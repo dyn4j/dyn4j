@@ -71,7 +71,7 @@ import org.dyn4j.world.result.RaycastResult;
  */
 public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V extends CollisionData<T, E>> extends Shiftable, DataContainer {
 	/** The default {@link CollisionBody} count */
-	public static final int DEFAULT_BODY_COUNT = 64;
+	public static final int DEFAULT_INITIAL_BODY_CAPACITY = 64;
 	
 	/**
 	 * Adds the given {@link CollisionBody} to this {@link CollisionWorld}.

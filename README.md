@@ -1,6 +1,9 @@
 ![alt tag](https://raw.githubusercontent.com/wnbittle/dyn4j/master/dyn4j.png)
 
 ![Actions Status](https://github.com/dyn4j/dyn4j/workflows/Maven%20CI/badge.svg)
+![License](https://img.shields.io/github/license/dyn4j/dyn4j)
+![Language](https://img.shields.io/github/languages/top/dyn4j/dyn4j)
+![Code Coverage](https://img.shields.io/badge/coverage-71.1%25-brightgreen)
 
 ## Java Collision Detection and Physics Engine
 

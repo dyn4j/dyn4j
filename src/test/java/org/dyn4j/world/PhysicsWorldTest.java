@@ -28,9 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.dyn4j.collision.AxisAlignedBounds;
-import org.dyn4j.collision.CategoryFilter;
+import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
-import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
 import org.dyn4j.collision.continuous.TimeOfImpactDetector;
@@ -49,60 +48,48 @@ import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
-import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
-import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.listener.BoundsListener;
 import org.dyn4j.world.listener.BoundsListenerAdapter;
-import org.dyn4j.world.listener.CollisionListenerAdapter;
+import org.dyn4j.world.listener.ContactListener;
 import org.dyn4j.world.listener.ContactListenerAdapter;
 import org.dyn4j.world.listener.DestructionListener;
 import org.dyn4j.world.listener.DestructionListenerAdapter;
 import org.dyn4j.world.listener.StepListener;
 import org.dyn4j.world.listener.StepListenerAdapter;
+import org.dyn4j.world.listener.TimeOfImpactListener;
 import org.dyn4j.world.listener.TimeOfImpactListenerAdapter;
-import org.dyn4j.world.result.ConvexDetectResult;
 import org.junit.Test;
 
 import junit.framework.TestCase;
 
 /**
- * Contains the test cases for the {@link World} class.
+ * Test case for the {@link AbstractPhysicsWorld} class.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0
  */
-public class WorldTest {
-	/**
-	 * Tests the creation of world collision data when given a valid pair.
-	 */
-	@Test
-	public void createCollisionData() {
-		Body b1 = new Body();
-		Body b2 = new Body();
-		BodyFixture f1 = b1.addFixture(Geometry.createCircle(0.5));
-		BodyFixture f2 = b2.addFixture(Geometry.createCircle(0.5));
+public class PhysicsWorldTest {
+	private class TestWorld extends AbstractPhysicsWorld<Body, WorldCollisionData<Body>> {
 		
-		World w = new World();
-		WorldCollisionData<Body> data = w.createCollisionData(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
-		
-		TestCase.assertEquals(b1, data.getBody1());
-		TestCase.assertEquals(b2, data.getBody2());
-		TestCase.assertEquals(f1, data.getFixture1());
-		TestCase.assertEquals(f2, data.getFixture2());
-		TestCase.assertNotNull(data.getPair());
-		TestCase.assertNotNull(data.getPenetration());
-		TestCase.assertNotNull(data.getManifold());
-		TestCase.assertNotNull(data.getContactConstraint());
-		TestCase.assertFalse(data.isBroadphaseCollision());
-		TestCase.assertFalse(data.isManifoldCollision());
-		TestCase.assertFalse(data.isNarrowphaseCollision());
-		TestCase.assertFalse(data.isContactConstraintCollision());
+		public TestWorld() {
+			super();
+			// TODO Auto-generated constructor stub
+		}
+
+		public TestWorld(int initialBodyCapacity, int initialJointCapacity) {
+			super(initialBodyCapacity, initialJointCapacity);
+		}
+
+
+		@Override
+		protected WorldCollisionData<Body> createCollisionData(CollisionPair<Body, BodyFixture> pair) {
+			return new WorldCollisionData<Body>(pair);
+		}
 	}
-	
 	
 	// FIXME OLD CODE - please remove once AbstractPhysicsWorld is tested
 	
@@ -112,7 +99,7 @@ public class WorldTest {
 	 * @version 4.0.0
 	 * @since 4.0.0
 	 */
-	public class WTStepListener implements StepListener<Body> {
+	private class StepListenerCounter implements StepListener<Body> {
 		/** The number of steps performed */
 		public int steps;
 		@Override
@@ -133,7 +120,7 @@ public class WorldTest {
 	 * @version 4.0.0
 	 * @since 4.0.0
 	 */
-	public class WTDestructionListener implements DestructionListener<Body> {
+	private class DestructionListenerCounter implements DestructionListener<Body> {
 		/** The number of times called */
 		public int called;
 		@Override
@@ -149,38 +136,601 @@ public class WorldTest {
 	 */
 	@Test
 	public void createSuccess() {
-		World w = new World();
+		TestWorld w = new TestWorld();
+		
 		TestCase.assertNotNull(w.bodies);
 		TestCase.assertNotNull(w.bodiesUnmodifiable);
 		TestCase.assertNull(w.bounds);
 		TestCase.assertNotNull(w.boundsListeners);
 		TestCase.assertNotNull(w.broadphaseDetector);
-		TestCase.assertNotNull(w.coefficientMixer);
 		TestCase.assertNotNull(w.collisionData);
 		TestCase.assertNotNull(w.collisionListeners);
-		TestCase.assertNotNull(w.contactCollisions);
-		TestCase.assertNotNull(w.contactConstraintSolver);
-		TestCase.assertNotNull(w.contactListeners);
-		TestCase.assertNotNull(w.destructionListeners);
 		TestCase.assertNotNull(w.broadphaseFilter);
-		TestCase.assertNotNull(w.gravity);
-		TestCase.assertNotNull(w.constraintGraph);
-		TestCase.assertNotNull(w.joints);
 		TestCase.assertNotNull(w.manifoldSolver);
 		TestCase.assertNotNull(w.narrowphaseDetector);
 		TestCase.assertNotNull(w.narrowphasePostProcessor);
 		TestCase.assertNotNull(w.raycastDetector);
+		TestCase.assertNotNull(w.timeOfImpactDetector);
+		TestCase.assertNull(w.userData);
+		
+		TestCase.assertNotNull(w.coefficientMixer);
+		TestCase.assertNotNull(w.contactCollisions);
+		TestCase.assertNotNull(w.contactConstraintSolver);
+		TestCase.assertNotNull(w.contactListeners);
+		TestCase.assertNotNull(w.contactListenersUnmodifiable);
+		TestCase.assertNotNull(w.destructionListeners);
+		TestCase.assertNotNull(w.destructionListenersUnmodifiable);
+		TestCase.assertNotNull(w.gravity);
+		TestCase.assertNotNull(w.constraintGraph);
+		TestCase.assertNotNull(w.joints);
+		TestCase.assertNotNull(w.jointsUnmodifiable);
 		TestCase.assertNotNull(w.settings);
 		TestCase.assertNotNull(w.step);
 		TestCase.assertNotNull(w.stepListeners);
+		TestCase.assertNotNull(w.stepListenersUnmodifiable);
 		TestCase.assertEquals(0.0, w.time);
 		TestCase.assertNotNull(w.timeOfImpactDetector);
 		TestCase.assertNotNull(w.timeOfImpactListeners);
+		TestCase.assertNotNull(w.timeOfImpactListenersUnmodifiable);
 		TestCase.assertNotNull(w.timeOfImpactSolver);
-		TestCase.assertNotNull(w.bodiesUnmodifiable);
-		TestCase.assertNotNull(w.jointsUnmodifiable);
 		TestCase.assertTrue(w.updateRequired);
+		
+		// test create with initial size
+		w = new TestWorld(16, 2);
+		w = new TestWorld(-16, 2);
+		w = new TestWorld(0, 2);
+		w = new TestWorld(5, -2);
+		w = new TestWorld(5, 0);
+		w = new TestWorld(-5, -2);
+		w = new TestWorld(0, 0);
 	}
+	
+	/**
+	 * Tests the addBody method,
+	 */
+	@Test
+	public void addBody() {
+		TestWorld w = new TestWorld();
+		Body b = new Body();
+		b.addFixture(Geometry.createCapsule(1.0, 0.5));
+		
+		TestCase.assertFalse(w.constraintGraph.containsNode(b));
+		
+		w.addBody(b);
+		
+		TestCase.assertTrue(w.constraintGraph.containsNode(b));
+	}
+	
+	@Test
+	public void addJoint() {
+		TestWorld w = new TestWorld();
+		
+		Body b1 = new Body(); b1.addFixture(Geometry.createCapsule(1.0, 0.5));
+		Body b2 = new Body(); b2.addFixture(Geometry.createCapsule(1.0, 0.5));
+		
+		Joint<Body> j = new AngleJoint<Body>(b1, b2);
+		
+		TestCase.assertNull(j.getOwner());
+		TestCase.assertEquals(0, w.joints.size());
+		TestCase.assertFalse(w.constraintGraph.containsNode(b1));
+		TestCase.assertFalse(w.constraintGraph.containsNode(b2));
+		
+		w.addBody(b1);
+		w.addBody(b2);
+		w.addJoint(j);
+		TestCase.assertEquals(1, w.joints.size());
+		
+		// make sure the joint has the right owner
+		TestCase.assertNotNull(j.getOwner());
+		TestCase.assertEquals(w, j.getOwner());
+		TestCase.assertTrue(w.constraintGraph.containsNode(b1));
+		TestCase.assertTrue(w.constraintGraph.containsNode(b2));
+		TestCase.assertTrue(w.constraintGraph.containsEdge(j));
+		
+		ConstraintGraphNode<Body> n1 = w.constraintGraph.getNode(b1);
+		TestCase.assertNotNull(n1);
+		TestCase.assertEquals(1, n1.joints.size());
+		
+		ConstraintGraphNode<Body> n2 = w.constraintGraph.getNode(b2);
+		TestCase.assertNotNull(n2);
+		TestCase.assertEquals(1, n2.joints.size());
+
+		TestCase.assertTrue(w.getJointCount() == 1);
+		TestCase.assertTrue(w.isJoined(b1, b2));
+		TestCase.assertTrue(!w.isJointCollisionAllowed(b1, b2));
+	}
+
+	/**
+	 * Tests the add joint method passing a null value.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void addNullJoint() {
+		TestWorld w = new TestWorld();
+		w.addJoint((Joint<Body>) null);
+	}
+
+	/**
+	 * Tests adding a joint that's on another world.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void addJointFromOtherWorld() {
+		TestWorld w1 = new TestWorld();
+		TestWorld w2 = new TestWorld();
+		
+		Body b1 = new Body();
+		Body b2 = new Body();
+		Joint<Body> j = new AngleJoint<Body>(b1, b2);
+		
+		w1.addBody(b1);
+		w1.addBody(b2);
+		w1.addJoint(j);
+		
+		w2.addJoint(j);
+	}
+	
+	/**
+	 * Tests adding a joint that's already on this world.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void addSameJointToSameWorld() {
+		TestWorld w = new TestWorld();
+		
+		Body b1 = new Body();
+		Body b2 = new Body();
+		Joint<Body> j = new AngleJoint<Body>(b1, b2);
+		
+		w.addBody(b1);
+		w.addBody(b2);
+		w.addJoint(j);
+		
+		w.addJoint(j);
+	}
+
+	/**
+	 * Tests adding a joint that's already on this world.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void addJointWithoutBodies() {
+		TestWorld w = new TestWorld();
+		
+		Body b1 = new Body();
+		Body b2 = new Body();
+		Joint<Body> j = new AngleJoint<Body>(b1, b2);
+		
+		// you must add the bodies first
+		w.addJoint(j);
+	}
+	
+	/**
+	 * Makes sure the returned list is unmodifiable.
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void getJointsAndAdd() {
+		TestWorld w = new TestWorld();
+		w.getJoints().add(new AngleJoint<Body>(new Body(), new Body()));
+	}
+
+	/**
+	 * Makes sure the returned list is unmodifiable.
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void getJointsAndRemove() {
+		TestWorld w = new TestWorld();
+		w.getJoints().remove(0);
+	}
+
+	/**
+	 * Tests the successful getJoint(int) method.
+	 */
+	@Test
+	public void getJointAtIndex() {
+		TestWorld w = new TestWorld();
+		
+		Body b1 = new Body();
+		Body b2 = new Body();
+		Joint<Body> j = new AngleJoint<Body>(b1, b2);
+		
+		w.addBody(b1);
+		w.addBody(b2);
+		w.addJoint(j);
+		
+		TestCase.assertEquals(j, w.getJoint(0));
+	}
+	
+	/**
+	 * Tests the getJoint(int) method w/ a negative value.
+	 */
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void getJointAtNegativeIndex() {
+		TestWorld w = new TestWorld();
+		w.getJoint(-1);
+	}
+
+	/**
+	 * Tests the getJoint(int) method w/ a value out of range.
+	 */
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void getJointAtBadIndex() {
+		TestWorld w = new TestWorld();
+		w.getJoint(1);
+	}
+	
+	/**
+	 * Tests the getJoint(int) method w/ a value out of range.
+	 */
+	@Test
+	public void getJointCount() {
+		TestWorld w = new TestWorld();
+		
+		TestCase.assertEquals(0, w.getJointCount());
+		
+		Body b1 = new Body();
+		Body b2 = new Body();
+		Joint<Body> j = new AngleJoint<Body>(b1, b2);
+		
+		w.addBody(b1);
+		w.addBody(b2);
+		w.addJoint(j);
+		
+		TestCase.assertEquals(1, w.getJointCount());
+	}
+
+	/**
+	 * Tests the getJointIterator method.
+	 */
+	@Test
+	public void getJointIterator() {
+		TestWorld w = new TestWorld();
+		
+		TestCase.assertNotNull(w.getJointIterator());
+		
+		// setup the bodies
+		Body b1 = new Body();
+		Body b2 = new Body();
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		Joint<Body> j1 = new AngleJoint<Body>(b1, b2);
+		Joint<Body> j2 = new AngleJoint<Body>(b1, b2);
+		
+		w.addJoint(j1);
+		w.addJoint(j2);
+		
+		TestCase.assertNotNull(w.getJointIterator());
+		
+		int i = 0;
+		Iterator<Joint<Body>> it = w.getJointIterator();
+		while (it.hasNext()) {
+			TestCase.assertNotNull(it.next());
+			i++;
+		}
+		
+		TestCase.assertEquals(w.joints.size(), i);
+		
+		i = 0;
+		it = w.getJointIterator();
+		while (it.hasNext()) {
+			i++;
+			it.next();
+			it.remove();
+			TestCase.assertEquals(2 - i, w.joints.size());
+		}
+	}
+	
+	/**
+	 * Tests the getJointIterator method.
+	 */
+	@Test
+	public void getJointIteratorFailure() {
+		TestWorld w = new TestWorld();
+		
+		// setup the bodies
+		Body b1 = new Body();
+		Body b2 = new Body();
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		Joint<Body> j1 = new AngleJoint<Body>(b1, b2);
+		Joint<Body> j2 = new AngleJoint<Body>(b1, b2);
+		
+		w.addJoint(j1);
+		w.addJoint(j2);
+		
+		// test overflow
+		Iterator<Joint<Body>> it = w.getJointIterator();
+		try {
+			it.next();
+			it.next();
+			it.next();
+			TestCase.fail();
+		} catch (IndexOutOfBoundsException ex) {
+		} catch (Exception ex) {
+			TestCase.fail();
+		}
+		
+		// test remove
+		it = w.getJointIterator();
+		try {
+			it.remove();
+			TestCase.fail();
+		} catch (IllegalStateException ex) {
+		} catch (Exception ex) {
+			TestCase.fail();
+		}
+		
+		// test second remove
+		it = w.getJointIterator();
+		try {
+			it.next();
+			it.remove();
+			it.remove();
+			TestCase.fail();
+		} catch (IllegalStateException ex) {
+		} catch (Exception ex) {
+			TestCase.fail();
+		}
+		
+		// test source modification before remove
+		it = w.getJointIterator();
+		try {
+			it.next();
+			w.removeAllJoints();
+			it.remove();
+			TestCase.fail();
+		} catch (IndexOutOfBoundsException ex) {
+		} catch (Exception ex) {
+			TestCase.fail();
+		}
+	}
+
+	/**
+	 * Tests the containsJoint method.
+	 */
+	@Test
+	public void containsJoint() {
+		TestWorld w = new TestWorld();
+		
+		Body b1 = new Body();
+		Body b2 = new Body();
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		Joint<Body> j1 = new AngleJoint<Body>(b1, b2);
+		
+		w.addJoint(j1);
+
+		TestCase.assertTrue(w.containsJoint(j1));
+		TestCase.assertFalse(w.containsJoint(null));
+		TestCase.assertFalse(w.containsJoint(new AngleJoint<Body>(b1, b2)));
+	}
+
+	/**
+	 * Tests the removeJoint method w/ a negative index.
+	 */
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void removeJointNegativeIndex() {
+		TestWorld w = new TestWorld();
+		w.removeJoint(-1);
+	}
+	
+	/**
+	 * Tests the removeJoint method w/ a non-existent index.
+	 */
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void removeJointBadIndex() {
+		TestWorld w = new TestWorld();
+		w.removeJoint(2);
+	}
+	
+	/**
+	 * Tests the removeJoint method.
+	 */
+	@Test
+	public void removeJoint() {
+		TestWorld w = new TestWorld();
+		
+		// test removing a null body
+		boolean success = w.removeJoint((Joint<Body>) null);
+		TestCase.assertFalse(success);
+		
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(1.0);
+		Convex c2 = Geometry.createEquilateralTriangle(0.5);
+		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		// create a joint
+		Joint<Body> j = new DistanceJoint<Body>(b1, b2, new Vector2(), new Vector2());
+		j.setCollisionAllowed(true);
+		w.addJoint(j);
+		
+		TestCase.assertEquals(1, w.joints.size());
+		// remove a joint and make sure destruction events are called
+		TestCase.assertTrue(w.removeJoint(j));
+		// make sure the world has zero joints
+		TestCase.assertEquals(0, w.joints.size());
+		// make sure the world still has both bodies
+		TestCase.assertEquals(2, w.bodies.size());
+		TestCase.assertNull(j.getOwner());
+		
+		ConstraintGraphNode<Body> n1 = w.constraintGraph.getNode(b1);
+		TestCase.assertNotNull(n1);
+		TestCase.assertEquals(0, n1.joints.size());
+
+		ConstraintGraphNode<Body> n2 = w.constraintGraph.getNode(b2);
+		TestCase.assertNotNull(n2);
+		TestCase.assertEquals(0, n2.joints.size());
+	}
+	
+	/**
+	 * Test the various listener methods (add, remove, remove all, get).
+	 */
+	@Test
+	public void listeners() {
+		TestWorld w = new TestWorld();
+		
+		ContactListener<Body> cl = new ContactListenerAdapter<Body>();
+		StepListener<Body> sl = new StepListenerAdapter<Body>();
+		DestructionListener<Body> dl = new DestructionListenerAdapter<Body>();
+		TimeOfImpactListener<Body> tl = new TimeOfImpactListenerAdapter<Body>();
+		
+		w.addContactListener(cl);
+		w.addStepListener(sl);
+		w.addDestructionListener(dl);
+		w.addTimeOfImpactListener(tl);
+		
+		TestCase.assertEquals(0, w.collisionListeners.size());
+		TestCase.assertEquals(0, w.boundsListeners.size());
+		TestCase.assertEquals(1, w.contactListeners.size());
+		TestCase.assertEquals(1, w.stepListeners.size());
+		TestCase.assertEquals(1, w.destructionListeners.size());
+		TestCase.assertEquals(1, w.timeOfImpactListeners.size());
+		
+		List<ContactListener<Body>> cls = w.getContactListeners();
+		List<StepListener<Body>> sls = w.getStepListeners();
+		List<DestructionListener<Body>> dls = w.getDestructionListeners();
+		List<TimeOfImpactListener<Body>> tls = w.getTimeOfImpactListeners();
+		
+		TestCase.assertEquals(1, cls.size());
+		TestCase.assertEquals(1, sls.size());
+		TestCase.assertEquals(1, dls.size());
+		TestCase.assertEquals(1, tls.size());
+		
+		TestCase.assertEquals(cl, cls.get(0));
+		TestCase.assertEquals(sl, sls.get(0));
+		TestCase.assertEquals(dl, dls.get(0));
+		TestCase.assertEquals(tl, tls.get(0));
+		
+		// confirm duplicates are allowed
+		w.addContactListener(cl);
+		w.addStepListener(sl);
+		w.addDestructionListener(dl);
+		w.addTimeOfImpactListener(tl);
+		
+		TestCase.assertEquals(2, cls.size());
+		TestCase.assertEquals(2, sls.size());
+		TestCase.assertEquals(2, dls.size());
+		TestCase.assertEquals(2, tls.size());
+		
+		// test removing a single one
+		
+		w.removeContactListener(cl);
+		cls = w.getContactListeners();
+		sls = w.getStepListeners();
+		dls = w.getDestructionListeners();
+		tls = w.getTimeOfImpactListeners();
+		TestCase.assertEquals(1, cls.size());
+		TestCase.assertEquals(2, sls.size());
+		TestCase.assertEquals(2, dls.size());
+		TestCase.assertEquals(2, tls.size());
+		
+		w.removeStepListener(sl);
+		cls = w.getContactListeners();
+		sls = w.getStepListeners();
+		dls = w.getDestructionListeners();
+		tls = w.getTimeOfImpactListeners();
+		TestCase.assertEquals(1, cls.size());
+		TestCase.assertEquals(1, sls.size());
+		TestCase.assertEquals(2, dls.size());
+		TestCase.assertEquals(2, tls.size());
+		
+		w.removeDestructionListener(dl);
+		cls = w.getContactListeners();
+		sls = w.getStepListeners();
+		dls = w.getDestructionListeners();
+		tls = w.getTimeOfImpactListeners();
+		TestCase.assertEquals(1, cls.size());
+		TestCase.assertEquals(1, sls.size());
+		TestCase.assertEquals(1, dls.size());
+		TestCase.assertEquals(2, tls.size());
+		
+		w.removeTimeOfImpactListener(tl);
+		cls = w.getContactListeners();
+		sls = w.getStepListeners();
+		dls = w.getDestructionListeners();
+		tls = w.getTimeOfImpactListeners();
+		TestCase.assertEquals(1, cls.size());
+		TestCase.assertEquals(1, sls.size());
+		TestCase.assertEquals(1, dls.size());
+		TestCase.assertEquals(1, tls.size());
+		
+		// test removing all of a specific type
+		
+		w.removeAllContactListeners();
+		cls = w.getContactListeners();
+		sls = w.getStepListeners();
+		dls = w.getDestructionListeners();
+		tls = w.getTimeOfImpactListeners();
+		TestCase.assertEquals(0, cls.size());
+		TestCase.assertEquals(1, sls.size());
+		TestCase.assertEquals(1, dls.size());
+		TestCase.assertEquals(1, tls.size());
+		
+		w.removeAllStepListeners();
+		cls = w.getContactListeners();
+		sls = w.getStepListeners();
+		dls = w.getDestructionListeners();
+		tls = w.getTimeOfImpactListeners();
+		TestCase.assertEquals(0, cls.size());
+		TestCase.assertEquals(0, sls.size());
+		TestCase.assertEquals(1, dls.size());
+		TestCase.assertEquals(1, tls.size());
+		
+		w.removeAllDestructionListeners();
+		cls = w.getContactListeners();
+		sls = w.getStepListeners();
+		dls = w.getDestructionListeners();
+		tls = w.getTimeOfImpactListeners();
+		TestCase.assertEquals(0, cls.size());
+		TestCase.assertEquals(0, sls.size());
+		TestCase.assertEquals(0, dls.size());
+		TestCase.assertEquals(1, tls.size());
+		
+		w.removeAllTimeOfImpactListeners();
+		cls = w.getContactListeners();
+		sls = w.getStepListeners();
+		dls = w.getDestructionListeners();
+		tls = w.getTimeOfImpactListeners();
+		TestCase.assertEquals(0, cls.size());
+		TestCase.assertEquals(0, sls.size());
+		TestCase.assertEquals(0, dls.size());
+		TestCase.assertEquals(0, tls.size());
+		
+		// test removing all
+		
+		w.addContactListener(cl);
+		w.addStepListener(sl);
+		w.addDestructionListener(dl);
+		w.addTimeOfImpactListener(tl);
+		w.removeAllListeners();
+		cls = w.getContactListeners();
+		sls = w.getStepListeners();
+		dls = w.getDestructionListeners();
+		tls = w.getTimeOfImpactListeners();
+		TestCase.assertEquals(0, cls.size());
+		TestCase.assertEquals(0, sls.size());
+		TestCase.assertEquals(0, dls.size());
+		TestCase.assertEquals(0, tls.size());
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	/**
 	 * Tests the update method.
@@ -212,7 +762,7 @@ public class WorldTest {
 	@Test
 	public void updatev() {
 		World w = new World();
-		WTStepListener sl = new WTStepListener();
+		StepListenerCounter sl = new StepListenerCounter();
 		w.addStepListener(sl);
 		
 		// a step is always taken unless the update time
@@ -234,7 +784,7 @@ public class WorldTest {
 	@Test
 	public void stepInt() {
 		World w = new World();
-		WTStepListener sl = new WTStepListener();
+		StepListenerCounter sl = new StepListenerCounter();
 		w.addStepListener(sl);
 		
 		// make sure the specified number of steps are taken
@@ -255,7 +805,7 @@ public class WorldTest {
 	@Test
 	public void stepIntElapsed() {
 		World w = new World();
-		WTStepListener sl = new WTStepListener();
+		StepListenerCounter sl = new StepListenerCounter();
 		w.addStepListener(sl);
 		
 		// make sure the specified number of steps are taken
@@ -270,101 +820,6 @@ public class WorldTest {
 	}
 	
 	/**
-	 * Tests the add body method.
-	 */
-	@Test
-	public void addBody() {
-		World w = new World();
-		Body b = new Body();
-		
-		TestCase.assertNull(b.getOwner());
-		
-		b.addFixture(Geometry.createCapsule(1.0, 0.5));
-		w.addBody(b);
-		TestCase.assertFalse(0 == w.getBodyCount());
-		// make sure the body's world reference is there
-		TestCase.assertNotNull(b.getOwner());
-		TestCase.assertEquals(w, b.getOwner());
-		// make sure it was added to the broadphase
-		TestCase.assertTrue(w.broadphaseDetector.contains(b));
-		TestCase.assertTrue(w.broadphaseDetector.contains(b, b.getFixture(0)));
-	}
-	
-	/**
-	 * Tests the add body method passing a null value.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void addNullBody() {
-		World w = new World();
-		w.addBody((Body) null);
-	}
-	
-	/**
-	 * Tests the add body method attempting to add the
-	 * same body more than once.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void addSameBody() {
-		World w = new World();
-		Body b1 = new Body();
-		w.addBody(b1);
-		w.addBody(b1);
-	}
-	
-	/**
-	 * Tests the add body method.
-	 */
-	@Test
-	public void addJoint() {
-		World w = new World();
-		
-		Convex c1 = Geometry.createCircle(1.0);
-		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
-		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
-		
-		Joint<Body> j = new DistanceJoint<Body>(b1, b2, new Vector2(), new Vector2());
-		
-		w.addBody(b1);
-		w.addBody(b2);
-		w.addJoint(j);
-		
-		TestCase.assertTrue(w.getJointCount() == 1);
-		TestCase.assertTrue(w.isJoined(b1, b2));
-		TestCase.assertTrue(!w.isJointCollisionAllowed(b1, b2));
-		
-		TestCase.assertNotNull(b1.getOwner());
-		TestCase.assertEquals(w, b1.getOwner());
-		TestCase.assertNotNull(b1.getFixtureModificationHandler());
-		TestCase.assertTrue(w.broadphaseDetector.contains(b1));
-		
-		TestCase.assertNotNull(b2.getOwner());
-		TestCase.assertEquals(w, b2.getOwner());
-		TestCase.assertNotNull(b2.getFixtureModificationHandler());
-		TestCase.assertTrue(w.broadphaseDetector.contains(b2));
-		
-		TestCase.assertNotNull(j.getOwner());
-		TestCase.assertEquals(w, j.getOwner());
-		
-		ConstraintGraphNode<Body> n1 = w.constraintGraph.getNode(b1);
-		TestCase.assertNotNull(n1);
-		TestCase.assertEquals(1, n1.joints.size());
-
-		ConstraintGraphNode<Body> n2 = w.constraintGraph.getNode(b2);
-		TestCase.assertNotNull(n2);
-		TestCase.assertEquals(1, n2.joints.size());
-	}
-
-	/**
-	 * Tests the add joint method passing a null value.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void addNullJoint() {
-		World w = new World();
-		w.addJoint((Joint<Body>) null);
-	}
-	
-	/**
 	 * Tests the remove body method.
 	 */
 	@Test
@@ -372,7 +827,7 @@ public class WorldTest {
 		World w = new World();
 		
 		// setup the destruction listener
-		WTDestructionListener dl = new WTDestructionListener();
+		DestructionListenerCounter dl = new DestructionListenerCounter();
 		w.addDestructionListener(dl);
 		
 		// test removing a null body
@@ -455,7 +910,7 @@ public class WorldTest {
 		World w = new World();
 		
 		// setup the destruction listener
-		WTDestructionListener dl = new WTDestructionListener();
+		DestructionListenerCounter dl = new DestructionListenerCounter();
 		w.addDestructionListener(dl);
 		
 		// test removing a null body
@@ -536,53 +991,6 @@ public class WorldTest {
 		
 		// make sure the leaked collision was cleaned up
 		TestCase.assertEquals(0, w.collisionData.size());
-	}
-	
-	/**
-	 * Tests the remove joint method.
-	 */
-	@Test
-	public void removeJoint() {
-		World w = new World();
-		
-		// test removing a null body
-		boolean success = w.removeJoint((Joint<Body>) null);
-		TestCase.assertFalse(success);
-		
-		// setup the bodies
-		Convex c1 = Geometry.createCircle(1.0);
-		Convex c2 = Geometry.createEquilateralTriangle(0.5);
-		Body b1 = new Body(); b1.addFixture(c1); b1.setMass(MassType.NORMAL);
-		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
-		
-		// add them to the world
-		w.addBody(b1);
-		w.addBody(b2);
-		
-		// create a joint
-		Joint<Body> j = new DistanceJoint<Body>(b1, b2, new Vector2(), new Vector2());
-		j.setCollisionAllowed(true);
-		w.addJoint(j);
-		
-		// perform a world step to get contacts
-		w.step(1);
-		
-		// remove a joint and make sure destruction events are called
-		w.removeJoint(j);
-		// make sure the world has zero joints
-		TestCase.assertEquals(0, w.getJointCount());
-		// make sure the world still has both bodies
-		TestCase.assertTrue(w.getBodyCount() > 0);
-		TestCase.assertEquals(2, w.getBodyCount());
-		TestCase.assertNull(j.getOwner());
-		
-		ConstraintGraphNode<Body> n1 = w.constraintGraph.getNode(b1);
-		TestCase.assertNotNull(n1);
-		TestCase.assertEquals(0, n1.joints.size());
-
-		ConstraintGraphNode<Body> n2 = w.constraintGraph.getNode(b2);
-		TestCase.assertNotNull(n2);
-		TestCase.assertEquals(0, n2.joints.size());
 	}
 	
 	/**
@@ -776,7 +1184,7 @@ public class WorldTest {
 		World w = new World();
 		
 		// setup the listener
-		WTDestructionListener dl = new WTDestructionListener();
+		DestructionListenerCounter dl = new DestructionListenerCounter();
 		w.addDestructionListener(dl);
 		
 		// setup the bodies
@@ -818,7 +1226,7 @@ public class WorldTest {
 		World w = new World();
 		
 		// setup the listener
-		WTDestructionListener dl = new WTDestructionListener();
+		DestructionListenerCounter dl = new DestructionListenerCounter();
 		w.addDestructionListener(dl);
 		
 		// setup the bodies
@@ -957,137 +1365,6 @@ public class WorldTest {
 		w.setSettings(null);
 	}
 	
-	/**
-	 * Tests adding a body to a world that has already been added to a different world.
-	 * @since 3.1.0
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void addBodyFromAnotherWorld() {
-		World w1 = new World();
-		World w2 = new World();
-		
-		Body b = new Body();
-		
-		w1.addBody(b);
-		
-		w2.addBody(b);
-	}
-	
-	/**
-	 * Tests the get/add/remove listeners methods.
-	 * @since 3.1.1
-	 */
-	@Test
-	public void listeners() {
-		World w = new World();
-		
-		// add some listeners
-		BoundsListenerAdapter<Body, BodyFixture> ba = new BoundsListenerAdapter<Body, BodyFixture>();
-		CollisionListenerAdapter<Body, BodyFixture> ca = new CollisionListenerAdapter<Body, BodyFixture>();
-		DestructionListenerAdapter<Body> da = new DestructionListenerAdapter<Body>();
-		StepListenerAdapter<Body> sa = new StepListenerAdapter<Body>();
-		TimeOfImpactListenerAdapter<Body> ta = new TimeOfImpactListenerAdapter<Body>();
-		ContactListenerAdapter<Body> na = new ContactListenerAdapter<Body>();
-		
-		w.addBoundsListener(ba);
-		TestCase.assertEquals(1, w.boundsListeners.size());
-		
-		w.addCollisionListener(ca);
-		TestCase.assertEquals(1, w.collisionListeners.size());
-		
-		w.addDestructionListener(da);
-		TestCase.assertEquals(1, w.destructionListeners.size());
-		
-		w.addStepListener(sa);
-		TestCase.assertEquals(1, w.stepListeners.size());
-		
-		w.addTimeOfImpactListener(ta);
-		TestCase.assertEquals(1, w.timeOfImpactListeners.size());
-		
-		w.addContactListener(na);
-		TestCase.assertEquals(1, w.contactListeners.size());
-		
-		// test the multi-listener functionality
-		w.addStepListener(new WTStepListener());
-		w.addStepListener(new WTStepListener());
-		w.step();
-		TestCase.assertEquals(3, w.stepListeners.size());
-		// verify both were called
-		TestCase.assertEquals(1, ((WTStepListener)w.stepListeners.get(1)).steps);
-		TestCase.assertEquals(1, ((WTStepListener)w.stepListeners.get(2)).steps);
-		
-		// test removing
-		w.removeAllBoundsListeners();
-		TestCase.assertEquals(0, w.boundsListeners.size());
-		
-		w.removeAllCollisionListeners();
-		TestCase.assertEquals(0, w.collisionListeners.size());
-		
-		w.removeAllDestructionListeners();
-		TestCase.assertEquals(0, w.destructionListeners.size());
-		
-		w.removeAllStepListeners();
-		TestCase.assertEquals(0, w.stepListeners.size());
-		
-		w.removeAllTimeOfImpactListeners();
-		TestCase.assertEquals(0, w.timeOfImpactListeners.size());
-		
-		w.removeAllContactListeners();
-		TestCase.assertEquals(0, w.contactListeners.size());
-	}
-	
-	/**
-	 * Tests the get/set of the user data.
-	 */
-	@Test
-	public void getUserData() {
-		String obj = "hello";
-		World w = new World();
-		
-		TestCase.assertNull(w.getUserData());
-		
-		w.setUserData(obj);
-		TestCase.assertNotNull(w.getUserData());
-		TestCase.assertSame(obj, w.getUserData());
-	}
-	
-	/**
-	 * Tests the new detect methods.
-	 * @since 3.1.10
-	 */
-	@Test
-	public void testNewDetectMethod() {
-	   World world = new World();
-	   Circle c = new Circle(20.0);
-	   
-	   DetectFilter<Body, BodyFixture> filter = new DetectFilter<Body, BodyFixture>(true, false, new CategoryFilter(2,15));
-	   
-	   Body b = new Body();
-	   b.addFixture(c) ;
-	   world.addBody(b);
-	   
-	   List<ConvexDetectResult<Body, BodyFixture>> results = world.detect(c, new Transform(), filter);
-	   TestCase.assertTrue(results.size() > 0);
-	}
-
-	/**
-	 * Makes sure the returned list is unmodifiable.
-	 */
-	@Test(expected = UnsupportedOperationException.class)
-	public void getBodies() {
-		World w = new World();
-		w.getBodies().add(new Body());
-	}
-
-	/**
-	 * Makes sure the returned list is unmodifiable.
-	 */
-	@Test(expected = UnsupportedOperationException.class)
-	public void getJoints() {
-		World w = new World();
-		w.getJoints().add(new AngleJoint<Body>(new Body(), new Body()));
-	}
-
 	/**
 	 * Tests the body iterator.
 	 */

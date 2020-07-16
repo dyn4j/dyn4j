@@ -56,9 +56,9 @@ public class TimeOfImpact implements Copyable<TimeOfImpact> {
 	 * @param time the time of impact; in the range [0, 1]
 	 * @param separation the separation at the time of impact
 	 */
-	public TimeOfImpact(double time, Separation separation) {
+	protected TimeOfImpact(double time, Separation separation) {
 		this.time = time;
-		this.separation = separation;
+		this.separation = separation.copy();
 	}
 	
 	/* (non-Javadoc)
@@ -104,7 +104,7 @@ public class TimeOfImpact implements Copyable<TimeOfImpact> {
 	 * @param separation the separation
 	 */
 	public void setSeparation(Separation separation) {
-		this.separation.setTo(separation);
+		this.separation.copy(separation);
 	}
 	
 	/**
@@ -112,9 +112,9 @@ public class TimeOfImpact implements Copyable<TimeOfImpact> {
 	 * @param toi the time of impact data to copy
 	 * @since 4.0.0
 	 */
-	public void setTo(TimeOfImpact toi) {
+	public void copy(TimeOfImpact toi) {
 		this.time = toi.time;
-		this.separation.setTo(toi.separation);
+		this.separation.copy(toi.separation);
 	}
 	
 	/* (non-Javadoc)
@@ -122,6 +122,6 @@ public class TimeOfImpact implements Copyable<TimeOfImpact> {
 	 */
 	@Override
 	public TimeOfImpact copy() {
-		return new TimeOfImpact(this.time, this.separation.copy());
+		return new TimeOfImpact(this.time, this.separation);
 	}
 }

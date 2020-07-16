@@ -53,13 +53,21 @@ public class PhysicsBodyBroadphaseFilter<T extends PhysicsBody> extends Collisio
 	 */
 	@Override
 	public boolean isAllowed(T body1, BodyFixture fixture1, T body2, BodyFixture fixture2) {
-		// inactive objects don't have collision detection/response
-		if (!body1.isEnabled() || !body2.isEnabled()) return false;
+		// check with the base class first
+		if (!super.isAllowed(body1, fixture1, body2, fixture2)) {
+			return false;
+		}
+		
 		// one body must be dynamic (unless one is a sensor)
-		if (!body1.isDynamic() && !body2.isDynamic() && !fixture1.isSensor() && !fixture2.isSensor()) return false;
+		if (!body1.isDynamic() && !body2.isDynamic() && !fixture1.isSensor() && !fixture2.isSensor()) {
+			return false;
+		}
+		
 		// check for connected pairs who's collision is not allowed
-		if (!this.world.isJointCollisionAllowed(body1, body2)) return false;
-		// check super class filter logic
-		return super.isAllowed(body1, fixture1, body2, fixture2);
+		if (!this.world.isJointCollisionAllowed(body1, body2)) {
+			return false;
+		}
+		
+		return true;
 	}
 }

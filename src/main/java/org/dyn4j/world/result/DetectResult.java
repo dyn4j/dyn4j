@@ -55,7 +55,7 @@ public class DetectResult<T extends CollisionBody<E>, E extends Fixture> impleme
 	 * @param body the body
 	 * @param fixture the fixture
 	 */
-	public DetectResult(T body, E fixture) {
+	protected DetectResult(T body, E fixture) {
 		this.body = body;
 		this.fixture = fixture;
 	}
@@ -96,7 +96,7 @@ public class DetectResult<T extends CollisionBody<E>, E extends Fixture> impleme
 	 * Copies (deep) the given result to this result.
 	 * @param result the result to copy
 	 */
-	public void setTo(DetectResult<T, E> result) {
+	public void copy(DetectResult<T, E> result) {
 		this.body = result.body;
 		this.fixture = result.fixture;
 	}

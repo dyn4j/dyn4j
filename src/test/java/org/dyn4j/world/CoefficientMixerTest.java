@@ -22,71 +22,38 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.world.result;
+package org.dyn4j.world;
 
-import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.collision.Fixture;
-import org.dyn4j.collision.narrowphase.Penetration;
+import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
- * Represents a reusable {@link DetectResult} for convex shape detection.
+ * Test case for the {@link CoefficientMixer} class.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0
- * @param <T> the {@link CollisionBody} type
- * @param <E> the {@link Fixture} type
  */
-public class ConvexDetectResult<T extends CollisionBody<E>, E extends Fixture> extends DetectResult<T, E> {
-	/** The penetration data */
-	protected final Penetration penetration;
-	
+public class CoefficientMixerTest {
 	/**
-	 * Default constructor.
+	 * Tests the mixing of the friction.
 	 */
-	public ConvexDetectResult() {
-		this.penetration = new Penetration();
+	@Test
+	public void mixFriction() {
+		double f1 = 0.5;
+		double f2 = 0.7;
+		double result = CoefficientMixer.DEFAULT_MIXER.mixFriction(f1, f2);
+		TestCase.assertEquals(Math.sqrt(f1*f2), result);
 	}
 	
 	/**
-	 * Full constructor.
-	 * @param body the body
-	 * @param fixture the fixture
-	 * @param penetration the penetration data
+	 * Tests the mixing of the restitution.
 	 */
-	protected ConvexDetectResult(T body, E fixture, Penetration penetration) {
-		super(body, fixture);
-		this.penetration = penetration.copy();
-	}
-
-	/**
-	 * Returns the penetration data.
-	 * @return {@link Penetration}
-	 */
-	public Penetration getPenetration() {
-		return this.penetration;
-	}
-	
-	/**
-	 * Sets the penetration data.
-	 * @param penetration the penetration data
-	 */
-	public void setPenetration(Penetration penetration) {
-		this.penetration.copy(penetration);
-	}
-	
-	/**
-	 * Copies (deep) the given result data to this result.
-	 * @param result the result to copy
-	 */
-	public void copy(ConvexDetectResult<T, E> result) {
-		super.copy(result);
-		this.penetration.copy(result.penetration);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.result.DetectResult#copy()
-	 */
-	public ConvexDetectResult<T, E> copy() {
-		return new ConvexDetectResult<T, E>(this.body, this.fixture, this.penetration);
+	@Test
+	public void mixRestitution() {
+		double r1 = 0.5;
+		double r2 = 0.7;
+		double result = CoefficientMixer.DEFAULT_MIXER.mixRestitution(r1, r2);
+		TestCase.assertEquals(Math.max(r1, r2), result);
 	}
 }

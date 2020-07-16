@@ -58,7 +58,7 @@ public class Penetration implements Shiftable, Copyable<Penetration> {
 	 * @param normal the penetration normal from {@link Convex}1 to {@link Convex}2
 	 * @param depth the penetration depth
 	 */
-	public Penetration(Vector2 normal, double depth) {
+	protected Penetration(Vector2 normal, double depth) {
 		this.normal = normal.copy();
 		this.depth = depth;
 	}
@@ -123,7 +123,7 @@ public class Penetration implements Shiftable, Copyable<Penetration> {
 	 * @param penetration the penetration to copy
 	 * @since 4.0.0
 	 */
-	public void setTo(Penetration penetration) {
+	public void copy(Penetration penetration) {
 		this.depth = penetration.depth;
 		this.normal.x = penetration.normal.x;
 		this.normal.y = penetration.normal.y;
@@ -142,6 +142,6 @@ public class Penetration implements Shiftable, Copyable<Penetration> {
 	 */
 	@Override
 	public Penetration copy() {
-		return new Penetration(this.normal.copy(), this.depth);
+		return new Penetration(this.normal, this.depth);
 	}
 }

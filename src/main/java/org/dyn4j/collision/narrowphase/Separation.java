@@ -68,11 +68,11 @@ public class Separation implements Shiftable, Copyable<Separation> {
 	 * @param point1 the closest point on the first {@link Convex} {@link Shape} to the second
 	 * @param point2 the closest point on the second {@link Convex} {@link Shape} to the first
 	 */
-	public Separation(Vector2 normal, double distance, Vector2 point1, Vector2 point2) {
-		this.normal = normal;
+	protected Separation(Vector2 normal, double distance, Vector2 point1, Vector2 point2) {
+		this.normal = normal.copy();
 		this.distance = distance;
-		this.point1 = point1;
-		this.point2 = point2;
+		this.point1 = point1.copy();
+		this.point2 = point2.copy();
 	}
 	
 	/* (non-Javadoc)
@@ -173,7 +173,7 @@ public class Separation implements Shiftable, Copyable<Separation> {
 	 * @param separation the separation to copy
 	 * @since 4.0.0
 	 */
-	public void setTo(Separation separation) {
+	public void copy(Separation separation) {
 		this.distance = separation.distance;
 		this.normal.x = separation.normal.x;
 		this.normal.y = separation.normal.y;
@@ -199,6 +199,6 @@ public class Separation implements Shiftable, Copyable<Separation> {
 	 */
 	@Override
 	public Separation copy() {
-		return new Separation(this.normal.copy(), this.distance, this.point1.copy(), this.point2.copy());
+		return new Separation(this.normal, this.distance, this.point1, this.point2);
 	}
 }

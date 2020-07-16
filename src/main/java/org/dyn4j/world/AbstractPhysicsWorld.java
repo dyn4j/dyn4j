@@ -125,8 +125,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	/** The accumulated time */
 	protected double time;
 	
-	/** The interaction graph between bodies */
-	protected final ConstraintGraph<T> interactionGraph;
+	/** The constraint graph between bodies */
+	protected final ConstraintGraph<T> constraintGraph;
 	
 	/** A temporary list of only the {@link ContactConstraint} collisions from the last detection; cleared and refilled each step */
 	protected final List<V> contactCollisions;
@@ -137,19 +137,28 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	/**
 	 * Default constructor.
 	 * <p>
-	 * Uses the {@link CollisionWorld#DEFAULT_BODY_COUNT} as the initial capacity.
+	 * Uses the {@link CollisionWorld#DEFAULT_INITIAL_BODY_CAPACITY} and
+	 * {@link PhysicsWorld#DEFAULT_INITIAL_JOINT_CAPACITY} as the initial capacity.
 	 */
 	public AbstractPhysicsWorld() {
-		this(DEFAULT_BODY_COUNT);
+		this(DEFAULT_INITIAL_BODY_CAPACITY, DEFAULT_INITIAL_JOINT_CAPACITY);
 	}
 
 	/**
 	 * Optional constructor.
-	 * @param initialBodyCapacity the default initial body capacity
+	 * @param initialBodyCapacity the initial body capacity
+	 * @param initialJointCapacity the initial joint capacity
 	 */
-	public AbstractPhysicsWorld(int initialBodyCapacity) {
+	public AbstractPhysicsWorld(int initialBodyCapacity, int initialJointCapacity) {
 		super(initialBodyCapacity);
-		int initialJointCapacity = 16;
+		
+		if (initialBodyCapacity <= 0) {
+			initialBodyCapacity = DEFAULT_INITIAL_BODY_CAPACITY;
+		}
+		
+		if (initialJointCapacity <= 0) {
+			initialJointCapacity = DEFAULT_INITIAL_JOINT_CAPACITY;
+		}
 		
 		// initialize all the classes with default values
 		this.settings = new Settings();
@@ -180,7 +189,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.time = 0.0;
 		
 		int estimatedCollisionPairs = Collisions.getEstimatedCollisionPairs(initialBodyCapacity);
-		this.interactionGraph = new ConstraintGraph<T>(initialBodyCapacity, initialJointCapacity);
+		this.constraintGraph = new ConstraintGraph<T>(initialBodyCapacity, initialJointCapacity);
 		this.contactCollisions = new ArrayList<V>(estimatedCollisionPairs);
 		this.updateRequired = true;
 	}
@@ -283,7 +292,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	@Override
 	public void addBody(T body) {
 		super.addBody(body);
-		this.interactionGraph.addNode(body);
+		this.constraintGraph.addNode(body);
 	}
 	
 	/* (non-Javadoc)
@@ -302,9 +311,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		T body1 = joint.getBody1();
 		T body2 = joint.getBody2();
 		
-		// FIXME need new message for this scenario
 		// dont allow someone to add a joint to the world when the joined bodies dont exist yet
-		if (!this.interactionGraph.containsNode(body1) || !this.interactionGraph.containsNode(body2)) {
+		if (!this.constraintGraph.containsNode(body1) || !this.constraintGraph.containsNode(body2)) {
 			throw new IllegalArgumentException("dynamics.world.addJointWithoutBodies");
 		}
 		
@@ -313,7 +321,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// set that its attached to this world
 		joint.setOwner(this);
 		// get the associated bodies
-		this.interactionGraph.addEdge(joint);
+		this.constraintGraph.addEdge(joint);
 	}
 
 	/* (non-Javadoc)
@@ -417,7 +425,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// remove the body from the broadphase
 			this.broadphaseDetector.remove(body);
 			// remove from the interaction graph
-			ConstraintGraphNode<T> node = this.interactionGraph.removeNode(body);
+			ConstraintGraphNode<T> node = this.constraintGraph.removeNode(body);
 			
 			// JOINT CLEANUP
 			
@@ -503,7 +511,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		if (removed) {
 			joint.setOwner(null);
 			
-			this.interactionGraph.removeEdge(joint);
+			this.constraintGraph.removeEdge(joint);
 		}
 		
 		return removed;
@@ -559,7 +567,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// NOTE: we do a remove here because this will remove the edges
 			// from the graph so that we don't report destruction for joints
 			// and contact constraints twice
-			ConstraintGraphNode<T> node = this.interactionGraph.removeNode(body);
+			ConstraintGraphNode<T> node = this.constraintGraph.removeNode(body);
 			
 			// JOINT CLEANUP
 			
@@ -628,7 +636,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.bodies.clear();
 		this.broadphaseDetector.clear();
 		this.collisionData.clear();
-		this.interactionGraph.clear();
+		this.constraintGraph.clear();
 		this.contactCollisions.clear();
 		this.joints.clear();
 	}
@@ -657,7 +665,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			}
 		}
 		
-		this.interactionGraph.removeAllJointEdges();
+		this.constraintGraph.removeAllJointEdges();
 		
 		this.joints.clear();
 	}
@@ -859,7 +867,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public boolean isInContact(T body1, T body2) {
-		return this.interactionGraph.isInContact(body1, body2);
+		return this.constraintGraph.isInContact(body1, body2);
 	}
 	
 	/* (non-Javadoc)
@@ -867,7 +875,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public List<ContactConstraint<T>> getContacts(T body) {
-		return this.interactionGraph.getContacts(body);
+		return this.constraintGraph.getContacts(body);
 	}
 	
 	/* (non-Javadoc)
@@ -875,7 +883,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public List<T> getInContactBodies(T body, boolean includeSensedContact) {
-		return this.interactionGraph.getInContactBodies(body, includeSensedContact);
+		return this.constraintGraph.getInContactBodies(body, includeSensedContact);
 	}
 
 	/* (non-Javadoc)
@@ -883,7 +891,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public boolean isJointCollisionAllowed(T body1, T body2) {
-		return this.interactionGraph.isJointCollisionAllowed(body1, body2);
+		return this.constraintGraph.isJointCollisionAllowed(body1, body2);
 	}
 	
 	/* (non-Javadoc)
@@ -891,7 +899,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public boolean isJoined(T body1, T body2) {
-		return this.interactionGraph.isJoined(body1, body2);
+		return this.constraintGraph.isJoined(body1, body2);
 	}
 
 	/* (non-Javadoc)
@@ -899,7 +907,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public List<Joint<T>> getJoints(T body) {
-		return this.interactionGraph.getJoints(body);
+		return this.constraintGraph.getJoints(body);
 	}
 
 	/* (non-Javadoc)
@@ -907,7 +915,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public List<T> getJoinedBodies(T body) {
-		return this.interactionGraph.getJoinedBodies(body);
+		return this.constraintGraph.getJoinedBodies(body);
 	}
 	
 	/* (non-Javadoc)
@@ -1106,7 +1114,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		}
 		
 		// solve the world by using the interaction graph to produce a set of islands
-		this.interactionGraph.solve(this.contactConstraintSolver, this.gravity, this.step, this.settings);
+		this.constraintGraph.solve(this.contactConstraintSolver, this.gravity, this.step, this.settings);
 		
 //		// perform a depth first search of the contact graph
 //		// to create islands for constraint solving
@@ -1245,7 +1253,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	@Override
 	protected void detectCollisions(Iterator<V> iterator) {
 		// clear the contact interactions since we'll be recreating them
-		this.interactionGraph.removeAllContactEdges();
+		this.constraintGraph.removeAllContactEdges();
 		
 		// this is rebuilt every time so clear it
 		this.contactCollisions.clear();
@@ -1282,7 +1290,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 				collision.setContactConstraintCollision(true);
 				
 				// build the contact edges
-				this.interactionGraph.addEdge(cc);
+				this.constraintGraph.addEdge(cc);
 				
 				// add it to a list of contact-constraint only collisions for
 				// quicker post/pre solve notification if it's enabled and
@@ -1593,11 +1601,15 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		/** The current index */
 		private int index;
 		
+		/** True if the current element has been removed */
+		private boolean removed;
+		
 		/**
 		 * Minimal constructor.
 		 */
 		public JointIterator() {
 			this.index = -1;
+			this.removed = false;
 		}
 		
 		/* (non-Javadoc)
@@ -1613,11 +1625,12 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		 */
 		@Override
 		public Joint<T> next() {
-			if (this.index >= AbstractPhysicsWorld.this.joints.size()) {
+			if (this.index + 1 >= AbstractPhysicsWorld.this.joints.size()) {
 				throw new IndexOutOfBoundsException();
 			}
 			try {
 				this.index++;
+				this.removed = false;
 				Joint<T> joint = AbstractPhysicsWorld.this.joints.get(this.index);
 				return joint;
 			} catch (IndexOutOfBoundsException ex) {
@@ -1630,7 +1643,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		 */
 		@Override
 		public void remove() {
-			if (this.index < 0) {
+			if (this.index < 0 || this.removed) {
 				throw new IllegalStateException();
 			}
 			if (this.index >= AbstractPhysicsWorld.this.joints.size()) {
@@ -1639,6 +1652,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			try {
 				AbstractPhysicsWorld.this.removeJoint(this.index);
 				this.index--;
+				this.removed = true;
 			} catch (IndexOutOfBoundsException ex) {
 				throw new ConcurrentModificationException();
 			}

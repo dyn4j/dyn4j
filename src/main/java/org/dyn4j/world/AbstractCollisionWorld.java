@@ -148,10 +148,10 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	/**
 	 * Default constructor.
 	 * <p>
-	 * Uses the {@link CollisionWorld#DEFAULT_BODY_COUNT} as the initial capacity.
+	 * Uses the {@link CollisionWorld#DEFAULT_INITIAL_BODY_CAPACITY} as the initial capacity.
 	 */
 	public AbstractCollisionWorld() {
-		this(DEFAULT_BODY_COUNT);
+		this(DEFAULT_INITIAL_BODY_CAPACITY);
 	}
 	
 	/**
@@ -159,8 +159,8 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 * @param initialBodyCapacity the default initial body capacity
 	 */
 	public AbstractCollisionWorld(int initialBodyCapacity) {
-		if (initialBodyCapacity < 0) {
-			initialBodyCapacity = DEFAULT_BODY_COUNT;
+		if (initialBodyCapacity <= 0) {
+			initialBodyCapacity = DEFAULT_INITIAL_BODY_CAPACITY;
 		}
 		
 		this.bounds = null;
@@ -859,12 +859,13 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			// perform the raycast
 			if (this.raycastDetector.raycast(ray, max, convex, transform, raycast)) {
 				if (result == null) {
-					result = new RaycastResult<T, E>(body, fixture, raycast);
-				} else {
-					result.setBody(body);
-					result.setFixture(fixture);
-					result.setRaycast(raycast);
+					result = new RaycastResult<T, E>();
 				}
+				
+				result.setBody(body);
+				result.setFixture(fixture);
+				result.setRaycast(raycast);
+				
 				// we are only looking for the closest so
 				// set the new maximum
 				max = raycast.getDistance();
@@ -1238,13 +1239,14 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		private int index;
 		
 		/** True if the current element has been removed */
-		private boolean removed = false;
+		private boolean removed;
 		
 		/**
 		 * Minimal constructor.
 		 */
 		public BodyIterator() {
 			this.index = -1;
+			this.removed = false;
 		}
 		
 		/* (non-Javadoc)
@@ -1326,7 +1328,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public DetectResult<T, E> next() {
 			if (this.hasNext) {
-				this.currentResult.setTo(this.nextResult);
+				this.currentResult.copy(this.nextResult);
 				this.hasNext = this.findNext();
 				return this.currentResult;
 			}
@@ -1402,7 +1404,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public DetectResult<T, E> next() {
 			if (this.hasNext) {
-				this.currentResult.setTo(this.nextResult);
+				this.currentResult.copy(this.nextResult);
 				this.hasNext = this.findNext();
 				return this.currentResult;
 			}
@@ -1480,7 +1482,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public ConvexDetectResult<T, E> next() {
 			if (this.hasNext) {
-				this.currentResult.setTo(this.nextResult);
+				this.currentResult.copy(this.nextResult);
 				this.hasNext = this.findNext();
 				return this.currentResult;
 			}
@@ -1564,7 +1566,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public ConvexDetectResult<T, E> next() {
 			if (this.hasNext) {
-				this.currentResult.setTo(this.nextResult);
+				this.currentResult.copy(this.nextResult);
 				this.hasNext = this.findNext();
 				return this.currentResult;
 			}
@@ -1649,7 +1651,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public RaycastResult<T, E> next() {
 			if (this.hasNext) {
-				this.currentResult.setTo(this.nextResult);
+				this.currentResult.copy(this.nextResult);
 				this.hasNext = this.findNext();
 				return this.currentResult;
 			}
@@ -1738,7 +1740,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public RaycastResult<T, E> next() {
 			if (this.hasNext) {
-				this.currentResult.setTo(this.nextResult);
+				this.currentResult.copy(this.nextResult);
 				this.hasNext = this.findNext();
 				return this.currentResult;
 			}
@@ -1839,7 +1841,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public ConvexCastResult<T, E> next() {
 			if (this.hasNext) {
-				this.currentResult.setTo(this.nextResult);
+				this.currentResult.copy(this.nextResult);
 				this.hasNext = this.findNext();
 				return this.currentResult;
 			}

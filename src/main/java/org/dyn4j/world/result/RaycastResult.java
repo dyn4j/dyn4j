@@ -53,9 +53,9 @@ public class RaycastResult<T extends CollisionBody<E>, E extends Fixture> extend
 	 * @param fixture the fixture
 	 * @param raycast the raycast information
 	 */
-	public RaycastResult(T body, E fixture, Raycast raycast) {
+	protected RaycastResult(T body, E fixture, Raycast raycast) {
 		super(body, fixture);
-		this.raycast = raycast;
+		this.raycast = raycast.copy();
 	}
 
 	/**
@@ -71,16 +71,16 @@ public class RaycastResult<T extends CollisionBody<E>, E extends Fixture> extend
 	 * @param raycast the raycast information
 	 */
 	public void setRaycast(Raycast raycast) {
-		this.raycast.setTo(raycast);
+		this.raycast.copy(raycast);
 	}
 	
 	/**
 	 * Copies (deep) the given result to this result.
 	 * @param result the result to copy
 	 */
-	public void setTo(RaycastResult<T, E> result) {
-		super.setTo(result);
-		this.raycast.setTo(result.raycast);
+	public void copy(RaycastResult<T, E> result) {
+		super.copy(result);
+		this.raycast.copy(result.raycast);
 	}
 
 	/* (non-Javadoc)
@@ -95,6 +95,6 @@ public class RaycastResult<T extends CollisionBody<E>, E extends Fixture> extend
 	 * @see org.dyn4j.world.result.DetectResult#copy()
 	 */
 	public RaycastResult<T, E> copy() {
-		return new RaycastResult<T, E>(this.body, this.fixture, this.raycast.copy());
+		return new RaycastResult<T, E>(this.body, this.fixture, this.raycast);
 	}
 }

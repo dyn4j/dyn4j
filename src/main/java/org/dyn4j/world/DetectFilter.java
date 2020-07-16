@@ -38,10 +38,10 @@ import org.dyn4j.collision.Fixture;
  */
 public class DetectFilter<T extends CollisionBody<E>, E extends Fixture> {
 	/** True if fixtures flagged as sensors should be ignored */
-	private final boolean ignoreSensors; 
+	private final boolean ignoreSensorsEnabled; 
 	
 	/** True if disabled bodies/fixtures should be ignored */
-	private final boolean ignoreDisabled;
+	private final boolean ignoreDisabledEnabled;
 	
 	/** A {@link Filter} to filter fixtures */
 	private final Filter filter;
@@ -54,8 +54,8 @@ public class DetectFilter<T extends CollisionBody<E>, E extends Fixture> {
 	 */
 	public DetectFilter(boolean ignoreSensors, boolean ignoreDisabled, Filter filter) {
 		super();
-		this.ignoreSensors = ignoreSensors;
-		this.ignoreDisabled = ignoreDisabled;
+		this.ignoreSensorsEnabled = ignoreSensors;
+		this.ignoreDisabledEnabled = ignoreDisabled;
 		this.filter = filter;
 	}
 
@@ -68,12 +68,12 @@ public class DetectFilter<T extends CollisionBody<E>, E extends Fixture> {
 	 */
 	public boolean isAllowed(T body, E fixture) {
 		// check for inactive
-		if (this.ignoreDisabled && !body.isEnabled()) {
+		if (this.ignoreDisabledEnabled && !body.isEnabled()) {
 			return false;
 		}
 		
 		// check for sensor
-		if (this.ignoreSensors && fixture.isSensor()) {
+		if (this.ignoreSensorsEnabled && fixture.isSensor()) {
 			return false;
 		}
 		
@@ -83,5 +83,29 @@ public class DetectFilter<T extends CollisionBody<E>, E extends Fixture> {
 		}
 		
 		return true;
+	}
+
+	/**
+	 * Returns true if sensor fixtures should be ignored.
+	 * @return boolean
+	 */
+	public boolean isIgnoreSensorsEnabled() {
+		return this.ignoreSensorsEnabled;
+	}
+
+	/**
+	 * Returns true if disabled bodies should be ignored.
+	 * @return boolean
+	 */
+	public boolean IsIgnoreDisabledEnabled() {
+		return this.ignoreDisabledEnabled;
+	}
+
+	/**
+	 * Returns the fixture-level filter.
+	 * @return {@link Filter}
+	 */
+	public Filter getFilter() {
+		return this.filter;
 	}
 }

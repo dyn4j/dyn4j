@@ -46,9 +46,7 @@ public class AbstractShapeTest {
 			super(new Vector2(), 0);
 		}
 		@Override
-		public boolean contains(Vector2 point, Transform transform) { return false; }
-		@Override
-		public AABB createAABB(Transform transform) { return null; }		
+		public boolean contains(Vector2 point, Transform transform) { return false; }	
 		@Override
 		public Mass createMass(double density) { return new Mass(); }
 		@Override

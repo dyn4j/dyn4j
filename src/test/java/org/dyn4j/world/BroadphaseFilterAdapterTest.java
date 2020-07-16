@@ -22,71 +22,36 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.world.result;
+package org.dyn4j.world;
 
-import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.collision.Fixture;
-import org.dyn4j.collision.narrowphase.Penetration;
+import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.geometry.Geometry;
+import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
- * Represents a reusable {@link DetectResult} for convex shape detection.
+ * Test case for the {@link BroadphaseFilterAdapter} class.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0
- * @param <T> the {@link CollisionBody} type
- * @param <E> the {@link Fixture} type
  */
-public class ConvexDetectResult<T extends CollisionBody<E>, E extends Fixture> extends DetectResult<T, E> {
-	/** The penetration data */
-	protected final Penetration penetration;
-	
+public class BroadphaseFilterAdapterTest {
 	/**
-	 * Default constructor.
+	 * Tests the default behavior of the adapter.
 	 */
-	public ConvexDetectResult() {
-		this.penetration = new Penetration();
-	}
-	
-	/**
-	 * Full constructor.
-	 * @param body the body
-	 * @param fixture the fixture
-	 * @param penetration the penetration data
-	 */
-	protected ConvexDetectResult(T body, E fixture, Penetration penetration) {
-		super(body, fixture);
-		this.penetration = penetration.copy();
-	}
-
-	/**
-	 * Returns the penetration data.
-	 * @return {@link Penetration}
-	 */
-	public Penetration getPenetration() {
-		return this.penetration;
-	}
-	
-	/**
-	 * Sets the penetration data.
-	 * @param penetration the penetration data
-	 */
-	public void setPenetration(Penetration penetration) {
-		this.penetration.copy(penetration);
-	}
-	
-	/**
-	 * Copies (deep) the given result data to this result.
-	 * @param result the result to copy
-	 */
-	public void copy(ConvexDetectResult<T, E> result) {
-		super.copy(result);
-		this.penetration.copy(result.penetration);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.result.DetectResult#copy()
-	 */
-	public ConvexDetectResult<T, E> copy() {
-		return new ConvexDetectResult<T, E>(this.body, this.fixture, this.penetration);
+	@Test
+	public void alwaysAllowed() {
+		BroadphaseFilterAdapter<Body, BodyFixture> filter = new BroadphaseFilterAdapter<Body, BodyFixture>();
+		
+		Body b1 = new Body();
+		Body b2 = new Body();
+		BodyFixture b1f1 = b1.addFixture(Geometry.createCircle(0.5));
+		BodyFixture b2f1 = b2.addFixture(Geometry.createCircle(0.5));
+		
+		// always returns true
+		TestCase.assertTrue(filter.isAllowed(b1, b1f1, b2, b2f1));
+		TestCase.assertTrue(filter.isAllowed(null, null, null, null));
 	}
 }

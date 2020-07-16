@@ -65,9 +65,9 @@ public class Raycast implements Shiftable, Copyable<Raycast> {
 	 * @param normal the normal at the hit point
 	 * @param distance the distance from the start of the {@link Ray} to the hit point
 	 */
-	public Raycast(Vector2 point, Vector2 normal, double distance) {
-		this.point = point;
-		this.normal = normal;
+	protected Raycast(Vector2 point, Vector2 normal, double distance) {
+		this.point = point.copy();
+		this.normal = normal.copy();
 		this.distance = distance;
 	}
 	
@@ -151,7 +151,7 @@ public class Raycast implements Shiftable, Copyable<Raycast> {
 	 * @param raycast the raycast to copy
 	 * @since 4.0.0
 	 */
-	public void setTo(Raycast raycast) {
+	public void copy(Raycast raycast) {
 		this.distance = raycast.distance;
 		this.normal.x = raycast.normal.x;
 		this.normal.y = raycast.normal.y;
@@ -173,6 +173,6 @@ public class Raycast implements Shiftable, Copyable<Raycast> {
 	 */
 	@Override
 	public Raycast copy() {
-		return new Raycast(this.point.copy(), this.normal.copy(), this.distance);
+		return new Raycast(this.point, this.normal, this.distance);
 	}
 }

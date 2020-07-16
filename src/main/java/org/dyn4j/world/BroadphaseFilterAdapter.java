@@ -26,8 +26,6 @@ package org.dyn4j.world;
 
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.Fixture;
-import org.dyn4j.geometry.AABB;
-import org.dyn4j.geometry.Ray;
 
 /**
  * Helper class to avoid having to override all the methods of the {@link BroadphaseFilter} interface.
@@ -41,28 +39,10 @@ import org.dyn4j.geometry.Ray;
  */
 public class BroadphaseFilterAdapter<T extends CollisionBody<E>, E extends Fixture> implements BroadphaseFilter<T, E>{
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture, org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.world.BroadphaseFilter#isAllowed(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture, org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
 	 */
 	@Override
 	public boolean isAllowed(T body1, E fixture1, T body2, E fixture2) {
-		return true;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(org.dyn4j.geometry.AABB, org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
-	 */
-	@Deprecated
-	@Override
-	public boolean isAllowed(AABB aabb, T body, E fixture) {
-		return true;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(org.dyn4j.geometry.Ray, double, org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
-	 */
-	@Deprecated
-	@Override
-	public boolean isAllowed(Ray ray, double length, T body, E fixture) {
 		return true;
 	}
 }

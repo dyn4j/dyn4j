@@ -365,12 +365,21 @@ public class CollisionWorldTest {
 		TestWorld w = new TestWorld();
 		w.getBodies().remove(0);
 	}
+
+	/**
+	 * Tests the getBodies method when trying to remove an item.
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void getBodiesAndAdd() {
+		TestWorld w = new TestWorld();
+		w.getBodies().add(new Body());
+	}
 	
 	/**
 	 * Tests the getBody w/ index method.
 	 */
 	@Test
-	public void getBodiesAtIndex() {
+	public void getBodyAtIndex() {
 		TestWorld w = new TestWorld();
 		
 		Body b1 = new Body();
@@ -388,7 +397,7 @@ public class CollisionWorldTest {
 	 * Tests the getBody method w/ a negative index.
 	 */
 	@Test(expected = IndexOutOfBoundsException.class)
-	public void getBodiesAtNegativeIndex() {
+	public void getBodyAtNegativeIndex() {
 		TestWorld w = new TestWorld();
 		w.getBody(-1);
 	}
@@ -397,7 +406,7 @@ public class CollisionWorldTest {
 	 * Tests the getBody method w/ a non-existent index.
 	 */
 	@Test(expected = IndexOutOfBoundsException.class)
-	public void getBodyBadIndex() {
+	public void getBodyAtBadIndex() {
 		TestWorld w = new TestWorld();
 		w.getBody(2);
 	}
@@ -466,7 +475,7 @@ public class CollisionWorldTest {
 			i++;
 		}
 		
-		TestCase.assertEquals(w.getBodyCount(), i);
+		TestCase.assertEquals(w.bodies.size(), i);
 		
 		i = 0;
 		it = w.getBodyIterator();
@@ -474,7 +483,7 @@ public class CollisionWorldTest {
 			i++;
 			it.next();
 			it.remove();
-			TestCase.assertEquals(2 - i, w.getBodyCount());
+			TestCase.assertEquals(2 - i, w.bodies.size());
 		}
 	}
 	
@@ -1032,29 +1041,72 @@ public class CollisionWorldTest {
 		Convex c1 = Geometry.createCircle(1.0);
 		Convex c2 = Geometry.createEquilateralTriangle(0.5);
 
-		Body b1 = new Body(); 
-		BodyFixture f1 = b1.addFixture(c1);
+		Body b1 = new Body(); BodyFixture f1 = b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
 		
 		// add them to the world
 		w.addBody(b1);
+		w.addBody(b2);
 		
+		w.detect();
+		
+		// sanity checks
 		TestCase.assertTrue(w.broadphaseDetector.contains(b1, f1));
+		TestCase.assertEquals(1, w.collisionData.size());
+		WorldCollisionData<Body> data = w.getCollisionData(b1, f1, b2, b2.getFixture(0));
+		TestCase.assertNotNull(data);
+		TestCase.assertTrue(data.isBroadphaseCollision());
+		TestCase.assertTrue(data.isNarrowphaseCollision());
+		TestCase.assertTrue(data.isManifoldCollision());
 		
+		// test adding a new fixture
 		BodyFixture f2 = b1.addFixture(c2);
 		TestCase.assertTrue(w.broadphaseDetector.contains(b1, f1));
 		TestCase.assertTrue(w.broadphaseDetector.contains(b1, f2));
 		
+		// test removing a fixture
 		b1.removeFixture(f1);
 		TestCase.assertFalse(w.broadphaseDetector.contains(b1, f1));
 		TestCase.assertTrue(w.broadphaseDetector.contains(b1, f2));
+		
+		// the collision is still there, but public methods should report it missing
+		TestCase.assertEquals(1, w.collisionData.size());
+		data = w.getCollisionData(b1, f1, b2, b2.getFixture(0));
+		TestCase.assertNull(data);
+		
+		w.detect();
+		
+		// now it should be gone (there's new collision B1-F2)
+		TestCase.assertEquals(1, w.collisionData.size());
+		data = w.getCollisionData(b1, f2, b2, b2.getFixture(0));
+		TestCase.assertNotNull(data);
+		data = w.getCollisionData(b1, f1, b2, b2.getFixture(0));
+		TestCase.assertNull(data);
 		
 		b1.addFixture(f1);
 		TestCase.assertTrue(w.broadphaseDetector.contains(b1, f1));
 		TestCase.assertTrue(w.broadphaseDetector.contains(b1, f2));
 		
+		w.detect();
+		
 		b1.removeAllFixtures();
 		TestCase.assertFalse(w.broadphaseDetector.contains(b1, f1));
 		TestCase.assertFalse(w.broadphaseDetector.contains(b1, f2));
+		
+		// the collision is still there, but public methods should report it missing
+		TestCase.assertEquals(2, w.collisionData.size());
+		data = w.getCollisionData(b1, f1, b2, b2.getFixture(0));
+		TestCase.assertNull(data);
+		data = w.getCollisionData(b1, f2, b2, b2.getFixture(0));
+		TestCase.assertNull(data);
+		
+		w.detect();
+		
+		TestCase.assertEquals(0, w.collisionData.size());
+		data = w.getCollisionData(b1, f1, b2, b2.getFixture(0));
+		TestCase.assertNull(data);
+		data = w.getCollisionData(b1, f2, b2, b2.getFixture(0));
+		TestCase.assertNull(data);
 	}
 	
 	/**
@@ -1248,7 +1300,7 @@ public class CollisionWorldTest {
 	 * Tests the detect method wrt. listeners.
 	 */
 	@Test
-	public void detectListeners() {
+	public void detectWithListeners() {
 		TestWorld w = new TestWorld();
 		
 		// setup the bodies
@@ -1317,6 +1369,67 @@ public class CollisionWorldTest {
 			TestCase.assertTrue(data.isNarrowphaseCollision());
 			TestCase.assertFalse(data.isManifoldCollision());
 		}
+	}
+	
+	/**
+	 * Test the fixture modification handler with fixture removal and detection.
+	 */
+	@Test
+	public void detectWithFixtureModification() {
+		TestWorld w = new TestWorld();
+
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(0.5);
+		Convex c2 = Geometry.createRectangle(1.0, 0.5);
+		Convex c3 = Geometry.createCircle(0.5);
+
+		Body b1 = new Body(); b1.addFixture(c1); b1.addFixture(c3); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); b2.addFixture(c2); b2.setMass(MassType.NORMAL);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		w.detect();
+		
+		// should be collisions: b1-f1<=>b2-f1 and b1-f2<=>b2-f1
+		int n = 0;
+		Iterator<WorldCollisionData<Body>> it = w.getCollisionDataIterator();
+		while (it.hasNext()) {
+			it.next();
+			n++;
+		}
+		TestCase.assertEquals(2, n);
+		
+		// test removal of fixture with the collision info
+		b1.removeFixture(1);
+		
+		// it's not removed until the next "detect"
+		TestCase.assertEquals(2, w.collisionData.size());
+		
+		// but the iterator shouldn't return it
+		n = 0;
+		it = w.getCollisionDataIterator();
+		while (it.hasNext()) {
+			it.next();
+			n++;
+		}
+		TestCase.assertEquals(1, n);
+		
+		// run a detect
+		w.detect();
+		
+		// after detect, the data should be removed
+		TestCase.assertEquals(1, w.collisionData.size());
+		
+		// and the iterator should be the same
+		n = 0;
+		it = w.getCollisionDataIterator();
+		while (it.hasNext()) {
+			it.next();
+			n++;
+		}
+		TestCase.assertEquals(1, n);
 	}
 	
 	/**

@@ -29,8 +29,6 @@ import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
-import org.dyn4j.geometry.AABB;
-import org.dyn4j.geometry.Ray;
 
 /**
  * Represents a class that defines rules to exclude results from {@link BroadphaseDetector}.
@@ -53,27 +51,4 @@ public interface BroadphaseFilter<T extends CollisionBody<E>, E extends Fixture>
 	 * @return boolean
 	 */
 	public abstract boolean isAllowed(T body1, E fixture1, T body2, E fixture2);
-	
-	/**
-	 * Returns true if this result should be added to the results list.
-	 * @param aabb the AABB using to test
-	 * @param body the {@link CollisionBody}
-	 * @param fixture the {@link CollisionBody}s {@link Fixture}
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. This was replaced with the {@link DetectFilter} class.
-	 */
-	@Deprecated
-	public abstract boolean isAllowed(AABB aabb, T body, E fixture);
-	
-	/**
-	 * Returns true if this result should be added to the results list.
-	 * @param ray the ray
-	 * @param length the length of the ray
-	 * @param body the {@link CollisionBody}
-	 * @param fixture the {@link CollisionBody}s {@link Fixture}
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. This was replaced with the {@link DetectFilter} class.
-	 */
-	@Deprecated
-	public abstract boolean isAllowed(Ray ray, double length, T body, E fixture);
 }

@@ -39,15 +39,16 @@ public class World extends AbstractPhysicsWorld<Body, WorldCollisionData<Body>> 
 	 * Default constructor.
 	 */
 	public World() {
-		this(CollisionWorld.DEFAULT_BODY_COUNT);
+		this(CollisionWorld.DEFAULT_INITIAL_BODY_CAPACITY, PhysicsWorld.DEFAULT_INITIAL_JOINT_CAPACITY);
 	}
 	
 	/**
 	 * Optional constructor.
-	 * @param initialBodyCapacity the default initial body capacity
+	 * @param initialBodyCapacity the initial body capacity
+	 * @param initialJointCapacity the initial joint capacity
 	 */
-	public World(int initialBodyCapacity) {
-		super(initialBodyCapacity);
+	public World(int initialBodyCapacity, int initialJointCapacity) {
+		super(initialBodyCapacity, initialJointCapacity);
 	}
 	
 	/* (non-Javadoc)

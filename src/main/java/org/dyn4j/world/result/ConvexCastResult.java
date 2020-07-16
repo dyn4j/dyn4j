@@ -53,9 +53,9 @@ public class ConvexCastResult<T extends CollisionBody<E>, E extends Fixture> ext
 	 * @param fixture the fixture
 	 * @param timeOfImpact the time of impact
 	 */
-	public ConvexCastResult(T body, E fixture, TimeOfImpact timeOfImpact) {
+	protected ConvexCastResult(T body, E fixture, TimeOfImpact timeOfImpact) {
 		super(body, fixture);
-		this.timeOfImpact = timeOfImpact;
+		this.timeOfImpact = timeOfImpact.copy();
 	}
 	
 	/* (non-Javadoc)
@@ -79,16 +79,16 @@ public class ConvexCastResult<T extends CollisionBody<E>, E extends Fixture> ext
 	 * @param timeOfImpact the time of impact data
 	 */
 	public void setTimeOfImpact(TimeOfImpact timeOfImpact) {
-		this.timeOfImpact.setTo(timeOfImpact);
+		this.timeOfImpact.copy(timeOfImpact);
 	}
 	
 	/**
 	 * Copies (deep) the given result to this result.
 	 * @param result the result to copy
 	 */
-	public void setTo(ConvexCastResult<T, E> result) {
-		super.setTo(result);
-		this.timeOfImpact.setTo(result.timeOfImpact);
+	public void copy(ConvexCastResult<T, E> result) {
+		super.copy(result);
+		this.timeOfImpact.copy(result.timeOfImpact);
 	}
 
 	/* (non-Javadoc)
@@ -96,6 +96,6 @@ public class ConvexCastResult<T extends CollisionBody<E>, E extends Fixture> ext
 	 */
 	@Override
 	public ConvexCastResult<T, E> copy() {
-		return new ConvexCastResult<T, E>(this.body, this.fixture, this.timeOfImpact.copy());
+		return new ConvexCastResult<T, E>(this.body, this.fixture, this.timeOfImpact);
 	}
 }

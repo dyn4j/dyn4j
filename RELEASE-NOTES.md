@@ -1,19 +1,25 @@
 ## v4.0.0 - _In Development_
+>While this version of the library retains many deprecated APIs, the new and old APIs do not mix.  
+>You should either: `Do nothing and upgrade later` -OR- `Remove ALL references to deprecated API`. The recommendation is
+>to move to the new API (it's nearly identical to the old) since the next version will remove all the deprecated API.
 
 **New Features:**
+- [#99](https://github.com/dyn4j/dyn4j/issues/99) Major performance enhancements for large worlds and some small enhancements for small-medium worlds
+- [#99](https://github.com/dyn4j/dyn4j/issues/99) Added new objects to track collision over time to reduce allocation per frame.
+- [#99](https://github.com/dyn4j/dyn4j/issues/99) Added new API to easily see the entire output
 - [#102](https://github.com/dyn4j/dyn4j/issues/102) Added guards on Joint setX methods to ensure that the joined bodies are not awakened unless necessary
 - [#103](https://github.com/dyn4j/dyn4j/issues/103) Updated the FrictionJoint default max force/torque to non-zero values to better illustrate it's use to new users
-- [#99](https://github.com/dyn4j/dyn4j/issues/99) Major performance enhancements for large worlds and some small enhancements for small-medium worlds.
 
 **Bug Fixes:**
 - [#106](https://github.com/dyn4j/dyn4j/issues/106) PulleyJoint no longer allows negative length
 - [#100](https://github.com/dyn4j/dyn4j/issues/100) Fixed unrealistic falling of bodies under gravity when bound together by a MotorJoint
     
 **Deprecated:**
-- A lot of the components in the dynamics packages have been deprecated and replaced with components in the world packages.
+- A lot of the components in the dynamics packages have been deprecated and replaced with components in the world packages
   
 **Breaking Changes:**
-- [#71](https://github.com/dyn4j/dyn4j/issues/71) Removed all references to UUID in the project as promised in the previous version's deprecation.
+- [#71](https://github.com/dyn4j/dyn4j/issues/71) Removed all references to UUID in the project as promised in the previous version's deprecation
+- Adding a Joint to a world now requires the bodies to be added first
   
 **Other:**
 - [#98](https://github.com/dyn4j/dyn4j/issues/98) Replaced release-notes.txt with RELEASE-NOTES.md for better formatting and maintenance.

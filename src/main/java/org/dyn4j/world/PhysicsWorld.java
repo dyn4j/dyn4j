@@ -55,6 +55,9 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * @param <V> the {@link ContactCollisionData} type
  */
 public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionData<T>> extends CollisionWorld<T, BodyFixture, V>, Shiftable, DataContainer {
+	/** The default {@link CollisionBody} count */
+	public static final int DEFAULT_INITIAL_JOINT_CAPACITY = 16;
+	
 	/** Earths gravity constant */
 	public static final Vector2 EARTH_GRAVITY = new Vector2(0.0, -9.8);
 	

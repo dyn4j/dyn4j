@@ -53,12 +53,16 @@ public class IslandTest {
 	}
 	
 	/**
-	 * Tests the failed creation of an island.
+	 * Tests the invalid constructor counts.
 	 */
-	public void createSuccessNullCapacity() {
-		new Island<Body>(-1, 5);
+	@Test
+	public void createInvalidInitialCapacity() {
+		Island<Body> island = new Island<Body>(-1, 0);
+		TestCase.assertNotNull(island.bodies);
+		TestCase.assertNotNull(island.contactConstraints);
+		TestCase.assertNotNull(island.joints);
 	}
-
+	
 	/**
 	 * Tests the add methods.
 	 */
@@ -84,23 +88,16 @@ public class IslandTest {
 		TestCase.assertEquals(1, i.joints.size());
 		TestCase.assertEquals(1, i.contactConstraints.size());
 		
-		// make sure the isOnIsland method works
+		// the island doesn't do any duplicate checking
 		
-//		TestCase.assertTrue(i.isOnIsland(b1));
-//		TestCase.assertTrue(i.isOnIsland(b2));
-//		TestCase.assertTrue(i.isOnIsland(j1));
-//		TestCase.assertTrue(i.isOnIsland(c1));
+		i.add(b1);
+		i.add(b2);
+		i.add(j1);
+		i.add(c1);
 		
-		// FIXME move this check to the InteractionGraph test
-		// make sure adding the same stuff doesn't add more than one
-//		i.add(b1);
-//		i.add(b2);
-//		i.add(j1);
-//		i.add(c1);
-//		
-//		TestCase.assertEquals(2, i.bodies.size());
-//		TestCase.assertEquals(1, i.joints.size());
-//		TestCase.assertEquals(1, i.contactConstraints.size());
+		TestCase.assertEquals(4, i.bodies.size());
+		TestCase.assertEquals(2, i.joints.size());
+		TestCase.assertEquals(2, i.contactConstraints.size());
 	}
 	
 	/**

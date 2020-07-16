@@ -213,6 +213,35 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	}
 	
 	/**
+	 * Returns true if the given joint exists in this interaction graph.
+	 * @param joint the joint
+	 * @return boolean
+	 */
+	public boolean containsEdge(Joint<T> joint) {
+		// remove the interaction edges
+		T body1 = joint.getBody1();
+		T body2 = joint.getBody2();
+		
+		boolean atob = false;
+		boolean btoa = false;
+		if (body1 != null) {
+			ConstraintGraphNode<T> node = this.graph.get(body1);
+			if (node != null) {
+				atob = node.joints.contains(joint);
+			}
+		}
+		
+		if (body2 != null) {
+			ConstraintGraphNode<T> node = this.graph.get(body2);
+			if (node != null) {
+				btoa = node.joints.contains(joint);
+			}
+		}
+		
+		return atob && btoa;
+	}
+	
+	/**
 	 * Removes the given joint from the graph.
 	 * <p>
 	 * A joint is an edge connecting body nodes. This method removes the edges
@@ -226,12 +255,16 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 		
 		if (body1 != null) {
 			ConstraintGraphNode<T> node = this.graph.get(body1);
-			node.joints.remove(joint);
+			if (node != null) {
+				node.joints.remove(joint);
+			}
 		}
 		
 		if (body2 != null) {
 			ConstraintGraphNode<T> node = this.graph.get(body2);
-			node.joints.remove(joint);
+			if (node != null) {
+				node.joints.remove(joint);
+			}
 		}
 	}
 	

@@ -54,28 +54,46 @@ final class CollisionItemAdapter<T extends CollisionBody<E>, E extends Fixture> 
 		this.fixture = fixture;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		return AbstractCollisionItem.getHashCode(this.body, this.fixture);
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		return AbstractCollisionItem.equals(this, obj);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionItem#getBody()
+	 */
 	@Override
 	public T getBody() {
 		return this.body;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionItem#getFixture()
+	 */
 	@Override
 	public E getFixture() {
 		return this.fixture;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
+	 */
 	@Override
-	public CollisionItem<T, E> copy() {
-		throw new UnsupportedOperationException();
+	public CollisionItemAdapter<T, E> copy() {
+		CollisionItemAdapter<T, E> item = new CollisionItemAdapter<T, E>();
+		item.body = this.body;
+		item.fixture = this.fixture;
+		return item;
 	}
 }

@@ -64,7 +64,7 @@ public class ManifoldPoint implements Shiftable, Copyable<ManifoldPoint> {
 	 * @param point the manifold point in world coordinates
 	 * @param depth the penetration depth
 	 */
-	public ManifoldPoint(ManifoldPointId id, Vector2 point, double depth) {
+	protected ManifoldPoint(ManifoldPointId id, Vector2 point, double depth) {
 		this.id = id;
 		this.point = point.copy();
 		this.depth = depth;
@@ -131,7 +131,7 @@ public class ManifoldPoint implements Shiftable, Copyable<ManifoldPoint> {
 	 * @param manifoldPoint the manifold point to copy
 	 * @since 4.0.0
 	 */
-	public void setTo(ManifoldPoint manifoldPoint) {
+	public void copy(ManifoldPoint manifoldPoint) {
 		this.id = manifoldPoint.id;
 		this.depth = manifoldPoint.depth;
 		this.point.x = manifoldPoint.point.x;
@@ -152,6 +152,6 @@ public class ManifoldPoint implements Shiftable, Copyable<ManifoldPoint> {
 	 */
 	@Override
 	public ManifoldPoint copy() {
-		return new ManifoldPoint(this.id, this.point.copy(), this.depth);
+		return new ManifoldPoint(this.id, this.point, this.depth);
 	}
 }

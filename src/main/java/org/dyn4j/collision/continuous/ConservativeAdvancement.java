@@ -110,7 +110,7 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 		if (d < this.distanceEpsilon) {
 			// fill up the toi
 			toi.time = 0.0;
-			toi.separation.setTo(separation);
+			toi.separation.copy(separation);
 			return true;
 		}
 		// get the separation normal
@@ -212,7 +212,7 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 		
 		// fill up the separation object
 		toi.time = l;
-		toi.separation.setTo(separation);
+		toi.separation.copy(separation);
 		
 		return true;
 	}
