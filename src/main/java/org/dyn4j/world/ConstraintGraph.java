@@ -42,8 +42,8 @@ import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents a graph of constraints involving {@link PhysicsBody}s with the desire
- * to split the graph into smaller solvable chunks.
+ * Represents an undirected graph of constraints involving {@link PhysicsBody}s with the desire
+ * to split the simulation into smaller, solvable chunks.
  * <p>
  * The graph is maintained by using the various add/remove methods. The {@link PhysicsWorld}
  * is a consumer of this object, adding nodes and edges when bodies/joints are added. During
@@ -60,6 +60,8 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	/** The constraint graph storage mechanism */
 	private final Map<T, ConstraintGraphNode<T>> graph;
 
+	// for solving
+	
 	/** Stack for depth-first traversal of the graph */
 	private final Deque<ConstraintGraphNode<T>> stack;
 
@@ -103,7 +105,7 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	 * Adds an interaction graph node for the given body.
 	 * @param body the body
 	 */
-	public void addNode(T body) {
+	public void addBody(T body) {
 		ConstraintGraphNode<T> node = this.graph.get(body);
 		
 		if (node == null) {
@@ -116,20 +118,24 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	 * Adds an interaction graph edge for the given {@link ContactConstraint}.
 	 * @param contactConstraint the contact constraint
 	 */
-	public void addEdge(ContactConstraint<T> contactConstraint) {
+	public void addContactConstraint(ContactConstraint<T> contactConstraint) {
 		T body1 = contactConstraint.getBody1();
 		T body2 = contactConstraint.getBody2();
 		
 		ConstraintGraphNode<T> node1 = this.graph.get(body1);
 		ConstraintGraphNode<T> node2 = this.graph.get(body2);
 		
+		// NOTE: node1/node2 shouldn't ever be null since
+		// the we shouldn't generate a contact constraint
+		// for bodies that don't already exist in the world
+		// but it's here just in case
 		if (node1 == null) {
 			node1 = new ConstraintGraphNode<T>(body1);
 			this.graph.put(body1, node1);
 		}
 		if (node2 == null) {
 			node2 = new ConstraintGraphNode<T>(body2);
-			this.graph.put(body1, node2);
+			this.graph.put(body2, node2);
 		}
 		
 		node1.contactConstraints.add(contactConstraint);
@@ -140,7 +146,7 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	 * Adds an interaction graph edge for the given {@link Joint}.
 	 * @param joint the joint
 	 */
-	public void addEdge(Joint<T> joint) {
+	public void addJoint(Joint<T> joint) {
 		T body1 = joint.getBody1();
 		T body2 = joint.getBody2();
 		
@@ -171,7 +177,7 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	 * @param body the body
 	 * @return boolean
 	 */
-	public boolean containsNode(T body) {
+	public boolean containsBody(T body) {
 		return this.graph.containsKey(body);
 	}
 	
@@ -183,7 +189,7 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	 * @param body the body to remove
 	 * @return {@link ConstraintGraphNode}&lt;T&gt;
 	 */
-	public ConstraintGraphNode<T> removeNode(T body) {
+	public ConstraintGraphNode<T> removeBody(T body) {
 		// remove the node
 		ConstraintGraphNode<T> node = this.graph.remove(body);
 		
@@ -217,8 +223,7 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	 * @param joint the joint
 	 * @return boolean
 	 */
-	public boolean containsEdge(Joint<T> joint) {
-		// remove the interaction edges
+	public boolean containsJoint(Joint<T> joint) {
 		T body1 = joint.getBody1();
 		T body2 = joint.getBody2();
 		
@@ -242,13 +247,41 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	}
 	
 	/**
+	 * Returns true if the given contact constraint exists in this interaction graph.
+	 * @param contactConstraint the contact constraint
+	 * @return boolean
+	 */
+	public boolean containsContactConstraint(ContactConstraint<T> contactConstraint) {
+		T body1 = contactConstraint.getBody1();
+		T body2 = contactConstraint.getBody2();
+		
+		boolean atob = false;
+		boolean btoa = false;
+		if (body1 != null) {
+			ConstraintGraphNode<T> node = this.graph.get(body1);
+			if (node != null) {
+				atob = node.contactConstraints.contains(contactConstraint);
+			}
+		}
+		
+		if (body2 != null) {
+			ConstraintGraphNode<T> node = this.graph.get(body2);
+			if (node != null) {
+				btoa = node.contactConstraints.contains(contactConstraint);
+			}
+		}
+		
+		return atob && btoa;
+	}
+	
+	/**
 	 * Removes the given joint from the graph.
 	 * <p>
 	 * A joint is an edge connecting body nodes. This method removes the edges
 	 * related to the given joint.
 	 * @param joint the joint to remove
 	 */
-	public void removeEdge(Joint<T> joint) {
+	public void removeJoint(Joint<T> joint) {
 		// remove the interaction edges
 		T body1 = joint.getBody1();
 		T body2 = joint.getBody2();
@@ -269,6 +302,33 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	}
 	
 	/**
+	 * Removes the given contact constraint from the graph.
+	 * <p>
+	 * A contact constraint is an edge connecting body nodes. This method removes the edges
+	 * related to the given contact constraint.
+	 * @param contactConstraint the contact constraint to remove
+	 */
+	public void removeContactConstraint(ContactConstraint<T> contactConstraint) {
+		// remove the interaction edges
+		T body1 = contactConstraint.getBody1();
+		T body2 = contactConstraint.getBody2();
+		
+		if (body1 != null) {
+			ConstraintGraphNode<T> node = this.graph.get(body1);
+			if (node != null) {
+				node.contactConstraints.remove(contactConstraint);
+			}
+		}
+		
+		if (body2 != null) {
+			ConstraintGraphNode<T> node = this.graph.get(body2);
+			if (node != null) {
+				node.contactConstraints.remove(contactConstraint);
+			}
+		}
+	}
+	
+	/**
 	 * Returns the node for the given body on the graph.
 	 * <p>
 	 * Returns null if the body is not on the graph.
@@ -282,7 +342,7 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	/**
 	 * Removes all edges in the graph related to contact constraints.
 	 */
-	public void removeAllContactEdges() {
+	public void removeAllContactConstraints() {
 		for (ConstraintGraphNode<T> node : this.graph.values()) {
 			node.contactConstraints.clear();
 		}
@@ -291,7 +351,7 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	/**
 	 * Removes all edges in the graph related to joints.
 	 */
-	public void removeAllJointEdges() {
+	public void removeAllJoints() {
 		for (ConstraintGraphNode<T> node : this.graph.values()) {
 			node.joints.clear();
 		}

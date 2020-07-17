@@ -292,7 +292,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	@Override
 	public void addBody(T body) {
 		super.addBody(body);
-		this.constraintGraph.addNode(body);
+		this.constraintGraph.addBody(body);
 	}
 	
 	/* (non-Javadoc)
@@ -312,7 +312,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		T body2 = joint.getBody2();
 		
 		// dont allow someone to add a joint to the world when the joined bodies dont exist yet
-		if (!this.constraintGraph.containsNode(body1) || !this.constraintGraph.containsNode(body2)) {
+		if (!this.constraintGraph.containsBody(body1) || !this.constraintGraph.containsBody(body2)) {
 			throw new IllegalArgumentException("dynamics.world.addJointWithoutBodies");
 		}
 		
@@ -321,7 +321,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// set that its attached to this world
 		joint.setOwner(this);
 		// get the associated bodies
-		this.constraintGraph.addEdge(joint);
+		this.constraintGraph.addJoint(joint);
 	}
 
 	/* (non-Javadoc)
@@ -425,7 +425,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// remove the body from the broadphase
 			this.broadphaseDetector.remove(body);
 			// remove from the interaction graph
-			ConstraintGraphNode<T> node = this.constraintGraph.removeNode(body);
+			ConstraintGraphNode<T> node = this.constraintGraph.removeBody(body);
 			
 			// JOINT CLEANUP
 			
@@ -511,7 +511,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		if (removed) {
 			joint.setOwner(null);
 			
-			this.constraintGraph.removeEdge(joint);
+			this.constraintGraph.removeJoint(joint);
 		}
 		
 		return removed;
@@ -567,7 +567,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// NOTE: we do a remove here because this will remove the edges
 			// from the graph so that we don't report destruction for joints
 			// and contact constraints twice
-			ConstraintGraphNode<T> node = this.constraintGraph.removeNode(body);
+			ConstraintGraphNode<T> node = this.constraintGraph.removeBody(body);
 			
 			// JOINT CLEANUP
 			
@@ -665,7 +665,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			}
 		}
 		
-		this.constraintGraph.removeAllJointEdges();
+		this.constraintGraph.removeAllJoints();
 		
 		this.joints.clear();
 	}
@@ -1251,9 +1251,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @see org.dyn4j.world.AbstractCollisionWorld#detectCollisions(java.util.Iterator)
 	 */
 	@Override
-	protected void detectCollisions(Iterator<V> iterator) {
+	protected void processCollisions(Iterator<V> iterator) {
 		// clear the contact interactions since we'll be recreating them
-		this.constraintGraph.removeAllContactEdges();
+		this.constraintGraph.removeAllContactConstraints();
 		
 		// this is rebuilt every time so clear it
 		this.contactCollisions.clear();
@@ -1290,7 +1290,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 				collision.setContactConstraintCollision(true);
 				
 				// build the contact edges
-				this.constraintGraph.addEdge(cc);
+				this.constraintGraph.addContactConstraint(cc);
 				
 				// add it to a list of contact-constraint only collisions for
 				// quicker post/pre solve notification if it's enabled and

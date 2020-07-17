@@ -599,7 +599,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	/**
 	 * Performs collision detection on the world.
 	 * <p>
-	 * Implement the {@link #detectCollisions(Iterator)} method to get access
+	 * Implement the {@link #processCollisions(Iterator)} method to get access
 	 * to the generated collision information.
 	 */
 	protected void detect() {
@@ -660,7 +660,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			}
 		}
 		
-		this.detectCollisions(new DetectIterator());
+		this.processCollisions(new DetectIterator());
 		
 		this.broadphaseDetector.clearUpdates();
 	}
@@ -673,13 +673,21 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	protected abstract V createCollisionData(CollisionPair<T, E> pair);
 	
 	/**
-	 * Detects collisions between all bodies in the world.
+	 * This method should process the collisions returned by the given iterator.
 	 * <p>
-	 * Implementors must use the given iterator to go through the collisions
-	 * found in the broad, narrow and manifold phases.
+	 * The given iterator will emit collision data for all collision pairs and it's
+	 * the responsibility of the sub class to do something with these.
+	 * <p>
+	 * At a minimum, sub classes should drain the given iterator:
+	 * <p>
+	 * <pre>
+	 * while (iterator.hasNext()) { 
+	 * 	iterator.next(); 
+	 * }
+	 * </pre>
 	 * @param iterator the collision iterator
 	 */
-	protected abstract void detectCollisions(Iterator<V> iterator);
+	protected abstract void processCollisions(Iterator<V> iterator);
 	
 	// AABB
 	

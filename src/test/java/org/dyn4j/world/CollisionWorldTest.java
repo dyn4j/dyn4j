@@ -87,7 +87,7 @@ public class CollisionWorldTest {
 		}
 
 		@Override
-		protected void detectCollisions(Iterator<WorldCollisionData<Body>> iterator) {
+		protected void processCollisions(Iterator<WorldCollisionData<Body>> iterator) {
 			while (iterator.hasNext()) {
 				iterator.next();
 			}
@@ -1274,7 +1274,7 @@ public class CollisionWorldTest {
 	public void detectIteratorRemove() {
 		TestWorld w = new TestWorld() {
 			@Override
-			protected void detectCollisions(Iterator<WorldCollisionData<Body>> iterator) {
+			protected void processCollisions(Iterator<WorldCollisionData<Body>> iterator) {
 				while (iterator.hasNext()) {
 					iterator.next();
 					iterator.remove();
