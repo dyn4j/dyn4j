@@ -66,7 +66,7 @@ import junit.framework.TestCase;
  * @version 4.0.0
  * @since 4.0.0
  */
-public class PhysicsWorldTest {
+public class AbstractPhysicsWorldTest {
 	private class TestWorld extends AbstractPhysicsWorld<Body, WorldCollisionData<Body>> {
 		public TestWorld() {
 			super();

@@ -265,7 +265,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		// set the type
 		this.mass.setType(type);
 		// compute the rotation disc radius
-		this.setRotationDiscRadius();
+		this.setRotationDiscRadius(this.mass.getCenter());
 		// return this body to facilitate chaining
 		return this;
 	}
@@ -280,7 +280,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		// set the mass
 		this.mass = mass;
 		// compute the rotation disc radius
-		this.setRotationDiscRadius();
+		this.setRotationDiscRadius(this.mass.getCenter());
 		return this;
 	}
 	
@@ -295,44 +295,6 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		this.mass.setType(type);
 		// return this body
 		return this;
-	}
-	
-	/**
-	 * Computes the rotation disc for this {@link AbstractPhysicsBody}.
-	 * <p>
-	 * This method requires that the center of mass be computed first.
-	 * <p>
-	 * The rotation disc radius is the radius, from the center of mass,
-	 * of the disc that encompasses the entire body as if it was rotated
-	 * 360 degrees.
-	 * @since 2.0.0
-	 * @see #getRotationDiscRadius()
-	 */
-	protected void setRotationDiscRadius() {
-		double r = 0.0;
-		// get the number of fixtures
-		int size = this.fixtures.size();
-		// check for zero fixtures
-		if (size == 0) {
-			// set the radius to zero
-			this.radius = 0.0;
-			return;
-		}
-		// get the body's center of mass
-		Vector2 c = this.mass.getCenter();
-		// loop over the fixtures
-		for (int i = 0; i < size; i++) {
-			// get the fixture and convex
-			BodyFixture fixture = this.fixtures.get(i);
-			Convex convex = fixture.getShape();
-			// get the convex's radius using the
-			// body's center of mass
-			double cr = convex.getRadius(c);
-			// keep the maximum
-			r = Math.max(r, cr);
-		}
-		// return the max
-		this.radius = r;
 	}
 	
 	/* (non-Javadoc)

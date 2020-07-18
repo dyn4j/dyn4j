@@ -49,7 +49,7 @@ import org.dyn4j.resources.Messages;
  */
 public abstract class AbstractCollisionBody<T extends Fixture> implements CollisionBody<T>, Transformable, DataContainer, Ownable {
 	/** The current {@link Transform} */
-	protected Transform transform;
+	protected final Transform transform;
 
 	/** The {@link Fixture} list */
 	protected final List<T> fixtures;
@@ -258,6 +258,43 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 		return new FixtureIterator();
 	}
 
+	/**
+	 * Computes the rotation disc for this {@link AbstractCollisionBody}.
+	 * <p>
+	 * This method requires that the center of the body be given.
+	 * <p>
+	 * The rotation disc radius is the radius, from the given point,
+	 * of the disc that encompasses the entire body as if it was rotated
+	 * 360 degrees about that point.
+	 * @param center the center of rotation
+	 * @since 2.0.0
+	 * @see #getRotationDiscRadius()
+	 */
+	protected void setRotationDiscRadius(Vector2 center) {
+		double r = 0.0;
+		// get the number of fixtures
+		int size = this.fixtures.size();
+		// check for zero fixtures
+		if (size == 0) {
+			// set the radius to zero
+			this.radius = 0.0;
+			return;
+		}
+		// loop over the fixtures
+		for (int i = 0; i < size; i++) {
+			// get the fixture and convex
+			Fixture fixture = this.fixtures.get(i);
+			Convex convex = fixture.getShape();
+			// get the convex's radius using the
+			// body's center of mass
+			double cr = convex.getRadius(center);
+			// keep the maximum
+			r = Math.max(r, cr);
+		}
+		// return the max
+		this.radius = r;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Rotatable#rotate(double, double, double)
 	 */
@@ -547,7 +584,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 		 */
 		@Override
 		public T next() {
-			if (this.index >= AbstractCollisionBody.this.fixtures.size()) {
+			if (this.index + 1 >= AbstractCollisionBody.this.fixtures.size()) {
 				throw new IndexOutOfBoundsException();
 			}
 			try {

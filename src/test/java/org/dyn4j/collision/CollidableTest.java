@@ -27,7 +27,6 @@ package org.dyn4j.collision;
 import java.util.List;
 
 import org.dyn4j.geometry.Convex;
-import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Transformable;
 import org.dyn4j.geometry.Vector2;
 
@@ -44,7 +43,6 @@ public class CollidableTest extends AbstractCollisionBody<Fixture> implements Co
 	 */
 	public CollidableTest(List<Fixture> fixtures) {
 		this.fixtures.addAll(fixtures);
-		this.transform = new Transform();
 	}
 	
 	/**
@@ -55,7 +53,6 @@ public class CollidableTest extends AbstractCollisionBody<Fixture> implements Co
 	 */
 	public CollidableTest(Convex shape) {
 		this.fixtures.add(new Fixture(shape));
-		this.transform = new Transform();
 	}
 	
 	/**
@@ -64,7 +61,6 @@ public class CollidableTest extends AbstractCollisionBody<Fixture> implements Co
 	 */
 	public CollidableTest(Fixture fixture) {
 		this.fixtures.add(fixture);
-		this.transform = new Transform();
 	}
 
 	/* (non-Javadoc)

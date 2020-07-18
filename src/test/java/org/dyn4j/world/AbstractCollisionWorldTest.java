@@ -70,7 +70,7 @@ import junit.framework.TestCase;
  * @version 4.0.0
  * @since 4.0.0
  */
-public class CollisionWorldTest {
+public class AbstractCollisionWorldTest {
 	private class TestWorld extends AbstractCollisionWorld<Body, BodyFixture, WorldCollisionData<Body>> {
 
 		public TestWorld() {

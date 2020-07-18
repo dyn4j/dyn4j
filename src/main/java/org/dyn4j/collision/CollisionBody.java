@@ -267,7 +267,7 @@ public interface CollisionBody<T extends Fixture> extends Transformable, Shiftab
 	/**
 	 * Sets this {@link CollisionBody}'s local to world space {@link Transform}.
 	 * <p>
-	 * If the given transform is null, this method returns immediately.
+	 * If the given transform is null, nothing is done and this method returns immediately.
 	 * @param transform the transform
 	 * @since 3.2.0
 	 */
