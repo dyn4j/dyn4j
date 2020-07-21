@@ -51,4 +51,12 @@ public class DefaultFilterTest {
 		f2.setFilter(new TypeFilter() {});
 		TestCase.assertTrue(f1.filter.isAllowed(f2.filter));
 	}
+	
+	/**
+	 * Tests the toString method.
+	 */
+	@Test
+	public void tostring() {
+		TestCase.assertNotNull(Filter.DEFAULT_FILTER.toString());
+	}
 }

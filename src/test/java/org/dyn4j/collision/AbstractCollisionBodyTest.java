@@ -345,13 +345,15 @@ public class AbstractCollisionBodyTest {
 	public void getFixtureIteratorFailures() {
 		TestBody b = new TestBody();
 
-		// setup the bodies
+		Iterator<Fixture> it = b.getFixtureIterator();
+		TestCase.assertNotNull(it);
+		TestCase.assertFalse(it.hasNext());
+		
 		b.addFixture(Geometry.createCircle(0.5));
 		b.addFixture(Geometry.createRectangle(1.0, 0.5));
 		
-		Iterator<Fixture> it = b.getFixtureIterator();
-		
 		// test overflow
+		it = b.getFixtureIterator();
 		try {
 			it.next();
 			it.next();

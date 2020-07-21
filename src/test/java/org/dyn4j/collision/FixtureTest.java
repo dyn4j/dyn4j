@@ -65,12 +65,23 @@ public class FixtureTest {
 		TestCase.assertNotNull(f.getShape());
 		TestCase.assertEquals(c, f.getShape());
 	}
+
+	/**
+	 * Tests the getShape method.
+	 */
+	@Test
+	public void tostring() {
+		Convex c = Geometry.createCircle(1.0);
+		Fixture f = new Fixture(c);
+		
+		TestCase.assertNotNull(f.toString());
+	}
 	
 	/**
 	 * Tests setting the filter.
 	 */
 	@Test
-	public void setFilter() {
+	public void getSetFilter() {
 		Fixture fixture = new Fixture(Geometry.createCircle(1.0));
 		Filter f = new CategoryFilter();
 		fixture.setFilter(f);
@@ -90,7 +101,7 @@ public class FixtureTest {
 	 * Tests the set/get sensor methods.
 	 */
 	@Test
-	public void setSensor() {
+	public void getSetSensor() {
 		Fixture fixture = new Fixture(Geometry.createCircle(1.0));
 		// by default it should be false
 		TestCase.assertFalse(fixture.isSensor());
@@ -106,7 +117,7 @@ public class FixtureTest {
 	 * Make sure storage of user data is working.
 	 */
 	@Test
-	public void setUserData() {
+	public void getSetUserData() {
 		Fixture fixture = new Fixture(Geometry.createCircle(1.0));
 		// should be initial null
 		TestCase.assertNull(fixture.getUserData());
@@ -115,5 +126,8 @@ public class FixtureTest {
 		fixture.setUserData(obj);
 		TestCase.assertNotNull(fixture.getUserData());
 		TestCase.assertSame(obj, fixture.getUserData());
+		
+		fixture.setUserData(null);
+		TestCase.assertNull(fixture.getUserData());
 	}
 }

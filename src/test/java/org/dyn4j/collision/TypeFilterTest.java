@@ -116,5 +116,7 @@ public class TypeFilterTest {
 		// null and any other type should return false
 		TestCase.assertFalse(ALL.isAllowed(null));
 		TestCase.assertFalse(ALL.isAllowed(new CategoryFilter()));
+		
+		TestCase.assertNotNull(ALL.toString());
 	}
 }

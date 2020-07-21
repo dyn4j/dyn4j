@@ -36,7 +36,7 @@ import org.dyn4j.Copyable;
  */
 public abstract class AbstractCollisionPair<T extends CollisionBody<E>, E extends Fixture> implements CollisionPair<T, E>, Copyable<CollisionPair<T, E>> {
 
-	// NOTE: if we ever move to Java 8 or higher, move these methods to the CollisionItem interface
+	// NOTE: if we ever move to Java 8 or higher, move these methods to the CollisionPair interface
 	
 	/**
 	 * Returns the hashcode for a collision pair.

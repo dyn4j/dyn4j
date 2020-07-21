@@ -37,7 +37,7 @@ import org.dyn4j.collision.Fixture;
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
  */
-public final class BroadphaseItem<T extends CollisionBody<E>, E extends Fixture> extends AbstractCollisionItem<T, E> implements CollisionItem<T, E> {
+final class BroadphaseItem<T extends CollisionBody<E>, E extends Fixture> extends AbstractCollisionItem<T, E> implements CollisionItem<T, E> {
 	/** The {@link CollisionBody} */
 	T body;
 	

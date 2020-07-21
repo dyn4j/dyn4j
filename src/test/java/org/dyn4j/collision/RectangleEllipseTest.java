@@ -99,8 +99,8 @@ public class RectangleEllipseTest extends AbstractTest {
 	@Test	
 	public void detectCollidableAABB() {
 		// create some collidables
-		CollidableTest ct1 = new CollidableTest(r);
-		CollidableTest ct2 = new CollidableTest(e);
+		TestCollisionBody ct1 = new TestCollisionBody(r);
+		TestCollisionBody ct2 = new TestCollisionBody(e);
 		
 		// test containment
 		TestCase.assertTrue(this.sap.detect(ct1, ct2));
@@ -127,11 +127,11 @@ public class RectangleEllipseTest extends AbstractTest {
 	 */
 	@Test
 	public void detectBroadphase() {
-		List<CollisionPair<CollidableTest, Fixture>> pairs;
+		List<CollisionPair<TestCollisionBody, Fixture>> pairs;
 		
 		// create some collidables
-		CollidableTest ct1 = new CollidableTest(r);
-		CollidableTest ct2 = new CollidableTest(e);
+		TestCollisionBody ct1 = new TestCollisionBody(r);
+		TestCollisionBody ct2 = new TestCollisionBody(e);
 		
 		this.sap.add(ct1);
 		this.sap.add(ct2);

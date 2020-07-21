@@ -44,10 +44,10 @@ public abstract class AbstractTest {
 	protected Gjk gjk = new Gjk();
 	
 	/** The sap algorithm */
-	protected Sap<CollidableTest, Fixture> sap = new Sap<CollidableTest, Fixture>();
+	protected Sap<TestCollisionBody, Fixture> sap = new Sap<TestCollisionBody, Fixture>();
 	
 	/** The dynamic aabb algorithm */
-	protected DynamicAABBTree<CollidableTest, Fixture> dyn = new DynamicAABBTree<CollidableTest, Fixture>();
+	protected DynamicAABBTree<TestCollisionBody, Fixture> dyn = new DynamicAABBTree<TestCollisionBody, Fixture>();
 	
 	/** The clipping manifold algorithm */
 	protected ClippingManifoldSolver cmfs = new ClippingManifoldSolver();

@@ -24,7 +24,7 @@
  */
 package org.dyn4j.dynamics;
 
-import org.dyn4j.collision.broadphase.BroadphasePair;
+import org.dyn4j.collision.BasicCollisionPair;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
@@ -189,21 +189,21 @@ public class ContactManagerTest {
 		// b1 - b2 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c2, b2.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c2, b2.getTransform(), m);
-			cc = new ContactConstraint(new BroadphasePair(b1, f1, b2, f2), m, 0, 0);
+			cc = new ContactConstraint(new BasicCollisionPair(b1, f1, b2, f2), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
 		// b1 - b3 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c3, b3.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c3, b3.getTransform(), m);
-			cc = new ContactConstraint(new BroadphasePair(b1, f1, b3, f3), m, 0, 0);
+			cc = new ContactConstraint(new BasicCollisionPair(b1, f1, b3, f3), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
 		// b1 - b4 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(new BroadphasePair(b1, f1, b4, f4), m, 0, 0);
+			cc = new ContactConstraint(new BasicCollisionPair(b1, f1, b4, f4), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
@@ -211,7 +211,7 @@ public class ContactManagerTest {
 		p.clear(); m.clear();
 		if (gjk.detect(c2, b2.getTransform(), c3, b3.getTransform(), p)) {
 			cms.getManifold(p, c2, b2.getTransform(), c3, b3.getTransform(), m);
-			cc = new ContactConstraint(new BroadphasePair(b2, f2, b3, f3), m, 0, 0);
+			cc = new ContactConstraint(new BasicCollisionPair(b2, f2, b3, f3), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
@@ -219,7 +219,7 @@ public class ContactManagerTest {
 		p.clear(); m.clear();
 		if (gjk.detect(c2, b2.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c2, b2.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(new BroadphasePair(b2, f2, b4, f4), m, 0, 0);
+			cc = new ContactConstraint(new BasicCollisionPair(b2, f2, b4, f4), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
@@ -227,7 +227,7 @@ public class ContactManagerTest {
 		p.clear(); m.clear();
 		if (gjk.detect(c3, b3.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c3, b3.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(new BroadphasePair(b3, f3, b4, f4), m, 0, 0);
+			cc = new ContactConstraint(new BasicCollisionPair(b3, f3, b4, f4), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
@@ -243,21 +243,21 @@ public class ContactManagerTest {
 		// b1 - b2 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c2, b2.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c2, b2.getTransform(), m);
-			cc = new ContactConstraint(new BroadphasePair(b1, f1, b2, f2), m, 0, 0);
+			cc = new ContactConstraint(new BasicCollisionPair(b1, f1, b2, f2), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
 		// b1 - b3 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c3, b3.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c3, b3.getTransform(), m);
-			cc = new ContactConstraint(new BroadphasePair(b1, f1, b3, f3), m, 0, 0);
+			cc = new ContactConstraint(new BasicCollisionPair(b1, f1, b3, f3), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
 		// b1 - b4 (2 contacts)
 		if (gjk.detect(c1, b1.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c1, b1.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(new BroadphasePair(b1, f1, b4, f4), m, 0, 0);
+			cc = new ContactConstraint(new BasicCollisionPair(b1, f1, b4, f4), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
@@ -265,7 +265,7 @@ public class ContactManagerTest {
 		p.clear(); m.clear();
 		if (gjk.detect(c2, b2.getTransform(), c3, b3.getTransform(), p)) {
 			cms.getManifold(p, c2, b2.getTransform(), c3, b3.getTransform(), m);
-			cc = new ContactConstraint(new BroadphasePair(b2, f2, b3, f3), m, 0, 0);
+			cc = new ContactConstraint(new BasicCollisionPair(b2, f2, b3, f3), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
@@ -273,7 +273,7 @@ public class ContactManagerTest {
 		p.clear(); m.clear();
 		if (gjk.detect(c2, b2.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c2, b2.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(new BroadphasePair(b2, f2, b4, f4), m, 0, 0);
+			cc = new ContactConstraint(new BasicCollisionPair(b2, f2, b4, f4), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 		
@@ -281,7 +281,7 @@ public class ContactManagerTest {
 		p.clear(); m.clear();
 		if (gjk.detect(c3, b3.getTransform(), c4, b4.getTransform(), p)) {
 			cms.getManifold(p, c3, b3.getTransform(), c4, b4.getTransform(), m);
-			cc = new ContactConstraint(new BroadphasePair(b3, f3, b4, f4), m, 0, 0);
+			cc = new ContactConstraint(new BasicCollisionPair(b3, f3, b4, f4), m, 0, 0);
 			this.contactManager.queue(cc);
 		}
 	}
@@ -295,7 +295,7 @@ public class ContactManagerTest {
 		ManifoldPoint mp = new ManifoldPoint(ManifoldPointId.DISTANCE);
 		mp.setDepth(1.0);
 		manifold.getPoints().add(mp);
-		ContactConstraint cc = new ContactConstraint(new BroadphasePair(
+		ContactConstraint cc = new ContactConstraint(new BasicCollisionPair(
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Body(), 
@@ -326,7 +326,7 @@ public class ContactManagerTest {
 		mp.getPoint().x = 2.0;
 		mp.setDepth(1.0);
 		manifold.getPoints().add(mp);
-		ContactConstraint<Body> cc = new ContactConstraint(new BroadphasePair(
+		ContactConstraint<Body> cc = new ContactConstraint(new BasicCollisionPair(
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Body(), 
@@ -354,7 +354,7 @@ public class ContactManagerTest {
 		ManifoldPoint mp = new ManifoldPoint(ManifoldPointId.DISTANCE);
 		mp.setDepth(1.0);
 		manifold.getPoints().add(mp);
-		ContactConstraint cc = new ContactConstraint(new BroadphasePair(
+		ContactConstraint cc = new ContactConstraint(new BasicCollisionPair(
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Body(), 

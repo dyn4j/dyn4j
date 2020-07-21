@@ -27,7 +27,7 @@ package org.dyn4j.dynamics;
 import java.util.Iterator;
 import java.util.List;
 
-import org.dyn4j.collision.broadphase.BroadphasePair;
+import org.dyn4j.collision.BasicCollisionPair;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.narrowphase.Penetration;
@@ -916,7 +916,7 @@ public class BodyTest {
 		ClippingManifoldSolver cms = new ClippingManifoldSolver();
 		Manifold m = new Manifold();
 		cms.getManifold(p, c1, b1.getTransform(), c2, b2.getTransform(), m);
-		ContactConstraint cc = new ContactConstraint(new BroadphasePair(b1, f1, b2, f2), m, 0, 0);
+		ContactConstraint cc = new ContactConstraint(new BasicCollisionPair(b1, f1, b2, f2), m, 0, 0);
 		ContactEdge ce1 = new ContactEdge(b2, cc);
 		ContactEdge ce2 = new ContactEdge(b1, cc);
 		
@@ -932,7 +932,7 @@ public class BodyTest {
 		b2.contacts.clear();
 		
 		f1.setSensor(true);
-		cc = new ContactConstraint(new BroadphasePair(b1, f1, b2, f2), m, 0, 0);
+		cc = new ContactConstraint(new BasicCollisionPair(b1, f1, b2, f2), m, 0, 0);
 		ce1 = new ContactEdge(b2, cc);
 		ce2 = new ContactEdge(b1, cc);
 		b1.contacts.add(ce1);
@@ -978,7 +978,7 @@ public class BodyTest {
 		ClippingManifoldSolver cms = new ClippingManifoldSolver();
 		Manifold m = new Manifold();
 		cms.getManifold(p, c1, b1.getTransform(), c2, b2.getTransform(), m);
-		ContactConstraint cc = new ContactConstraint(new BroadphasePair(b1, f1, b2, f2), m, 0, 0);
+		ContactConstraint cc = new ContactConstraint(new BasicCollisionPair(b1, f1, b2, f2), m, 0, 0);
 		ContactEdge ce1 = new ContactEdge(b2, cc);
 		ContactEdge ce2 = new ContactEdge(b1, cc);
 		
@@ -993,7 +993,7 @@ public class BodyTest {
 		b2.contacts.clear();
 		
 		f1.setSensor(true);
-		cc = new ContactConstraint(new BroadphasePair(b1, f1, b2, f2), m, 0, 0);
+		cc = new ContactConstraint(new BasicCollisionPair(b1, f1, b2, f2), m, 0, 0);
 		ce1 = new ContactEdge(b2, cc);
 		ce2 = new ContactEdge(b1, cc);
 		b1.contacts.add(ce1);

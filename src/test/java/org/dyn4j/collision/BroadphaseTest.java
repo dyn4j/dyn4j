@@ -32,7 +32,6 @@ import java.util.Random;
 
 import org.dyn4j.collision.broadphase.AbstractBroadphaseDetector;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
-import org.dyn4j.collision.broadphase.BroadphaseItem;
 import org.dyn4j.collision.broadphase.BruteForceBroadphase;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.broadphase.LazyAABBTree;
@@ -67,23 +66,23 @@ public class BroadphaseTest {
     public static Collection<Object[]> data() {
     	return Arrays.asList(
     			/** The sap algorithm */
-    			new Object[]{new Sap<CollidableTest, Fixture>()},
+    			new Object[]{new Sap<TestCollisionBody, Fixture>()},
     			/** The dynamic aabb algorithm */
-    			new Object[]{new DynamicAABBTree<CollidableTest, Fixture>()},
+    			new Object[]{new DynamicAABBTree<TestCollisionBody, Fixture>()},
     			/** The lazy aabb algorithm */
-    			new Object[]{new LazyAABBTree<CollidableTest, Fixture>()},
+    			new Object[]{new LazyAABBTree<TestCollisionBody, Fixture>()},
     			/** The plain brute-force broadphase */
-    			new Object[]{new BruteForceBroadphase<CollidableTest, Fixture>()}
+    			new Object[]{new BruteForceBroadphase<TestCollisionBody, Fixture>()}
     			);
     }
 	
     /** Stores the current broadphase being tested */
-    protected BroadphaseDetector<CollidableTest, Fixture> broadphase;
+    protected BroadphaseDetector<TestCollisionBody, Fixture> broadphase;
     
     /**
      * @param broadphase One broadphase instance to test
      */
-    public BroadphaseTest(BroadphaseDetector<CollidableTest, Fixture> broadphase) {
+    public BroadphaseTest(BroadphaseDetector<TestCollisionBody, Fixture> broadphase) {
     	this.broadphase = broadphase;
     	this.broadphase.setUpdateTrackingEnabled(false);
     }
@@ -102,7 +101,7 @@ public class BroadphaseTest {
 	 */
 	@Test
 	public void addWithShape() {
-		CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
+		TestCollisionBody ct = new TestCollisionBody(Geometry.createCircle(1.0));
 		
 		// make sure its not there first
 		TestCase.assertFalse(this.broadphase.contains(ct));
@@ -119,7 +118,7 @@ public class BroadphaseTest {
 	 */
 	@Test
 	public void addWithFixture() {
-		CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
+		TestCollisionBody ct = new TestCollisionBody(Geometry.createCircle(1.0));
 		ct.addFixture(Geometry.createCircle(0.5));
 		
 		// make sure its not there first
@@ -143,9 +142,9 @@ public class BroadphaseTest {
 	 */
 	@Test
 	public void removeBody() {
-		CollidableTest ct1 = new CollidableTest(Geometry.createCircle(1.0));
+		TestCollisionBody ct1 = new TestCollisionBody(Geometry.createCircle(1.0));
 		ct1.addFixture(Geometry.createCircle(3.0));
-		CollidableTest ct2 = new CollidableTest(Geometry.createCircle(2.0));
+		TestCollisionBody ct2 = new TestCollisionBody(Geometry.createCircle(2.0));
 		
 		// add the item to the broadphases
 		this.broadphase.add(ct1);
@@ -169,7 +168,7 @@ public class BroadphaseTest {
 	 */
 	@Test
 	public void removeFixture() {
-		CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
+		TestCollisionBody ct = new TestCollisionBody(Geometry.createCircle(1.0));
 		ct.addFixture(Geometry.createCircle(0.5));
 		
 		// add the item to the broadphases
@@ -192,7 +191,7 @@ public class BroadphaseTest {
 	@Test
 	public void updateSmall() {
 		if (this.broadphase.isAABBExpansionSupported()) {
-			CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
+			TestCollisionBody ct = new TestCollisionBody(Geometry.createCircle(1.0));
 			Fixture f = ct.getFixture(0);
 			
 			// add the item to the broadphases
@@ -217,7 +216,7 @@ public class BroadphaseTest {
 			// check for update
 			if (this.broadphase.isUpdateTrackingEnabled()) {
 				TestCase.assertFalse(this.broadphase.isUpdated(ct));
-				TestCase.assertFalse(this.broadphase.isUpdated(new BroadphaseItem<CollidableTest, Fixture>(ct, f)));
+				TestCase.assertFalse(this.broadphase.isUpdated(new BasicCollisionItem<TestCollisionBody, Fixture>(ct, f)));
 				TestCase.assertFalse(this.broadphase.isUpdated(ct, f));
 			}
 		}
@@ -228,7 +227,7 @@ public class BroadphaseTest {
 	 */
 	@Test
 	public void updateLarge() {
-		CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
+		TestCollisionBody ct = new TestCollisionBody(Geometry.createCircle(1.0));
 		Fixture f = ct.getFixture(0);
 		
 		// add the item to the broadphases
@@ -253,7 +252,7 @@ public class BroadphaseTest {
 		// this will always return true for some detectors, but for those that
 		// it doesn't, it should return true because of the update above
 		TestCase.assertTrue(this.broadphase.isUpdated(ct));
-		TestCase.assertTrue(this.broadphase.isUpdated(new BroadphaseItem<CollidableTest, Fixture>(ct, f)));
+		TestCase.assertTrue(this.broadphase.isUpdated(new BasicCollisionItem<TestCollisionBody, Fixture>(ct, f)));
 		TestCase.assertTrue(this.broadphase.isUpdated(ct, f));
 	}
 	
@@ -262,7 +261,7 @@ public class BroadphaseTest {
 	 */
 	@Test
 	public void clear() {
-		CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
+		TestCollisionBody ct = new TestCollisionBody(Geometry.createCircle(1.0));
 		
 		// add the item to the broadphases
 		this.broadphase.add(ct);
@@ -281,7 +280,7 @@ public class BroadphaseTest {
 	 */
 	@Test
 	public void getAABB() {
-		CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
+		TestCollisionBody ct = new TestCollisionBody(Geometry.createCircle(1.0));
 		
 		// add the item to the broadphases
 		this.broadphase.add(ct);
@@ -318,8 +317,8 @@ public class BroadphaseTest {
 	 */
 	@Test
 	public void detectConvexAndTransform() {
-		CollidableTest ct1 = new CollidableTest(Geometry.createCircle(1.0));
-		CollidableTest ct2 = new CollidableTest(Geometry.createUnitCirclePolygon(5, 0.5));
+		TestCollisionBody ct1 = new TestCollisionBody(Geometry.createCircle(1.0));
+		TestCollisionBody ct2 = new TestCollisionBody(Geometry.createUnitCirclePolygon(5, 0.5));
 		ct1.translate(-2.0, 0.0);
 		ct2.translate(-1.0, 1.0);
 		
@@ -337,10 +336,10 @@ public class BroadphaseTest {
 	 */
 	@Test
 	public void detect() {
-		CollidableTest ct1 = new CollidableTest(Geometry.createCircle(1.0));
-		CollidableTest ct2 = new CollidableTest(Geometry.createUnitCirclePolygon(5, 0.5));
-		CollidableTest ct3 = new CollidableTest(Geometry.createRectangle(1.0, 0.5));
-		CollidableTest ct4 = new CollidableTest(Geometry.createVerticalSegment(2.0));
+		TestCollisionBody ct1 = new TestCollisionBody(Geometry.createCircle(1.0));
+		TestCollisionBody ct2 = new TestCollisionBody(Geometry.createUnitCirclePolygon(5, 0.5));
+		TestCollisionBody ct3 = new TestCollisionBody(Geometry.createRectangle(1.0, 0.5));
+		TestCollisionBody ct4 = new TestCollisionBody(Geometry.createVerticalSegment(2.0));
 		
 		ct1.translate(-2.0, 0.0);
 		ct2.translate(-1.0, 1.0);
@@ -350,7 +349,7 @@ public class BroadphaseTest {
 		// add the items to the broadphases
 		this.broadphase.add(ct1); this.broadphase.add(ct2); this.broadphase.add(ct3); this.broadphase.add(ct4);
 		
-		List<CollisionPair<CollidableTest, Fixture>> pairs = this.broadphase.detect();
+		List<CollisionPair<TestCollisionBody, Fixture>> pairs = this.broadphase.detect();
 		TestCase.assertEquals(1, pairs.size());
 	}
 	
@@ -359,10 +358,10 @@ public class BroadphaseTest {
 	 */
 	@Test
 	public void detectAABB() {
-		CollidableTest ct1 = new CollidableTest(Geometry.createCircle(1.0));
-		CollidableTest ct2 = new CollidableTest(Geometry.createUnitCirclePolygon(5, 0.5));
-		CollidableTest ct3 = new CollidableTest(Geometry.createRectangle(1.0, 0.5));
-		CollidableTest ct4 = new CollidableTest(Geometry.createVerticalSegment(2.0));
+		TestCollisionBody ct1 = new TestCollisionBody(Geometry.createCircle(1.0));
+		TestCollisionBody ct2 = new TestCollisionBody(Geometry.createUnitCirclePolygon(5, 0.5));
+		TestCollisionBody ct3 = new TestCollisionBody(Geometry.createRectangle(1.0, 0.5));
+		TestCollisionBody ct4 = new TestCollisionBody(Geometry.createVerticalSegment(2.0));
 		
 		ct1.translate(-2.0, 0.0);
 		ct2.translate(-1.0, 1.0);
@@ -375,7 +374,7 @@ public class BroadphaseTest {
 		// this aabb should include:
 		// ct3 and ct4
 		AABB aabb = new AABB(0.0, -2.0, 1.0, 1.0);
-		List<CollisionItem<CollidableTest, Fixture>> list;
+		List<CollisionItem<TestCollisionBody, Fixture>> list;
 		
 		list = this.broadphase.detect(aabb);
 		TestCase.assertEquals(2, list.size());
@@ -398,10 +397,10 @@ public class BroadphaseTest {
 	 */
 	@Test
 	public void detectRay() {
-		CollidableTest ct1 = new CollidableTest(Geometry.createCircle(1.0));
-		CollidableTest ct2 = new CollidableTest(Geometry.createUnitCirclePolygon(5, 0.5));
-		CollidableTest ct3 = new CollidableTest(Geometry.createRectangle(1.0, 0.5));
-		CollidableTest ct4 = new CollidableTest(Geometry.createVerticalSegment(2.0));
+		TestCollisionBody ct1 = new TestCollisionBody(Geometry.createCircle(1.0));
+		TestCollisionBody ct2 = new TestCollisionBody(Geometry.createUnitCirclePolygon(5, 0.5));
+		TestCollisionBody ct3 = new TestCollisionBody(Geometry.createRectangle(1.0, 0.5));
+		TestCollisionBody ct4 = new TestCollisionBody(Geometry.createVerticalSegment(2.0));
 		
 		ct1.translate(-2.0, 0.0);
 		ct2.translate(-1.0, 1.0);
@@ -411,7 +410,7 @@ public class BroadphaseTest {
 		// add the items to the broadphases
 		this.broadphase.add(ct1); this.broadphase.add(ct2); this.broadphase.add(ct3); this.broadphase.add(ct4);
 		
-		List<CollisionItem<CollidableTest, Fixture>> list;
+		List<CollisionItem<TestCollisionBody, Fixture>> list;
 		
 		// ray that points in the positive x direction and starts at the origin
 		Ray r = new Ray(new Vector2(1.0, 0.0));
@@ -451,7 +450,7 @@ public class BroadphaseTest {
 			TestCase.assertEquals(0.3, this.broadphase.getAABBExpansion());
 			
 			// test the new expansion value
-			CollidableTest ct = new CollidableTest(Geometry.createCircle(1.0));
+			TestCollisionBody ct = new TestCollisionBody(Geometry.createCircle(1.0));
 			
 			// add the item to the broadphases
 			this.broadphase.add(ct);
@@ -470,10 +469,10 @@ public class BroadphaseTest {
 	 */
 	@Test
 	public void shiftCoordinates() {
-		CollidableTest ct1 = new CollidableTest(Geometry.createCircle(1.0));
-		CollidableTest ct2 = new CollidableTest(Geometry.createUnitCirclePolygon(5, 0.5));
-		CollidableTest ct3 = new CollidableTest(Geometry.createRectangle(1.0, 0.5));
-		CollidableTest ct4 = new CollidableTest(Geometry.createVerticalSegment(2.0));
+		TestCollisionBody ct1 = new TestCollisionBody(Geometry.createCircle(1.0));
+		TestCollisionBody ct2 = new TestCollisionBody(Geometry.createUnitCirclePolygon(5, 0.5));
+		TestCollisionBody ct3 = new TestCollisionBody(Geometry.createRectangle(1.0, 0.5));
+		TestCollisionBody ct4 = new TestCollisionBody(Geometry.createVerticalSegment(2.0));
 		
 		ct1.translate(-2.0, 0.0);
 		ct2.translate(-1.0, 1.0);
@@ -484,7 +483,7 @@ public class BroadphaseTest {
 		this.broadphase.add(ct1); this.broadphase.add(ct2); this.broadphase.add(ct3); this.broadphase.add(ct4);
 		
 		// perform a detect on the whole broadphase
-		List<CollisionPair<CollidableTest, Fixture>> pairs = this.broadphase.detect();
+		List<CollisionPair<TestCollisionBody, Fixture>> pairs = this.broadphase.detect();
 		TestCase.assertEquals(1, pairs.size());
 		
 		// shift the broadphases
@@ -501,7 +500,7 @@ public class BroadphaseTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void SapNegativeInitialCapacity() {
-		new Sap<CollidableTest, Fixture>(-10);
+		new Sap<TestCollisionBody, Fixture>(-10);
 	}
 	
 	/**
@@ -509,7 +508,7 @@ public class BroadphaseTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void DynamicAABBTreeNegativeInitialCapacity() {
-		new DynamicAABBTree<CollidableTest, Fixture>(-10);
+		new DynamicAABBTree<TestCollisionBody, Fixture>(-10);
 	}
 	
 	/** Seed for the randomized test. Can be any value */
@@ -526,8 +525,8 @@ public class BroadphaseTest {
 	@Test
 	public void randomizedTest() {
 		// The reference broad-phase is {@link PlainBroadphase}
-		BroadphaseDetector<CollidableTest, Fixture> reference = new BruteForceBroadphase<CollidableTest, Fixture>();
-		List<CollidableTest> collidables = new ArrayList<CollidableTest>();
+		BroadphaseDetector<TestCollisionBody, Fixture> reference = new BruteForceBroadphase<TestCollisionBody, Fixture>();
+		List<TestCollisionBody> collidables = new ArrayList<TestCollisionBody>();
 		
 		// Constant seed so we always get the same sequence of randoms
 		Random random = new Random(SEED);
@@ -539,7 +538,7 @@ public class BroadphaseTest {
 		for (int i = 0; i < iterations; i++) {
 			// Create a random rectangle
 			Rectangle randomRectangle = Geometry.createRectangle(random.nextDouble() + 0.1, random.nextDouble() + 0.1);
-			CollidableTest collidable = new CollidableTest(randomRectangle);
+			TestCollisionBody collidable = new TestCollisionBody(randomRectangle);
 			
 			// And apply a random translation
 			collidable.translate(random.nextDouble() * 10 - 5, random.nextDouble() * 10 - 5);
@@ -551,7 +550,7 @@ public class BroadphaseTest {
 			
 			// Also remove one existing collidable with 25% chance
 			if (random.nextDouble() <= 0.25) {
-				CollidableTest forRemoval = collidables.remove(random.nextInt(collidables.size()));
+				TestCollisionBody forRemoval = collidables.remove(random.nextInt(collidables.size()));
 				
 				this.broadphase.remove(forRemoval);
 				reference.remove(forRemoval);
@@ -559,12 +558,12 @@ public class BroadphaseTest {
 			
 			// Now start querying
 			// First test detect
-			List<CollisionPair<CollidableTest, Fixture>> referenceDetect = reference.detect();
-			List<CollisionPair<CollidableTest, Fixture>> otherDetect = this.broadphase.detect();
+			List<CollisionPair<TestCollisionBody, Fixture>> referenceDetect = reference.detect();
+			List<CollisionPair<TestCollisionBody, Fixture>> otherDetect = this.broadphase.detect();
 			
 			// The pairs returned from {@link PlainBroadphase} are the minimum possible
 			// if any of those is missing from the broadphase being tested, something is wrong
-			for (CollisionPair<CollidableTest, Fixture> pair : referenceDetect) {
+			for (CollisionPair<TestCollisionBody, Fixture> pair : referenceDetect) {
 				// Be careful to have correct pair equality here. See pairExists
 				if (!containsPair(pair, otherDetect)) {
 					TestCase.fail("detect() is missing pairs");
@@ -580,12 +579,12 @@ public class BroadphaseTest {
 				double aabbY = -5 + random.nextDouble() * (10 - aabbHeight);
 				
 				AABB aabb = new AABB(aabbX, aabbY, aabbX + aabbWidth, aabbY + aabbHeight);
-				List<CollisionItem<CollidableTest, Fixture>> referenceAABBDetect = reference.detect(aabb);
-				List<CollisionItem<CollidableTest, Fixture>> otherAABBDetect = this.broadphase.detect(aabb);
+				List<CollisionItem<TestCollisionBody, Fixture>> referenceAABBDetect = reference.detect(aabb);
+				List<CollisionItem<TestCollisionBody, Fixture>> otherAABBDetect = this.broadphase.detect(aabb);
 				
 				// Again, because the items returned from {@link PlainBroadphase} are the minimum possible
 				// if any of those are missing from the broadphase being tested, something is wrong
-				for (CollisionItem<CollidableTest, Fixture> item : referenceAABBDetect) {
+				for (CollisionItem<TestCollisionBody, Fixture> item : referenceAABBDetect) {
 					// Since we don't have pairs here we can rely on BroadphaseItem#equals
 					if (!otherAABBDetect.contains(item)) {
 						TestCase.fail("detect(AABB) is missing items");
@@ -602,10 +601,10 @@ public class BroadphaseTest {
 				Vector2 start = new Vector2(random.nextDouble() * 10 - 5, random.nextDouble() * 10 - 5);
 				Ray randomRay = new Ray(start, random.nextDouble() * Geometry.TWO_PI);
 				
-				List<CollisionItem<CollidableTest, Fixture>> referenceRaycast = reference.detect(randomRay, rayLength);
-				List<CollisionItem<CollidableTest, Fixture>> otherRaycast = this.broadphase.detect(randomRay, rayLength);
+				List<CollisionItem<TestCollisionBody, Fixture>> referenceRaycast = reference.detect(randomRay, rayLength);
+				List<CollisionItem<TestCollisionBody, Fixture>> otherRaycast = this.broadphase.detect(randomRay, rayLength);
 				
-				for (CollisionItem<CollidableTest, Fixture> item : referenceRaycast) {
+				for (CollisionItem<TestCollisionBody, Fixture> item : referenceRaycast) {
 					if (!otherRaycast.contains(item)) {
 						TestCase.fail("raycast() is missing items");
 					}
@@ -622,8 +621,8 @@ public class BroadphaseTest {
 	 * @param items the items
 	 * @return boolean
 	 */
-	private boolean containsItem(CollidableTest collidable, Fixture fixture, List<CollisionItem<CollidableTest, Fixture>> items) {
-		for (CollisionItem<CollidableTest, Fixture> item : items) {
+	private boolean containsItem(TestCollisionBody collidable, Fixture fixture, List<CollisionItem<TestCollisionBody, Fixture>> items) {
+		for (CollisionItem<TestCollisionBody, Fixture> item : items) {
 			if (item.getBody() == collidable && item.getFixture() == fixture) {
 				return true;
 			}
@@ -640,8 +639,8 @@ public class BroadphaseTest {
 	 * @param pairs The list of pairs
 	 * @return true if pair or it's reverse is contained in the list, false otherwise
 	 */
-	private boolean containsPair(CollisionPair<CollidableTest, Fixture> pair, List<CollisionPair<CollidableTest, Fixture>> pairs) {
-		for (CollisionPair<CollidableTest, Fixture> test : pairs) {
+	private boolean containsPair(CollisionPair<TestCollisionBody, Fixture> pair, List<CollisionPair<TestCollisionBody, Fixture>> pairs) {
+		for (CollisionPair<TestCollisionBody, Fixture> test : pairs) {
 			if (pair.equals(test)) {
 				return true;
 			}

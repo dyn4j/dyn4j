@@ -100,8 +100,8 @@ public class PolygonPolygonTest extends AbstractTest {
 	@Test	
 	public void detectCollidableAABB() {
 		// create some collidables
-		CollidableTest ct1 = new CollidableTest(poly1);
-		CollidableTest ct2 = new CollidableTest(poly2);
+		TestCollisionBody ct1 = new TestCollisionBody(poly1);
+		TestCollisionBody ct2 = new TestCollisionBody(poly2);
 		
 		// test containment
 		TestCase.assertTrue(this.sap.detect(ct1, ct2));
@@ -128,11 +128,11 @@ public class PolygonPolygonTest extends AbstractTest {
 	 */
 	@Test
 	public void detectBroadphase() {
-		List<CollisionPair<CollidableTest, Fixture>> pairs;
+		List<CollisionPair<TestCollisionBody, Fixture>> pairs;
 		
 		// create some collidables
-		CollidableTest ct1 = new CollidableTest(poly1);
-		CollidableTest ct2 = new CollidableTest(poly2);
+		TestCollisionBody ct1 = new TestCollisionBody(poly1);
+		TestCollisionBody ct2 = new TestCollisionBody(poly2);
 		
 		this.sap.add(ct1);
 		this.sap.add(ct2);

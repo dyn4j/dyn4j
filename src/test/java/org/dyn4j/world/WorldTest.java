@@ -28,9 +28,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.dyn4j.collision.AxisAlignedBounds;
+import org.dyn4j.collision.BasicCollisionPair;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
-import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
 import org.dyn4j.collision.continuous.TimeOfImpactDetector;
@@ -87,7 +87,7 @@ public class WorldTest {
 		BodyFixture f2 = b2.addFixture(Geometry.createCircle(0.5));
 		
 		World w = new World();
-		WorldCollisionData<Body> data = w.createCollisionData(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
+		WorldCollisionData<Body> data = w.createCollisionData(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
 		
 		TestCase.assertEquals(b1, data.getBody1());
 		TestCase.assertEquals(b2, data.getBody2());

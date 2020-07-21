@@ -36,12 +36,18 @@ import org.dyn4j.geometry.Vector2;
  * @version 4.0.0
  * @since 1.0.0
  */
-public class CollidableTest extends AbstractCollisionBody<Fixture> implements CollisionBody<Fixture>, Transformable {
+public class TestCollisionBody extends AbstractCollisionBody<Fixture> implements CollisionBody<Fixture>, Transformable {
+	/**
+	 * Default constructor.
+	 */
+	public TestCollisionBody() {
+	}
+	
 	/**
 	 * Full constructor.
 	 * @param fixtures the {@link Fixture}s list
 	 */
-	public CollidableTest(List<Fixture> fixtures) {
+	public TestCollisionBody(List<Fixture> fixtures) {
 		this.fixtures.addAll(fixtures);
 	}
 	
@@ -51,7 +57,7 @@ public class CollidableTest extends AbstractCollisionBody<Fixture> implements Co
 	 * Uses default {@link Fixture} settings.
 	 * @param shape the shape to use
 	 */
-	public CollidableTest(Convex shape) {
+	public TestCollisionBody(Convex shape) {
 		this.fixtures.add(new Fixture(shape));
 	}
 	
@@ -59,7 +65,7 @@ public class CollidableTest extends AbstractCollisionBody<Fixture> implements Co
 	 * Optional constructor.
 	 * @param fixture the fixture to use
 	 */
-	public CollidableTest(Fixture fixture) {
+	public TestCollisionBody(Fixture fixture) {
 		this.fixtures.add(fixture);
 	}
 

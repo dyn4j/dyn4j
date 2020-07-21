@@ -100,8 +100,8 @@ public class CapsuleCapsuleTest extends AbstractTest {
 	@Test	
 	public void detectCollidableAABB() {
 		// create some collidables
-		CollidableTest ct1 = new CollidableTest(capsule1);
-		CollidableTest ct2 = new CollidableTest(capsule2);
+		TestCollisionBody ct1 = new TestCollisionBody(capsule1);
+		TestCollisionBody ct2 = new TestCollisionBody(capsule2);
 		
 		// test containment
 		TestCase.assertTrue(this.sap.detect(ct1, ct2));
@@ -128,11 +128,11 @@ public class CapsuleCapsuleTest extends AbstractTest {
 	 */
 	@Test
 	public void detectBroadphase() {
-		List<CollisionPair<CollidableTest, Fixture>> pairs;
+		List<CollisionPair<TestCollisionBody, Fixture>> pairs;
 		
 		// create some collidables
-		CollidableTest ct1 = new CollidableTest(capsule1);
-		CollidableTest ct2 = new CollidableTest(capsule2);
+		TestCollisionBody ct1 = new TestCollisionBody(capsule1);
+		TestCollisionBody ct2 = new TestCollisionBody(capsule2);
 		
 		this.sap.add(ct1);
 		this.sap.add(ct2);

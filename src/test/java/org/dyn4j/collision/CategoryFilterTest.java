@@ -36,6 +36,49 @@ import org.junit.Test;
  */
 public class CategoryFilterTest {
 	/**
+	 * Tests the create method with no args.
+	 */
+	@Test
+	public void create() {
+		CategoryFilter f = new CategoryFilter();
+		TestCase.assertEquals(1, f.category);
+		TestCase.assertEquals(Long.MAX_VALUE, f.mask);
+		
+		TestCase.assertEquals(1, f.getCategory());
+		TestCase.assertEquals(Long.MAX_VALUE, f.getMask());
+	}
+	
+	/**
+	 * Tests the equals and hashCode methods.
+	 */
+	@Test
+	public void equalsAndHashCode() {
+		CategoryFilter f1 = new CategoryFilter();
+		CategoryFilter f2 = new CategoryFilter();
+		
+		TestCase.assertTrue(f1.equals(f2));
+		TestCase.assertEquals(f1.hashCode(), f2.hashCode());
+		
+		CategoryFilter f3 = new CategoryFilter(1, 2);
+		
+		TestCase.assertFalse(f1.equals(f3));
+		TestCase.assertFalse(f1.hashCode() == f3.hashCode());
+		
+		CategoryFilter f4 = new CategoryFilter(1, 2);
+		
+		TestCase.assertTrue(f3.equals(f4));
+		TestCase.assertEquals(f3.hashCode(), f4.hashCode());
+		
+		CategoryFilter f5 = new CategoryFilter(1, 3);
+		
+		TestCase.assertFalse(f3.equals(f5));
+		
+		TestCase.assertTrue(f1.equals(f1));
+		TestCase.assertFalse(f1.equals(null));
+		TestCase.assertFalse(f1.equals(new Object()));
+	}
+	
+	/**
 	 * Tests the {@link CategoryFilter}.
 	 */
 	@Test
@@ -64,5 +107,17 @@ public class CategoryFilterTest {
 		// not allowed
 		TestCase.assertFalse(f2.isAllowed(f3));
 		TestCase.assertFalse(f3.isAllowed(f2));
+		
+		// test null
+		TestCase.assertTrue(f1.isAllowed(null));
+	}
+	
+	/**
+	 * Tests the toString method.
+	 */
+	@Test
+	public void tostring() {
+		CategoryFilter f1 = new CategoryFilter();
+		TestCase.assertNotNull(f1.toString());
 	}
 }

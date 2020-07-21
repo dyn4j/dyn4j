@@ -26,7 +26,6 @@ package org.dyn4j.collision;
 
 import java.util.HashMap;
 
-import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.geometry.Geometry;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,22 +38,22 @@ import junit.framework.TestCase;
  * @version 4.0.0
  * @since 4.0.0
  */
-public class CollisionPairTest {
-	private CollisionBody<Fixture> cb1;
-	private CollisionBody<Fixture> cb2;
-	private CollisionBody<Fixture> cb3;
+public class AbstractCollisionPairTest {
+	private TestCollisionBody cb1;
+	private TestCollisionBody cb2;
+	private TestCollisionBody cb3;
 	
 	private Fixture f1a;
 	private Fixture f1b;
 	private Fixture f2;
 	private Fixture f3;
 	
-	private CollisionPair<CollisionBody<Fixture>, Fixture> pair_1a_to_2;
-	private CollisionPair<CollisionBody<Fixture>, Fixture> pair_2_to_1a;
-	private CollisionPair<CollisionBody<Fixture>, Fixture> pair_1b_to_2;
-	private CollisionPair<CollisionBody<Fixture>, Fixture> pair_2_to_1b;
-	private CollisionPair<CollisionBody<Fixture>, Fixture> pair_2_to_3;
-	private CollisionPair<CollisionBody<Fixture>, Fixture> pair_3_to_2;
+	private CollisionPair<TestCollisionBody, Fixture> pair_1a_to_2;
+	private CollisionPair<TestCollisionBody, Fixture> pair_2_to_1a;
+	private CollisionPair<TestCollisionBody, Fixture> pair_1b_to_2;
+	private CollisionPair<TestCollisionBody, Fixture> pair_2_to_1b;
+	private CollisionPair<TestCollisionBody, Fixture> pair_2_to_3;
+	private CollisionPair<TestCollisionBody, Fixture> pair_3_to_2;
 	
 	/**
 	 * Sets up the test.
@@ -66,16 +65,16 @@ public class CollisionPairTest {
 		this.f2 = new Fixture(Geometry.createCircle(2.0));
 		this.f3 = new Fixture(Geometry.createCircle(3.0));
 		
-		this.cb1 = new CollidableTest(this.f1a); cb1.addFixture(this.f1b);
-		this.cb2 = new CollidableTest(this.f2);
-		this.cb3 = new CollidableTest(this.f3);
+		this.cb1 = new TestCollisionBody(this.f1a); cb1.addFixture(this.f1b);
+		this.cb2 = new TestCollisionBody(this.f2);
+		this.cb3 = new TestCollisionBody(this.f3);
 		
-		this.pair_1a_to_2 = new BroadphasePair<CollisionBody<Fixture>, Fixture>(this.cb1, this.f1a, this.cb2, this.f2);
-		this.pair_2_to_1a = new BroadphasePair<CollisionBody<Fixture>, Fixture>(this.cb2, this.f2, this.cb1, this.f1a);
-		this.pair_1b_to_2 = new BroadphasePair<CollisionBody<Fixture>, Fixture>(this.cb1, this.f1b, this.cb2, this.f2);
-		this.pair_2_to_1b = new BroadphasePair<CollisionBody<Fixture>, Fixture>(this.cb2, this.f2, this.cb1, this.f1b);
-		this.pair_2_to_3 = new BroadphasePair<CollisionBody<Fixture>, Fixture>(this.cb2, this.f2, this.cb3, this.f3);
-		this.pair_3_to_2 = new BroadphasePair<CollisionBody<Fixture>, Fixture>(this.cb3, this.f3, this.cb2, this.f2);
+		this.pair_1a_to_2 = new BasicCollisionPair<TestCollisionBody, Fixture>(this.cb1, this.f1a, this.cb2, this.f2);
+		this.pair_2_to_1a = new BasicCollisionPair<TestCollisionBody, Fixture>(this.cb2, this.f2, this.cb1, this.f1a);
+		this.pair_1b_to_2 = new BasicCollisionPair<TestCollisionBody, Fixture>(this.cb1, this.f1b, this.cb2, this.f2);
+		this.pair_2_to_1b = new BasicCollisionPair<TestCollisionBody, Fixture>(this.cb2, this.f2, this.cb1, this.f1b);
+		this.pair_2_to_3 = new BasicCollisionPair<TestCollisionBody, Fixture>(this.cb2, this.f2, this.cb3, this.f3);
+		this.pair_3_to_2 = new BasicCollisionPair<TestCollisionBody, Fixture>(this.cb3, this.f3, this.cb2, this.f2);
 	}
 	
 	/**
@@ -117,6 +116,12 @@ public class CollisionPairTest {
 		TestCase.assertTrue(AbstractCollisionPair.equals(this.pair_2_to_3, this.pair_3_to_2));
 		TestCase.assertTrue(AbstractCollisionPair.equals(this.pair_3_to_2, this.pair_2_to_3));
 		TestCase.assertTrue(AbstractCollisionPair.equals(this.pair_3_to_2, this.pair_3_to_2));
+		
+		TestCase.assertFalse(AbstractCollisionPair.equals(this.pair_1a_to_2, null));
+		TestCase.assertFalse(AbstractCollisionPair.equals(null, this.pair_2_to_1a));
+		TestCase.assertTrue(AbstractCollisionPair.equals(null, null));
+		TestCase.assertFalse(AbstractCollisionPair.equals(this.pair_1a_to_2, new Object()));
+		TestCase.assertFalse(AbstractCollisionPair.equals(null, new Object()));
 	}
 	
 	/**
@@ -124,7 +129,7 @@ public class CollisionPairTest {
 	 */
 	@Test
 	public void mapTest() {
-		HashMap<CollisionPair<CollisionBody<Fixture>, Fixture>, Object> map = new HashMap<CollisionPair<CollisionBody<Fixture>,Fixture>, Object>();
+		HashMap<CollisionPair<TestCollisionBody, Fixture>, Object> map = new HashMap<CollisionPair<TestCollisionBody, Fixture>, Object>();
 		
 		Object o1 = new Object();
 		Object o2 = new Object();

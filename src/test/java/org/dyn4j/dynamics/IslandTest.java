@@ -24,12 +24,8 @@
  */
 package org.dyn4j.dynamics;
 
-import org.dyn4j.collision.broadphase.BroadphasePair;
+import org.dyn4j.collision.BasicCollisionPair;
 import org.dyn4j.collision.manifold.Manifold;
-import org.dyn4j.dynamics.Body;
-import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.dynamics.Capacity;
-import org.dyn4j.dynamics.Island;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.geometry.Geometry;
@@ -75,7 +71,7 @@ public class IslandTest {
 		
 		i.add(new Body());
 		i.add(new AngleJoint(new Body(), new Body()));
-		i.add(new ContactConstraint(new BroadphasePair(
+		i.add(new ContactConstraint(new BasicCollisionPair(
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Body(), 
@@ -96,7 +92,7 @@ public class IslandTest {
 		
 		i.add(new Body());
 		i.add(new AngleJoint(new Body(), new Body()));
-		i.add(new ContactConstraint(new BroadphasePair(
+		i.add(new ContactConstraint(new BasicCollisionPair(
 				new Body(), 
 				new BodyFixture(Geometry.createCircle(1.0)), 
 				new Body(), 

@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.dyn4j.DataContainer;
+import org.dyn4j.collision.BasicCollisionPair;
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.CollisionItem;
@@ -42,7 +43,6 @@ import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.FixtureModificationHandler;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
-import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
 import org.dyn4j.collision.continuous.TimeOfImpact;
@@ -503,7 +503,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			return null;
 		}
 		
-		BroadphasePair<T, E> pair = new BroadphasePair<T, E>(body1, fixture1, body2, fixture2);
+		CollisionPair<T, E> pair = new BasicCollisionPair<T, E>(body1, fixture1, body2, fixture2);
 		return this.collisionData.get(pair);
 	}
 	

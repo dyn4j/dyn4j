@@ -26,7 +26,7 @@ package org.dyn4j.world;
 
 import java.util.List;
 
-import org.dyn4j.collision.broadphase.BroadphasePair;
+import org.dyn4j.collision.BasicCollisionPair;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.contact.ContactConstraint;
@@ -122,7 +122,7 @@ public class ConstraintGraphTest {
 		g.addBody(b1);
 		g.addBody(b2);
 		
-		ContactConstraint<Body> cc = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
+		ContactConstraint<Body> cc = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
 		g.addContactConstraint(cc);
 		
 		TestCase.assertTrue(g.isInContact(b1, b2));
@@ -137,7 +137,7 @@ public class ConstraintGraphTest {
 		TestCase.assertEquals(cc, n2.contactConstraints.get(0));
 		
 		// it's reference equals, so check that
-		cc = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
+		cc = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
 		TestCase.assertFalse(g.containsContactConstraint(cc));
 	}
 	
@@ -156,7 +156,7 @@ public class ConstraintGraphTest {
 		Body b2 = new Body();
 		BodyFixture f2 = b2.addFixture(c2);
 		
-		ContactConstraint<Body> cc = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
+		ContactConstraint<Body> cc = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
 		g.addContactConstraint(cc);
 		
 		TestCase.assertTrue(g.isInContact(b1, b2));
@@ -254,10 +254,10 @@ public class ConstraintGraphTest {
 		g.addBody(b1);
 		g.addBody(b2);
 		
-		ContactConstraint<Body> cc1 = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
+		ContactConstraint<Body> cc1 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
 		g.addContactConstraint(cc1);
 		
-		ContactConstraint<Body> cc2 = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
+		ContactConstraint<Body> cc2 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
 		g.addContactConstraint(cc2);
 
 		ConstraintGraphNode<Body> n1 = g.getNode(b1);
@@ -367,9 +367,9 @@ public class ConstraintGraphTest {
 		g.addJoint(j2);
 		g.addJoint(j3);
 		
-		ContactConstraint<Body> cc1 = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
-		ContactConstraint<Body> cc2 = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b3, f3));
-		ContactConstraint<Body> cc3 = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b2, f2, b3, f3));
+		ContactConstraint<Body> cc1 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
+		ContactConstraint<Body> cc2 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b3, f3));
+		ContactConstraint<Body> cc3 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b2, f2, b3, f3));
 		
 		g.addContactConstraint(cc1);
 		g.addContactConstraint(cc2);
@@ -473,9 +473,9 @@ public class ConstraintGraphTest {
 		g.addJoint(j2);
 		g.addJoint(j3);
 		
-		ContactConstraint<Body> cc1 = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
-		ContactConstraint<Body> cc2 = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b3, f3));
-		ContactConstraint<Body> cc3 = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b2, f2, b3, f3));
+		ContactConstraint<Body> cc1 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
+		ContactConstraint<Body> cc2 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b3, f3));
+		ContactConstraint<Body> cc3 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b2, f2, b3, f3));
 		
 		g.addContactConstraint(cc1);
 		g.addContactConstraint(cc2);
@@ -572,8 +572,8 @@ public class ConstraintGraphTest {
 		g.addBody(b1);
 		g.addBody(b2);
 		
-		ContactConstraint<Body> cc1 = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
-		ContactConstraint<Body> cc2 = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
+		ContactConstraint<Body> cc1 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
+		ContactConstraint<Body> cc2 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
 		
 		g.addContactConstraint(cc1);
 		g.addContactConstraint(cc2);
@@ -640,9 +640,9 @@ public class ConstraintGraphTest {
 		g.addJoint(j2);
 		g.addJoint(j3);
 		
-		ContactConstraint<Body> cc1 = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
-		ContactConstraint<Body> cc2 = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b3, f3));
-		ContactConstraint<Body> cc3 = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b2, f2, b3, f3));
+		ContactConstraint<Body> cc1 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
+		ContactConstraint<Body> cc2 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b3, f3));
+		ContactConstraint<Body> cc3 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b2, f2, b3, f3));
 		
 		g.addContactConstraint(cc1);
 		g.addContactConstraint(cc2);
@@ -827,7 +827,7 @@ public class ConstraintGraphTest {
 		TestCase.assertNotNull(bodies);
 		TestCase.assertTrue(bodies.isEmpty());
 		
-		ContactConstraint<Body> cc = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
+		ContactConstraint<Body> cc = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
 		g.addContactConstraint(cc);
 		
 		bodies = g.getInContactBodies(b1, false);
@@ -872,7 +872,7 @@ public class ConstraintGraphTest {
 		TestCase.assertNotNull(contacts);
 		TestCase.assertTrue(contacts.isEmpty());
 		
-		ContactConstraint<Body> cc = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
+		ContactConstraint<Body> cc = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
 		g.addContactConstraint(cc);
 		
 		contacts = g.getContacts(b1);
@@ -907,7 +907,7 @@ public class ConstraintGraphTest {
 		
 		TestCase.assertFalse(g.isInContact(b1, b2));
 		
-		ContactConstraint<Body> cc = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
+		ContactConstraint<Body> cc = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
 		g.addContactConstraint(cc);
 		
 		TestCase.assertTrue(g.isInContact(b1, b2));
@@ -963,8 +963,8 @@ public class ConstraintGraphTest {
 		g.addBody(b1);
 		g.addBody(b2);
 		
-		ContactConstraint<Body> cc1 = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f2));
-		ContactConstraint<Body> cc2 = new ContactConstraint<Body>(new BroadphasePair<Body, BodyFixture>(b1, f1, b2, f3));
+		ContactConstraint<Body> cc1 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
+		ContactConstraint<Body> cc2 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f3));
 		g.addContactConstraint(cc1);
 		g.addContactConstraint(cc2);
 		
