@@ -91,6 +91,10 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * If the {@link CollisionBody}'s {@link Fixture}s have already been added to this broad-phase
 	 * they will instead be updated.
 	 * <p>
+	 * If a {@link Fixture} has been added to the {@link CollisionBody} and the {@link CollisionBody}
+	 * has already been added to this broadphase, any new {@link Fixture}s will be added, and the
+	 * existing ones will be updated.
+	 * <p>
 	 * If a fixture is removed from a {@link CollisionBody}, the calling code must
 	 * call the {@link #remove(CollisionBody, Fixture)} method for that fixture to 
 	 * be removed from the broad-phase.  This method makes no effort to remove
@@ -256,7 +260,11 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * <p>
 	 * The AABB returned is an AABB encompasing all fixtures on the
 	 * given {@link CollisionBody}.  When possible, AABBs from the
-	 * broad-phase will be used to create this.
+	 * broad-phase will be used to create this, otherwise new AABBs
+	 * will be created and unioned.
+	 * <p>
+	 * In all cases this method returns the <b>expanded</b> AABB in the
+	 * case this detector supports it.
 	 * <p>
 	 * If the body doesn't have any fixtures a degenerate
 	 * AABB is returned.
@@ -273,7 +281,10 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * broad-phase, a new AABB is created and returned (but not added to
 	 * broad-phase).
 	 * <p>
-	 * NOTE: The {@link AABB} returned from this method should not be modified.
+	 * In all cases this method returns the <b>expanded</b> AABB in the
+	 * case this detector supports it.
+	 * <p>
+	 * <b>NOTE</b>: The {@link AABB} returned from this method should not be modified.
 	 * Instead use the {@link AABB#copy()} method to create a new instance to 
 	 * modify.
 	 * @param body the {@link CollisionBody}
@@ -290,7 +301,10 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * broad-phase, a new AABB is created and returned (but not added to
 	 * broad-phase).
 	 * <p>
-	 * NOTE: The {@link AABB} returned from this method should not be modified.
+	 * In all cases this method returns the <b>expanded</b> AABB in the
+	 * case this detector supports it.
+	 * <p>
+	 * <b>NOTE</b>: The {@link AABB} returned from this method should not be modified.
 	 * Instead use the {@link AABB#copy()} method to create a new instance to 
 	 * modify.
 	 * @param item the collision item
@@ -332,7 +346,8 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	public abstract boolean contains(CollisionItem<T, E> item);
 	
 	/**
-	 * Clears all the {@link CollisionBody} {@link Fixture}s from this broad-phase.
+	 * Clears all the {@link CollisionBody} {@link Fixture}s from this broad-phase and
+	 * any state held by this broadphase.
 	 * @since 3.0.0
 	 */
 	public abstract void clear();
@@ -437,26 +452,14 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	public abstract List<CollisionItem<T, E>> detect(AABB aabb, BroadphaseFilter<T, E> filter);
 
 	/**
-	 * Performs a preliminary raycast over all the bodies in the broad-phase and returns the
-	 * items that intersect.
-	 * @param ray the {@link Ray}
-	 * @param length the length of the ray; 0.0 for infinite length
-	 * @return List&lt;{@link CollisionItem}&gt;
-	 * @since 3.0.0
-	 * @deprecated Deprecated in 4.0.0. Use the {@link #detect(Ray, double)} method instead.
-	 */
-	@Deprecated
-	public abstract List<CollisionItem<T, E>> raycast(Ray ray, double length);
-	
-	/**
 	 * Performs a raycast over all the bodies in the broad-phase and returns the
 	 * items that intersect.
 	 * @param ray the {@link Ray}
 	 * @param length the length of the ray; 0.0 for infinite length
 	 * @return List&lt;{@link CollisionItem}&gt;
-	 * @since 4.0.0
+	 * @since 3.0.0
 	 */
-	public abstract List<CollisionItem<T, E>> detect(Ray ray, double length);
+	public abstract List<CollisionItem<T, E>> raycast(Ray ray, double length);
 	
 	/**
 	 * Performs a raycast over all the bodies in the broad-phase and returns the
@@ -466,7 +469,7 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * @return Iterator&lt;{@link CollisionItem}&gt;
 	 * @since 4.0.0
 	 */
-	public abstract Iterator<CollisionItem<T, E>> detectIterator(Ray ray, double length);
+	public abstract Iterator<CollisionItem<T, E>> raycastIterator(Ray ray, double length);
 	
 	/**
 	 * Performs a preliminary raycast over all the bodies in the broad-phase and returns the
@@ -479,7 +482,7 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * @return List&lt;{@link BroadphaseItem}&gt;
 	 * @since 3.2.0
 	 * @see #raycast(Ray, double)
-	 * @deprecated Deprecated in 4.0.0. Use the {@link #detect(Ray, double)} method instead
+	 * @deprecated Deprecated in 4.0.0. Use the {@link #raycast(Ray, double)} method instead
 	 */
 	@Deprecated
 	public abstract List<CollisionItem<T, E>> raycast(Ray ray, double length, BroadphaseFilter<T, E> filter);
@@ -568,6 +571,7 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * NOTE: Some broadphase detectors may not support this feature.
 	 * @param flag true to turn on update tracking
 	 * @since 4.0.0
+	 * @see #isUpdateTrackingSupported()
 	 */
 	public abstract void setUpdateTrackingEnabled(boolean flag);
 	

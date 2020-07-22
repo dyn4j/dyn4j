@@ -49,10 +49,18 @@ import org.dyn4j.geometry.Vector2;
  */
 public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E extends Fixture> implements BroadphaseDetector<T, E> {
 	/** The {@link AABB} expansion value */
-	protected double expansion = BroadphaseDetector.DEFAULT_AABB_EXPANSION;
+	protected double expansion;
 	
 	/** True if update tracking is enabled */
-	protected boolean updateTrackingEnabled = true;
+	protected boolean updateTrackingEnabled;
+	
+	/**
+	 * Default constructor.
+	 */
+	public AbstractBroadphaseDetector() {
+		this.expansion = BroadphaseDetector.DEFAULT_AABB_EXPANSION;
+		this.updateTrackingEnabled = true;
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.CollisionBody)
@@ -136,8 +144,6 @@ public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E e
 		// attempt to use this broadphase's cache
 		AABB aAABB = this.getAABB(a);
 		AABB bAABB = this.getAABB(b);
-		// check for null
-		if (aAABB == null || bAABB == null) return false;
 		// perform the test
 		if (aAABB.overlaps(bAABB)) {
 			return true;
@@ -216,14 +222,7 @@ public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E e
 	 */
 	@Override
 	public List<CollisionPair<T, E>> detect() {
-		int eSize = Collisions.getEstimatedCollisionPairs(this.size());
-		List<CollisionPair<T, E>> items = new ArrayList<CollisionPair<T,E>>(eSize);
-		Iterator<CollisionPair<T, E>> it = this.detectIterator(true);
-		while (it.hasNext()) {
-			CollisionPair<T, E> item = it.next();
-			items.add(item.copy());
-		}
-		return items;
+		return this.detect(true);
 	}
 	
 	/* (non-Javadoc)
@@ -296,10 +295,10 @@ public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E e
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.Ray, double)
 	 */
 	@Override
-	public List<CollisionItem<T, E>> detect(Ray ray, double length) {
+	public List<CollisionItem<T, E>> raycast(Ray ray, double length) {
 		int eSize = Collisions.getEstimatedRaycastCollisions(this.size());
 		List<CollisionItem<T, E>> items = new ArrayList<CollisionItem<T,E>>(eSize);
-		Iterator<CollisionItem<T, E>> it = this.detectIterator(ray, length);
+		Iterator<CollisionItem<T, E>> it = this.raycastIterator(ray, length);
 		while (it.hasNext()) {
 			CollisionItem<T, E> item = it.next();
 			items.add(item.copy());
@@ -308,15 +307,6 @@ public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E e
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#raycast(org.dyn4j.geometry.Ray, double)
-	 */
-	@Deprecated
-	@Override
-	public List<CollisionItem<T, E>> raycast(Ray ray, double length) {
-		return this.detect(ray, length);
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.Ray, length, org.dyn4j.collision.broadphase.BroadphaseFilter)
 	 */
 	@Deprecated
@@ -324,7 +314,7 @@ public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E e
 	public List<CollisionItem<T, E>> raycast(Ray ray, double length, BroadphaseFilter<T, E> filter) {
 		int eSize = Collisions.getEstimatedRaycastCollisions(this.size());
 		List<CollisionItem<T, E>> items = new ArrayList<CollisionItem<T,E>>(eSize);
-		Iterator<CollisionItem<T, E>> it = this.detectIterator(ray, length);
+		Iterator<CollisionItem<T, E>> it = this.raycastIterator(ray, length);
 		while (it.hasNext()) {
 			CollisionItem<T, E> item = it.next();
 			if (filter.isAllowed(ray, length, item.getBody(), item.getFixture())) {

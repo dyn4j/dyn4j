@@ -849,7 +849,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		Raycast raycast = new Raycast();
 
 		// filter using the broadphase first
-		Iterator<CollisionItem<T, E>> iterator = this.broadphaseDetector.detectIterator(ray, maxLength);
+		Iterator<CollisionItem<T, E>> iterator = this.broadphaseDetector.raycastIterator(ray, maxLength);
 		
 		while (iterator.hasNext()) {
 			CollisionItem<T, E> item = iterator.next();
@@ -1632,7 +1632,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		public RaycastDetectIterator(Ray ray, double maxLength, DetectFilter<T, E> filter) {
 			this.ray = ray;
 			this.filter = filter;
-			this.iterator = AbstractCollisionWorld.this.broadphaseDetector.detectIterator(ray, maxLength);
+			this.iterator = AbstractCollisionWorld.this.broadphaseDetector.raycastIterator(ray, maxLength);
 			
 			double max = 0.0;
 			if (maxLength > 0.0) {

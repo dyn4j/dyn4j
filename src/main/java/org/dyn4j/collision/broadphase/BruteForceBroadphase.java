@@ -233,7 +233,7 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detectIterator(org.dyn4j.geometry.Ray, double)
 	 */
 	@Override
-	public Iterator<CollisionItem<T, E>> detectIterator(Ray ray, double length) {
+	public Iterator<CollisionItem<T, E>> raycastIterator(Ray ray, double length) {
 		return new DetectRayIterator(ray, length);
 	}
 	
@@ -517,9 +517,6 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		/** The length of the ray */
 		private final double length;
 		
-		/** The AABB of the ray */
-		private final AABB aabb;
-		
 		/** Precomputed 1/x */
 		private final double invDx;
 		
@@ -541,27 +538,15 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 			this.ray = ray;
 			this.iterator = BruteForceBroadphase.this.map.values().iterator();
 			
-			// create an aabb from the ray
-			Vector2 s = ray.getStart();
+			// precompute
 			Vector2 d = ray.getDirectionVector();
+			this.invDx = 1.0 / d.x;
+			this.invDy = 1.0 / d.y;
 			
 			// get the length
 			double l = length;
 			if (length <= 0.0) l = Double.MAX_VALUE;
 			this.length = l;
-			
-			// compute the coordinates
-			double x1 = s.x;
-			double x2 = s.x + d.x * l;
-			double y1 = s.y;
-			double y2 = s.y + d.y * l;
-			
-			// create the aabb
-			this.aabb = AABB.createAABBFromPoints(x1, y1, x2, y2);
-			
-			// precompute
-			this.invDx = 1.0 / d.x;
-			this.invDy = 1.0 / d.y;
 			
 			this.findNext();
 		}
@@ -604,11 +589,9 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 			
 			while (this.iterator.hasNext()) {
 				AABBBroadphaseProxy<T, E> b = this.iterator.next();
-				if (this.aabb.overlaps(b.aabb)) {
-					if (AbstractBroadphaseDetector.raycast(this.ray.getStart(), this.length, this.invDx, this.invDy, b.aabb)) {
-						this.nextItem = b.item;
-						return true;
-					}
+				if (AbstractBroadphaseDetector.raycast(this.ray.getStart(), this.length, this.invDx, this.invDy, b.aabb)) {
+					this.nextItem = b.item;
+					return true;
 				}
 			}
 			

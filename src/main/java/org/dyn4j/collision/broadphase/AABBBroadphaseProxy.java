@@ -73,30 +73,6 @@ final class AABBBroadphaseProxy<T extends CollisionBody<E>, E extends Fixture> i
 	}
 
 	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj == this) return true;
-		if (obj instanceof AABBBroadphaseProxy) {
-			AABBBroadphaseProxy<?, ?> pair = (AABBBroadphaseProxy<?, ?>)obj;
-			if (pair.item.equals(this.item)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return this.item.hashCode();
-	}
-	
-	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

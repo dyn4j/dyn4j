@@ -812,7 +812,7 @@ public final class LazyAABBTree<T extends CollisionBody<E>, E extends Fixture> e
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detectIterator(org.dyn4j.geometry.Ray, double)
 	 */
 	@Override
-	public Iterator<CollisionItem<T, E>> detectIterator(Ray ray, double length) {
+	public Iterator<CollisionItem<T, E>> raycastIterator(Ray ray, double length) {
 		return this.raycast(ray, length, new BroadphaseFilterAdapter<T, E>()).iterator();
 	}
 	
@@ -975,6 +975,14 @@ public final class LazyAABBTree<T extends CollisionBody<E>, E extends Fixture> e
 	 */
 	@Override
 	public boolean supportsAABBExpansion() {
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdateTrackingEnabled()
+	 */
+	@Override
+	public boolean isUpdateTrackingEnabled() {
 		return false;
 	}
 	

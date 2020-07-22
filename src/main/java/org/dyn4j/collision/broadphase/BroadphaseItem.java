@@ -45,11 +45,6 @@ final class BroadphaseItem<T extends CollisionBody<E>, E extends Fixture> extend
 	E fixture;
 	
 	/**
-	 * Constructor for reuse.
-	 */
-	BroadphaseItem() {}
-
-	/**
 	 * Full constructor.
 	 * @param body the {@link CollisionBody}
 	 * @param fixture the {@link Fixture}

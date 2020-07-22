@@ -62,10 +62,10 @@ public class Manifold implements Shiftable, Copyable<Manifold> {
 	
 	/**
 	 * Full constructor.
-	 * @param points the manifold points
 	 * @param normal the manifold normal
+	 * @param points the manifold points
 	 */
-	protected Manifold(List<ManifoldPoint> points, Vector2 normal) {
+	protected Manifold(Vector2 normal, List<ManifoldPoint> points) {
 		this.points = new ArrayList<ManifoldPoint>(points.size());
 		this.normal = normal.copy();
 		for (ManifoldPoint mp : points) {
@@ -166,6 +166,6 @@ public class Manifold implements Shiftable, Copyable<Manifold> {
 	 */
 	@Override
 	public Manifold copy() {
-		return new Manifold(this.points, this.normal);
+		return new Manifold(this.normal, this.points);
 	}
 }

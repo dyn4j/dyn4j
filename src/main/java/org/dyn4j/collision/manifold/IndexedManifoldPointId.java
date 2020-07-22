@@ -46,40 +46,40 @@ import org.dyn4j.geometry.Shape;
  * @see ManifoldPointId#DISTANCE
  */
 public class IndexedManifoldPointId implements ManifoldPointId {
-	/** The reference edge index */
-	private final int referenceEdge;
+	/** The index of the edge on the reference convex */
+	protected final int referenceEdgeIndex;
 	
-	/** The incident edge index */
-	private final int incidentEdge;
+	/** The index of the edge on the incident convex */
+	protected final int incidentEdgeIndex;
 	
-	/** The index of the incident vertex */
-	private final int incidentVertex;
+	/** The index of the vertex on the incident convex */
+	protected final int incidentVertexIndex;
 	
 	/** Whether the reference and incident features flipped */
-	private final boolean flipped;
+	protected final boolean flipped;
 	
 	/**
 	 * Optional constructor.
-	 * @param referenceEdge the reference edge index
-	 * @param incidentEdge the incident edge index
-	 * @param incidentVertex the incident vertex index
+	 * @param referenceEdgeIndex the reference edge index
+	 * @param incidentEdgeIndex the incident edge index
+	 * @param incidentVertexIndex the incident vertex index
 	 * @since 3.1.5
 	 */
-	public IndexedManifoldPointId(int referenceEdge, int incidentEdge, int incidentVertex) {
-		this(referenceEdge, incidentEdge, incidentVertex, false);
+	public IndexedManifoldPointId(int referenceEdgeIndex, int incidentEdgeIndex, int incidentVertexIndex) {
+		this(referenceEdgeIndex, incidentEdgeIndex, incidentVertexIndex, false);
 	}
 	
 	/**
 	 * Full constructor.
-	 * @param referenceEdge the reference edge index
-	 * @param incidentEdge the incident edge index
-	 * @param incidentVertex the incident vertex index
+	 * @param referenceEdgeIndex the reference edge index
+	 * @param incidentEdgeIndex the incident edge index
+	 * @param incidentVertexIndex the incident vertex index
 	 * @param flipped whether the reference and incident features flipped
 	 */
-	public IndexedManifoldPointId(int referenceEdge, int incidentEdge, int incidentVertex, boolean flipped) {
-		this.referenceEdge = referenceEdge;
-		this.incidentEdge = incidentEdge;
-		this.incidentVertex = incidentVertex;
+	public IndexedManifoldPointId(int referenceEdgeIndex, int incidentEdgeIndex, int incidentVertexIndex, boolean flipped) {
+		this.referenceEdgeIndex = referenceEdgeIndex;
+		this.incidentEdgeIndex = incidentEdgeIndex;
+		this.incidentVertexIndex = incidentVertexIndex;
 		this.flipped = flipped;
 	}
 	
@@ -92,9 +92,9 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 		if (other == this) return true;
 		if (other instanceof IndexedManifoldPointId) {
 			IndexedManifoldPointId o = (IndexedManifoldPointId) other;
-			if (this.referenceEdge == o.referenceEdge
-			 && this.incidentEdge == o.incidentEdge
-			 && this.incidentVertex == o.incidentVertex
+			if (this.referenceEdgeIndex == o.referenceEdgeIndex
+			 && this.incidentEdgeIndex == o.incidentEdgeIndex
+			 && this.incidentVertexIndex == o.incidentVertexIndex
 			 && this.flipped == o.flipped) {
 				return true;
 			}
@@ -107,9 +107,9 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 	 */
 	@Override
 	public int hashCode() {
-		int hash = this.referenceEdge;
-		hash = 37 * hash + this.incidentEdge;
-		hash = 37 * hash + this.incidentVertex;
+		int hash = this.referenceEdgeIndex;
+		hash = 37 * hash + this.incidentEdgeIndex;
+		hash = 37 * hash + this.incidentVertexIndex;
 		hash = 37 * hash + (this.flipped ? 1231 : 1237);
 		return hash;
 	}
@@ -120,9 +120,9 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("IndexedManifoldPointId[ReferenceEdge=").append(this.referenceEdge)
-		.append("|IncidentEdge=").append(this.incidentEdge)
-		.append("|IncidentVertex=").append(this.incidentVertex)
+		sb.append("IndexedManifoldPointId[ReferenceEdge=").append(this.referenceEdgeIndex)
+		.append("|IncidentEdge=").append(this.incidentEdgeIndex)
+		.append("|IncidentVertex=").append(this.incidentVertexIndex)
 		.append("|IsFlipped=").append(this.flipped)
 		.append("]");
 		return sb.toString();
@@ -135,8 +135,8 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 	 * The reference edge is the edge that is most perpendicular to the collision normal.
 	 * @return int
 	 */
-	public int getReferenceEdge() {
-		return this.referenceEdge;
+	public int getReferenceEdgeIndex() {
+		return this.referenceEdgeIndex;
 	}
 
 	/**
@@ -144,8 +144,8 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 	 * on the other {@link Shape}.
 	 * @return int
 	 */
-	public int getIncidentEdge() {
-		return this.incidentEdge;
+	public int getIncidentEdgeIndex() {
+		return this.incidentEdgeIndex;
 	}
 
 	/**
@@ -153,8 +153,8 @@ public class IndexedManifoldPointId implements ManifoldPointId {
 	 * the other {@link Shape}.
 	 * @return int
 	 */
-	public int getIncidentVertex() {
-		return this.incidentVertex;
+	public int getIncidentVertexIndex() {
+		return this.incidentVertexIndex;
 	}
 
 	/**

@@ -49,7 +49,7 @@ import org.dyn4j.geometry.Vector2;
  * Projects all {@link CollisionBody} {@link Fixture}s on both the x and y axes and performs overlap checks
  * on all the projections to test for possible collisions (AABB tests).
  * <p>
- * This algorithm is O(n) for all {@link #detect(AABB)} and {@link #detect(Ray, double)} methods.
+ * This algorithm is O(n) for all {@link #detect(AABB)} and {@link #raycast(Ray, double)} methods.
  * @author William Bittle
  * @version 4.0.0
  * @since 1.0.0
@@ -124,7 +124,10 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 		AABBBroadphaseProxy<T, E> proxy = new AABBBroadphaseProxy<T, E>(key, this.updatedAABB.copy());
 		// add the proxy to the map
 		this.map.put(key, proxy);
-		this.updated.put(key, proxy);
+		// are we tracking updates?
+		if (this.updateTrackingEnabled) {
+			this.updated.put(key, proxy);
+		}
 		// insert the node into the tree
 		this.tree.insert(proxy);
 	}
@@ -204,7 +207,10 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 		this.tree.remove(proxy);
 		// set the new aabb
 		proxy.aabb.set(this.updatedAABB);
-		this.updated.put(key, proxy);
+		// are we tracking updates?
+		if (this.updateTrackingEnabled) {
+			this.updated.put(key, proxy);
+		}
 		// reinsert the proxy
 		this.tree.insert(proxy);
 	}
@@ -214,6 +220,9 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 	 */
 	@Override
 	public boolean isUpdated(T body, E fixture) {
+		if (!this.updateTrackingEnabled) {
+			return true;
+		}
 		CollisionItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
 		return this.updated.containsKey(key);
 	}
@@ -223,6 +232,9 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 	 */
 	@Override
 	public boolean isUpdated(CollisionItem<T, E> item) {
+		if (!this.updateTrackingEnabled) {
+			return true;
+		}
 		return this.updated.containsKey(item);
 	}
 	
@@ -231,6 +243,10 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 	 */
 	@Override
 	public void setUpdated(T body, E fixture) {
+		if (!this.updateTrackingEnabled) {
+			return;
+		}
+		
 		CollisionItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
 		AABBBroadphaseProxy<T, E> proxy = this.map.get(key);
 		this.updated.put(key, proxy);
@@ -254,7 +270,7 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 			return proxy.aabb;
 		}
 		
-		return item.getFixture().getShape().createAABB(item.getBody().getTransform());
+		return item.getFixture().getShape().createAABB(item.getBody().getTransform()).expand(this.expansion);
 	}
 	
 	/* (non-Javadoc)
@@ -291,6 +307,24 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 	public int size() {
 		return this.map.size();
 	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.AbstractBroadphaseDetector#setUpdateTrackingEnabled(boolean)
+	 */
+	@Override
+	public void setUpdateTrackingEnabled(boolean flag) {
+		if (this.updateTrackingEnabled != flag) {
+			if (flag) {
+				// nothing to do here, we'll just have to wait for the next
+				// round of updates to come in
+			} else {
+				// clear everything to save space and so that it doesn't produce
+				// odd results if it's turned back on
+				this.updated.clear();
+			}
+		}
+		super.setUpdateTrackingEnabled(flag);
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detectIterator(boolean)
@@ -315,7 +349,7 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detectIterator(org.dyn4j.geometry.Ray, double)
 	 */
 	@Override
-	public Iterator<CollisionItem<T, E>> detectIterator(Ray ray, double length) {
+	public Iterator<CollisionItem<T, E>> raycastIterator(Ray ray, double length) {
 		return new DetectRayIterator(ray, length);
 	}
 	

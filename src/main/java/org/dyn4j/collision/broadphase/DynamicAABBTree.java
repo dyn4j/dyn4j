@@ -118,7 +118,6 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 	 */
 	private void add(BroadphaseItem<T, E> key, T body, E fixture) {
 		Transform tx = body.getTransform();
-//		AABB aabb = fixture.getShape().createAABB(tx);
 		fixture.getShape().computeAABB(tx, this.updatedAABB);
 		// expand the aabb
 		this.updatedAABB.expand(this.expansion);
@@ -129,7 +128,7 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		this.map.put(key, node);
 		// insert the node into the tree
 		this.insert(node);
-		
+		// are we tracking updates?
 		if (this.updateTrackingEnabled) {
 			this.updated.put(key, node);
 		}
@@ -191,7 +190,6 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 	private void update(CollisionItem<T, E> key, DynamicAABBTreeLeaf<T, E> node, T body, E fixture) {
 		Transform tx = body.getTransform();
 		// create the new aabb
-//		AABB aabb = fixture.getShape().createAABB(tx);
 		fixture.getShape().computeAABB(tx, this.updatedAABB);
 		// see if the old aabb contains the new one
 		if (node.aabb.contains(this.updatedAABB)) {
@@ -206,7 +204,7 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		node.aabb.set(this.updatedAABB);
 		// reinsert the node
 		this.insert(node);
-		
+		// are we tracking updates?
 		if (this.updateTrackingEnabled) {
 			this.updated.put(key, node);
 		}
@@ -286,7 +284,7 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 		if (node != null) {
 			return node.aabb;
 		}
-		return item.getFixture().getShape().createAABB(item.getBody().getTransform());
+		return item.getFixture().getShape().createAABB(item.getBody().getTransform()).expand(this.expansion);
 	}
 	
 	/* (non-Javadoc)
@@ -347,7 +345,7 @@ public final class DynamicAABBTree<T extends CollisionBody<E>, E extends Fixture
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detectIterator(org.dyn4j.geometry.Ray, double)
 	 */
 	@Override
-	public Iterator<CollisionItem<T, E>> detectIterator(Ray ray, double length) {
+	public Iterator<CollisionItem<T, E>> raycastIterator(Ray ray, double length) {
 		return new DetectRayIterator(ray, length);
 	}
 	
