@@ -153,8 +153,8 @@ final class Island {
 			if (invM > Epsilon.E) {
 				// only perform this step if the body does not have
 				// a fixed linear velocity
-				body.velocity.x += (body.force.x * invM + gravity.x * body.gravityScale) * dt;
-				body.velocity.y += (body.force.y * invM + gravity.y * body.gravityScale) * dt;
+				body.linearVelocity.x += (body.force.x * invM + gravity.x * body.gravityScale) * dt;
+				body.linearVelocity.y += (body.force.y * invM + gravity.y * body.gravityScale) * dt;
 			}
 			// av1 = av0 + (t / I) * dt
 			if (invI > Epsilon.E) {
@@ -170,8 +170,8 @@ final class Island {
 				linear = Interval.clamp(linear, 0.0, 1.0);
 				
 				// inline body.velocity.multiply(linear);
-				body.velocity.x *= linear;
-				body.velocity.y *= linear;	
+				body.linearVelocity.x *= linear;
+				body.linearVelocity.y *= linear;	
 			}
 			
 			// apply angular damping
@@ -215,8 +215,8 @@ final class Island {
 			if (body.isStatic()) continue;
 			
 			// compute the translation and rotation for this time step
-			double translationX = body.velocity.x * dt;
-			double translationY = body.velocity.y * dt;
+			double translationX = body.linearVelocity.x * dt;
+			double translationY = body.linearVelocity.y * dt;
 			double translationMagnitudeSquared = translationX * translationX + translationY * translationY;
 			
 			// make sure the translation is not over the maximum
@@ -224,7 +224,7 @@ final class Island {
 				double translationMagnitude = Math.sqrt(translationMagnitudeSquared);
 				double ratio = maxTranslation / translationMagnitude;
 				
-				body.velocity.multiply(ratio);
+				body.linearVelocity.multiply(ratio);
 
 				translationX *= ratio;
 				translationY *= ratio;
@@ -276,7 +276,7 @@ final class Island {
 				// see if the body is allowed to sleep
 				if (body.isAutoSleepingEnabled()) {
 					// check the linear and angular velocity
-					if (body.velocity.getMagnitudeSquared() > sleepLinearVelocitySquared || body.angularVelocity > sleepAngularVelocity) {
+					if (body.linearVelocity.getMagnitudeSquared() > sleepLinearVelocitySquared || body.angularVelocity > sleepAngularVelocity) {
 						// if either the linear or angular velocity is above the 
 						// threshold then reset the sleep time
 						body.atRestTime = 0.0;

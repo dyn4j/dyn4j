@@ -56,7 +56,7 @@ import junit.framework.TestCase;
  * @version 3.4.0
  * @since 1.0.2
  */
-@SuppressWarnings("deprecation")
+@Deprecated
 public class BodyTest {
 	/**
 	 * Tests the constructor.
@@ -75,7 +75,7 @@ public class BodyTest {
 		TestCase.assertNotNull(b.torques);
 		TestCase.assertNotNull(b.getTransform());
 		TestCase.assertNotNull(b.transform0);
-		TestCase.assertNotNull(b.velocity);
+		TestCase.assertNotNull(b.linearVelocity);
 		TestCase.assertNull(b.getOwner());
 	}
 	
@@ -559,7 +559,7 @@ public class BodyTest {
 		Body b = new Body();
 		
 		b.applyForce(new Vector2(0.0, 1.0), new Vector2(2.0, 1.0));
-		b.force = new Vector2(-1.0, 0.5);
+		b.force.add(new Vector2(-1.0, 0.5));
 		b.torque = 0.4;
 		
 		b.clearForce();
@@ -626,7 +626,7 @@ public class BodyTest {
 		TestCase.assertTrue(b.isKinematic());
 		TestCase.assertFalse(b.isStatic());
 		
-		b.velocity.zero();
+		b.linearVelocity.zero();
 		b.angularVelocity = 0.4;
 		TestCase.assertFalse(b.isDynamic());
 		TestCase.assertTrue(b.isKinematic());
@@ -661,8 +661,8 @@ public class BodyTest {
 		
 		// test that we can sleep the body even if the
 		// auto sleep is not enabled.
-		b.velocity.x = -0.5;
-		b.velocity.y = 1.0;
+		b.linearVelocity.x = -0.5;
+		b.linearVelocity.y = 1.0;
 		b.angularVelocity = 3.2;
 		b.force.x = 1.0;
 		b.torque = 1.2;
@@ -674,7 +674,7 @@ public class BodyTest {
 		TestCase.assertTrue(b.torques.isEmpty());
 		TestCase.assertEquals(1.2, b.torque);
 		TestCase.assertEquals(1.0, b.force.x);
-		TestCase.assertTrue(b.velocity.isZero());
+		TestCase.assertTrue(b.linearVelocity.isZero());
 		TestCase.assertEquals(0.0, b.angularVelocity);
 	}
 	
@@ -1076,7 +1076,7 @@ public class BodyTest {
 	@Test
 	public void velocityAtPoint() {
 		Body b = new Body();
-		b.velocity.set(5.0, 4.0);
+		b.linearVelocity.set(5.0, 4.0);
 		b.angularVelocity = Math.PI;
 		b.addFixture(Geometry.createEquilateralTriangle(2.0));
 		BodyFixture bf = b.addFixture(Geometry.createUnitCirclePolygon(5, 1.0));

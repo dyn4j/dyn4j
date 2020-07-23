@@ -236,6 +236,15 @@ public class Transform implements Transformable, Copyable<Transform> {
 	}
 	
 	/**
+	 * Returns true if this {@link Transform} is an identity transform.
+	 * @return boolean
+	 * @since 4.0.0
+	 */
+	public boolean isIdentity() {
+		return this.cost == 1.0 && this.sint == 0.0 && this.x == 0.0 && this.y == 0.0;
+	}
+	
+	/**
 	 * Transforms only the x coordinate of the given {@link Vector2} and returns the result.
 	 * @param vector the {@link Vector2} to transform
 	 * @return the transformed x coordinate

@@ -35,6 +35,7 @@ import org.dyn4j.collision.AbstractCollisionBody;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.MassType;
@@ -50,17 +51,11 @@ import org.dyn4j.resources.Messages;
  * @since 4.0.0
  */
 public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixture> implements PhysicsBody, CollisionBody<BodyFixture>, Transformable, DataContainer, Ownable {
-	/** The default linear damping; value = {@link #DEFAULT_LINEAR_DAMPING} */
-	public static final double DEFAULT_LINEAR_DAMPING = 0.0;
-	
-	/** The default angular damping; value = {@link #DEFAULT_ANGULAR_DAMPING} */
-	public static final double DEFAULT_ANGULAR_DAMPING 	= 0.01;
-	
 	/** The {@link Mass} information */
 	protected Mass mass;
 	
 	/** The current linear velocity */
-	protected Vector2 velocity;
+	protected final Vector2 linearVelocity;
 
 	/** The current angular velocity */
 	protected double angularVelocity;
@@ -75,7 +70,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	protected double gravityScale;
 
 	/** The beginning transform for CCD */
-	protected Transform transform0;
+	protected final Transform transform0;
 
 	/** True if the body is fast, small or both */
 	protected boolean bullet;
@@ -94,7 +89,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	// last iteration accumulated force/torque
 
 	/** The current force */
-	protected Vector2 force;
+	protected final Vector2 force;
 	
 	/** The current torque */
 	protected double torque;
@@ -130,7 +125,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		this.radius = 0.0;
 		this.mass = new Mass();
 		this.transform0 = new Transform();
-		this.velocity = new Vector2();
+		this.linearVelocity = new Vector2();
 		this.angularVelocity = 0.0;
 		this.force = new Vector2();
 		this.torque = 0.0;
@@ -166,7 +161,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		.append("|Transform=").append(this.transform)
 		.append("|RotationDiscRadius=").append(this.radius)
 		.append("|Mass=").append(this.mass)
-		.append("|Velocity=").append(this.velocity)
+		.append("|LinearVelocity=").append(this.linearVelocity)
 		.append("|AngularVelocity=").append(this.angularVelocity)
 		.append("|Force=").append(this.force)
 		.append("|Torque=").append(this.torque)
@@ -440,7 +435,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 			return this;
 		}
 		// apply the impulse immediately
-		this.velocity.add(impulse.x * invM, impulse.y * invM);
+		this.linearVelocity.add(impulse.x * invM, impulse.y * invM);
 		// wake up the body
 		this.setAtRest(false);
 		// return this body
@@ -482,7 +477,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		// check the linear mass
 		if (invM != 0.0) {
 			// apply the impulse immediately
-			this.velocity.add(impulse.x * invM, impulse.y * invM);
+			this.linearVelocity.add(impulse.x * invM, impulse.y * invM);
 			awaken = true;
 		}
 		if (invI != 0.0) {
@@ -598,8 +593,8 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		if (inverseMass > Epsilon.E) {
 			// only perform this step if the body does not have
 			// a fixed linear velocity
-			this.velocity.x += (this.force.x * inverseMass + gravity.x * this.gravityScale) * elapsedTime;
-			this.velocity.y += (this.force.y * inverseMass + gravity.y * this.gravityScale) * elapsedTime;
+			this.linearVelocity.x += (this.force.x * inverseMass + gravity.x * this.gravityScale) * elapsedTime;
+			this.linearVelocity.y += (this.force.y * inverseMass + gravity.y * this.gravityScale) * elapsedTime;
 		}
 		
 		// av1 = av0 + (t / I) * dt
@@ -616,8 +611,8 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 			linear = Interval.clamp(linear, 0.0, 1.0);
 			
 			// inline body.velocity.multiply(linear);
-			this.velocity.x *= linear;
-			this.velocity.y *= linear;	
+			this.linearVelocity.x *= linear;
+			this.linearVelocity.y *= linear;	
 		}
 		
 		// apply angular damping
@@ -643,8 +638,8 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		}
 		
 		// compute the translation and rotation for this time step
-		double translationX = this.velocity.x * elapsedTime;
-		double translationY = this.velocity.y * elapsedTime;
+		double translationX = this.linearVelocity.x * elapsedTime;
+		double translationY = this.linearVelocity.y * elapsedTime;
 		double translationMagnitudeSquared = translationX * translationX + translationY * translationY;
 		
 		// make sure the translation is not over the maximum
@@ -652,7 +647,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 			double translationMagnitude = Math.sqrt(translationMagnitudeSquared);
 			double ratio = maxTranslation / translationMagnitude;
 			
-			this.velocity.multiply(ratio);
+			this.linearVelocity.multiply(ratio);
 
 			translationX *= ratio;
 			translationY *= ratio;
@@ -691,7 +686,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 			double maximumAtRestAngularVeclotiy = settings.getMaximumAtRestAngularVelocity();
 			
 			// check the linear and angular velocity
-			if (this.velocity.getMagnitudeSquared() > maximumAtRestLinearVelocitySquared || this.angularVelocity > maximumAtRestAngularVeclotiy) {
+			if (this.linearVelocity.getMagnitudeSquared() > maximumAtRestLinearVelocitySquared || this.angularVelocity > maximumAtRestAngularVeclotiy) {
 				// if either the linear or angular velocity is above the 
 				// threshold then reset the sleep time
 				this.atRestTime = 0.0;
@@ -712,8 +707,8 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	@Override
 	public boolean isStatic() {
 		return this.mass.getType() == MassType.INFINITE &&
-			   Math.abs(this.velocity.x) <= Epsilon.E &&
-			   Math.abs(this.velocity.y) <= Epsilon.E &&
+			   Math.abs(this.linearVelocity.x) <= Epsilon.E &&
+			   Math.abs(this.linearVelocity.y) <= Epsilon.E &&
 			   Math.abs(this.angularVelocity) <= Epsilon.E;
 	}
 	
@@ -723,8 +718,8 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	@Override
 	public boolean isKinematic() {
 		return this.mass.getType() == MassType.INFINITE &&
-				   (Math.abs(this.velocity.x) > Epsilon.E ||
-				    Math.abs(this.velocity.y) > Epsilon.E ||
+				   (Math.abs(this.linearVelocity.x) > Epsilon.E ||
+				    Math.abs(this.linearVelocity.y) > Epsilon.E ||
 				    Math.abs(this.angularVelocity) > Epsilon.E);
 	}
 	
@@ -821,7 +816,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	public void setAtRest(boolean flag) {
 		if (flag) {
 			this.atRest = true;
-			this.velocity.zero();
+			this.linearVelocity.zero();
 			this.angularVelocity = 0.0;
 			this.forces.clear();
 			this.torques.clear();
@@ -902,7 +897,10 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		double ri = this.transform0.getRotationAngle();
 		double rf = this.transform.getRotationAngle();
 		
-		final double twopi = 2.0 * Math.PI;
+		// special case of no rotation
+		if (ri == rf) return 0.0;
+		
+		final double twopi = Geometry.TWO_PI;
 		
 		// put the angles in the range [0, 2pi] rather than [-pi, pi]
 		if (ri < 0) ri += twopi;
@@ -910,6 +908,13 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		
 		// compute the difference
 		double r = rf - ri;
+		
+		// special case for zero angular velocity
+		if (this.angularVelocity == 0.0) {
+			return r > Math.PI ? r - twopi 
+					: r < -Math.PI ? r + twopi 
+						: r;
+		}
 		
 		// determine which way the angular velocity was going so that
 		// we know which angle is correct
@@ -943,7 +948,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	 */
 	@Override
 	public Vector2 getLinearVelocity() {
-		return this.velocity;
+		return this.linearVelocity;
 	}
 	
 	/* (non-Javadoc)
@@ -956,7 +961,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		// compute the r vector from the center of mass to the point
 		Vector2 r = c.to(point);
 		// compute the velocity
-		return r.cross(this.angularVelocity).add(this.velocity);
+		return r.cross(this.angularVelocity).add(this.linearVelocity);
 	}
 	
 	/* (non-Javadoc)
@@ -965,7 +970,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	@Override
 	public void setLinearVelocity(Vector2 velocity) {
 		if (velocity == null) throw new NullPointerException(Messages.getString("dynamics.body.nullVelocity"));
-		this.velocity.set(velocity);
+		this.linearVelocity.set(velocity);
 	}
 
 	/* (non-Javadoc)
@@ -973,8 +978,8 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	 */
 	@Override
 	public void setLinearVelocity(double x, double y) {
-		this.velocity.x = x;
-		this.velocity.y = y;
+		this.linearVelocity.x = x;
+		this.linearVelocity.y = y;
 	}
 	
 	/* (non-Javadoc)

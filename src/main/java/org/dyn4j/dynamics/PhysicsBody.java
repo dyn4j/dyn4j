@@ -76,6 +76,12 @@ import org.dyn4j.geometry.Vector2;
  * @since 1.0.0
  */
 public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, Shiftable, DataContainer, Ownable {
+	/** The default linear damping; value = {@link #DEFAULT_LINEAR_DAMPING} */
+	public static final double DEFAULT_LINEAR_DAMPING = 0.0;
+	
+	/** The default angular damping; value = {@link #DEFAULT_ANGULAR_DAMPING} */
+	public static final double DEFAULT_ANGULAR_DAMPING 	= 0.01;
+	
 	/**
 	 * Creates a {@link BodyFixture} for the given {@link Convex} {@link Shape},
 	 * adds it to the {@link PhysicsBody}, and returns it for configuration.
@@ -549,6 +555,14 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * This method takes the bounding circle, using the world center
 	 * and rotation disc radius, at the initial and final transforms
 	 * and creates an AABB containing both.
+	 * <p>
+	 * This method will return a degenerate AABB if the body has zero 
+	 * fixtures.  If this body has one or more fixtures, but didn't move, an AABB 
+	 * with a width and height equal to the rotation disc radius is returned.
+	 * <p>
+	 * <b>NOTE</b>: To get an accurate result from this method, one of the 
+	 * <code>setMass</code> methods should be called to set the 
+	 * rotation disc radius before calling this method.
 	 * @return {@link AABB}
 	 * @since 3.1.1
 	 */
@@ -556,12 +570,19 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	
 	/**
 	 * Creates a swept {@link AABB} from the given start and end {@link Transform}s
-	 * for this {@link PhysicsBody}.
+	 * using the fixtures on this {@link PhysicsBody}.
 	 * <p>
-	 * This method may return a degenerate AABB, where the min == max, if the body 
-	 * has not moved and does not have any fixtures.  If this body does have 
-	 * fixtures, but didn't move, an AABB encompassing the initial and final center 
-	 * points is returned.
+	 * This method takes the bounding circle, using the world center
+	 * and rotation disc radius, at the initial and final transforms
+	 * and creates an AABB containing both.
+	 * <p>
+	 * This method will return a degenerate AABB if the body has zero 
+	 * fixtures.  If this body has one or more fixtures, but didn't move, an AABB 
+	 * with a width and height equal to the rotation disc radius is returned.
+	 * <p>
+	 * <b>NOTE</b>: To get an accurate result from this method, one of the 
+	 * <code>setMass</code> methods should be called to set the 
+	 * rotation disc radius before calling this method.
 	 * @param initialTransform the initial {@link Transform}
 	 * @param finalTransform the final {@link Transform}
 	 * @return {@link AABB}
@@ -584,6 +605,9 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * This method will return a change in the range [0, 2&pi;).  This isn't as useful
 	 * if the angular velocity is greater than 2&pi; per time step.  Since we don't have
 	 * the timestep here, we can't compute the exact change in this case.
+	 * <p>
+	 * If the angular velocity is zero, this method returns the minimum difference
+	 * in orientation.
 	 * @return double
 	 * @since 3.1.5
 	 */
