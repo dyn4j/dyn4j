@@ -25,11 +25,11 @@
 package org.dyn4j.dynamics.contact;
 
 import org.dyn4j.collision.manifold.ManifoldPointId;
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents a contact point between two {@link Body} objects that
+ * Represents a contact point between two {@link PhysicsBody} objects that
  * has the necessary information to allow solving.
  * @author William Bittle
  * @version 4.0.0
@@ -45,16 +45,16 @@ final class SolvableContact implements Contact, SolvedContact {
 	/** The contact penetration depth */
 	final double depth;
 	
-	/** The contact point in {@link Body}1 space */
+	/** The contact point in {@link PhysicsBody}1 space */
 	final Vector2 p1;
 	
-	/** The contact point in {@link Body}2 space */
+	/** The contact point in {@link PhysicsBody}2 space */
 	final Vector2 p2;
 	
-	/** The {@link Vector2} from the center of {@link Body}1 to the contact point */
+	/** The {@link Vector2} from the center of {@link PhysicsBody}1 to the contact point */
 	Vector2 r1;
 	
-	/** The {@link Vector2} from the center of {@link Body}2 to the contact point */
+	/** The {@link Vector2} from the center of {@link PhysicsBody}2 to the contact point */
 	Vector2 r2;
 	
 	/** The accumulated normal impulse */
@@ -80,8 +80,8 @@ final class SolvableContact implements Contact, SolvedContact {
 	 * @param id the manifold point id used for warm starting
 	 * @param point the world space collision point
 	 * @param depth the penetration depth of this point
-	 * @param p1 the collision point in {@link Body}1's local space
-	 * @param p2 the collision point in {@link Body}2's local space
+	 * @param p1 the collision point in {@link PhysicsBody}1's local space
+	 * @param p2 the collision point in {@link PhysicsBody}2's local space
 	 */
 	public SolvableContact(ManifoldPointId id, Vector2 point, double depth, Vector2 p1, Vector2 p2) {
 		this.id = id;

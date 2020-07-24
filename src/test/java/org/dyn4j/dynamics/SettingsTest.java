@@ -246,6 +246,20 @@ public class SettingsTest {
 	}
 	
 	/**
+	 * Tests the get/set of warm starting enabled flag.
+	 */
+	@Test
+	public void getSetWarmStartingEnabled() {
+		TestCase.assertTrue(settings.isWarmStartingEnabled());
+		
+		settings.setWarmStartingEnabled(false);
+		TestCase.assertFalse(settings.isWarmStartingEnabled());
+		
+		settings.setWarmStartingEnabled(true);
+		TestCase.assertTrue(settings.isWarmStartingEnabled());
+	}
+	
+	/**
 	 * Tests the set restitution velocity method.
 	 */
 	@Test
@@ -357,10 +371,27 @@ public class SettingsTest {
 	 * @since 2.2.3
 	 */
 	@Test
-	public void setContinuousDetectionMode() {
+	public void getSetContinuousDetectionMode() {
 		settings.setContinuousDetectionMode(ContinuousDetectionMode.ALL);
 		TestCase.assertEquals(ContinuousDetectionMode.ALL, settings.getContinuousDetectionMode());
 		settings.setContinuousDetectionMode(ContinuousDetectionMode.NONE);
 		TestCase.assertEquals(ContinuousDetectionMode.NONE, settings.getContinuousDetectionMode());
+	}
+
+	/**
+	 * Tests the set continuous collision detection mode w/ null.
+	 * @since 4.0.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullContinuousDetectionMode() {
+		settings.setContinuousDetectionMode(null);
+	}
+	
+	/**
+	 * Tests the toString method.
+	 */
+	@Test
+	public void tostring() {
+		TestCase.assertNotNull(settings.toString());
 	}
 }

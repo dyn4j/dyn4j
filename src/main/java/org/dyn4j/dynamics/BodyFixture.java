@@ -32,7 +32,7 @@ import org.dyn4j.geometry.Shape;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a piece of a {@link Body}.
+ * Represents a piece of a {@link PhysicsBody}.
  * <p>
  * {@link BodyFixture} extends the {@link Fixture} class, adding physical features
  * like density and friction.
@@ -98,7 +98,7 @@ public class BodyFixture extends Fixture implements DataContainer {
 	 * @throws IllegalArgumentException if density is less than or equal to zero
 	 */
 	public void setDensity(double density) {
-		if (density <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.body.fixture.invalidDensity"));
+		if (density <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidDensity"));
 		this.density = density;
 	}
 	
@@ -133,7 +133,7 @@ public class BodyFixture extends Fixture implements DataContainer {
 	 * @throws IllegalArgumentException if friction is less than zero
 	 */
 	public void setFriction(double friction) {
-		if (friction < 0) throw new IllegalArgumentException(Messages.getString("dynamics.body.fixture.invalidFriction"));
+		if (friction < 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidFriction"));
 		this.friction = friction;
 	}
 	
@@ -160,7 +160,7 @@ public class BodyFixture extends Fixture implements DataContainer {
 	 * @throws IllegalArgumentException if restitution is less than zero
 	 */
 	public void setRestitution(double restitution) {
-		if (restitution < 0) throw new IllegalArgumentException(Messages.getString("dynamics.body.fixture.invalidRestitution"));
+		if (restitution < 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidRestitution"));
 		this.restitution = restitution;
 	}
 	

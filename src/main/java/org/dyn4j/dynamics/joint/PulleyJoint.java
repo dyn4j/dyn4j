@@ -102,10 +102,10 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 	/** The total length of the pulley system */
 	private double length;
 	
-	/** The normal from the first pulley anchor to the first {@link Body} anchor */
+	/** The normal from the first pulley anchor to the first {@link PhysicsBody} anchor */
 	private Vector2 n1;
 	
-	/** The normal from the second pulley anchor to the second {@link Body} anchor */
+	/** The normal from the second pulley anchor to the second {@link PhysicsBody} anchor */
 	private Vector2 n2;
 	
 	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */

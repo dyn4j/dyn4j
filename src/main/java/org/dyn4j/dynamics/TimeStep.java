@@ -24,6 +24,8 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.resources.Messages;
+
 /**
  * Class encapsulating the timestep information.
  * <p>
@@ -50,11 +52,10 @@ public class TimeStep {
 
 	/**
 	 * Default constructor.
-	 * @param dt the initial delta time; in seconds<sup>-1</sup>
+	 * @param dt the initial delta time in seconds; must be positive or zero
 	 */
 	public TimeStep(double dt) {
-		super();
-		// 1.0 / hz
+		if (dt <= 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.step.invalidDeltaTime"));
 		this.dt = dt;
 		this.invdt = 1.0 / dt;
 		this.dt0 = this.dt;
@@ -79,9 +80,10 @@ public class TimeStep {
 	
 	/**
 	 * Updates the current {@link TimeStep} using the new elapsed time.
-	 * @param dt in seconds.
+	 * @param dt in delta time in seconds; must be positive or zero
 	 */
 	public void update(double dt) {
+		if (dt <= 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.step.invalidDeltaTime"));
 		this.dt0 = this.dt;
 		this.invdt0 = this.invdt;
 		this.dt = dt;

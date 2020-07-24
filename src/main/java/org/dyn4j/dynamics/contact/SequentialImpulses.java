@@ -27,7 +27,6 @@ package org.dyn4j.dynamics.contact;
 import java.util.List;
 
 import org.dyn4j.Epsilon;
-import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
@@ -38,7 +37,7 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents an impulse based rigid {@link Body} physics collision resolver.
+ * Represents an impulse based rigid {@link PhysicsBody} physics collision resolver.
  * @author William Bittle
  * @version 4.0.0
  * @since 3.2.0

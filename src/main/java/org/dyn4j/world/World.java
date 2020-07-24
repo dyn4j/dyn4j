@@ -27,6 +27,7 @@ package org.dyn4j.world;
 import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.TimeStep;
 
 /**
  * Full implementation of both the {@link CollisionWorld} and {@link PhysicsWorld} interfaces.
@@ -57,5 +58,15 @@ public class World extends AbstractPhysicsWorld<Body, WorldCollisionData<Body>> 
 	@Override
 	protected WorldCollisionData<Body> createCollisionData(CollisionPair<Body, BodyFixture> pair) {
 		return new WorldCollisionData<Body>(pair);
+	}
+
+	/**
+	 * Returns the current time step information.
+	 * @return {@link TimeStep}
+	 * @deprecated Deprecated in 4.0.0. Use the {@link #getTimeStep()} method instead.
+	 */
+	@Deprecated
+	public TimeStep getStep() {
+		return this.step;
 	}
 }

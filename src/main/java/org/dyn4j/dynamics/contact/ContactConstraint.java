@@ -33,16 +33,16 @@ import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
 import org.dyn4j.collision.manifold.ManifoldPointId;
-import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
- * Represents a {@link SolvableContact} constraint for each {@link Body} pair.  
+ * Represents a {@link SolvableContact} constraint for each {@link PhysicsBody} pair.  
  * @author William Bittle
  * @version 4.0.0
  * @since 1.0.0
@@ -73,10 +73,10 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	protected final List<SolvableContact> contactsUnmodifiable;
 	
 	/** The penetration normal */
-	protected Vector2 normal;
+	protected final Vector2 normal;
 	
 	/** The tangent of the normal */
-	protected Vector2 tangent;
+	protected final Vector2 tangent;
 	
 	/** The coefficient of friction */
 	protected double friction;
@@ -165,9 +165,9 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		this.contacts = new ArrayList<SolvableContact>(2);
 		this.contactsUnmodifiable = Collections.unmodifiableList(this.contacts);
 		// set the normal
-		this.normal = null;
+		this.normal = new Vector2();
 		// set the tangent
-		this.tangent = null;
+		this.tangent = new Vector2();
 		// set coefficients
 		this.friction = 0.0;
 		this.restitution = 0.0;
@@ -198,8 +198,14 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		// reset all other data
 		// NOTE: we need to do this before any listeners are called because the user
 		// may want to update some of these and we don't want to reset them
-		this.normal = manifold.getNormal();
-		this.tangent = this.normal.getLeftHandOrthogonalVector();
+		Vector2 normal = manifold.getNormal();
+		this.normal.x = normal.x;
+		this.normal.y = normal.y;
+		
+		// inlined this.normal.getLeftHandOrthogonalVector();
+		this.tangent.x = normal.y;
+		this.tangent.y = -normal.x;
+		
 		this.friction = handler.getFriction(fixture1, fixture2);
 		this.restitution = handler.getRestitution(fixture1, fixture2);
 		this.sensor = fixture1.isSensor() || fixture2.isSensor();
@@ -358,32 +364,32 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	}
 	
 	/**
-	 * Returns the first {@link Body}.
-	 * @return {@link Body}
+	 * Returns the first {@link PhysicsBody}.
+	 * @return {@link PhysicsBody}
 	 */
 	public T getBody1() {
 		return this.pair.getBody1();
 	}
 	
 	/**
-	 * Returns the second {@link Body}.
-	 * @return {@link Body}
+	 * Returns the second {@link PhysicsBody}.
+	 * @return {@link PhysicsBody}
 	 */
 	public T getBody2() {
 		return this.pair.getBody2();
 	}
 
 	/**
-	 * Returns the first {@link Body}'s {@link BodyFixture}.
-	 * @return {@link BodyFixture} the first {@link Body}'s {@link BodyFixture}
+	 * Returns the first {@link PhysicsBody}'s {@link BodyFixture}.
+	 * @return {@link BodyFixture} the first {@link PhysicsBody}'s {@link BodyFixture}
 	 */
 	public BodyFixture getFixture1() {
 		return this.pair.getFixture1();
 	}
 	
 	/**
-	 * Returns the second {@link Body}'s {@link BodyFixture}.
-	 * @return {@link BodyFixture} the second {@link Body}'s {@link BodyFixture}
+	 * Returns the second {@link PhysicsBody}'s {@link BodyFixture}.
+	 * @return {@link BodyFixture} the second {@link PhysicsBody}'s {@link BodyFixture}
 	 */
 	public BodyFixture getFixture2() {
 		return this.pair.getFixture2();
@@ -443,10 +449,11 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	
 	/**
 	 * Sets the coefficient of friction for this contact constraint.
-	 * @param friction the friction
+	 * @param friction the friction; must be 0 or greater
 	 * @since 3.0.2
 	 */
 	public void setFriction(double friction) {
+		if (friction < 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidFriction"));
 		this.friction = friction;
 	}
 	
@@ -460,10 +467,11 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 
 	/**
 	 * Sets the coefficient of restitution for this contact constraint.
-	 * @param restitution the restitution
+	 * @param restitution the restitution; must be zero or greater
 	 * @since 3.0.2
 	 */
 	public void setRestitution(double restitution) {
+		if (restitution < 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidRestitution"));
 		this.restitution = restitution;
 	}
 	

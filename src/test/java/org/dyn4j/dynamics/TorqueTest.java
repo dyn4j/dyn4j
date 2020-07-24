@@ -43,12 +43,15 @@ public class TorqueTest {
 		Torque t = new Torque();
 		t = new Torque(0.2);
 		TestCase.assertEquals(0.2, t.torque);
+		TestCase.assertEquals(0.2, t.getTorque());
 		
 		t = new Torque(-3.5);
 		TestCase.assertEquals(-3.5, t.torque);
+		TestCase.assertEquals(-3.5, t.getTorque());
 		
 		Torque t2 = new Torque(t);
 		TestCase.assertEquals(-3.5, t2.torque);
+		TestCase.assertEquals(-3.5, t.getTorque());
 	}
 	
 	/**
@@ -59,10 +62,12 @@ public class TorqueTest {
 		Torque t = new Torque();
 		t.set(0.32);
 		TestCase.assertEquals(0.32, t.torque);
+		TestCase.assertEquals(0.32, t.getTorque());
 		
 		Torque t2 = new Torque(3.42);
 		t.set(t2);
 		TestCase.assertEquals(3.42, t.torque);
+		TestCase.assertEquals(3.42, t.getTorque());
 	}
 	
 	/**
@@ -80,5 +85,28 @@ public class TorqueTest {
 	public void setNullTorque() {
 		Torque t = new Torque();
 		t.set(null);
+	}
+
+	/**
+	 * Tests the toString method.
+	 */
+	@Test
+	public void tostring() {
+		Torque t = new Torque();
+		TestCase.assertNotNull(t.toString());
+		
+		t.set(0.32);
+		TestCase.assertNotNull(t.toString());
+	}
+
+	/**
+	 * Tests the default isComplete method.
+	 */
+	@Test
+	public void isComplete() {
+		Torque t = new Torque();
+		
+		// by default it should be true
+		TestCase.assertTrue(t.isComplete(0.0));
 	}
 }

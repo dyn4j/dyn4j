@@ -558,18 +558,6 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	public TimeStep getTimeStep();
 
 	/**
-	 * Returns the {@link TimeStep} object used to advance
-	 * the simulation.
-	 * <p>
-	 * The returned object contains the step information (elapsed time)
-	 * for the last and the previous time step.
-	 * @return {@link TimeStep} the current step object
-	 * @deprecated Deprecated in 4.0.0. Use the {@link #getTimeStep()} method instead.
-	 */
-	@Deprecated
-	public TimeStep getStep();
-	
-	/**
 	 * Returns the current accumulated time.
 	 * <p>
 	 * This is the time that has elapsed since the last step

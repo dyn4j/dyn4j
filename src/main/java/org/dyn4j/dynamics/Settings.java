@@ -61,21 +61,21 @@ public class Settings {
 	public static final double DEFAULT_MINIMUM_AT_REST_TIME = 0.5;
 
 	/** 
-	 * The default maximum velocity for a {@link Body} to go to sleep; in meters/second
+	 * The default maximum velocity for a {@link PhysicsBody} to go to sleep; in meters/second
 	 * @deprecated Deprecated in 4.0.0. Use {@link #DEFAULT_MAXIMUM_AT_REST_LINEAR_VELOCITY} instead.
 	 */
 	@Deprecated
 	public static final double DEFAULT_SLEEP_LINEAR_VELOCITY = DEFAULT_MAXIMUM_AT_REST_LINEAR_VELOCITY;
 	
 	/** 
-	 * The default maximum angular velocity for a {@link Body} to go to sleep; in radians/second 
+	 * The default maximum angular velocity for a {@link PhysicsBody} to go to sleep; in radians/second 
 	 * @deprecated Deprecated in 4.0.0. Use {@link #DEFAULT_MAXIMUM_AT_REST_ANGULAR_VELOCITY} instead.
 	 */
 	@Deprecated
 	public static final double DEFAULT_SLEEP_ANGULAR_VELOCITY = DEFAULT_MAXIMUM_AT_REST_ANGULAR_VELOCITY;
 	
 	/** 
-	 * The default required time a {@link Body} must maintain small motion so that its put to sleep; in seconds
+	 * The default required time a {@link PhysicsBody} must maintain small motion so that its put to sleep; in seconds
 	 * @deprecated Deprecated in 4.0.0. Use {@link #DEFAULT_MINIMUM_AT_REST_TIME} instead.
 	 */
 	@Deprecated

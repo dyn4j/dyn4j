@@ -38,7 +38,7 @@ import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactConstraintSolver;
 import org.dyn4j.dynamics.contact.SequentialImpulses;
 import org.dyn4j.dynamics.contact.SolvedContact;
-import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
+import org.dyn4j.dynamics.contact.ForceCollisionTimeOfImpactSolver;
 import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -1226,7 +1226,7 @@ public class AbstractPhysicsWorldTest {
 	public void getSetTimeOfImpactSolver() {
 		TestWorld w = new TestWorld();
 		
-		TimeOfImpactSolver<Body> tois = new TimeOfImpactSolver<Body>();
+		ForceCollisionTimeOfImpactSolver<Body> tois = new ForceCollisionTimeOfImpactSolver<Body>();
 		w.setTimeOfImpactSolver(tois);
 		
 		TestCase.assertEquals(tois, w.getTimeOfImpactSolver());
@@ -1245,7 +1245,6 @@ public class AbstractPhysicsWorldTest {
 	 * Tests the getTimeStep method.
 	 */
 	@Test
-	@SuppressWarnings("deprecation")
 	public void getTimeStep() {
 		TestWorld w = new TestWorld();
 		
@@ -1253,7 +1252,6 @@ public class AbstractPhysicsWorldTest {
 		
 		TimeStep step = w.getTimeStep();
 		TestCase.assertEquals(Settings.DEFAULT_STEP_FREQUENCY, step.getDeltaTime());
-		TestCase.assertEquals(Settings.DEFAULT_STEP_FREQUENCY, w.getStep().getDeltaTime());
 		
 		w.step(1);
 		

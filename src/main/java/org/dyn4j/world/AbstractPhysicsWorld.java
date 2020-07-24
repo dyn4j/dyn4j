@@ -46,6 +46,7 @@ import org.dyn4j.dynamics.contact.ContactUpdateHandler;
 import org.dyn4j.dynamics.contact.SequentialImpulses;
 import org.dyn4j.dynamics.contact.SolvedContact;
 import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
+import org.dyn4j.dynamics.contact.ForceCollisionTimeOfImpactSolver;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
@@ -171,7 +172,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.broadphaseFilter = new PhysicsBodyBroadphaseFilter<T>(this);
 		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
 		this.contactConstraintSolver = new SequentialImpulses<T>();
-		this.timeOfImpactSolver = new TimeOfImpactSolver<T>();
+		this.timeOfImpactSolver = new ForceCollisionTimeOfImpactSolver<T>();
 		
 		this.joints = new ArrayList<Joint<T>>(initialJointCapacity);
 		this.jointsUnmodifiable = Collections.unmodifiableList(this.joints);
@@ -795,15 +796,6 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		return this.step;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.PhysicsWorld#getStep()
-	 */
-	@Deprecated
-	@Override
-	public TimeStep getStep() {
-		return this.step;
-	}
-
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.PhysicsWorld#getAccumulatedTime()
 	 */

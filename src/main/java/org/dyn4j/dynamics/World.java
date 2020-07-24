@@ -65,7 +65,7 @@ import org.dyn4j.dynamics.contact.ContactManager;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.contact.DefaultContactManager;
 import org.dyn4j.dynamics.contact.SequentialImpulses;
-import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
+import org.dyn4j.dynamics.contact.ForceCollisionTimeOfImpactSolver;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
@@ -149,8 +149,8 @@ public class World implements Shiftable, DataContainer {
 	/** The {@link ContactConstraintSolver} */
 	protected ContactConstraintSolver contactConstraintSolver;
 	
-	/** The {@link TimeOfImpactSolver} */
-	protected TimeOfImpactSolver timeOfImpactSolver;
+	/** The {@link ForceCollisionTimeOfImpactSolver} */
+	protected ForceCollisionTimeOfImpactSolver timeOfImpactSolver;
 
 	/** The application data associated */
 	protected Object userData;
@@ -256,7 +256,7 @@ public class World implements Shiftable, DataContainer {
 		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
 		this.contactManager = new DefaultContactManager(initialCapacity);
 		this.contactConstraintSolver = new SequentialImpulses();
-		this.timeOfImpactSolver = new TimeOfImpactSolver();
+		this.timeOfImpactSolver = new ForceCollisionTimeOfImpactSolver();
 		
 		this.bodies = new ArrayList<Body>(initialCapacity.getBodyCount());
 		this.joints = new ArrayList<Joint>(initialCapacity.getJointCount());
@@ -942,7 +942,7 @@ public class World implements Shiftable, DataContainer {
 	 * After the first {@link Body} is found the two {@link Body}s are interpolated
 	 * to the time of impact.
 	 * <p>
-	 * Then the {@link Body}s are position solved using the {@link TimeOfImpactSolver}
+	 * Then the {@link Body}s are position solved using the {@link ForceCollisionTimeOfImpactSolver}
 	 * to force the {@link Body}s into collision.  This causes the discrete collision
 	 * detector to detect the collision on the next time step.
 	 * @param body1 the {@link Body}

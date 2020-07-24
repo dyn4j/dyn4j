@@ -45,15 +45,22 @@ public class ForceTest {
 		f = new Force(0.3, 2.0);
 		TestCase.assertEquals(0.3, f.force.x);
 		TestCase.assertEquals(2.0, f.force.y);
+		TestCase.assertEquals(0.3, f.getForce().x);
+		TestCase.assertEquals(2.0, f.getForce().y);
 		
 		Force f2 = new Force(f);
-		TestCase.assertEquals(0.3, f.force.x);
-		TestCase.assertEquals(2.0, f.force.y);
+		TestCase.assertEquals(0.3, f2.force.x);
+		TestCase.assertEquals(2.0, f2.force.y);
 		TestCase.assertNotSame(f.force, f2.force);
+		TestCase.assertEquals(0.3, f2.getForce().x);
+		TestCase.assertEquals(2.0, f2.getForce().y);
+		TestCase.assertNotSame(f.getForce(), f2.getForce());
 		
 		f = new Force(new Vector2(2.0, 1.0));
 		TestCase.assertEquals(2.0, f.force.x);
 		TestCase.assertEquals(1.0, f.force.y);
+		TestCase.assertEquals(2.0, f.getForce().x);
+		TestCase.assertEquals(1.0, f.getForce().y);
 	}
 	
 	/**
@@ -109,5 +116,29 @@ public class ForceTest {
 	public void setNullVector() {
 		Force f = new Force();
 		f.set((Vector2) null);
+	}
+	
+	/**
+	 * Tests the toString method.
+	 */
+	@Test
+	public void tostring() {
+		Force f = new Force();
+		
+		TestCase.assertNotNull(f.toString());
+		
+		f.set(2.0, 0.4);
+		TestCase.assertNotNull(f.toString());
+	}
+	
+	/**
+	 * Tests the default isComplete method.
+	 */
+	@Test
+	public void isComplete() {
+		Force f = new Force();
+		
+		// by default it should be true
+		TestCase.assertTrue(f.isComplete(0.0));
 	}
 }

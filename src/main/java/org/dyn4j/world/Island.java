@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dyn4j.collision.Collisions;
-import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
@@ -45,7 +44,7 @@ import org.dyn4j.geometry.Vector2;
  * @param <T> the {@link PhysicsBody} type
  */
 public final class Island<T extends PhysicsBody> {
-	/** The list of {@link Body}s on this {@link Island} */
+	/** The list of {@link PhysicsBody}s on this {@link Island} */
 	final List<T> bodies;
 
 	/** The list of {@link Joint}s on this {@link Island} */
@@ -89,8 +88,8 @@ public final class Island<T extends PhysicsBody> {
 	}
 	
 	/**
-	 * Adds the given {@link Body} to the {@link Body} list.
-	 * @param body the {@link Body}
+	 * Adds the given {@link PhysicsBody} to the {@link PhysicsBody} list.
+	 * @param body the {@link PhysicsBody}
 	 */
 	public void add(T body) {
 		this.bodies.add(body);
@@ -113,8 +112,8 @@ public final class Island<T extends PhysicsBody> {
 	}
 	
 	/**
-	 * Integrates the {@link Body}s, solves all {@link ContactConstraint}s and
-	 * {@link Joint}s, and attempts to sleep motionless {@link Body}s.
+	 * Integrates the {@link PhysicsBody}s, solves all {@link ContactConstraint}s and
+	 * {@link Joint}s, and attempts to sleep motionless {@link PhysicsBody}s.
 	 * @param solver the contact constraint solver
 	 * @param gravity the gravity vector
 	 * @param step the time step information
