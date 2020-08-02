@@ -443,4 +443,51 @@ public class Matrix22 implements Copyable<Matrix22> {
 		r.y = det * (this.m00 * b.y - this.m10 * b.x);
 		return r;
 	}
+	
+	/**
+	 * Returns the max-norm of this matrix.
+	 * @return double
+	 */
+	public double normMax() {
+		// just the max of the absolute values
+		return Math.max(
+				Math.abs(this.m00), Math.max(
+						Math.abs(this.m01), Math.max(
+								Math.abs(this.m10), Math.abs(this.m11))));
+	}
+
+	/**
+	 * Returns the infinity-norm of this matrix.
+	 * @return double
+	 */
+	public double normInfinity() {
+		// the max of the sum of the absolute values of the rows
+		double row1 = Math.abs(this.m00) + Math.abs(this.m01);
+		double row2 = Math.abs(this.m10) + Math.abs(this.m11);
+		return Math.max(row1, row2);		
+	}
+
+	/**
+	 * Returns the 1-norm of this matrix.
+	 * @return double
+	 */
+	public double norm1() {
+		// the max of the sum of the absolute values of the columns
+		double col1 = Math.abs(this.m00) + Math.abs(this.m10);
+		double col2 = Math.abs(this.m01) + Math.abs(this.m11);
+		return Math.max(col1, col2);
+	}
+	
+	/**
+	 * Returns the frobenius-norm of this matrix.
+	 * @return double
+	 */
+	public double normFrobenius() {
+		// the square root of the sum of all the elements squared
+		return Math.sqrt(
+			this.m00 * this.m00 +
+			this.m10 * this.m10 +
+			this.m01 * this.m01 +
+			this.m11 * this.m11);
+	}
 }

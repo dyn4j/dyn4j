@@ -465,7 +465,7 @@ public class AABB implements Translatable, Copyable<AABB> {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Returns a new {@link AABB} of this AABB expanded by half the given expansion
 	 * in both the x and y directions.
@@ -555,6 +555,17 @@ public class AABB implements Translatable, Copyable<AABB> {
 	 */
 	public boolean isDegenerate(double error) {
 		return Math.abs(this.maxX - this.minX) <= error || Math.abs(this.maxY - this.minY) <= error;
+	}
+	
+	/**
+	 * Returns the center of the AABB.
+	 * @return {@link Vector2}
+	 * @since 4.0.0
+	 */
+	public Vector2 getCenter() {
+		return new Vector2(
+				this.minX + (this.maxX - this.minX) * 0.5,
+				this.minY + (this.maxY - this.minY) * 0.5);
 	}
 	
 	/**
