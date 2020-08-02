@@ -254,12 +254,61 @@ public class Settings {
 		this.restitutionVelocitySquared = Settings.DEFAULT_RESTITUTION_VELOCITY * Settings.DEFAULT_RESTITUTION_VELOCITY;
 		this.linearTolerance = Settings.DEFAULT_LINEAR_TOLERANCE;
 		this.linearToleranceSquared = Settings.DEFAULT_LINEAR_TOLERANCE * Settings.DEFAULT_LINEAR_TOLERANCE;
+		this.maximumAngularCorrection = Settings.DEFAULT_MAXIMUM_ANGULAR_CORRECTION;
+		this.maximumAngularCorrectionSquared = Settings.DEFAULT_MAXIMUM_ANGULAR_CORRECTION * Settings.DEFAULT_MAXIMUM_ANGULAR_CORRECTION;
 		this.maximumLinearCorrection = Settings.DEFAULT_MAXIMUM_LINEAR_CORRECTION;
 		this.maximumLinearCorrectionSquared = Settings.DEFAULT_MAXIMUM_LINEAR_CORRECTION * Settings.DEFAULT_MAXIMUM_LINEAR_CORRECTION;
 		this.angularTolerance = Settings.DEFAULT_ANGULAR_TOLERANCE;
 		this.angularToleranceSquared = Settings.DEFAULT_ANGULAR_TOLERANCE * Settings.DEFAULT_ANGULAR_TOLERANCE;
 		this.baumgarte = Settings.DEFAULT_BAUMGARTE;
 		this.continuousDetectionMode = ContinuousDetectionMode.ALL;
+	}
+
+	/**
+	 * Creates a deep copy of this settings object.
+	 * @return {@link Settings}
+	 * @since 4.0.0
+	 */
+	public Settings copy() {
+		Settings settings = new Settings();
+		settings.copy(this);
+		return settings;
+	}
+	
+	/**
+	 * Copies all the settings from the given settings to this settings.
+	 * @param settings the settings to copy
+	 * @since 4.0.0
+	 */
+	public void copy(Settings settings) {
+		this.angularTolerance = settings.angularTolerance;
+		this.angularToleranceSquared = settings.angularToleranceSquared;
+		this.atRestDetectionEnabled = settings.atRestDetectionEnabled;
+		this.baumgarte = settings.baumgarte;
+		this.continuousDetectionMode = settings.continuousDetectionMode;
+		this.linearTolerance = settings.linearTolerance;
+		this.linearToleranceSquared = settings.linearToleranceSquared;
+		this.maximumAngularCorrection = settings.maximumAngularCorrection;
+		this.maximumAngularCorrectionSquared = settings.maximumAngularCorrectionSquared;
+		this.maximumAtRestAngularVelocity = settings.maximumAtRestAngularVelocity;
+		this.maximumAtRestAngularVelocitySquared = settings.maximumAtRestAngularVelocitySquared;
+		this.maximumAtRestLinearVelocity = settings.maximumAtRestLinearVelocity;
+		this.maximumAtRestLinearVelocitySquared = settings.maximumAtRestLinearVelocitySquared;
+		this.maximumLinearCorrection = settings.maximumLinearCorrection;
+		this.maximumLinearCorrectionSquared = settings.maximumLinearCorrectionSquared;
+		this.maximumRotation = settings.maximumRotation;
+		this.maximumRotationSquared = settings.maximumRotationSquared;
+		this.maximumTranslation = settings.maximumTranslation;
+		this.maximumTranslationSquared = settings.maximumTranslationSquared;
+		this.maximumWarmStartDistance = settings.maximumWarmStartDistance;
+		this.maximumWarmStartDistanceSquared = settings.maximumWarmStartDistanceSquared;
+		this.minimumAtRestTime = settings.minimumAtRestTime;
+		this.positionConstraintSolverIterations = settings.positionConstraintSolverIterations;
+		this.restitutionVelocity = settings.restitutionVelocity;
+		this.restitutionVelocitySquared = settings.restitutionVelocitySquared;
+		this.stepFrequency = settings.stepFrequency;
+		this.velocityConstraintSolverIterations = settings.velocityConstraintSolverIterations;
+		this.warmStartingEnabled = settings.warmStartingEnabled;
 	}
 	
 	/**

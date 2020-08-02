@@ -219,8 +219,28 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 				K.m11 = invM1 + invM2 + invI1 * rn2A * rn2A + invI2 * rn2B * rn2B;
 				
 				// check the condition number of the matrix
+				
+				// typically you would take the matrix and compute
+				// one of the norms (1, max, infinity, etc), do the same
+				// for the inverse of the matrix, then multiple the two
+				// to get the condition number
+				
+				// instead, box2d takes a bit of a short cut by only
+				// evaluating the norm for a single element:
+				// ||A||      = m00
+				// ||inv(A)|| = m00 / determinant
+				// cond(A) = m00 * m00 / determinant
+				
+				// then, instead of dividing by the determinant we use
+				// it as part of the predicate for ill-conditioned
+				// m00 * m00 = cond(A) * determinant
+				// m00 * m00 < maxCondition * determinant
+				
+				// what's interesting about this is that the values i've seen here are very
+				// close to the values produced by the max-norm
 				final double maxCondition = 1000.0;
-				if (K.m00 * K.m00 < maxCondition * K.determinant()) {
+				final double det = K.determinant();
+				if (K.m00 * K.m00 < maxCondition * det) {
 					// if the condition number is below the max then we can
 					// assume that we can invert K
 					contactConstraint.K = K;
@@ -234,7 +254,12 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 					// just choose one of the points as the point to solve
 					
 					// let's choose the deepest point
-					// FIXME this would break the begin/persist/end sequencing...
+					// FIXME this would break the begin/persist/end sequencing....
+					
+					// don't remove, but don't solve the other one either. so we'll need to record that it was ill conditioned
+					// or that it wasn't solved and make sure thats part of the notification system or something
+					// this way we avoid having to report it "end"ing and "begin"ing over and over again.
+					
 					if (contact1.depth > contact2.depth) {
 						// then remove the second contact
 						contactConstraint.contacts.remove(1);
@@ -289,6 +314,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 			}
 		}
 	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.contact.ContactConstraintSolver#solveVelocityContraints(java.util.List, org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */

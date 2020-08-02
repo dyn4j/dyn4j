@@ -34,6 +34,7 @@ import org.dyn4j.DataContainer;
 import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.Filter;
 import org.dyn4j.collision.continuous.TimeOfImpact;
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.ContinuousDetectionMode;
 import org.dyn4j.dynamics.PhysicsBody;
@@ -62,8 +63,18 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
 /**
  * Abstract implementation of the {@link PhysicsWorld} interface.
  * <p>
- * This class pulls together the concept of a time-step with collision detection, collision resolution,
- * constraint solving, force/torque integration, etc.
+ * This class builds on top of the {@link AbstractCollisionWorld} class adding a physics
+ * pipeline to the collision detection pipeline. This class implements the {@link #processCollisions(Iterator)}
+ * method and uses it to build a {@link ConstraintGraph} which is then used to solve
+ * {@link ContactConstraint}s and {@link Joint}s.
+ * <p>
+ * Extenders only need to implement the {@link #createCollisionData(org.dyn4j.collision.CollisionPair)} method
+ * to ensure the correct type of collision data is used for tracking.
+ * <p>
+ * <b>NOTE</b>: This class uses the {@link Body#setOwner(Object)} and 
+ * {@link Body#setFixtureModificationHandler(org.dyn4j.collision.FixtureModificationHandler)}
+ * methods to handle certain scenarios like fixture removal on a body or bodies added to
+ * more than one world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0
@@ -72,13 +83,13 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  */
 public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends ContactCollisionData<T>> extends AbstractCollisionWorld<T, BodyFixture, V> implements PhysicsWorld<T, V>, Shiftable, DataContainer {
 	/** The dynamics settings for this world */
-	protected Settings settings;
+	protected final Settings settings;
 	
 	/** The {@link TimeStep} used by the dynamics calculations */
-	protected TimeStep step;
+	protected final TimeStep timeStep;
 	
 	/** The world gravity vector */
-	protected Vector2 gravity;
+	protected final Vector2 gravity;
 	
 	/** The {@link CoefficientMixer} */
 	protected CoefficientMixer coefficientMixer;
@@ -163,7 +174,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		
 		// initialize all the classes with default values
 		this.settings = new Settings();
-		this.step = new TimeStep(this.settings.getStepFrequency());
+		this.timeStep = new TimeStep(this.settings.getStepFrequency());
 		this.gravity = PhysicsWorld.EARTH_GRAVITY.copy();
 		
 		// override the broadphase filter
@@ -234,7 +245,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		int steps = 0;
 		while (this.time >= invhz && steps < maximumSteps) {
 			// update the step
-			this.step.update(stepElapsedTime <= 0 ? invhz : stepElapsedTime);
+			this.timeStep.update(stepElapsedTime <= 0 ? invhz : stepElapsedTime);
 			// reset the time
 			this.time = this.time - invhz;
 			// step the world
@@ -253,7 +264,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// make sure the update time is greater than zero
 		if (elapsedTime <= 0.0) return;
 		// update the step
-		this.step.update(elapsedTime);
+		this.timeStep.update(elapsedTime);
 		// step the world
 		this.step();
 	}
@@ -281,7 +292,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// perform the steps
 		for (int i = 0; i < steps; i++) {
 			// update the step object
-			this.step.update(elapsedTime);
+			this.timeStep.update(elapsedTime);
 			// step the world
 			this.step();
 		}
@@ -399,6 +410,116 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.removeAllBodies(notify);
 	}
 	
+	/**
+	 * Destroys all joints associated with the given constraint graph node.
+	 * @param node the node
+	 * @param notify true if destruction should emit notifications
+	 */
+	protected void destroyJoints(ConstraintGraphNode<T> node, boolean notify) {
+		T body = node.body;
+		
+		// JOINT CLEANUP
+		
+		// wake up any bodies connected to this body by a joint
+		// and destroy the joints and remove the edges
+		int jSize = node.joints.size();
+		for (int j = 0; j < jSize; j++) {
+			Joint<T> joint = node.joints.get(j);
+			
+			// remove the ownership
+			joint.setOwner(null);
+			// get the other body
+			T other = joint.getOtherBody(body);
+			// wake up the other body
+			other.setAtRest(false);
+			
+			// notify of the destroyed joint
+			if (notify) {
+				for (DestructionListener<T> dl : this.destructionListeners) {
+					dl.destroyed(joint);
+				}
+			}
+			
+			// remove the joint from the world
+			this.joints.remove(joint);
+		}
+		
+		// clear the node's joints
+		node.joints.clear();
+	}
+	
+	/**
+	 * Destroys the contacts for the given graph node.
+	 * @param node the node
+	 * @param fixture the fixture of the contacts to destroy; null means to destroy all
+	 * @param notify true if destruction should emit notifications
+	 */
+	protected void destroyContacts(ConstraintGraphNode<T> node, BodyFixture fixture, boolean notify) {
+		T body = node.body;
+		
+		// CONTACT CLEANUP
+
+		// NOTE: I've opted to remove any collision data in the next collision 
+		// detection phase except for the contact-constraint collision data. 
+		// The effect is that users of the stored collisionData need 
+		// to understand that the data stored there could include collision information 
+		// for bodies that no longer exist in the world. The alternative is to iterate 
+		// the entire set of pairs checking for this body - which isn't particularly
+		// efficient.
+		
+		Iterator<ContactConstraint<T>> it = node.contactConstraints.iterator();
+		while (it.hasNext()) {
+			ContactConstraint<T> contactConstraint = it.next();
+
+			// don't do anything with contact constraints that aren't involving the
+			// given fixture
+			if (fixture != null && 
+				contactConstraint.getFixture1() != fixture && 
+				contactConstraint.getFixture2() != fixture) {
+				continue;
+			}
+			
+			// get the other body involved
+			T other = contactConstraint.getOtherBody(body);				
+			// wake the other body
+			other.setAtRest(false);
+			
+			// remove the stored collision data
+			V data = this.collisionData.remove(contactConstraint.getCollisionPair());
+			
+			if (notify) {
+				// notify of contact destruction
+				List<? extends SolvedContact> contacts = contactConstraint.getContacts();
+				int cSize = contacts.size();
+				for (int k = 0; k < cSize; k++) {
+					Contact contact = contacts.get(k);
+					// call the destruction listeners
+					for (ContactListener<T> cl : this.contactListeners) {
+						cl.destroyed(data, contact);
+					}
+				}
+				
+				// notify destruction of collision info
+				for (DestructionListener<T> dl : this.destructionListeners) {
+					dl.destroyed(contactConstraint);
+				}
+			}
+			
+			// if we're trying to remove contacts for only a single fixture
+			// then remove them during the iteration, otherwise they are
+			// all cleared at the end of the iteration
+			if (fixture != null) {
+				it.remove();
+			}
+		}
+		
+		// if we were not given a fixture, then we need to remove all
+		// contacts from the node
+		if (fixture == null) {
+			node.contactConstraints.clear();
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.PhysicsWorld#removeBody(org.dyn4j.dynamics.PhysicsBody, boolean)
 	 */
@@ -406,14 +527,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	public boolean removeBody(T body, boolean notify) {
 		// check for null body
 		if (body == null) return false;
-		
-		List<DestructionListener<T>> destructionListeners = null;
-		List<ContactListener<T>> contactListeners = null;
-		if (notify) {
-			destructionListeners = this.destructionListeners;
-			contactListeners = this.contactListeners;
-		}
-		
+
 		// remove the body from the list
 		boolean removed = this.bodies.remove(body);
 		
@@ -422,6 +536,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// set the world property to null
 			body.setFixtureModificationHandler(null);
 			body.setOwner(null);
+			body.setAtRest(false);
+			body.setEnabled(true);
 			
 			// remove the body from the broadphase
 			this.broadphaseDetector.remove(body);
@@ -429,71 +545,10 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			ConstraintGraphNode<T> node = this.constraintGraph.removeBody(body);
 			
 			// JOINT CLEANUP
-			
-			// wake up any bodies connected to this body by a joint
-			// and destroy the joints and remove the edges
-			int jSize = node.joints.size();
-			for (int j = 0; j < jSize; j++) {
-				Joint<T> joint = node.joints.get(j);
-				
-				// remove the ownership
-				joint.setOwner(null);
-				// get the other body
-				T other = joint.getOtherBody(body);
-				// wake up the other body
-				other.setAtRest(false);
-				
-				// notify of the destroyed joint
-				if (notify) {
-					for (DestructionListener<T> dl : destructionListeners) {
-						dl.destroyed(joint);
-					}
-				}
-				
-				// remove the joint from the world
-				this.joints.remove(joint);
-			}
-			
-			// CONTACT CLEANUP
-			
-			// NOTE: I've opted to remove any collision data in the next collision 
-			// detection phase except for the contact-constraint collision data. 
-			// The effect is that users of the stored collisionData need 
-			// to understand that the data stored there could include collision information 
-			// for bodies that no longer exist in the world. The alternative is to iterate 
-			// the entire set of pairs checking for this body - which isn't particularly
-			// efficient.
-			
-			int ccSize = node.contactConstraints.size();
-			for (int j = 0; j < ccSize; j++) {
-				ContactConstraint<T> contactConstraint = node.contactConstraints.get(j);
+			this.destroyJoints(node, notify);
 
-				// get the other body involved
-				T other = contactConstraint.getOtherBody(body);				
-				// wake the other body
-				other.setAtRest(false);
-				
-				// remove the stored collision data
-				V data = this.collisionData.remove(contactConstraint.getCollisionPair());
-				
-				if (notify) {
-					// notify of contact end
-					List<? extends SolvedContact> contacts = contactConstraint.getContacts();
-					int cSize = contacts.size();
-					for (int k = 0; k < cSize; k++) {
-						Contact contact = contacts.get(k);
-						// call the destruction listeners
-						for (ContactListener<T> cl : contactListeners) {
-							cl.end(data, contact);
-						}
-					}
-					
-					// notify destruction of collision info
-					for (DestructionListener<T> dl : destructionListeners) {
-						dl.destroyed(contactConstraint);
-					}
-				}
-			}
+			// CONTACT CLEANUP
+			this.destroyContacts(node, null, notify);
 		}
 		
 		return removed;
@@ -511,6 +566,12 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// we remove the joint from the interaction graph nodes
 		if (removed) {
 			joint.setOwner(null);
+			
+			// wake the bodies
+			T b1 = joint.getBody1();
+			T b2 = joint.getBody2();
+			b1.setAtRest(false);
+			b2.setAtRest(false);
 			
 			this.constraintGraph.removeJoint(joint);
 		}
@@ -534,6 +595,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 				T body = this.bodies.get(i);
 				body.setFixtureModificationHandler(null);
 				body.setOwner(null);
+				body.setAtRest(false);
+				body.setEnabled(true);
 			}
 			
 			// remove ownership
@@ -547,13 +610,6 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			return;
 		}
 		
-		List<DestructionListener<T>> destructionListeners = null;
-		List<ContactListener<T>> contactListeners = null;
-		if (notify) {
-			destructionListeners = this.destructionListeners;
-			contactListeners = this.contactListeners;
-		}
-		
 		// loop over the bodies and clear all
 		// joints and contacts
 		for (int i = 0; i < bsize; i++) {
@@ -563,6 +619,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// set the world property to null
 			body.setFixtureModificationHandler(null);
 			body.setOwner(null);
+			body.setAtRest(false);
+			body.setEnabled(true);
 			
 			// notify of all the destroyed contacts
 			// NOTE: we do a remove here because this will remove the edges
@@ -571,57 +629,13 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			ConstraintGraphNode<T> node = this.constraintGraph.removeBody(body);
 			
 			// JOINT CLEANUP
-			
-			// destroy the joints and remove the edges
-			int jSize = node.joints.size();
-			for (int j = 0; j < jSize; j++) {
-				Joint<T> joint = node.joints.get(j);
-				
-				// clear the owner
-				joint.setOwner(null);
-				
-				// notify of the destroyed joint
-				for (DestructionListener<T> dl : destructionListeners) {
-					dl.destroyed(joint);
-				}
-			}
+			this.destroyJoints(node, notify);
 			
 			// CONTACT CLEANUP
-			
-			// NOTE: I've opted to remove any collision data in the next collision 
-			// detection phase except for the contact-constraint collision data. 
-			// The effect is that users of the stored collisionData need 
-			// to understand that the data stored there could include collision information 
-			// for bodies that no longer exist in the world. The alternative is to iterate 
-			// the entire set of pairs checking for this body - which isn't particularly
-			// efficient.
-			
-			int ccSize = node.contactConstraints.size();
-			for (int j = 0; j < ccSize; j++) {
-				ContactConstraint<T> contactConstraint = node.contactConstraints.get(j);
-				
-				// remove the stored collision data
-				V data = this.collisionData.remove(contactConstraint.getCollisionPair());
-				
-				// notify of contact end
-				List<? extends SolvedContact> contacts = contactConstraint.getContacts();
-				int cSize = contacts.size();
-				for (int k = 0; k < cSize; k++) {
-					Contact contact = contacts.get(k);
-					// call the destruction listeners
-					for (ContactListener<T> cl : contactListeners) {
-						cl.end(data, contact);
-					}
-				}
-				
-				// notify destruction of collision info
-				for (DestructionListener<T> dl : destructionListeners) {
-					dl.destroyed(contactConstraint);
-				}
-			}
-			
+			this.destroyContacts(node, null, notify);
+
 			// notify of the destroyed body
-			for (DestructionListener<T> dl : destructionListeners) {
+			for (DestructionListener<T> dl : this.destructionListeners) {
 				dl.destroyed(body);
 			}
 		}
@@ -647,30 +661,60 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public void removeAllJoints(boolean notify) {
-		List<DestructionListener<T>> destructionListeners = null;
-		if (notify) {
-			destructionListeners = this.destructionListeners;
-		}
-		
 		int size = this.joints.size();
 		for (int i = 0; i < size; i++) {
 			Joint<T> joint = this.joints.get(i);
 			
 			// clear the owner
 			joint.setOwner(null);
+			
+			T b1 = joint.getBody1();
+			T b2 = joint.getBody2();
+			
+			b1.setAtRest(false);
+			b2.setAtRest(false);
 
 			if (notify) {
-				for (DestructionListener<T> dl : destructionListeners) {
+				for (DestructionListener<T> dl : this.destructionListeners) {
 					dl.destroyed(joint);
 				}
 			}
 		}
 		
 		this.constraintGraph.removeAllJoints();
-		
 		this.joints.clear();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.AbstractCollisionWorld#handleFixtureRemoved(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	protected void handleFixtureRemoved(T body, BodyFixture fixture) {
+		super.handleFixtureRemoved(body, fixture);
+
+		// check the constraint graph for contacts to end
+		ConstraintGraphNode<T> node = this.constraintGraph.getNode(body);
+		if (node != null) {
+			// CONTACT CLEANUP
+			this.destroyContacts(node, fixture, true);
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.AbstractCollisionWorld#handleAllFixturesRemoved(org.dyn4j.collision.CollisionBody)
+	 */
+	@Override
+	protected void handleAllFixturesRemoved(T body) {
+		super.handleAllFixturesRemoved(body);
+		
+		// check the constraint graph for contacts to end
+		ConstraintGraphNode<T> node = this.constraintGraph.getNode(body);
+		if (node != null) {
+			// CONTACT CLEANUP
+			this.destroyContacts(node, null, true);
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.PhysicsWorld#getSettings()
 	 */
@@ -684,8 +728,10 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public void setSettings(Settings settings) {
-		if (settings == null) throw new NullPointerException(Messages.getString("dynamics.world.nullSettings"));
-		this.settings = settings;
+		if (settings == null) {
+			return;
+		}
+		this.settings.copy(settings);
 	}
 
 	/* (non-Javadoc)
@@ -693,10 +739,22 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public void setGravity(Vector2 gravity) {
-		if (gravity == null) throw new NullPointerException(Messages.getString("dynamics.world.nullGravity"));
-		this.gravity = gravity;
+		if (gravity == null) {
+			return;
+		}
+		this.gravity.x = gravity.x;
+		this.gravity.y = gravity.y;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#setGravity(double, double)
+	 */
+	@Override
+	public void setGravity(double x, double y) {
+		this.gravity.x = x;
+		this.gravity.y = y;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.PhysicsWorld#getGravity()
 	 */
@@ -793,7 +851,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public TimeStep getTimeStep() {
-		return this.step;
+		return this.timeStep;
 	}
 	
 	/* (non-Javadoc)
@@ -1064,7 +1122,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// notify the step listeners
 		for (int i = 0; i < sSize; i++) {
 			StepListener<T> sl = stepListeners.get(i);
-			sl.begin(this.step, this);
+			sl.begin(this.timeStep, this);
 		}
 		
 		// check if we need to update the contacts first
@@ -1074,7 +1132,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// notify that an update was performed
 			for (int i = 0; i < sSize; i++) {
 				StepListener<T> sl = stepListeners.get(i);
-				sl.updatePerformed(this.step, this);
+				sl.updatePerformed(this.timeStep, this);
 			}
 			// set the update required flag to false
 			this.updateRequired = false;
@@ -1106,99 +1164,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		}
 		
 		// solve the world by using the interaction graph to produce a set of islands
-		this.constraintGraph.solve(this.contactConstraintSolver, this.gravity, this.step, this.settings);
-		
-//		// perform a depth first search of the contact graph
-//		// to create islands for constraint solving
-//		Deque<InteractionGraphNode<T>> stack = new ArrayDeque<InteractionGraphNode<T>>(size);
-//
-//		// create an island to reuse
-//		Island<T> island = new Island<T>(size, this.joints.size());
-//		for (InteractionGraphNode<T> seed : this.interactionGraph.values()) {
-//			T seedBody = seed.body;
-//			
-//			// skip if asleep, in active, static, or already on an island
-//			if (island.isOnIsland(seedBody) || seedBody.isAtRest() || !seedBody.isEnabled() || seedBody.isStatic()) {
-//				continue;
-//			}
-//			
-//			island.clear();
-//			stack.clear();
-//			stack.push(seed);
-//			
-//			while (stack.size() > 0) {
-//				InteractionGraphNode<T> node = stack.pop();
-//				T body = node.body;
-//				// add it to the island
-//				island.add(body);
-//				// make sure the body is awake
-//				body.setAtRest(false);
-//				
-//				// if its static then continue since we don't want the
-//				// island to span more than one static object
-//				// this keeps the size of the islands small
-//				if (body.isStatic()) {
-//					continue;
-//				}
-//				
-//				// loop over the contact edges of this body
-//				int ceSize = node.contacts.size();
-//				for (int j = 0; j < ceSize; j++) {
-//					ContactConstraint<T> contactConstraint = node.contacts.get(j);
-//					
-//					// skip disabled or sensor contacts or contacts already on the island
-//					if (!contactConstraint.isEnabled() || contactConstraint.isSensor() || island.isOnIsland(contactConstraint)) {
-//						continue;
-//					}
-//					
-//					// get the other body
-//					T other = contactConstraint.getOtherBody(body);
-//					// add the contact constraint to the island list
-//					island.add(contactConstraint);
-//					
-//					// has the other body been added to an island yet?
-//					if (!island.isOnIsland(other)) {
-//						// if not then add this body to the stack
-//						stack.push(this.interactionGraph.get(other));
-//					}
-//				}
-//				
-//				// loop over the joint edges of this body
-//				int jeSize = node.joints.size();
-//				for (int j = 0; j < jeSize; j++) {
-//					Joint<T> joint = node.joints.get(j);
-//					
-//					// check if the joint is inactive
-//					if (!joint.isEnabled() || island.isOnIsland(joint)) {
-//						continue;
-//					}
-//					
-//					// get the other body
-//					T other = joint.getOtherBody(body);
-//					
-//					// check if the joint has already been added to an island
-//					// or if the other body is not active
-//					if (!other.isEnabled()) {
-//						continue;
-//					}
-//					
-//					// add the joint to the island
-//					island.add(joint);
-//					// check if the other body has been added to an island
-//					if (!island.isOnIsland(other)) {
-//						// if not then add the body to the stack
-//						stack.push(this.interactionGraph.get(other));
-//					}
-//				}
-//			}
-//			
-//			// solve the island
-//			island.solve(this.contactConstraintSolver, this.gravity, this.step, this.settings);
-//		}
-//		
-//		// allow memory to be reclaimed
-//		stack.clear();
-//		island.clear();
+		this.constraintGraph.solve(this.contactConstraintSolver, this.gravity, this.timeStep, this.settings);
 		
 		// notify of the all solved contacts
 		if (contactListeners.size() > 0) {
@@ -1221,7 +1187,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// notify the step listener
 		for (int i = 0; i < sSize; i++) {
 			StepListener<T> sl = stepListeners.get(i);
-			sl.postSolve(this.step, this);
+			sl.postSolve(this.timeStep, this);
 		}
 		
 		// after all has been updated find new contacts
@@ -1235,7 +1201,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// notify the step listener
 		for (int i = 0; i < sSize; i++) {
 			StepListener<T> sl = stepListeners.get(i);
-			sl.end(this.step, this);
+			sl.end(this.timeStep, this);
 		}
 	}
 	
@@ -1422,7 +1388,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			
 			// get the velocities for the time step since we want
 			// [t1, t2] to be bound to this time step
-			double dt = this.step.getDeltaTime();
+			double dt = this.timeStep.getDeltaTime();
 			// the linear and angular velocities should match what 
 			// we did when we advanced the position. alternatively
 			// we could calculate these from the start and end transforms
@@ -1522,6 +1488,12 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		}
 	}
 	
+	/**
+	 * A {@link ContactUpdateHandler} that uses the local mixers and listeners.
+	 * @author William Bittle
+	 * @version 4.0.0
+	 * @since 4.0.0
+	 */
 	private final class WarmStartHandler implements ContactUpdateHandler {
 		private ContactCollisionData<T> data;
 		private final List<ContactListener<T>> listeners;

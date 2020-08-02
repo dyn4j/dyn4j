@@ -57,8 +57,10 @@ import org.dyn4j.collision.narrowphase.NarrowphasePostProcessor;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.collision.narrowphase.Raycast;
 import org.dyn4j.collision.narrowphase.RaycastDetector;
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Link;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
@@ -73,6 +75,29 @@ import org.dyn4j.world.result.RaycastResult;
 
 /**
  * Abstract implementation of the {@link CollisionWorld} interface.
+ * <p>
+ * Implements the basic wiring for a collision <i>detection</i> pipeline. Extenders are expected
+ * to implement the {@link #processCollisions(Iterator)} and {@link #createCollisionData(CollisionPair)}
+ * methods. It's expected that extenders would fully enumerate the Iterator given in the
+ * {@link #processCollisions(Iterator)} method to ensure a detection cycle is fully completed.
+ * <p>
+ * Extenders should call the {@link #detect()} method to initiate the collision detection pipeline.
+ * Calling the {@link #detect()} will call the {@link #processCollisions(Iterator)} method to perform
+ * additional processing on the collisions found.
+ * <p>
+ * At a high-level this class handles the following pipeline activities:
+ * <ol>
+ * <li>(out of) Bounds detection (optional)
+ * <li>Broad-phase collision detection
+ * <li>Narrow-phase collision detection
+ * <li>Narrow-phase post-processing (ex. {@link Link} shapes)
+ * <li>Manifold (contact point) generation
+ * </ol>
+ * <p>
+ * <b>NOTE</b>: This class uses the {@link Body#setOwner(Object)} and 
+ * {@link Body#setFixtureModificationHandler(org.dyn4j.collision.FixtureModificationHandler)}
+ * methods to handle certain scenarios like fixture removal on a body or bodies added to
+ * more than one world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0
@@ -679,7 +704,6 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 * the responsibility of the sub class to do something with these.
 	 * <p>
 	 * At a minimum, sub classes should drain the given iterator:
-	 * <p>
 	 * <pre>
 	 * while (iterator.hasNext()) { 
 	 * 	iterator.next(); 
@@ -688,6 +712,32 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 * @param iterator the collision iterator
 	 */
 	protected abstract void processCollisions(Iterator<V> iterator);
+	
+	/**
+	 * Handler for fixture addition.
+	 * @param body the body the fixture was added to
+	 * @param fixture the fixture that was added
+	 */
+	protected void handleFixtureAdded(T body, E fixture) {
+		this.broadphaseDetector.add(body, fixture);
+	}
+	
+	/**
+	 * Handler for fixture removal.
+	 * @param body the body the fixture was removed from
+	 * @param fixture the fixture that was removed
+	 */
+	protected void handleFixtureRemoved(T body, E fixture) {
+		this.broadphaseDetector.remove(body, fixture);
+	}
+	
+	/**
+	 * Handler for all fixture removal.
+	 * @param body the body the fixtures were removed from
+	 */
+	protected void handleAllFixturesRemoved(T body) {
+		this.broadphaseDetector.remove(body);
+	}
 	
 	// AABB
 	
@@ -1191,7 +1241,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			Convex convex2 = fixture2.getShape();
 			Convex convex1 = fixture1.getShape();
 
-			// TODO would be nice to seed the narrowphase with the last separation normal (when they aren't overlapping), if we store the last separation normal, we don't want to clear/reset that
+			// TODO would be nice to seed the narrowphase with the last separation normal (when they aren't overlapping), if we store the last separation normal, we don't want to clear/reset that, then we could increase the broadphase expansion default
 			Penetration penetration = collision.getPenetration();
 			if (AbstractCollisionWorld.this.narrowphaseDetector.detect(convex1, transform1, convex2, transform2, penetration)) {
 				// check for zero penetration
@@ -1994,7 +2044,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		 */
 		@Override
 		public void onFixtureAdded(E fixture) {
-			AbstractCollisionWorld.this.broadphaseDetector.add(this.body, fixture);
+			AbstractCollisionWorld.this.handleFixtureAdded(this.body, fixture);
 		}
 		
 		/* (non-Javadoc)
@@ -2002,7 +2052,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		 */
 		@Override
 		public void onFixtureRemoved(E fixture) {
-			AbstractCollisionWorld.this.broadphaseDetector.remove(this.body, fixture);
+			AbstractCollisionWorld.this.handleFixtureRemoved(this.body, fixture);
 		}
 		
 		/* (non-Javadoc)
@@ -2010,7 +2060,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		 */
 		@Override
 		public void onAllFixturesRemoved() {
-			AbstractCollisionWorld.this.broadphaseDetector.remove(this.body);
+			AbstractCollisionWorld.this.handleAllFixturesRemoved(this.body);
 		}
 	}
 }

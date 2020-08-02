@@ -25,7 +25,7 @@
 package org.dyn4j.collision;
 
 /**
- * [INTERNAL] Represents a hook into a {@link CollisionBody} to be notified of {@link Fixture} modification events.
+ * Represents a hook into a {@link CollisionBody} to be notified of {@link Fixture} modification events.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0

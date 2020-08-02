@@ -319,7 +319,6 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	/**
 	 * Sets the dynamics settings for this world.
 	 * @param settings the desired settings
-	 * @throws NullPointerException if the given settings is null
 	 * @since 3.0.3
 	 */
 	public void setSettings(Settings settings);
@@ -327,9 +326,16 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	/**
 	 * Sets the acceleration due to gravity.
 	 * @param gravity the gravity in meters/second<sup>2</sup>
-	 * @throws NullPointerException if gravity is null
 	 */
 	public void setGravity(Vector2 gravity);
+	
+	/**
+	 * Sets the acceleration due to gravity.
+	 * @param x the x component of gravity
+	 * @param y the y component of gravity
+	 * @since 4.0.0
+	 */
+	public void setGravity(double x, double y);
 	
 	/**
 	 * Returns the acceleration due to gravity.

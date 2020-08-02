@@ -63,6 +63,13 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	 * @param contact the contact
 	 */
 	public abstract void end(ContactCollisionData<T> collision, Contact contact);
+
+	/**
+	 * Called when a body or fixture is removed from the world that had existing contacts.
+	 * @param collision the collision data
+	 * @param contact the contact
+	 */
+	public abstract void destroyed(ContactCollisionData<T> collision, Contact contact);
 	
 	/**
 	 * Called when two {@link BodyFixture}s remain in contact.

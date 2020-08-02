@@ -50,6 +50,12 @@ public class ContactListenerAdapter<T extends PhysicsBody> implements ContactLis
 	public void end(ContactCollisionData<T> collision, Contact contact) {}
 
 	/* (non-Javadoc)
+	 * @see org.dyn4j.world.listener.ContactListener#destroyed(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact)
+	 */
+	@Override
+	public void destroyed(ContactCollisionData<T> collision, Contact contact) {}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.ContactListener#persist(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact, org.dyn4j.dynamics.contact.Contact)
 	 */
 	@Override

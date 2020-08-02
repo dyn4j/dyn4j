@@ -66,10 +66,10 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/** True if the body is enabled */
 	protected boolean enabled;
 	
-	/** [INTERNAL] Used for notifcation of fixture modification events */
+	/** Used for notifcation of fixture modification events */
 	protected FixtureModificationHandler<T> fixtureModificationHandler;
 	
-	/** [INTERNAL] User for ownership by another object */
+	/** User for ownership by another object */
 	protected Object owner;
 	
 	/**

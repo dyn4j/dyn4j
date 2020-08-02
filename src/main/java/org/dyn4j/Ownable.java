@@ -25,20 +25,20 @@
 package org.dyn4j;
 
 /**
- * [INTERNAL] Represents an object that can be owned by a single owner.
+ * Represents an object that can be owned by a single owner.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0
  */
 public interface Ownable {
 	/**
-	 * [INTERNAL] Returns the owner for this body.
+	 * Returns the owner for this body.
 	 * @return Object
 	 */
 	public Object getOwner();
 	
 	/**
-	 * [INTERNAL] Sets the owner of this body.
+	 * Sets the owner of this body.
 	 * @param owner the owner
 	 */
 	public void setOwner(Object owner);

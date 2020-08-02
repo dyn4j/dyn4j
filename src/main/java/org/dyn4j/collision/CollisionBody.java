@@ -333,14 +333,14 @@ public interface CollisionBody<T extends Fixture> extends Transformable, Shiftab
 	// internal API
 	
 	/**
-	 * [INTERNAL] Returns the {@link FixtureModificationHandler} for this body.
+	 * Returns the {@link FixtureModificationHandler} for this body.
 	 * @return {@link FixtureModificationHandler}
 	 * @since 4.0.0
 	 */
 	public abstract FixtureModificationHandler<T> getFixtureModificationHandler();
 	
 	/**
-	 * [INTERNAL] Sets the {@link FixtureModificationHandler} for this body.
+	 * Sets the {@link FixtureModificationHandler} for this body.
 	 * @param handler the handler
 	 * @since 4.0.0
 	 */

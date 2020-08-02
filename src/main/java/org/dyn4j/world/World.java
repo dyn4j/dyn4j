@@ -31,6 +31,11 @@ import org.dyn4j.dynamics.TimeStep;
 
 /**
  * Full implementation of both the {@link CollisionWorld} and {@link PhysicsWorld} interfaces.
+ * <p>
+ * <b>NOTE</b>: This class uses the {@link Body#setOwner(Object)} and 
+ * {@link Body#setFixtureModificationHandler(org.dyn4j.collision.FixtureModificationHandler)}
+ * methods to handle certain scenarios like fixture removal on a body or bodies added to
+ * more than one world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0
@@ -67,6 +72,6 @@ public class World extends AbstractPhysicsWorld<Body, WorldCollisionData<Body>> 
 	 */
 	@Deprecated
 	public TimeStep getStep() {
-		return this.step;
+		return this.timeStep;
 	}
 }

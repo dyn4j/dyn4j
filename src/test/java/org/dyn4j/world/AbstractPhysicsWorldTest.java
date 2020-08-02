@@ -129,12 +129,15 @@ public class AbstractPhysicsWorldTest {
 	private class ContactListenerCounter implements ContactListener<Body> {
 		/** The number of times called */
 		public int end;
+		public int destroyed;
 		@Override
 		public void preSolve(ContactCollisionData<Body> collision, Contact contact) { }
 		@Override
 		public void begin(ContactCollisionData<Body> collision, Contact contact) { }
 		@Override
 		public void end(ContactCollisionData<Body> collision, Contact contact) { this.end++; }
+		@Override
+		public void destroyed(ContactCollisionData<Body> collision, Contact contact) { this.destroyed++; }
 		@Override
 		public void persist(ContactCollisionData<Body> collision, Contact oldContact, Contact newContact) { }
 		@Override
@@ -175,7 +178,7 @@ public class AbstractPhysicsWorldTest {
 		TestCase.assertNotNull(w.joints);
 		TestCase.assertNotNull(w.jointsUnmodifiable);
 		TestCase.assertNotNull(w.settings);
-		TestCase.assertNotNull(w.step);
+		TestCase.assertNotNull(w.timeStep);
 		TestCase.assertNotNull(w.stepListeners);
 		TestCase.assertNotNull(w.stepListenersUnmodifiable);
 		TestCase.assertEquals(0.0, w.time);
@@ -909,10 +912,16 @@ public class AbstractPhysicsWorldTest {
 	/**
 	 * Tests the set gravity method passing a null value.
 	 */
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void setNullGravity() {
 		TestWorld w = new TestWorld();
+		w.setGravity(0.0, -4.0);
+		
 		w.setGravity(null);
+		
+		TestCase.assertNotNull(w.getGravity());
+		TestCase.assertEquals(0.0, w.getGravity().x);
+		TestCase.assertEquals(-4.0, w.getGravity().y);
 	}
 	
 	/**
@@ -1206,17 +1215,22 @@ public class AbstractPhysicsWorldTest {
 		Settings s = new Settings();
 		s.setLinearTolerance(10000.0);
 		w.setSettings(s);
-		TestCase.assertEquals(s, w.getSettings());
+		TestCase.assertNotSame(s, w.getSettings());
 		TestCase.assertEquals(10000.0, w.getSettings().getLinearTolerance());
 	}
 	
 	/**
 	 * Tests setting the settings to null.
 	 */
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void setNullSettings() {
 		TestWorld w = new TestWorld();
+		w.getSettings().setAngularTolerance(4.0);
+		
 		w.setSettings(null);
+		
+		TestCase.assertNotNull(w.getSettings());
+		TestCase.assertEquals(4.0, w.getSettings().getAngularTolerance());
 	}
 	
 	/**
@@ -1504,7 +1518,7 @@ public class AbstractPhysicsWorldTest {
 		TestCase.assertEquals(1, w.bodies.size());
 		// make sure it really is the first body
 		TestCase.assertEquals(b1, w.getBody(0));
-		TestCase.assertEquals(1, cl.end);
+		TestCase.assertEquals(1, cl.destroyed);
 		
 		ConstraintGraphNode<Body> n1 = w.constraintGraph.getNode(b1);
 		TestCase.assertNotNull(n1);
@@ -1854,11 +1868,12 @@ public class AbstractPhysicsWorldTest {
 		
 		// one contact, one joint, and two bodies
 		TestCase.assertEquals(4, dl.called);
-		TestCase.assertEquals(1, cl.end);
+		TestCase.assertEquals(1, cl.destroyed);
+		TestCase.assertEquals(0, cl.end);
 		
 		// now try without notification
 		dl.called = 0;
-		cl.end = 0;
+		cl.destroyed = 0;
 		
 		w.addBody(b1);
 		w.addBody(b2);
@@ -1881,6 +1896,7 @@ public class AbstractPhysicsWorldTest {
 		
 		// one contact, one joint, and two bodies
 		TestCase.assertEquals(0, dl.called);
+		TestCase.assertEquals(0, cl.destroyed);
 		TestCase.assertEquals(0, cl.end);
 	}
 	
