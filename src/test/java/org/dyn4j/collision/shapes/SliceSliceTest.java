@@ -51,7 +51,7 @@ import org.junit.Test;
  * @version 3.1.5
  * @since 3.1.5
  */
-public class SliceSliceTest extends AbstractTest {
+public class SliceSliceTest extends AbstractNarrowphaseShapeTest {
 	/** The first test {@link Slice} */
 	private Slice slice1;
 	

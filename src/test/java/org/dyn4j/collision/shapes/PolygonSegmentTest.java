@@ -54,7 +54,7 @@ import org.junit.Test;
  * @version 3.1.5
  * @since 1.0.0
  */
-public class PolygonSegmentTest extends AbstractTest {
+public class PolygonSegmentTest extends AbstractNarrowphaseShapeTest {
 	/** The test {@link Polygon} */
 	private Polygon poly;
 	

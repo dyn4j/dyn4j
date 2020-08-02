@@ -49,7 +49,7 @@ import org.junit.Test;
  * @version 3.1.5
  * @since 1.0.0
  */
-public class SegmentSegmentTest extends AbstractTest {
+public class SegmentSegmentTest extends AbstractNarrowphaseShapeTest {
 	/** The first test {@link Segment} */
 	private Segment seg1;
 	

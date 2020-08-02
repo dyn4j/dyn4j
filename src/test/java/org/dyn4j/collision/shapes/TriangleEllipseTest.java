@@ -52,7 +52,7 @@ import org.junit.Test;
  * @version 3.1.5
  * @since 3.1.5
  */
-public class TriangleEllipseTest extends AbstractTest {
+public class TriangleEllipseTest extends AbstractNarrowphaseShapeTest {
 	/** The {@link Triangle} */
 	private Triangle t;
 	

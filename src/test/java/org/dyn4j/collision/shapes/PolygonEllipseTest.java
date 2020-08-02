@@ -53,7 +53,7 @@ import org.junit.Test;
  * @version 3.1.5
  * @since 3.1.5
  */
-public class PolygonEllipseTest extends AbstractTest {
+public class PolygonEllipseTest extends AbstractNarrowphaseShapeTest {
 	/** The test {@link Polygon} */
 	private Polygon poly;
 	

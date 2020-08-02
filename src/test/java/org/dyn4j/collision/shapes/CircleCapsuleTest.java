@@ -52,7 +52,7 @@ import org.junit.Test;
  * @version 3.1.5
  * @since 3.1.5
  */
-public class CircleCapsuleTest extends AbstractTest {
+public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 	/** The test {@link Circle} */
 	private Circle circle;
 	

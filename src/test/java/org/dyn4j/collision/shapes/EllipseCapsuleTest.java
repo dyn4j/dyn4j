@@ -52,7 +52,7 @@ import org.junit.Test;
  * @version 3.1.5
  * @since 3.1.5
  */
-public class EllipseCapsuleTest extends AbstractTest {
+public class EllipseCapsuleTest extends AbstractNarrowphaseShapeTest {
 	/** The test {@link Ellipse} */
 	private Ellipse ellipse;
 	
