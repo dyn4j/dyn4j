@@ -454,33 +454,42 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 			return false;
 		}
 		
-		ConstraintGraphNode<T> node = this.graph.get(body1);
-		if (node != null) {
-			int size = node.joints.size();
-			
-			// if there are no joints on this body, then the
-			// collision is allowed
-			if (size == 0) return true;
-			
-			// if any joint connecting body1 and body2 allows collision
-			// then the collision is allowed
-			for (int i = 0; i < size; i++) {
-				Joint<T> joint = node.joints.get(i);
-				// testing object references should be sufficient
-				if (joint.getBody1() == body2 || joint.getBody2() == body2) {
-					// check if collision is allowed
-					// we do an or here to find if there is at least one
-					// joint joining the two bodies that allows collision
-					if (joint.isCollisionAllowed()) {
-						return true;
-					}
+		// check that both bodies are part of this graph
+		ConstraintGraphNode<T> node1 = this.graph.get(body1);
+		ConstraintGraphNode<T> node2 = this.graph.get(body2);
+		if (node1 == null || node2 == null) {
+			return false;
+		}
+		
+		int size = node1.joints.size();
+		
+		// if there are no joints on this body, then the
+		// collision is allowed
+		if (size == 0) return true;
+		
+		// if any joint connecting body1 and body2 allows collision
+		// then the collision is allowed
+		boolean connectedWithBody2 = false;
+		for (int i = 0; i < size; i++) {
+			Joint<T> joint = node1.joints.get(i);
+			// testing object references should be sufficient
+			if (joint.getBody1() == body2 || joint.getBody2() == body2) {
+				connectedWithBody2 = true;
+				// check if collision is allowed
+				// we do an or here to find if there is at least one
+				// joint joining the two bodies that allows collision
+				if (joint.isCollisionAllowed()) {
+					return true;
 				}
 			}
 		}
 		
-		// not found, so return false
-		return false;
+		// if body1 has joints, but none are with body2
+		// then connectedWithBody2 = false
 		
+		// if body1 has joints with body2, but none of them
+		// allow collision connectedWithBody2 = true
+		return !connectedWithBody2;
 	}
 	
 	/**
