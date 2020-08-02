@@ -599,8 +599,8 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 			// Fg = mg
 			// a = F / m
 			// v1 = v0 + at
-			// v1 = v0 + ((Fg + F) / m)t
-			// v1 = v0 + ((mg + F) / m)t
+			// v1 = v0 + (Fg + F)t
+			// v1 = v0 + (mg + F)t
 			this.linearVelocity.x += elapsedTime * inverseMass * (gravity.x * this.gravityScale * mass + this.force.x);
 			this.linearVelocity.y += elapsedTime * inverseMass * (gravity.y * this.gravityScale * mass + this.force.y);
 		}
