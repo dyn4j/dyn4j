@@ -946,7 +946,7 @@ public class AbstractPhysicsBodyTest {
 		b.integrateVelocity(g, ts, s);
 		
 		TestCase.assertEquals(0.0, b.linearVelocity.x);
-		TestCase.assertEquals(g.y * s.getStepFrequency(), b.linearVelocity.y);
+		TestCase.assertEquals(g.y * s.getStepFrequency(), b.linearVelocity.y, 1e-9);
 		TestCase.assertEquals(0.0, b.angularVelocity);
 		
 		// try with some linear damping

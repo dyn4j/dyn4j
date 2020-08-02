@@ -584,17 +584,25 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		this.accumulate(elapsedTime);
 		
 		// get the mass properties
+		double mass = this.mass.getMass();
 		double inverseMass = this.mass.getInverseMass();
 		double inverseInertia = this.mass.getInverseInertia();
 		
 		// integrate force and torque to modify the velocity and
 		// angular velocity (sympletic euler)
-		// v1 = v0 + (f / m) + g) * dt
+		// v1 = v0 + ((f / m) + g) * dt
 		if (inverseMass > Epsilon.E) {
 			// only perform this step if the body does not have
 			// a fixed linear velocity
-			this.linearVelocity.x += (this.force.x * inverseMass + gravity.x * this.gravityScale) * elapsedTime;
-			this.linearVelocity.y += (this.force.y * inverseMass + gravity.y * this.gravityScale) * elapsedTime;
+			
+			// F = ma
+			// Fg = mg
+			// a = F / m
+			// v1 = v0 + at
+			// v1 = v0 + ((Fg + F) / m)t
+			// v1 = v0 + ((mg + F) / m)t
+			this.linearVelocity.x += elapsedTime * inverseMass * (gravity.x * this.gravityScale * mass + this.force.x);
+			this.linearVelocity.y += elapsedTime * inverseMass * (gravity.y * this.gravityScale * mass + this.force.y);
 		}
 		
 		// av1 = av0 + (t / I) * dt
