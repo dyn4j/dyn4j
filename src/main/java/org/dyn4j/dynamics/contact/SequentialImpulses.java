@@ -24,6 +24,7 @@
  */
 package org.dyn4j.dynamics.contact;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.dyn4j.Epsilon;
@@ -222,7 +223,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 				
 				// typically you would take the matrix and compute
 				// one of the norms (1, max, infinity, etc), do the same
-				// for the inverse of the matrix, then multiple the two
+				// for the inverse of the matrix, then multiply the two
 				// to get the condition number
 				
 				// instead, box2d takes a bit of a short cut by only
@@ -250,22 +251,19 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 					
 					// it looks like this will only be the case if the points are
 					// close to being the same point.  If they were the same point
-					// then the constraints would be redundant
+					// then the constraints would be redundant and solving them would
+					// produce instability.
+					
 					// just choose one of the points as the point to solve
 					
-					// let's choose the deepest point
-					// FIXME this would break the begin/persist/end sequencing....
+					// we're going to keep both points so that we don't keep emitting end
+					// notifications for these points and instead just set the number of 
+					// constraints to solve to 1
+					contactConstraint.size = 1;
 					
-					// don't remove, but don't solve the other one either. so we'll need to record that it was ill conditioned
-					// or that it wasn't solved and make sure thats part of the notification system or something
-					// this way we avoid having to report it "end"ing and "begin"ing over and over again.
-					
-					if (contact1.depth > contact2.depth) {
-						// then remove the second contact
-						contactConstraint.contacts.remove(1);
-					} else {
-						// then remove the first contact
-						contactConstraint.contacts.remove(0);
+					// then we're going to solve the one with the most depth
+					if (contact1.depth < contact2.depth) {
+						Collections.swap(contactConstraint.contacts, 0, 1);
 					}
 				}
 			}
@@ -299,7 +297,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 			
 			// get the contacts and contact size
 			List<SolvableContact> contacts = contactConstraint.contacts;
-			int cSize = contacts.size();
+			int cSize = contactConstraint.size;
 			
 			for (int j = 0; j < cSize; j++) {
 				SolvableContact contact = contacts.get(j);
@@ -326,7 +324,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 			
 			// get the contact list
 			List<SolvableContact> contacts = contactConstraint.contacts;
-			int cSize = contacts.size();
+			int cSize = contactConstraint.size;
 			if (cSize == 0) continue;
 			
 			// get the penetration axis and tangent
@@ -571,7 +569,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 			
 			// get the contact list
 			List<SolvableContact> contacts = contactConstraint.contacts;
-			int cSize = contacts.size();
+			int cSize = contactConstraint.size;
 			if (cSize == 0) continue;
 			
 			// get the bodies

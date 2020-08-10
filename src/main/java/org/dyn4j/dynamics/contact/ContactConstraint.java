@@ -93,7 +93,8 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	/** True if the contact should be evaluated */
 	protected boolean enabled;
 	
-	// TODO can we reuse these?
+	/** The number of contacts to solve */
+	protected int size;
 	
 	/** The K matrix for block solving a contact pair */
 	Matrix22 K;
@@ -148,6 +149,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		// by default the tangent speed is zero
 		this.tangentSpeed = 0;
 		this.enabled = true;
+		this.size = manifold.getPoints().size();
 	}
 	
 	/**
@@ -177,6 +179,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		// by default the tangent speed is zero
 		this.tangentSpeed = 0;
 		this.enabled = true;
+		this.size = 0;
 	}
 	
 	/**
@@ -272,6 +275,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		// the new ones
 		this.contacts.clear();
 		this.contacts.addAll(contacts);
+		this.size = this.contacts.size();
 	}
 	
 	/* (non-Javadoc)
