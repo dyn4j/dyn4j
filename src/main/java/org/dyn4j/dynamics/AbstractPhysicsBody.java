@@ -694,7 +694,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 			double maximumAtRestAngularVeclotiy = settings.getMaximumAtRestAngularVelocity();
 			
 			// check the linear and angular velocity
-			if (this.linearVelocity.getMagnitudeSquared() > maximumAtRestLinearVelocitySquared || this.angularVelocity > maximumAtRestAngularVeclotiy) {
+			if (this.linearVelocity.getMagnitudeSquared() > maximumAtRestLinearVelocitySquared || Math.abs(this.angularVelocity) > maximumAtRestAngularVeclotiy) {
 				// if either the linear or angular velocity is above the 
 				// threshold then reset the sleep time
 				this.atRestTime = 0.0;
