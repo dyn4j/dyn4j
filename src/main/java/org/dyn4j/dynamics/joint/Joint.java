@@ -151,18 +151,18 @@ public abstract class Joint<T extends PhysicsBody> implements Shiftable, DataCon
 	 * Returns the natural frequency of the given frequency.
 	 * <p>
 	 * The natural frequency can be determined by combining the following equations:
-	 * <pre>
+	 * <p style="white-space: pre;">
 	 * Harmonic oscillator:
 	 * f = 1 / (2&pi;) * sqrt(k / m)
 	 * 
 	 * Natural frequency:
 	 * w = sqrt(k / m)
-	 * </pre>
+	 * </p>
 	 * Substituting w into the first equation and solving for w:
-	 * <pre>
+	 * <p style="white-space: pre;">
 	 * f = 1 / (2&pi;) * w
 	 * w = f * 2&pi;
-	 * </pre>
+	 * </p>
 	 * @param frequency the frequency
 	 * @return double
 	 * @see <a href="https://en.wikipedia.org/wiki/Hookes_law#Harmonic_oscillator">https://en.wikipedia.org/wiki/Hookes_law#Harmonic_oscillator</a>
@@ -175,18 +175,18 @@ public abstract class Joint<T extends PhysicsBody> implements Shiftable, DataCon
 	 * Returns the spring damping coefficient.
 	 * <p>
 	 * The damping coefficient can be determined by the following equations:
-	 * <pre>
+	 * <p style="white-space: pre;">
 	 * Damping Ratio:
 	 * dr = actual damping (ad) / critical damping (cd)
 	 * 
 	 * Critical Damping:
 	 * cd = 2mw
-	 * </pre>
+	 * </p>
 	 * Where m is the mass and w is the natural frequency. Substituting cd into the first equation and solving for ad:
-	 * <pre>
+	 * <p style="white-space: pre;">
 	 * dr = ad / 2mw
 	 * ad = dr * 2mw
-	 * </pre>
+	 * </p>
 	 * @param mass the mass attached to the spring
 	 * @param naturalFrequency the natural frequency
 	 * @param dampingRatio the damping ratio
@@ -201,7 +201,7 @@ public abstract class Joint<T extends PhysicsBody> implements Shiftable, DataCon
 	 * Returns the spring stiffness, k, from Hooke's Law.
 	 * <p>
 	 * The stiffness can be determined by the following equation and solving for k:
-	 * <pre>
+	 * <p style="white-space: pre;">
 	 * Harmonic oscillator:
 	 * f = 1 / (2&pi;) * sqrt(k / m)
 	 * 
@@ -209,7 +209,7 @@ public abstract class Joint<T extends PhysicsBody> implements Shiftable, DataCon
 	 * k / m = (f * 2&pi;)<sup>2</sup>
 	 * k = (f * 2&pi;)<sup>2</sup> * m
 	 * k = w<sup>2</sup> * m
-	 * </pre>
+	 * </p>
 	 * Where w is the natural frequency and m is the mass.
 	 * @param mass the mass attached to the spring
 	 * @param naturalFrequency the natural frequency

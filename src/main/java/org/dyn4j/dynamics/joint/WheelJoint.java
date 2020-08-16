@@ -169,8 +169,6 @@ public class WheelJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	/** The impulse applied by the motor */
 	private double motorImpulse;
 	
-	// TODO add a reference distance to provide context to the limits
-	
 	/**
 	 * Minimal constructor.
 	 * @param body1 the first {@link PhysicsBody}
