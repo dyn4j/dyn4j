@@ -90,38 +90,38 @@ public class WheelJointTest extends AbstractJointTest {
 	 * Tests the isSpring method.
 	 */
 	@Test
-	public void isSpring() {
+	public void isSpringEnabled() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
 		// by default is a spring
-		TestCase.assertTrue(wj.isSpring());
+		TestCase.assertTrue(wj.isSpringEnabled());
 		
 		wj.setFrequency(1.0);
-		TestCase.assertTrue(wj.isSpring());
+		TestCase.assertTrue(wj.isSpringEnabled());
 		
 		wj.setFrequency(15.24);
-		TestCase.assertTrue(wj.isSpring());
+		TestCase.assertTrue(wj.isSpringEnabled());
 	}
 
 	/**
-	 * Tests the isSpringDamper method.
+	 * Tests the isSpringDamperEnabled method.
 	 */
 	@Test
-	public void isSpringDamper() {
+	public void isSpringDamperEnabled() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		TestCase.assertFalse(wj.isSpringDamper());
+		TestCase.assertFalse(wj.isSpringDamperEnabled());
 		
 		wj.setFrequency(1.0);
-		TestCase.assertFalse(wj.isSpringDamper());
+		TestCase.assertFalse(wj.isSpringDamperEnabled());
 		
 		wj.setFrequency(15.24);
-		TestCase.assertFalse(wj.isSpringDamper());
+		TestCase.assertFalse(wj.isSpringDamperEnabled());
 		
 		wj.setDampingRatio(0.4);
-		TestCase.assertTrue(wj.isSpringDamper());
+		TestCase.assertTrue(wj.isSpringDamperEnabled());
 		
 		wj.setDampingRatio(0.0);
-		TestCase.assertFalse(wj.isSpringDamper());
+		TestCase.assertFalse(wj.isSpringDamperEnabled());
 	}
 
 	/**
@@ -225,7 +225,7 @@ public class WheelJointTest extends AbstractJointTest {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
 		TestCase.assertFalse(wj.isMotorEnabled());
-		TestCase.assertEquals(0.0, wj.getMaximumMotorTorque());
+		TestCase.assertEquals(1000.0, wj.getMaximumMotorTorque());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		
@@ -236,8 +236,8 @@ public class WheelJointTest extends AbstractJointTest {
 		b2.setAtRest(true);
 		
 		// don't change the max force
-		wj.setMaximumMotorTorque(0.0);
-		TestCase.assertEquals(0.0, wj.getMaximumMotorTorque());
+		wj.setMaximumMotorTorque(1000.0);
+		TestCase.assertEquals(1000.0, wj.getMaximumMotorTorque());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		

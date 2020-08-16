@@ -29,7 +29,9 @@ package org.dyn4j.dynamics.joint;
  * @author William Bittle
  * @version 1.0.3
  * @since 1.0.0
+ * @deprecated Deprecated in 4.0.0. Joints are now using predictive limits.
  */
+@Deprecated
 public enum LimitState {
 	/** The state if the upper and lower limits are equal within tolerance */
 	EQUAL,

@@ -85,19 +85,19 @@ public class WeldJointTest extends AbstractJointTest {
 	@Test
 	public void isSpring() {
 		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-		TestCase.assertFalse(wj.isSpring());
+		TestCase.assertFalse(wj.isSpringEnabled());
 		
 		wj.setFrequency(0.0);
-		TestCase.assertFalse(wj.isSpring());
+		TestCase.assertFalse(wj.isSpringEnabled());
 		
 		wj.setFrequency(1.0);
-		TestCase.assertTrue(wj.isSpring());
+		TestCase.assertTrue(wj.isSpringEnabled());
 		
 		wj.setFrequency(15.24);
-		TestCase.assertTrue(wj.isSpring());
+		TestCase.assertTrue(wj.isSpringEnabled());
 		
 		wj.setFrequency(0.0);
-		TestCase.assertFalse(wj.isSpring());
+		TestCase.assertFalse(wj.isSpringEnabled());
 	}
 
 	/**
@@ -107,26 +107,26 @@ public class WeldJointTest extends AbstractJointTest {
 	@Test
 	public void isSpringDamper() {
 		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-		TestCase.assertFalse(wj.isSpringDamper());
+		TestCase.assertFalse(wj.isSpringDamperEnabled());
 		
 		wj.setFrequency(0.0);
-		TestCase.assertFalse(wj.isSpringDamper());
+		TestCase.assertFalse(wj.isSpringDamperEnabled());
 		
 		wj.setFrequency(1.0);
-		TestCase.assertFalse(wj.isSpringDamper());
+		TestCase.assertFalse(wj.isSpringDamperEnabled());
 		
 		wj.setFrequency(15.24);
-		TestCase.assertFalse(wj.isSpringDamper());
+		TestCase.assertFalse(wj.isSpringDamperEnabled());
 		
 		wj.setDampingRatio(0.4);
-		TestCase.assertTrue(wj.isSpringDamper());
+		TestCase.assertTrue(wj.isSpringDamperEnabled());
 		
 		wj.setDampingRatio(0.0);
-		TestCase.assertFalse(wj.isSpringDamper());
+		TestCase.assertFalse(wj.isSpringDamperEnabled());
 		
 		wj.setDampingRatio(0.61);
 		wj.setFrequency(0.0);
-		TestCase.assertFalse(wj.isSpringDamper());
+		TestCase.assertFalse(wj.isSpringDamperEnabled());
 	}
 	
 	/**

@@ -13,6 +13,8 @@ __ALL__ deprecated APIs will be removed in the next version. The deprecated APIs
 - [#99](https://github.com/dyn4j/dyn4j/issues/99) Major performance enhancements for large worlds (30-40%) and some small enhancements for small-medium worlds
 - [#99](https://github.com/dyn4j/dyn4j/issues/99) Added new objects to track collision over time to reduce allocation per frame.
 - [#99](https://github.com/dyn4j/dyn4j/issues/99) Added new API to easily see the entire output of the collision detection/resolution pipelines
+- New predictive joint limits
+- New linear limits on the Wheel Joint
 - [#102](https://github.com/dyn4j/dyn4j/issues/102) Added guards on Joint setX methods to ensure that the joined bodies are not awakened unless necessary
 - [#103](https://github.com/dyn4j/dyn4j/issues/103) Updated the FrictionJoint default max force/torque to non-zero values to better illustrate it's use to new users
 - Increased test coverage by 10%+ and greatly improved test quality

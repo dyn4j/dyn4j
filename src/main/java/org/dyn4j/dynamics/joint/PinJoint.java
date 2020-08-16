@@ -29,7 +29,6 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Shiftable;
@@ -70,10 +69,10 @@ import org.dyn4j.resources.Messages;
  */
 public class PinJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
 	/** The world space target point */
-	protected Vector2 target;
+	protected final Vector2 target;
 	
 	/** The local anchor point for the body */
-	protected Vector2 anchor;
+	protected final Vector2 anchor;
 	
 	/** The oscillation frequency in hz */
 	protected double frequency;
@@ -85,16 +84,22 @@ public class PinJoint<T extends PhysicsBody> extends Joint<T> implements Shiftab
 	protected double maximumForce;
 	
 	// current state
+
+	/** The stiffness (k) of the spring */
+	private double stiffness;
 	
-	/** The constraint mass; K = J * Minv * Jtrans */
-	private Matrix22 K;
-	
+	/** The damping coefficient of the spring-damper */
+	private double damping;
+
 	/** The bias for adding work to the constraint (simulating a spring) */
 	private Vector2 bias;
 	
 	/** The damping portion of the constraint */
 	private double gamma;
 
+	/** The constraint mass; K = J * Minv * Jtrans */
+	private final Matrix22 K;
+	
 	// output
 	
 	/** The impulse applied to the body to satisfy the constraint */
@@ -121,14 +126,19 @@ public class PinJoint<T extends PhysicsBody> extends Joint<T> implements Shiftab
 		// verity the max force
 		if (maximumForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.pin.invalidMaximumForce"));
 		
-		this.target = anchor;
+		this.target = anchor.copy();
 		this.anchor = body.getLocalPoint(anchor);
 		this.frequency = frequency;
 		this.dampingRatio = dampingRatio;
 		this.maximumForce = maximumForce;
 		
 		// initialize
+		this.stiffness = 0.0;
+		this.damping = 0.0;
+		this.gamma = 0.0;
+		this.bias = new Vector2();
 		this.K = new Matrix22();
+		
 		this.impulse = new Vector2();
 	}
 	
@@ -170,28 +180,34 @@ public class PinJoint<T extends PhysicsBody> extends Joint<T> implements Shiftab
 			m = mass.getInertia();
 		}
 		
-		// compute the natural frequency; f = w / (2 * pi) -> w = 2 * pi * f
-		double w = Geometry.TWO_PI * this.frequency;
-		// compute the damping coefficient; dRatio = d / (2 * m * w) -> d = 2 * m * w * dRatio
-		double d = 2.0 * m * this.dampingRatio * w;
-		// compute the spring constant; w = sqrt(k / m) -> k = m * w * w
-		double k = m * w * w;
+		// recompute spring reduced mass (m), stiffness (k), and damping (d)
+		// since frequency, dampingRatio, or the masses of the joined bodies
+		// could change
+		if (this.frequency > 0.0) {
+			double nf = this.getNaturalFrequency(this.frequency);
+			
+			this.stiffness = this.getSpringStiffness(m, nf);
+			this.damping = this.getSpringDampingCoefficient(m, nf, this.dampingRatio);
+		} else {
+			this.stiffness = 0.0;
+			this.damping = 0.0;
+		}
 		
 		// get the delta time
 		double dt = step.getDeltaTime();
-		// compute gamma = CMF = 1 / (hk + d)
-		this.gamma = dt * (d + dt * k);
-		// check for zero before inverting
-		if (this.gamma > Epsilon.E) {
-			this.gamma = 1.0 / this.gamma;
-		}
+		
+		// compute the CIM
+		this.gamma = this.getConstraintImpulseMixing(dt, this.stiffness, this.damping);
+		
+		// compute the ERP
+		double erp = this.getErrorReductionParameter(dt, this.stiffness, this.damping);
 		
 		// compute the r vector
 		Vector2 r = transform.getTransformedR(body.getLocalCenter().to(this.anchor));
 		
 		// compute the bias = ERP where ERP = hk / (hk + d)
 		this.bias = body.getWorldCenter().add(r).difference(this.target);
-		this.bias.multiply(dt * k * this.gamma);
+		this.bias.multiply(erp);
 		
 		// compute the K inverse matrix
 		this.K.m00 = invM + r.y * r.y * invI;
@@ -204,9 +220,13 @@ public class PinJoint<T extends PhysicsBody> extends Joint<T> implements Shiftab
 		this.K.m11 += this.gamma;
 		
 		// warm start
-		this.impulse.multiply(step.getDeltaTimeRatio());
-		body.getLinearVelocity().add(this.impulse.product(invM));
-		body.setAngularVelocity(body.getAngularVelocity() + invI * r.cross(this.impulse));
+		if (settings.isWarmStartingEnabled()) {
+			this.impulse.multiply(step.getDeltaTimeRatio());
+			body.getLinearVelocity().add(this.impulse.product(invM));
+			body.setAngularVelocity(body.getAngularVelocity() + invI * r.cross(this.impulse));
+		} else {
+			this.impulse.zero();
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -327,7 +347,7 @@ public class PinJoint<T extends PhysicsBody> extends Joint<T> implements Shiftab
 			// wake up the body
 			this.body2.setAtRest(false);
 			// set the new target
-			this.target = target;
+			this.target.set(target);
 		}
 	}
 	

@@ -120,7 +120,7 @@ public class PrismaticJointTest extends AbstractJointTest {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
 		TestCase.assertFalse(pj.isMotorEnabled());
-		TestCase.assertEquals(0.0, pj.getMaximumMotorForce());
+		TestCase.assertEquals(1000.0, pj.getMaximumMotorForce());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		
@@ -131,8 +131,8 @@ public class PrismaticJointTest extends AbstractJointTest {
 		b2.setAtRest(true);
 		
 		// don't change the max force
-		pj.setMaximumMotorForce(0.0);
-		TestCase.assertEquals(0.0, pj.getMaximumMotorForce());
+		pj.setMaximumMotorForce(1000.0);
+		TestCase.assertEquals(1000.0, pj.getMaximumMotorForce());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		

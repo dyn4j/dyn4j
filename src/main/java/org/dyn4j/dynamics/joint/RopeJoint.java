@@ -50,6 +50,11 @@ import org.dyn4j.resources.Messages;
  * between the given anchor points and will function identically like a
  * {@link DistanceJoint}.  The upper and lower limits can be enabled
  * separately.
+ * <p>
+ * The lower limit constraint requires that the bodies are initially separated
+ * for it to be enforced. The lower limit will be enforced as soon as the bodies
+ * separate, but it's recommended that they start separated instead. If the lower
+ * limit is not being used, then the initial state doesn't matter.
  * @author William Bittle
  * @version 4.0.0
  * @since 2.2.1
@@ -60,10 +65,10 @@ import org.dyn4j.resources.Messages;
  */
 public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
 	/** The local anchor point on the first {@link PhysicsBody} */
-	protected Vector2 localAnchor1;
+	protected final Vector2 localAnchor1;
 	
 	/** The local anchor point on the second {@link PhysicsBody} */
-	protected Vector2 localAnchor2;
+	protected final Vector2 localAnchor2;
 	
 	/** The maximum distance between the two world space anchor points */
 	protected double upperLimit;
@@ -79,19 +84,22 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 	
 	// current state
 	
+	/** The current distance */
+	private double length;
+	
 	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */
 	private double invK;
 	
 	/** The normal */
 	private Vector2 n;
 	
-	/** The current state of the joint limits */
-	private LimitState limitState;
-	
 	// output
 	
-	/** The accumulated impulse from the previous time step */
-	private double impulse;
+	/** The accumulated upper limit impulse */
+	private double upperImpulse;
+	
+	/** The accumulated lower limit impulse */
+	private double lowerImpulse;
 	
 	/**
 	 * Minimal constructor.
@@ -121,6 +129,13 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 		double distance = anchor1.distance(anchor2);
 		this.upperLimit = distance;
 		this.lowerLimit = distance;
+		
+		this.length = 0.0;
+		this.invK = 0.0;
+		this.n = null;
+		
+		this.lowerImpulse = 0.0;
+		this.upperImpulse = 0.0;
 	}
 	
 	/* (non-Javadoc)
@@ -162,83 +177,48 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 		this.n = r1.sum(this.body1.getWorldCenter()).subtract(r2.sum(this.body2.getWorldCenter()));
 		
 		// get the current length
-		double length = this.n.getMagnitude();
+		this.length = this.n.getMagnitude();
 		// check for the tolerance
-		if (length < linearTolerance) {
+		if (this.length < linearTolerance) {
 			this.n.zero();
+			this.upperImpulse = 0.0;
+			this.lowerImpulse = 0.0;
+			return;
 		} else {
 			// normalize it
-			this.n.multiply(1.0 / length);
+			this.n.multiply(1.0 / this.length);
 		}
 		
-		// check if both limits are enabled
-		// and get the current state of the limits
-		if (this.upperLimitEnabled && this.lowerLimitEnabled) {
-			// if both are enabled check if they are equal
-			if (Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * linearTolerance) {
-				// if so then set the state to equal
-				this.limitState = LimitState.EQUAL;
-			} else {
-				// make sure we have valid settings
-				if (this.upperLimit > this.lowerLimit) {
-					// check against the max and min distances
-					if (length > this.upperLimit) {
-						// set the state to at upper
-						this.limitState = LimitState.AT_UPPER;
-					} else if (length < this.lowerLimit) {
-						// set the state to at lower
-						this.limitState = LimitState.AT_LOWER;
-					} else {
-						// set the state to inactive
-						this.limitState = LimitState.INACTIVE;
-					}
-				}
-			}
-		} else if (this.upperLimitEnabled) {
-			// check the maximum against the current length
-			if (length > this.upperLimit) {
-				// set the state to at upper
-				this.limitState = LimitState.AT_UPPER;
-			} else {
-				// no constraint needed at this time
-				this.limitState = LimitState.INACTIVE;
-			}
-		} else if (this.lowerLimitEnabled) {
-			// check the minimum against the current length
-			if (length < this.lowerLimit) {
-				// set the state to at lower
-				this.limitState = LimitState.AT_LOWER;
-			} else {
-				// no constraint needed at this time
-				this.limitState = LimitState.INACTIVE;
-			}
-		} else {
-			// neither is enabled so no constraint needed at this time
-			this.limitState = LimitState.INACTIVE;
+		if (!this.upperLimitEnabled) {
+			this.upperImpulse = 0.0;
 		}
+		if (!this.lowerLimitEnabled) {
+			this.lowerImpulse = 0.0;
+		}
+
+		// compute K inverse
+		double cr1n = r1.cross(this.n);
+		double cr2n = r2.cross(this.n);
+		double invMass = 
+				invM1 + invI1 * cr1n * cr1n + 
+				invM2 + invI2 * cr2n * cr2n;
 		
-		// check the length to see if we need to apply the constraint
-		if (this.limitState != LimitState.INACTIVE) {
-			// compute K inverse
-			double cr1n = r1.cross(this.n);
-			double cr2n = r2.cross(this.n);
-			double invMass = invM1 + invI1 * cr1n * cr1n;
-			invMass += invM2 + invI2 * cr2n * cr2n;
-			
-			// check for zero before inverting
-			this.invK = invMass <= Epsilon.E ? 0.0 : 1.0 / invMass;
-			
+		// check for zero before inverting
+		this.invK = invMass <= Epsilon.E ? 0.0 : 1.0 / invMass;
+		
+		if (settings.isWarmStartingEnabled()) {
 			// warm start
-			this.impulse *= step.getDeltaTimeRatio();
+			this.upperImpulse *= step.getDeltaTimeRatio();
+			this.lowerImpulse *= step.getDeltaTimeRatio();
 			
-			Vector2 J = this.n.product(this.impulse);
+			Vector2 J = this.n.product(this.upperImpulse - this.lowerImpulse);
 			this.body1.getLinearVelocity().add(J.product(invM1));
 			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
 			this.body2.getLinearVelocity().subtract(J.product(invM2));
 			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(J));
 		} else {
-			// clear the impulse
-			this.impulse = 0.0;
+			this.upperImpulse = 0.0;
+			this.lowerImpulse = 0.0;
 		}
 	}
 	
@@ -247,8 +227,7 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 	 */
 	@Override
 	public void solveVelocityConstraints(TimeStep step, Settings settings) {
-		// check if the constraint need to be applied
-		if (this.limitState != LimitState.INACTIVE) {
+		if (this.lowerLimitEnabled || this.upperLimitEnabled) {
 			Transform t1 = this.body1.getTransform();
 			Transform t2 = this.body2.getTransform();
 			Mass m1 = this.body1.getMass();
@@ -267,19 +246,48 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 			Vector2 v1 = this.body1.getLinearVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
 			Vector2 v2 = this.body2.getLinearVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
 			
-			// compute Jv
-			double Jv = this.n.dot(v1.difference(v2));
+			double invdt = step.getInverseDeltaTime();
+			// upper limit (max length)
+			if (this.upperLimitEnabled) {
+				double d = this.length - this.upperLimit;
+				if (d < 0.0) {
+					double Jv = this.n.dot(v1.difference(v2));
+					
+					// compute lambda (the magnitude of the impulse)
+					double j = -this.invK * (Jv + d * invdt);
+					double oldImpulse = this.upperImpulse;
+					this.upperImpulse = Math.min(0.0, this.upperImpulse + j);
+					j = this.upperImpulse - oldImpulse;
+					
+					// apply the impulse
+					Vector2 J = this.n.product(j);
+					this.body1.getLinearVelocity().add(J.product(invM1));
+					this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
+					this.body2.getLinearVelocity().subtract(J.product(invM2));
+					this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(J));
+				}
+			}
 			
-			// compute lambda (the magnitude of the impulse)
-			double j = -this.invK * (Jv);
-			this.impulse += j;
-			
-			// apply the impulse
-			Vector2 J = this.n.product(j);
-			this.body1.getLinearVelocity().add(J.product(invM1));
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
-			this.body2.getLinearVelocity().subtract(J.product(invM2));
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(J));
+			// lower limit (min length)
+			if (this.lowerLimitEnabled) {
+				double d = this.lowerLimit - this.length;
+				if (d < 0.0) {
+					double Jv = this.n.dot(v2.difference(v1));
+
+					// compute lambda (the magnitude of the impulse)
+					double j = -this.invK * (Jv + d * invdt);
+					double oldImpulse = this.lowerImpulse;
+					this.lowerImpulse = Math.min(0.0, this.lowerImpulse + j);
+					j = this.lowerImpulse - oldImpulse;
+					
+					// apply the impulse
+					Vector2 J = this.n.product(j);
+					this.body1.getLinearVelocity().subtract(J.product(invM1));
+					this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * r1.cross(J));
+					this.body2.getLinearVelocity().add(J.product(invM2));
+					this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J));
+				}
+			}
 		}
 	}
 	
@@ -288,24 +296,14 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 	 */
 	@Override
 	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
-		// check if the constraint need to be applied
-		if (this.limitState != LimitState.INACTIVE) {
-			// if the limits are equal it doesn't matter if we
-			// use the maximum or minimum setting
-			double targetDistance = this.upperLimit;
-			// determine the target distance
-			if (this.limitState == LimitState.AT_LOWER) {
-				// use the minimum distance as the target
-				targetDistance = this.lowerLimit;
-			}
-			
+		if (this.lowerLimitEnabled || this.upperLimitEnabled) {	
 			double linearTolerance = settings.getLinearTolerance();
 			double maxLinearCorrection = settings.getMaximumLinearCorrection();
 			
 			Transform t1 = this.body1.getTransform();
 			Transform t2 = this.body2.getTransform();
 			Mass m1 = this.body1.getMass();
-			Mass m2 = this.body2.getMass();
+			Mass m2 = this.body2.getMass();	
 			
 			double invM1 = m1.getInverseMass();
 			double invM2 = m2.getInverseMass();
@@ -322,8 +320,15 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 			
 			// solve the position constraint
 			double l = this.n.normalize();
-			double C = l - targetDistance;
-			C = Interval.clamp(C, -maxLinearCorrection, maxLinearCorrection);
+			double C = 0.0;
+			
+			if (this.upperLimitEnabled && this.lowerLimitEnabled && Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * linearTolerance) {
+				C = Interval.clamp(l - this.lowerLimit, -maxLinearCorrection, maxLinearCorrection);
+			} else if (this.lowerLimitEnabled && l <= this.lowerLimit) {
+				C = Interval.clamp(l - this.lowerLimit, -maxLinearCorrection, 0.0);
+			} else if (this.upperLimitEnabled && l >= this.upperLimit) {
+				C = Interval.clamp(l - this.upperLimit, 0.0, maxLinearCorrection);
+			}
 			
 			double impulse = -this.invK * C;
 			
@@ -362,7 +367,7 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 	 */
 	@Override
 	public Vector2 getReactionForce(double invdt) {
-		return this.n.product(this.impulse * invdt);
+		return this.n.product((this.upperImpulse + this.lowerImpulse) * invdt);
 	}
 	
 	/**
@@ -413,6 +418,8 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 			}
 			// set the new target distance
 			this.upperLimit = upperLimit;
+			// clear the accumulated impulse
+			this.upperImpulse = 0.0;
 		}
 	}
 	
@@ -427,6 +434,8 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 			this.body2.setAtRest(false);
 			// set the flag
 			this.upperLimitEnabled = flag;
+			// clear the accumulated impulse
+			this.upperImpulse = 0.0;
 		}
 	}
 	
@@ -466,6 +475,8 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 			}
 			// set the new target distance
 			this.lowerLimit = lowerLimit;
+			// clear the accumulated impulse
+			this.lowerImpulse = 0.0;
 		}
 	}
 
@@ -480,6 +491,8 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 			this.body2.setAtRest(false);
 			// set the flag
 			this.lowerLimitEnabled = flag;
+			// clear the accumulated impulse
+			this.lowerImpulse = 0.0;
 		}
 	}
 
@@ -515,6 +528,9 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 			// set the limits
 			this.upperLimit = upperLimit;
 			this.lowerLimit = lowerLimit;
+			// clear the accumulated impulse
+			this.upperImpulse = 0.0;
+			this.lowerImpulse = 0.0;
 		}
 	}
 
@@ -543,6 +559,9 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 			// wake up the bodies
 			this.body1.setAtRest(false);
 			this.body2.setAtRest(false);
+			// clear the accumulated impulse
+			this.upperImpulse = 0.0;
+			this.lowerImpulse = 0.0;
 		}
 	}
 	
@@ -568,6 +587,9 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 			// set the limits
 			this.upperLimit = limit;
 			this.lowerLimit = limit;
+			// clear the accumulated impulse
+			this.upperImpulse = 0.0;
+			this.lowerImpulse = 0.0;
 		}
 	}
 	
@@ -591,8 +613,10 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 	 * Returns the current state of the limit.
 	 * @return {@link LimitState}
 	 * @since 3.2.0
+	 * @deprecated Deprecated in 4.0.0.
 	 */
+	@Deprecated
 	public LimitState getLimitState() {
-		return this.limitState;
+		return LimitState.INACTIVE;
 	}
 }

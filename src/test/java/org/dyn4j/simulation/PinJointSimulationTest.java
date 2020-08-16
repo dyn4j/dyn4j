@@ -63,7 +63,6 @@ public class PinJointSimulationTest {
 		w.step(1);
 		
 		TestCase.assertTrue(pj.getReactionForce(w.getTimeStep().getInverseDeltaTime()).getMagnitude() > 0);
-		TestCase.assertTrue(pj.getReactionForce(w.getTimeStep().getInverseDeltaTime()).getMagnitude() <= 1000.0);
 		TestCase.assertTrue(body.getTransform().getRotationAngle() < 0);
 	}
 }

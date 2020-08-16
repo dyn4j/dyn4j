@@ -102,16 +102,25 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	
 	// current state
 	
-	/** The current state of the joint limits */
-	private LimitState limitState;
+	/** The current angle between the bodies */
+	private double angle;
+		
+	/** The angular mass about the pivot point */
+	private double axialMass;
 	
-	/** The inverse effective mass */
-	private double invK;
-
+	/** True if the axial mass was close or equal to zero */
+	private boolean fixedRotation;
+	
 	// output
 	
 	/** The impulse applied to reduce angular motion */
 	private double impulse;
+	
+	/** The impulse applied by the lower limit */
+	private double lowerImpulse;
+	
+	/** The impulse applied by the upper limit */
+	private double upperImpulse;
 
 	/**
 	 * Minimal constructor.
@@ -135,8 +144,6 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		this.lowerLimit = this.referenceAngle;
 		// set enabled
 		this.limitEnabled = true;
-		// default the limit state
-		this.limitState = LimitState.EQUAL;
 		
 	}
 	
@@ -161,75 +168,53 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	 */
 	@Override
 	public void initializeConstraints(TimeStep step, Settings settings) {
-		double angularTolerance = settings.getAngularTolerance();
-		
 		Mass m1 = this.body1.getMass();
 		Mass m2 = this.body2.getMass();
 		
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		// check if the limits are enabled
-		if (this.limitEnabled) {
-			// compute the current angle
-			double angle = this.getRelativeRotation();
+		this.axialMass = invI1 + invI2;
+		if (this.axialMass > Epsilon.E) {
+			this.axialMass = 1.0 / this.axialMass;
+		} else {
+			this.fixedRotation = true;
+		}
+		
+		// compute the current angle
+		this.angle = this.getRelativeRotation();
+		
+		// handle no limits (or if the two bodies have fixed rotation)
+		if (!this.limitEnabled || this.fixedRotation) {
+			this.lowerImpulse = 0.0;
+			this.upperImpulse = 0.0;
+		}
+		
+		if (settings.isWarmStartingEnabled()) {
+			// account for variable time step
+			double dtr = step.getDeltaTimeRatio();
+
+			// account for variable time step
+			this.impulse *= dtr;
+			this.lowerImpulse *= dtr;
+			this.upperImpulse *= dtr;
 			
-			// if they are enabled check if they are equal
-			if (Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * angularTolerance) {
-				// if so then set the state to equal
-				this.limitState = LimitState.EQUAL;
-			} else {
-				// make sure we have valid settings
-				if (this.upperLimit > this.lowerLimit) {
-					// check against the max and min distances
-					if (angle >= this.upperLimit) {
-						// is the limit already at the upper limit
-						if (this.limitState != LimitState.AT_UPPER) {
-							this.impulse = 0;
-						}
-						// set the state to at upper
-						this.limitState = LimitState.AT_UPPER;
-					} else if (angle <= this.lowerLimit) {
-						// is the limit already at the lower limit
-						if (this.limitState != LimitState.AT_LOWER) {
-							this.impulse = 0;
-						}
-						// set the state to at lower
-						this.limitState = LimitState.AT_LOWER;
-					} else {
-						// set the state to inactive
-						this.limitState = LimitState.INACTIVE;
-						this.impulse = 0;
-					}
-				}
+			double axialImpulse1 = this.impulse + this.lowerImpulse - this.upperImpulse;
+			double axialImpulse2 = axialImpulse1;
+			if (this.limitEnabled) {
+				axialImpulse2 = this.impulse * this.ratio + this.lowerImpulse - this.upperImpulse;
 			}
+			
+			// warm start
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * axialImpulse1);
+			// we only want to apply the ratio to the impulse if the limits are not active.  When the
+			// limits are active we effectively disable the ratio
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * axialImpulse2);
 		} else {
-			// neither is enabled so no constraint needed at this time
-			this.limitState = LimitState.INACTIVE;
-			this.impulse = 0;
+			this.impulse = 0.0;
+			this.lowerImpulse = 0.0;
+			this.upperImpulse = 0.0;
 		}
-		
-		// compute the mass
-		if (this.limitState == LimitState.INACTIVE) {
-			// compute the angular mass including the ratio
-			this.invK = invI1 + this.ratio * this.ratio * invI2;
-		} else {
-			// compute the angular mass normally
-			this.invK = invI1 + invI2;
-		}
-		
-		if (this.invK > Epsilon.E) {
-			this.invK = 1.0 / this.invK;
-		}
-		
-		// account for variable time step
-		this.impulse *= step.getDeltaTimeRatio();
-		
-		// warm start
-		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * this.impulse);
-		// we only want to apply the ratio to the impulse if the limits are not active.  When the
-		// limits are active we effectively disable the ratio
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * this.impulse * (this.limitState == LimitState.INACTIVE ? this.ratio : 1.0));
 	}
 	
 	/* (non-Javadoc)
@@ -243,40 +228,42 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		// check if the limit needs to be applied (if we are at one of the limits
-		// then we ignore the ratio)
-		if (this.limitState != LimitState.INACTIVE) {
-			// solve the angular constraint
-			// get the relative velocity
-			double C = this.body1.getAngularVelocity() - this.body2.getAngularVelocity();
-			// get the impulse required to obtain the speed
-			double impulse = this.invK * -C;
-			
-			if (this.limitState == LimitState.EQUAL) {
-				this.impulse += impulse;
-			}else if (this.limitState == LimitState.AT_LOWER) {
-				double newImpulse = this.impulse + impulse;
-				if (newImpulse < 0.0) {
-					impulse = -this.impulse;
-					this.impulse = 0.0;
-				}
-			} else if (this.limitState == LimitState.AT_UPPER) {
-				double newImpulse = this.impulse + impulse;
-				if (newImpulse > 0.0) {
-					impulse = -this.impulse;
-					this.impulse = 0.0;
-				}
+		// solve the limit constraints
+		// check if the limit constraint is enabled
+		if (this.limitEnabled && !this.fixedRotation) {
+			// lower limit
+			{
+				double C = this.angle - this.lowerLimit;
+				double Cdot = this.body1.getAngularVelocity() - this.body2.getAngularVelocity();
+				double impulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * step.getInverseDeltaTime());
+				double oldImpulse = this.lowerImpulse;
+				this.lowerImpulse = Math.max(this.lowerImpulse + impulse, 0.0);
+				impulse = this.lowerImpulse - oldImpulse;
+				
+				this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * impulse);
+				this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * impulse);
 			}
-		
-			// apply the impulse
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * impulse);
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * impulse);
-		} else if (this.ratio != 1.0) {
+			
+			// upper limit
+			{
+				double C = this.upperLimit - this.angle;
+				double Cdot = this.body2.getAngularVelocity() - this.body1.getAngularVelocity();
+				double impulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * step.getInverseDeltaTime());
+				double oldImpulse = this.upperImpulse;
+				this.upperImpulse = Math.max(this.upperImpulse + impulse, 0.0);
+				impulse = this.upperImpulse - oldImpulse;
+				
+				this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * impulse);
+				this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * impulse);
+			}
+		}
+
+		if (!this.limitEnabled && this.ratio != 1.0) {
 			// the limit is inactive and the ratio is not one
 			// get the relative velocity
 			double C = this.body1.getAngularVelocity() - this.ratio * this.body2.getAngularVelocity();
 			// get the impulse required to obtain the speed
-			double impulse = this.invK * -C;
+			double impulse = this.axialMass * -C;
 			
 			// apply the impulse
 			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * impulse);
@@ -289,8 +276,8 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	 */
 	@Override
 	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
-		// check if the constraint needs to be applied
-		if (this.limitState != LimitState.INACTIVE) {
+		// solve position constraint for limits
+		if (this.limitEnabled && !this.fixedRotation) {
 			double angularTolerance = settings.getAngularTolerance();
 			double maxAngularCorrection = settings.getMaximumAngularCorrection();
 			
@@ -301,38 +288,29 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 			double invI2 = m2.getInverseInertia();
 			
 			// get the current angle between the bodies
-			double angle = this.getRelativeRotation();
 			double impulse = 0.0;
 			double angularError = 0.0;
-			// check the limit state
-			if (this.limitState == LimitState.EQUAL) {
-				// if the limits are equal then clamp the impulse to maintain
-				// the constraint between the maximum
-				double j = Interval.clamp(angle - this.lowerLimit, -maxAngularCorrection, maxAngularCorrection);
-				impulse = -j * this.invK;
-				angularError = Math.abs(j);
-			} else if (this.limitState == LimitState.AT_LOWER) {
-				// if the joint is at the lower limit then clamp only the lower value
-				double j = angle - this.lowerLimit;
-				angularError = -j;
-				j = Interval.clamp(j + angularTolerance, -maxAngularCorrection, 0.0);
-				impulse = -j * this.invK;
-			} else if (this.limitState == LimitState.AT_UPPER) {
-				// if the joint is at the upper limit then clamp only the upper value
-				double j = angle - this.upperLimit;
-				angularError = j;
-				j = Interval.clamp(j - angularTolerance, 0.0, maxAngularCorrection);
-				impulse = -j * this.invK;
+			
+			double angle = this.getRelativeRotation();
+			double C = 0.0;
+			
+			if (Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * angularTolerance) {
+				C = Interval.clamp(angle - this.lowerLimit, -maxAngularCorrection, maxAngularCorrection);
+			} else if (angle <= this.lowerLimit) {
+				C = Interval.clamp(angle - this.lowerLimit + angularTolerance, -maxAngularCorrection, 0.0);
+			} else if (angle >= this.upperLimit) {
+				C = Interval.clamp(angle - this.upperLimit - angularTolerance, 0.0, maxAngularCorrection);
 			}
 			
-			// apply the corrective impulses to the bodies
+			impulse = -this.axialMass * C;
 			this.body1.rotateAboutCenter(invI1 * impulse);
 			this.body2.rotateAboutCenter(-invI2 * impulse);
+			angularError = Math.abs(C);
 			
 			return angularError <= angularTolerance;
-		} else {
-			return true;
 		}
+		
+		return true;
 	}
 	
 	/**
@@ -608,8 +586,10 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	 * Returns the current state of the limit.
 	 * @return {@link LimitState}
 	 * @since 3.2.0
+	 * @deprecated Deprecated in 4.0.0.
 	 */
+	@Deprecated
 	public LimitState getLimitState() {
-		return this.limitState;
+		return LimitState.INACTIVE;
 	}
 }

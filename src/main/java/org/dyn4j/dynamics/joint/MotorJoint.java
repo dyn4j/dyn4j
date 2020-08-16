@@ -76,7 +76,7 @@ import org.dyn4j.resources.Messages;
  */
 public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
 	/** The linear target distance from body1's world space center */
-	protected Vector2 linearTarget;
+	protected final Vector2 linearTarget;
 	
 	/** The target angle between the two body's angles */
 	protected double angularTarget;
@@ -93,7 +93,7 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	// current state
 	
 	/** The pivot mass; K = J * Minv * Jtrans */
-	private Matrix22 K;
+	private final Matrix22 K;
 	
 	/** The mass for the angular constraint */
 	private double angularMass;
@@ -190,15 +190,20 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		this.linearError = d2.subtract(d1);
 		this.angularError = this.getAngularError();
 		
-		// account for variable time step
-		this.linearImpulse.multiply(step.getDeltaTimeRatio());
-		this.angularImpulse *= step.getDeltaTimeRatio();
-		
-		// warm start
-		this.body1.getLinearVelocity().subtract(this.linearImpulse.product(invM1));
-		this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * (r1.cross(this.linearImpulse) + this.angularImpulse));
-		this.body2.getLinearVelocity().add(this.linearImpulse.product(invM2));
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * (r2.cross(this.linearImpulse) + this.angularImpulse));
+		if (settings.isWarmStartingEnabled()) {
+			// account for variable time step
+			this.linearImpulse.multiply(step.getDeltaTimeRatio());
+			this.angularImpulse *= step.getDeltaTimeRatio();
+			
+			// warm start
+			this.body1.getLinearVelocity().subtract(this.linearImpulse.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * (r1.cross(this.linearImpulse) + this.angularImpulse));
+			this.body2.getLinearVelocity().add(this.linearImpulse.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * (r2.cross(this.linearImpulse) + this.angularImpulse));
+		} else {
+			this.linearImpulse.zero();
+			this.angularImpulse = 0.0;
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -358,7 +363,7 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		if (!target.equals(this.linearTarget)) {
 			this.body1.setAtRest(false);
 			this.body2.setAtRest(false);
-			this.linearTarget = target;
+			this.linearTarget.set(target);
 		}
 	}
 	

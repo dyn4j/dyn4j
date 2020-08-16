@@ -71,16 +71,16 @@ import org.dyn4j.resources.Messages;
  */
 public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
 	/** The world space pulley anchor point for the first {@link PhysicsBody} */
-	protected Vector2 pulleyAnchor1;
+	protected final Vector2 pulleyAnchor1;
 	
 	/** The world space pulley anchor point for the second {@link PhysicsBody} */
-	protected Vector2 pulleyAnchor2;
+	protected final Vector2 pulleyAnchor2;
 	
 	/** The local anchor point on the first {@link PhysicsBody} */
-	protected Vector2 localAnchor1;
+	protected final Vector2 localAnchor1;
 	
 	/** The local anchor point on the second {@link PhysicsBody} */
-	protected Vector2 localAnchor2;
+	protected final Vector2 localAnchor2;
 	
 	/** The pulley ratio for modeling a block-and-tackle */
 	protected double ratio;
@@ -91,13 +91,7 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 	// current state
 	
 	/** The state of the limit (only used for slack) */
-	private LimitState limitState;
-	
-	/** The original length of the first side of the pulley */
-	private final double length1;
-	
-	/** The original length of the second side of the pulley */
-	private final double length2;
+	private boolean underLength;
 	
 	/** The total length of the pulley system */
 	private double length;
@@ -148,16 +142,16 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 		// default the ratio and minimum length
 		this.ratio = 1.0;
 		// compute the lengths
-		this.length1 = bodyAnchor1.distance(pulleyAnchor1);
-		this.length2 = bodyAnchor2.distance(pulleyAnchor2);
+		double length1 = bodyAnchor1.distance(pulleyAnchor1);
+		double length2 = bodyAnchor2.distance(pulleyAnchor2);
 		// compute the lengths
 		// length = l1 + ratio * l2
-		this.length = this.length1 + this.length2;
+		this.length = length1 + length2;
 		// initialize the other fields
 		this.impulse = 0.0;
 		// initialize the slack parameters
 		this.slackEnabled = false;
-		this.limitState = LimitState.AT_UPPER;
+		this.underLength = false;
 	}
 	
 	/* (non-Javadoc)
@@ -216,7 +210,7 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 		
 		// check if we need to solve the constraint
 		if (l > this.length || !this.slackEnabled) {
-			this.limitState = LimitState.AT_UPPER;
+			this.underLength = false;
 			
 			// check for near zero length
 			if (l1 <= 10.0 * linearTolerance) {
@@ -243,24 +237,26 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 				this.invK = 0.0;
 			}
 			
-			// warm start the constraints taking
-			// variable time steps into account
-			double dtRatio = step.getDeltaTimeRatio();
-			this.impulse *= dtRatio;
-			
-			// compute the impulse along the axes
-			Vector2 J1 = this.n1.product(-this.impulse);
-			Vector2 J2 = this.n2.product(-this.ratio * this.impulse);
-			
-			// apply the impulse
-			this.body1.getLinearVelocity().add(J1.product(invM1));
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J1));
-			this.body2.getLinearVelocity().add(J2.product(invM2));
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J2));
+			if (settings.isWarmStartingEnabled()) {
+				// warm start the constraints taking
+				// variable time steps into account
+				double dtRatio = step.getDeltaTimeRatio();
+				this.impulse *= dtRatio;
+				
+				// compute the impulse along the axes
+				Vector2 J1 = this.n1.product(-this.impulse);
+				Vector2 J2 = this.n2.product(-this.ratio * this.impulse);
+				
+				// apply the impulse
+				this.body1.getLinearVelocity().add(J1.product(invM1));
+				this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J1));
+				this.body2.getLinearVelocity().add(J2.product(invM2));
+				this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J2));
+			}
 		} else {
 			// clear the impulse and don't solve anything
 			this.impulse = 0;
-			this.limitState = LimitState.INACTIVE;
+			this.underLength = true;
 		}
 	}
 	
@@ -269,7 +265,7 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 	 */
 	@Override
 	public void solveVelocityConstraints(TimeStep step, Settings settings) {
-		if (this.limitState != LimitState.INACTIVE) {
+		if (!this.underLength) {
 			Transform t1 = this.body1.getTransform();
 			Transform t2 = this.body2.getTransform();
 			Mass m1 = this.body1.getMass();
@@ -311,7 +307,7 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 	 */
 	@Override
 	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
-		if (this.limitState != LimitState.INACTIVE) {
+		if (this.underLength) {
 			double linearTolerance = settings.getLinearTolerance();
 			
 			Transform t1 = this.body1.getTransform();
@@ -369,9 +365,7 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 			double C = this.length - l1 - this.ratio * l2;
 			linearError = Math.abs(C);
 			
-			// clamping the impulse does not work with the limit state
 			// clamp the error
-//			C = Interval.clamp(C + linearTolerance, -maxLinearCorrection, maxLinearCorrection);
 			double impulse = -this.invK * C;
 			
 			// compute the impulse along the axes
@@ -385,9 +379,9 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 			this.body2.rotateAboutCenter(r2.cross(J2) * invI2);
 			
 			return linearError < linearTolerance;
-		} else {
-			return true;
 		}
+		
+		return true;
 	}
 	
 	/* (non-Javadoc)
@@ -532,8 +526,6 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 		if (ratio != this.ratio) {
 			// set the new ratio
 			this.ratio = ratio;
-			// compute the new length
-			this.length = this.length1 + this.ratio * this.length2;
 			// wake up both bodies
 			this.body1.setAtRest(false);
 			this.body2.setAtRest(false);
@@ -564,8 +556,10 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 	 * Returns the current state of the limit.
 	 * @return {@link LimitState}
 	 * @since 3.2.0
+	 * @deprecated Deprecated in 4.0.0.
 	 */
+	@Deprecated
 	public LimitState getLimitState() {
-		return this.limitState;
+		return LimitState.INACTIVE;
 	}
 }

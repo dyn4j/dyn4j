@@ -112,7 +112,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		
 		TestCase.assertFalse(rj.isMotorEnabled());
-		TestCase.assertEquals(0.0, rj.getMaximumMotorTorque());
+		TestCase.assertEquals(1000.0, rj.getMaximumMotorTorque());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		
@@ -123,8 +123,8 @@ public class RevoluteJointTest extends AbstractJointTest {
 		b2.setAtRest(true);
 		
 		// don't change the max force
-		rj.setMaximumMotorTorque(0.0);
-		TestCase.assertEquals(0.0, rj.getMaximumMotorTorque());
+		rj.setMaximumMotorTorque(1000.0);
+		TestCase.assertEquals(1000.0, rj.getMaximumMotorTorque());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		

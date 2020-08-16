@@ -25,11 +25,13 @@
 package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
+import org.dyn4j.Epsilon;
 import org.dyn4j.Ownable;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 
@@ -53,7 +55,7 @@ public abstract class Joint<T extends PhysicsBody> implements Shiftable, DataCon
 	/** The user data */
 	protected Object userData;
 	
-	/** [INTERNAL] The joint owner */
+	/** The joint owner */
 	protected Object owner;
 	
 	/**
@@ -100,6 +102,169 @@ public abstract class Joint<T extends PhysicsBody> implements Shiftable, DataCon
 		sb.append("|").append(super.toString())
 		.append("|IsCollisionAllowed=").append(this.collisionAllowed);
 		return sb.toString();
+	}
+	
+	/**
+	 * Returns the reduced mass of this pair of bodies.
+	 * <p>
+	 * The reduced mass is used to solve spring/damper problems as a single body rather
+	 * than as a system of two bodies.
+	 * <p>
+	 * <a href="https://en.wikipedia.org/wiki/Reduced_mass">https://en.wikipedia.org/wiki/Reduced_mass</a>
+	 * @return double
+	 */
+	protected final double getReducedMass() {
+		// https://en.wikipedia.org/wiki/Reduced_mass
+		double m1 = this.body1.getMass().getMass();
+		double m2 = this.body2.getMass().getMass();
+		
+		// compute the mass
+		if (m1 > 0.0 && m2 > 0.0) {
+			return m1 * m2 / (m1 + m2);
+		} else if (m1 > 0.0) {
+			return m1;
+		} else {
+			return m2;
+		}
+	}
+	
+	/**
+	 * Returns the reduced inertia of this pair of bodies.
+	 * @return double
+	 * @see #getReducedMass()
+	 */
+	protected final double getReducedInertia() {
+		double i1 = this.body1.getMass().getInertia();
+		double i2 = this.body2.getMass().getInertia();
+		
+		// compute the mass
+		if (i1 > 0.0 && i2 > 0.0) {
+			return i1 * i2 / (i1 + i2);
+		} else if (i1 > 0.0) {
+			return i1;
+		} else {
+			return i2;
+		}
+	}
+	
+	/**
+	 * Returns the natural frequency of the given frequency.
+	 * <p>
+	 * The natural frequency can be determined by combining the following equations:
+	 * <pre>
+	 * Harmonic oscillator:
+	 * f = 1 / (2&pi;) * sqrt(k / m)
+	 * 
+	 * Natural frequency:
+	 * w = sqrt(k / m)
+	 * </pre>
+	 * Substituting w into the first equation and solving for w:
+	 * <pre>
+	 * f = 1 / (2&pi;) * w
+	 * w = f * 2&pi;
+	 * </pre>
+	 * @param frequency the frequency
+	 * @return double
+	 * @see <a href="https://en.wikipedia.org/wiki/Hookes_law#Harmonic_oscillator">https://en.wikipedia.org/wiki/Hookes_law#Harmonic_oscillator</a>
+	 */
+	protected final double getNaturalFrequency(double frequency) {
+		return Geometry.TWO_PI * frequency;
+	}
+	
+	/**
+	 * Returns the spring damping coefficient.
+	 * <p>
+	 * The damping coefficient can be determined by the following equations:
+	 * <pre>
+	 * Damping Ratio:
+	 * dr = actual damping (ad) / critical damping (cd)
+	 * 
+	 * Critical Damping:
+	 * cd = 2mw
+	 * </pre>
+	 * Where m is the mass and w is the natural frequency. Substituting cd into the first equation and solving for ad:
+	 * <pre>
+	 * dr = ad / 2mw
+	 * ad = dr * 2mw
+	 * </pre>
+	 * @param mass the mass attached to the spring
+	 * @param naturalFrequency the natural frequency
+	 * @param dampingRatio the damping ratio
+	 * @return double
+	 * @see <a href="https://en.wikipedia.org/wiki/Damping_ratio">https://en.wikipedia.org/wiki/Damping_ratio</a>
+	 */
+	protected final double getSpringDampingCoefficient(double mass, double naturalFrequency, double dampingRatio) {
+		return dampingRatio * 2.0 * mass * naturalFrequency;
+	}
+	
+	/**
+	 * Returns the spring stiffness, k, from Hooke's Law.
+	 * <p>
+	 * The stiffness can be determined by the following equation and solving for k:
+	 * <pre>
+	 * Harmonic oscillator:
+	 * f = 1 / (2&pi;) * sqrt(k / m)
+	 * 
+	 * f * 2&pi; = sqrt(k / m)
+	 * k / m = (f * 2&pi;)<sup>2</sup>
+	 * k = (f * 2&pi;)<sup>2</sup> * m
+	 * k = w<sup>2</sup> * m
+	 * </pre>
+	 * Where w is the natural frequency and m is the mass.
+	 * @param mass the mass attached to the spring
+	 * @param naturalFrequency the natural frequency
+	 * @return double
+	 * @see <a href="https://en.wikipedia.org/wiki/Hookes_law#Harmonic_oscillator">https://en.wikipedia.org/wiki/Hookes_law#Harmonic_oscillator</a>
+	 */
+	protected final double getSpringStiffness(double mass, double naturalFrequency) {
+		return mass * naturalFrequency * naturalFrequency;
+	}
+	
+	/**
+	 * Returns the constraint impulse mixing parameter.
+	 * @param deltaTime the time step
+	 * @param stiffness the stiffness of the spring
+	 * @param damping the damping coefficient of the spring
+	 * @return double
+	 * @see <a href="http://www.ode.org/ode-latest-userguide.html#sec_3_8_2">http://www.ode.org/ode-latest-userguide.html#sec_3_8_2</a>
+	 */
+	protected final double getConstraintImpulseMixing(double deltaTime, double stiffness, double damping) {
+		// CFM = constraint force mixing (from ODE)
+		// CFM = 1 / (hk + d)
+		
+		// since we're solving velocity constraints
+		// these factors need an extra h
+		
+		// CIM = constraint impulse mixing
+		// CIM = 1 / (h * (hk + d))
+
+		// compute CIM using [8]
+		double cim = deltaTime * (deltaTime * stiffness + damping);
+		// check for zero before inverting
+		return cim <= Epsilon.E ? 0.0 : 1.0 / cim;
+	}
+	
+	/**
+	 * Returns the error reduction parameter.
+	 * @param deltaTime the time step
+	 * @param stiffness the stiffness of the spring
+	 * @param damping the damping coefficient of the spring
+	 * @return double
+	 * @see <a href="http://www.ode.org/ode-latest-userguide.html#sec_3_8_2">http://www.ode.org/ode-latest-userguide.html#sec_3_8_2</a>
+	 */
+	protected final double getErrorReductionParameter(double deltaTime, double stiffness, double damping) {
+		// ERP = error reduction parameter (from ODE)
+		// ERP = hk / (hk + d)
+		
+		// since we're solving velocity constraints
+		// these factors need an extra h
+		
+		// ERP = error reduction parameter
+		// ERP = hk / (h * (hk + d))
+		// ERP = k / (hk + d)
+		double erp = deltaTime * stiffness + damping;
+		// check for zero before inverting
+		return erp <= Epsilon.E ? 0.0 : stiffness / erp;
 	}
 	
 	/**

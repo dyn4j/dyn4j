@@ -29,7 +29,6 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Shiftable;
@@ -59,34 +58,40 @@ import org.dyn4j.resources.Messages;
  */
 public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
 	/** The local anchor point on the first {@link PhysicsBody} */
-	protected Vector2 localAnchor1;
+	protected final Vector2 localAnchor1;
 	
 	/** The local anchor point on the second {@link PhysicsBody} */
-	protected Vector2 localAnchor2;
+	protected final Vector2 localAnchor2;
 	
+	/** The computed distance between the two world space anchor points */
+	protected double distance;
+
 	/** The oscillation frequency in hz */
 	protected double frequency;
 	
 	/** The damping ratio */
 	protected double dampingRatio;
 	
-	/** The computed distance between the two world space anchor points */
-	protected double distance;
-	
 	// current state
+
+	/** The stiffness (k) of the spring */
+	private double stiffness;
 	
-	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */
-	private double invK;
-	
+	/** The damping coefficient of the spring-damper */
+	private double damping;
+
 	/** The normal */
 	private Vector2 n;
-	
-	/** The bias for adding work to the constraint (simulating a spring) */
-	private double bias;
 	
 	/** The damping portion of the constraint */
 	private double gamma;
 
+	/** The bias for adding work to the constraint (simulating a spring) */
+	private double bias;
+
+	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */
+	private double invK;
+	
 	// output
 	
 	/** The accumulated impulse from the previous time step */
@@ -117,6 +122,16 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		this.localAnchor2 = body2.getLocalPoint(anchor2);
 		// compute the initial distance
 		this.distance = anchor1.distance(anchor2);
+		this.frequency = 0.0;
+		this.dampingRatio = 0.0;
+		
+		this.stiffness = 0.0;
+		this.damping = 0.0;
+		this.n = null;
+		
+		this.gamma = 0.0;
+		this.bias = 0.0;
+		this.invK = 0.0;
 	}
 	
 	/* (non-Javadoc)
@@ -169,48 +184,62 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		// compute K inverse
 		double cr1n = r1.cross(this.n);
 		double cr2n = r2.cross(this.n);
-		double invMass = invM1 + invI1 * cr1n * cr1n;
-		invMass += invM2 + invI2 * cr2n * cr2n;
+		double invMass = 
+				invM1 + invI1 * cr1n * cr1n + 
+				invM2 + invI2 * cr2n * cr2n;
 		
-		// check for zero before inverting
-		this.invK = invMass <= Epsilon.E ? 0.0 : 1.0 / invMass;
+		// recompute spring reduced mass (m), stiffness (k), and damping (d)
+		// since frequency, dampingRatio, or the masses of the joined bodies
+		// could change
+		if (this.frequency > 0.0) {
+			double lm = this.getReducedMass();
+			double nf = this.getNaturalFrequency(this.frequency);
+			
+			this.stiffness = this.getSpringStiffness(lm, nf);
+			this.damping = this.getSpringDampingCoefficient(lm, nf, this.dampingRatio);
+		} else {
+			this.stiffness = 0.0;
+			this.damping = 0.0;
+		}
 		
 		// see if we need to compute spring damping
-		if (this.frequency > 0.0) {
+		if (this.stiffness > 0.0) {
 			double dt = step.getDeltaTime();
 			// get the current compression/extension of the spring
 			double x = length - this.distance;
-			// compute the natural frequency; f = w / (2 * pi) -> w = 2 * pi * f
-			double w = Geometry.TWO_PI * this.frequency;
-			// compute the damping coefficient; dRatio = d / (2 * m * w) -> d = 2 * m * w * dRatio
-			double d = 2.0 * this.invK * this.dampingRatio * w;
-			// compute the spring constant; w = sqrt(k / m) -> k = m * w * w
-			double k = this.invK * w * w;
 			
-			// compute gamma = CMF = 1 / (hk + d)
-			this.gamma = dt * (d + dt * k);
-			// check for zero before inverting
-			this.gamma = this.gamma <= Epsilon.E ? 0.0 : 1.0 / this.gamma;			
-			// compute the bias = x * ERP where ERP = hk / (hk + d)
-			this.bias = x * dt * k * this.gamma;
+			// compute the CIM
+			this.gamma = this.getConstraintImpulseMixing(dt, this.stiffness, this.damping);
 			
-			// compute the effective mass			
+			// compute the ERP
+			double erp = this.getErrorReductionParameter(dt, this.stiffness, this.damping);
+			
+			// compute the bias
+			// b = C * ERP
+			this.bias = x * erp;
+			
+			// compute the effective mass
 			invMass += this.gamma;
 			// check for zero before inverting
 			this.invK = invMass <= Epsilon.E ? 0.0 : 1.0 / invMass;
 		} else {
 			this.gamma = 0.0;
 			this.bias = 0.0;
+			this.invK = invMass <= Epsilon.E ? 0.0 : 1.0 / invMass;
 		}
 		
-		// warm start
-		impulse *= step.getDeltaTimeRatio();
-		
-		Vector2 J = n.product(impulse);
-		body1.getLinearVelocity().add(J.product(invM1));
-		body1.setAngularVelocity(body1.getAngularVelocity() + invI1 * r1.cross(J));
-		body2.getLinearVelocity().subtract(J.product(invM2));
-		body2.setAngularVelocity(body2.getAngularVelocity() - invI2 * r2.cross(J));
+		if (settings.isWarmStartingEnabled()) {
+			// warm start
+			this.impulse *= step.getDeltaTimeRatio();
+			
+			Vector2 J = this.n.product(this.impulse);
+			this.body1.getLinearVelocity().add(J.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
+			this.body2.getLinearVelocity().subtract(J.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(J));
+		} else {
+			this.impulse = 0.0;
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -218,10 +247,10 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	 */
 	@Override
 	public void solveVelocityConstraints(TimeStep step, Settings settings) {
-		Transform t1 = body1.getTransform();
-		Transform t2 = body2.getTransform();
-		Mass m1 = body1.getMass();
-		Mass m2 = body2.getMass();
+		Transform t1 = this.body1.getTransform();
+		Transform t2 = this.body2.getTransform();
+		Mass m1 = this.body1.getMass();
+		Mass m2 = this.body2.getMass();
 		
 		double invM1 = m1.getInverseMass();
 		double invM2 = m2.getInverseMass();
@@ -233,8 +262,8 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
 		// compute the relative velocity
-		Vector2 v1 = body1.getLinearVelocity().sum(r1.cross(body1.getAngularVelocity()));
-		Vector2 v2 = body2.getLinearVelocity().sum(r2.cross(body2.getAngularVelocity()));
+		Vector2 v1 = this.body1.getLinearVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
+		Vector2 v2 = this.body2.getLinearVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
 		
 		// compute Jv
 		double Jv = n.dot(v1.difference(v2));
@@ -244,11 +273,11 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		this.impulse += j;
 		
 		// apply the impulse
-		Vector2 J = n.product(j);
-		body1.getLinearVelocity().add(J.product(invM1));
-		body1.setAngularVelocity(body1.getAngularVelocity() + invI1 * r1.cross(J));
-		body2.getLinearVelocity().subtract(J.product(invM2));
-		body2.setAngularVelocity(body2.getAngularVelocity() - invI2 * r2.cross(J));
+		Vector2 J = this.n.product(j);
+		this.body1.getLinearVelocity().add(J.product(invM1));
+		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
+		this.body2.getLinearVelocity().subtract(J.product(invM2));
+		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(J));
 	}
 	
 	/* (non-Javadoc)
@@ -256,48 +285,50 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	 */
 	@Override
 	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
-		// check if this is a spring damper
-		if (this.frequency > 0.0) {
-			// don't solve position constraints for spring damper
+		// check if this is a spring
+		// we do this because stiffness is a function of the frequency
+		// and the mass of the bodies (both of which could make stiffness zero)
+		if (this.stiffness > 0.0) {
+			// don't solve position constraints for springs
 			return true;
 		}
 		
 		double linearTolerance = settings.getLinearTolerance();
 		double maxLinearCorrection = settings.getMaximumLinearCorrection();
 		
-		Transform t1 = body1.getTransform();
-		Transform t2 = body2.getTransform();
-		Mass m1 = body1.getMass();
-		Mass m2 = body2.getMass();
+		Transform t1 = this.body1.getTransform();
+		Transform t2 = this.body2.getTransform();
+		Mass m1 = this.body1.getMass();
+		Mass m2 = this.body2.getMass();
 		
 		double invM1 = m1.getInverseMass();
 		double invM2 = m2.getInverseMass();
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		Vector2 c1 = body1.getWorldCenter();
-		Vector2 c2 = body2.getWorldCenter();
+		Vector2 c1 = this.body1.getWorldCenter();
+		Vector2 c2 = this.body2.getWorldCenter();
 		
 		// recompute n since it may have changed after integration
 		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
-		n = r1.sum(body1.getWorldCenter()).subtract(r2.sum(body2.getWorldCenter()));
+		this.n = r1.sum(this.body1.getWorldCenter()).subtract(r2.sum(this.body2.getWorldCenter()));
 		
 		// solve the position constraint
-		double l = n.normalize();
+		double l = this.n.normalize();
 		double C = l - this.distance;
 		C = Interval.clamp(C, -maxLinearCorrection, maxLinearCorrection);
 		
 		double impulse = -this.invK * C;
 		
-		Vector2 J = n.product(impulse);
+		Vector2 J = this.n.product(impulse);
 		
 		// translate and rotate the objects
-		body1.translate(J.product(invM1));
-		body1.rotate(invI1 * r1.cross(J), c1);
+		this.body1.translate(J.product(invM1));
+		this.body1.rotate(invI1 * r1.cross(J), c1);
 		
-		body2.translate(J.product(-invM2));
-		body2.rotate(-invI2 * r2.cross(J), c2);
+		this.body2.translate(J.product(-invM2));
+		this.body2.rotate(-invI2 * r2.cross(J), c2);
 		
 		return Math.abs(C) < linearTolerance;
 	}
@@ -346,7 +377,9 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	/**
 	 * Returns true if this distance joint is a spring distance joint.
 	 * @return boolean
+	 * @deprecated Deprecated in 4.0.0. Use the {@link #isSpringEnabled()} method instead.
 	 */
+	@Deprecated
 	public boolean isSpring() {
 		return this.frequency > 0.0;
 	}
@@ -355,8 +388,29 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	 * Returns true if this distance joint is a spring distance joint
 	 * with damping.
 	 * @return boolean
+	 * @deprecated Deprecated in 4.0.0. Use the {@link #isSpringDamperEnabled()} method instead.
 	 */
+	@Deprecated
 	public boolean isSpringDamper() {
+		return this.frequency > 0.0 && this.dampingRatio > 0.0;
+	}
+	
+	/**
+	 * Returns true if this distance joint is a spring distance joint.
+	 * @return boolean
+	 * @since 4.0.0
+	 */
+	public boolean isSpringEnabled() {
+		return this.frequency > 0.0;
+	}
+	
+	/**
+	 * Returns true if this distance joint is a spring distance joint
+	 * with damping.
+	 * @return boolean
+	 * @since 4.0.0
+	 */
+	public boolean isSpringDamperEnabled() {
 		return this.frequency > 0.0 && this.dampingRatio > 0.0;
 	}
 	

@@ -25,7 +25,6 @@
 package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.dynamics.Body;
-import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
@@ -92,19 +91,19 @@ public class DistanceJointTest extends AbstractJointTest {
 	@Test
 	public void isSpring() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		TestCase.assertFalse(dj.isSpring());
+		TestCase.assertFalse(dj.isSpringEnabled());
 		
 		dj.setFrequency(0.0);
-		TestCase.assertFalse(dj.isSpring());
+		TestCase.assertFalse(dj.isSpringEnabled());
 		
 		dj.setFrequency(1.0);
-		TestCase.assertTrue(dj.isSpring());
+		TestCase.assertTrue(dj.isSpringEnabled());
 		
 		dj.setFrequency(15.24);
-		TestCase.assertTrue(dj.isSpring());
+		TestCase.assertTrue(dj.isSpringEnabled());
 		
 		dj.setFrequency(0.0);
-		TestCase.assertFalse(dj.isSpring());
+		TestCase.assertFalse(dj.isSpringEnabled());
 	}
 
 	/**
@@ -113,26 +112,26 @@ public class DistanceJointTest extends AbstractJointTest {
 	@Test
 	public void isSpringDamper() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		TestCase.assertFalse(dj.isSpringDamper());
+		TestCase.assertFalse(dj.isSpringDamperEnabled());
 		
 		dj.setFrequency(0.0);
-		TestCase.assertFalse(dj.isSpringDamper());
+		TestCase.assertFalse(dj.isSpringDamperEnabled());
 		
 		dj.setFrequency(1.0);
-		TestCase.assertFalse(dj.isSpringDamper());
+		TestCase.assertFalse(dj.isSpringDamperEnabled());
 		
 		dj.setFrequency(15.24);
-		TestCase.assertFalse(dj.isSpringDamper());
+		TestCase.assertFalse(dj.isSpringDamperEnabled());
 		
 		dj.setDampingRatio(0.4);
-		TestCase.assertTrue(dj.isSpringDamper());
+		TestCase.assertTrue(dj.isSpringDamperEnabled());
 		
 		dj.setDampingRatio(0.0);
-		TestCase.assertFalse(dj.isSpringDamper());
+		TestCase.assertFalse(dj.isSpringDamperEnabled());
 		
 		dj.setDampingRatio(0.61);
 		dj.setFrequency(0.0);
-		TestCase.assertFalse(dj.isSpringDamper());
+		TestCase.assertFalse(dj.isSpringDamperEnabled());
 	}
 	
 	/**

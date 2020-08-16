@@ -58,10 +58,10 @@ import org.dyn4j.resources.Messages;
  */
 public class WeldJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
 	/** The local anchor point on the first {@link PhysicsBody} */
-	protected Vector2 localAnchor1;
+	protected final Vector2 localAnchor1;
 	
 	/** The local anchor point on the second {@link PhysicsBody} */
-	protected Vector2 localAnchor2;
+	protected final Vector2 localAnchor2;
 
 	/** The initial angle between the two {@link PhysicsBody}s */
 	protected double referenceAngle;
@@ -73,9 +73,15 @@ public class WeldJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 	protected double dampingRatio;
 
 	// current state
+
+	/** The stiffness (k) of the spring */
+	private double stiffness;
 	
+	/** The damping coefficient of the spring-damper */
+	private double damping;
+
 	/** The constraint mass; K = J * Minv * Jtrans */
-	private Matrix33 K;
+	private final Matrix33 K;
 	
 	/** The bias for adding work to the constraint (simulating a spring) */
 	private double bias;
@@ -108,6 +114,8 @@ public class WeldJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 		// set the reference angle
 		this.referenceAngle = body1.getTransform().getRotationAngle() - body2.getTransform().getRotationAngle();
 		// initialize
+		this.stiffness = 0.0;
+		this.damping = 0.0;
 		this.K = new Matrix33();
 		this.impulse = new Vector3();
 		this.frequency = 0.0;
@@ -160,28 +168,38 @@ public class WeldJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 		this.K.m20 = this.K.m02;
 		this.K.m21 = this.K.m12;
 		this.K.m22 = invI1 + invI2;
-		
-		if (this.frequency > 0.0 && this.K.m22 > 0.0) {
-			double invI = invI1 + invI2;
-			double i = invI <= Epsilon.E ? 0.0 : 1.0 / invI;
+
+		// recompute spring reduced mass (m), stiffness (k), and damping (d)
+		// since frequency, dampingRatio, or the masses of the joined bodies
+		// could change
+		if (this.frequency > 0.0) {
+			double lm = this.getReducedInertia();
+			double nf = this.getNaturalFrequency(this.frequency);
 			
+			this.stiffness = this.getSpringStiffness(lm, nf);
+			this.damping = this.getSpringDampingCoefficient(lm, nf, this.dampingRatio);
+		} else {
+			this.stiffness = 0.0;
+			this.damping = 0.0;
+		}
+		
+		// see if we need to compute spring damping
+		if (this.stiffness > 0.0) {
+			double dt = step.getDeltaTime();
+			double invI = invI1 + invI2;
+
 			// compute the current angle between relative to the reference angle
 			double r = this.getRelativeRotation();
+
+			// compute the CIM
+			this.gamma = this.getConstraintImpulseMixing(dt, this.stiffness, this.damping);
 			
-			double dt = step.getDeltaTime();
-			// compute the natural frequency; f = w / (2 * pi) -> w = 2 * pi * f
-			double w = Geometry.TWO_PI * this.frequency;
-			// compute the damping coefficient; dRatio = d / (2 * m * w) -> d = 2 * m * w * dRatio
-			double d = 2.0 * i * this.dampingRatio * w;
-			// compute the spring constant; w = sqrt(k / m) -> k = m * w * w
-			double k = i * w * w;
+			// compute the ERP
+			double erp = this.getErrorReductionParameter(dt, this.stiffness, this.damping);
 			
-			// compute gamma = CMF = 1 / (hk + d)
-			this.gamma = dt * (d + dt * k);
-			// check for zero before inverting
-			this.gamma = this.gamma <= Epsilon.E ? 0.0 : 1.0 / this.gamma;			
-			// compute the bias = x * ERP where ERP = hk / (hk + d)
-			this.bias = r * dt * k * this.gamma;
+			// compute the bais 
+			// bias = x * ERP
+			this.bias = r * erp;
 			
 			// compute the effective mass
 			invI += this.gamma;
@@ -222,7 +240,10 @@ public class WeldJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
-		if (this.frequency > 0.0) {
+		// check if the spring is enabled
+		// we do this because stiffness is a function of the frequency
+		// and the mass of the bodies (both of which could make stiffness zero)
+		if (this.stiffness > 0.0) {
 			// get the relative angular velocity
 			double rav = this.body1.getAngularVelocity() - this.body2.getAngularVelocity();
 			// solve for the spring/damper impulse
@@ -311,7 +332,10 @@ public class WeldJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 		this.K.m21 = this.K.m12;
 		this.K.m22 = invI1 + invI2;
 		
-		if (this.frequency > 0.0) {
+		// check if spring is enabled
+		// we do this because stiffness is a function of the frequency
+		// and the mass of the bodies (both of which could make stiffness zero)
+		if (this.stiffness > 0.0) {
 			// only solve the linear constraint
 			angularError = 0.0;
 			Vector2 j = this.K.solve22(C1).negate();
@@ -398,7 +422,9 @@ public class WeldJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 	 * Returns true if this distance joint is a spring distance joint.
 	 * @return boolean
 	 * @since 3.0.1
+	 * @deprecated Deprecated in 4.0.0. Use the {@link #isSpringEnabled()} method instead.
 	 */
+	@Deprecated
 	public boolean isSpring() {
 		return this.frequency > 0.0;
 	}
@@ -408,8 +434,29 @@ public class WeldJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 	 * with damping.
 	 * @return boolean
 	 * @since 3.0.1
+	 * @deprecated Deprecated in 4.0.0. Use the {@link #isSpringDamperEnabled()} method instead.
 	 */
+	@Deprecated
 	public boolean isSpringDamper() {
+		return this.frequency > 0.0 && this.dampingRatio > 0.0;
+	}
+	
+	/**
+	 * Returns true if this distance joint is a spring distance joint.
+	 * @return boolean
+	 * @since 4.0.0
+	 */
+	public boolean isSpringEnabled() {
+		return this.frequency > 0.0;
+	}
+	
+	/**
+	 * Returns true if this distance joint is a spring distance joint
+	 * with damping.
+	 * @return boolean
+	 * @since 4.0.0
+	 */
+	public boolean isSpringDamperEnabled() {
 		return this.frequency > 0.0 && this.dampingRatio > 0.0;
 	}
 	

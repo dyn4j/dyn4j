@@ -60,10 +60,10 @@ import org.dyn4j.resources.Messages;
  */
 public class FrictionJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
 	/** The local anchor point on the first {@link PhysicsBody} */
-	protected Vector2 localAnchor1;
+	protected final Vector2 localAnchor1;
 	
 	/** The local anchor point on the second {@link PhysicsBody} */
-	protected Vector2 localAnchor2;
+	protected final Vector2 localAnchor2;
 	
 	/** The maximum force the constraint can apply */
 	protected double maximumForce;
@@ -74,7 +74,7 @@ public class FrictionJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	// current state
 	
 	/** The pivot mass; K = J * Minv * Jtrans */
-	private Matrix22 K;
+	private final Matrix22 K;
 	
 	/** The mass for the angular constraint */
 	private double angularMass;
@@ -105,15 +105,16 @@ public class FrictionJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		// put the anchor in local space
 		this.localAnchor1 = body1.getLocalPoint(anchor);
 		this.localAnchor2 = body2.getLocalPoint(anchor);
-		// initialize
-		this.K = new Matrix22();
-		this.linearImpulse = new Vector2();
-		this.angularImpulse = 0.0;
 		
 		// the maximum force in Newtons
 		this.maximumForce = 10;
 		// the maximum torque in Newton-Meters
 		this.maximumTorque = 0.25;
+		
+		this.K = new Matrix22();
+		
+		this.linearImpulse = new Vector2();
+		this.angularImpulse = 0.0;
 	}
 	
 	/* (non-Javadoc)
@@ -161,15 +162,20 @@ public class FrictionJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			this.angularMass = 1.0 / this.angularMass;
 		}
 		
-		// account for variable time step
-		this.linearImpulse.multiply(step.getDeltaTimeRatio());
-		this.angularImpulse *= step.getDeltaTimeRatio();
-		
-		// warm start
-		this.body1.getLinearVelocity().add(this.linearImpulse.product(invM1));
-		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * (r1.cross(this.linearImpulse) + this.angularImpulse));
-		this.body2.getLinearVelocity().subtract(this.linearImpulse.product(invM2));
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (r2.cross(this.linearImpulse) + this.angularImpulse));
+		if (settings.isWarmStartingEnabled()) {
+			// account for variable time step
+			this.linearImpulse.multiply(step.getDeltaTimeRatio());
+			this.angularImpulse *= step.getDeltaTimeRatio();
+			
+			// warm start
+			this.body1.getLinearVelocity().add(this.linearImpulse.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * (r1.cross(this.linearImpulse) + this.angularImpulse));
+			this.body2.getLinearVelocity().subtract(this.linearImpulse.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (r2.cross(this.linearImpulse) + this.angularImpulse));
+		} else {
+			this.linearImpulse.zero();
+			this.angularImpulse = 0.0;
+		}
 	}
 	
 	/* (non-Javadoc)
