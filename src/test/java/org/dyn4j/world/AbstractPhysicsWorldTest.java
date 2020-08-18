@@ -1965,6 +1965,4 @@ public class AbstractPhysicsWorldTest {
 		
 		world.step(1);
 	}
-	
-	// TODO test TOI methods
 }

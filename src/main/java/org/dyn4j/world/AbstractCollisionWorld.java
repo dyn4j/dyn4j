@@ -1241,7 +1241,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			Convex convex2 = fixture2.getShape();
 			Convex convex1 = fixture1.getShape();
 
-			// TODO would be nice to seed the narrowphase with the last separation normal (when they aren't overlapping), if we store the last separation normal, we don't want to clear/reset that, then we could increase the broadphase expansion default
+			// narrowphase detection
 			Penetration penetration = collision.getPenetration();
 			if (AbstractCollisionWorld.this.narrowphaseDetector.detect(convex1, transform1, convex2, transform2, penetration)) {
 				// check for zero penetration
