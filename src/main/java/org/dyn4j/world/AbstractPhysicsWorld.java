@@ -1515,7 +1515,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		 */
 		@Override
 		public double getRestitution(BodyFixture fixture1, BodyFixture fixture2) {
-			return AbstractPhysicsWorld.this.coefficientMixer.mixFriction(fixture1.getRestitution(), fixture2.getRestitution());
+			return AbstractPhysicsWorld.this.coefficientMixer.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution());
 		}
 
 		/* (non-Javadoc)

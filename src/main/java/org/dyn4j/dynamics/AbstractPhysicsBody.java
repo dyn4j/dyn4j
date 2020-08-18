@@ -690,7 +690,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 			}
 			
 			// get maximum velocities
-			double maximumAtRestLinearVelocitySquared = settings.getMaximumAtRestAngularVelocitySquared();
+			double maximumAtRestLinearVelocitySquared = settings.getMaximumAtRestLinearVelocitySquared();
 			double maximumAtRestAngularVeclotiy = settings.getMaximumAtRestAngularVelocity();
 			
 			// check the linear and angular velocity
