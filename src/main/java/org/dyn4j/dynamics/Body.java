@@ -36,6 +36,7 @@ import org.dyn4j.dynamics.contact.ContactListener;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.contact.SolvedContact;
 import org.dyn4j.dynamics.joint.Joint;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Transformable;
 
 /**
@@ -94,6 +95,16 @@ public class Body extends AbstractPhysicsBody implements PhysicsBody, CollisionB
 	@Deprecated
 	public void setOnIsland(boolean flag) {
 		this.onIsland = flag;
+	}
+
+	/**
+	 * Returns the previous frame's transform.
+	 * @return {@link Transform}
+	 * @deprecated Deprecated in 4.0.0. Use the {@link #getPreviousTransform()} method instead.
+	 */
+	@Deprecated
+	public Transform getInitialTransform() {
+		return this.transform0;
 	}
 	
 	/**

@@ -69,9 +69,6 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	/** The per body gravity scale factor */
 	protected double gravityScale;
 
-	/** The beginning transform for CCD */
-	protected final Transform transform0;
-
 	/** True if the body is fast, small or both */
 	protected boolean bullet;
 	
@@ -124,7 +121,6 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		super(fixtureCount);
 		this.radius = 0.0;
 		this.mass = new Mass();
-		this.transform0 = new Transform();
 		this.linearVelocity = new Vector2();
 		this.angularVelocity = 0.0;
 		this.force = new Vector2();
@@ -853,14 +849,6 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	@Override
 	public void setBullet(boolean flag) {
 		this.bullet = flag;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.PhysicsBody#getInitialTransform()
-	 */
-	@Override
-	public Transform getInitialTransform() {
-		return this.transform0;
 	}
 	
 	/* (non-Javadoc)

@@ -539,15 +539,6 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	public boolean isBullet();
 	
 	/**
-	 * Returns the transform of the last iteration.
-	 * <p>
-	 * This transform represents the last frame's position and
-	 * orientation.
-	 * @return {@link Transform}
-	 */
-	public Transform getInitialTransform();
-	
-	/**
 	 * Returns an AABB that contains the maximal space in which
 	 * the {@link CollisionBody} exists from the initial transform
 	 * to the final transform.

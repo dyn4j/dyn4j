@@ -72,7 +72,6 @@ public class AbstractPhysicsBodyTest {
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertEquals(0.0, b.torque);
 		TestCase.assertNotNull(b.torques);
-		TestCase.assertNotNull(b.transform0);
 		TestCase.assertNotNull(b.linearVelocity);
 		
 		b = new TestBody(3);
@@ -606,7 +605,7 @@ public class AbstractPhysicsBodyTest {
 		TestBody b = new TestBody();
 		b.addFixture(Geometry.createCircle(0.5));
 		
-		b.getInitialTransform().set(b.getTransform());
+		b.getPreviousTransform().set(b.getTransform());
 		
 		// test moving just right
 		b.translate(2.0, 0.0);
@@ -650,7 +649,7 @@ public class AbstractPhysicsBodyTest {
 		b.setAngularVelocity(Math.toRadians(1));
 		b.setMass(MassType.INFINITE);
 		
-		b.getInitialTransform().set(b.getTransform());
+		b.getPreviousTransform().set(b.getTransform());
 		
 		// TEST moving forward 20 degrees
 		
@@ -725,7 +724,7 @@ public class AbstractPhysicsBodyTest {
 		
 		b.getTransform().identity();
 		b.rotate(Math.toRadians(-30.0));
-		b.getInitialTransform().set(b.getTransform());
+		b.getPreviousTransform().set(b.getTransform());
 		b.setAngularVelocity(1.0);
 		
 		// test moving forward 20 degrees
@@ -873,30 +872,6 @@ public class AbstractPhysicsBodyTest {
 		TestCase.assertEquals(100.0, b.getGravityScale());
 		b.setGravityScale(0.00001);
 		TestCase.assertEquals(0.00001, b.getGravityScale());
-	}
-	
-	/**
-	 * Tests the getInitialTransform method.
-	 */
-	@Test
-	public void getInitialTransform() {
-		TestBody b = new TestBody();
-		
-		// test the default
-		TestCase.assertNotNull(b.getInitialTransform());
-		TestCase.assertTrue(b.getInitialTransform().isIdentity());
-		
-		b.translate(1.0, -1.0);
-		
-		TestCase.assertNotNull(b.getInitialTransform());
-		TestCase.assertTrue(b.getInitialTransform().isIdentity());
-		
-		b.getInitialTransform().set(b.getTransform());
-		
-		TestCase.assertNotNull(b.getInitialTransform());
-		TestCase.assertFalse(b.getInitialTransform().isIdentity());
-		TestCase.assertEquals(1.0, b.getInitialTransform().getTranslationX());
-		TestCase.assertEquals(-1.0, b.getInitialTransform().getTranslationY());
 	}
 	
 	/**

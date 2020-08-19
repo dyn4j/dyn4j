@@ -1160,7 +1160,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		for (int i = 0; i < size; i++) {
 			T body = this.bodies.get(i);
 			// save the current transform into the previous transform
-			body.getInitialTransform().set(body.getTransform());
+			body.getPreviousTransform().set(body.getTransform());
 		}
 		
 		// solve the world by using the interaction graph to produce a set of islands
@@ -1403,8 +1403,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			double av1 = body1.getAngularVelocity() * dt;
 			double av2 = body2.getAngularVelocity() * dt;
 			
-			Transform tx1 = body1.getInitialTransform();
-			Transform tx2 = body2.getInitialTransform();
+			Transform tx1 = body1.getPreviousTransform();
+			Transform tx2 = body2.getPreviousTransform();
 			
 			// test against all fixture pairs taking the fixture
 			// with the smallest time of impact
@@ -1469,11 +1469,11 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			double t = minToi.getTime();
 			
 			// move the dynamic body to the time of impact
-			body1.getInitialTransform().lerp(body1.getTransform(), t, body1.getTransform());
+			body1.getPreviousTransform().lerp(body1.getTransform(), t, body1.getTransform());
 			// check if the other body is dynamic
 			if (minBody.isDynamic()) {
 				// if the other body is dynamic then interpolate its transform also
-				minBody.getInitialTransform().lerp(minBody.getTransform(), t, minBody.getTransform());
+				minBody.getPreviousTransform().lerp(minBody.getTransform(), t, minBody.getTransform());
 			}
 			// this should bring the bodies within d distance from one another
 			// we need to move the bodies more so that they are in collision

@@ -111,6 +111,7 @@ public class AbstractCollisionBodyTest {
 		TestCase.assertNotNull(b.fixturesUnmodifiable);
 		TestCase.assertEquals(0.0, b.radius);
 		TestCase.assertNotNull(b.transform);
+		TestCase.assertNotNull(b.transform0);
 		
 		b = new TestBody(5);
 		TestCase.assertNull(b.owner);
@@ -121,6 +122,7 @@ public class AbstractCollisionBodyTest {
 		TestCase.assertNotNull(b.fixturesUnmodifiable);
 		TestCase.assertEquals(0.0, b.radius);
 		TestCase.assertNotNull(b.transform);
+		TestCase.assertNotNull(b.transform0);
 		
 		new TestBody(-1);
 	}
@@ -653,6 +655,30 @@ public class AbstractCollisionBodyTest {
 		TestCase.assertEquals(tx.getTranslationY(), b.getTransform().getTranslationY());
 	}
 
+	/**
+	 * Tests the get/set of the previous transform
+	 */
+	@Test
+	public void getSetPreviousTransform() {
+		TestBody b = new TestBody();
+		
+		// test the default
+		TestCase.assertNotNull(b.getPreviousTransform());
+		TestCase.assertTrue(b.getPreviousTransform().isIdentity());
+		
+		b.translate(1.0, -1.0);
+		
+		TestCase.assertNotNull(b.getPreviousTransform());
+		TestCase.assertTrue(b.getPreviousTransform().isIdentity());
+		
+		b.getPreviousTransform().set(b.getTransform());
+		
+		TestCase.assertNotNull(b.getPreviousTransform());
+		TestCase.assertFalse(b.getPreviousTransform().isIdentity());
+		TestCase.assertEquals(1.0, b.getPreviousTransform().getTranslationX());
+		TestCase.assertEquals(-1.0, b.getPreviousTransform().getTranslationY());
+	}
+	
 	/**
 	 * Make sure the user data is stored.
 	 */

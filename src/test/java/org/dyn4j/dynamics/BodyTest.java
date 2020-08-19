@@ -74,7 +74,6 @@ public class BodyTest {
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertNotNull(b.torques);
 		TestCase.assertNotNull(b.getTransform());
-		TestCase.assertNotNull(b.transform0);
 		TestCase.assertNotNull(b.linearVelocity);
 		TestCase.assertNull(b.getOwner());
 	}

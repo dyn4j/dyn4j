@@ -51,6 +51,9 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/** The current {@link Transform} */
 	protected final Transform transform;
 
+	/** The previous {@link Transform} */
+	protected final Transform transform0;
+	
 	/** The {@link Fixture} list */
 	protected final List<T> fixtures;
 	
@@ -94,6 +97,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 		this.fixturesUnmodifiable = Collections.unmodifiableList(this.fixtures);
 		this.radius = 0.0;
 		this.transform = new Transform();
+		this.transform0 = new Transform();
 		this.enabled = true;
 	}
 	
@@ -389,6 +393,14 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	 */
 	public Transform getTransform() {
 		return this.transform;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionBody#getPreviousTransform()
+	 */
+	@Override
+	public Transform getPreviousTransform() {
+		return this.transform0;
 	}
 	
 	/* (non-Javadoc)

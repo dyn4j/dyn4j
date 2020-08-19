@@ -263,6 +263,15 @@ public interface CollisionBody<T extends Fixture> extends Transformable, Shiftab
 	 * @return {@link Transform}
 	 */
 	public abstract Transform getTransform();
+
+	/**
+	 * Returns the transform of the last iteration.
+	 * <p>
+	 * This transform represents the last frame's position and
+	 * orientation.
+	 * @return {@link Transform}
+	 */
+	public Transform getPreviousTransform();
 	
 	/**
 	 * Sets this {@link CollisionBody}'s local to world space {@link Transform}.

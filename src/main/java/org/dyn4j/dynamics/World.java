@@ -527,7 +527,7 @@ public class World implements Shiftable, DataContainer {
 			// remove the island flag
 			body.setOnIsland(false);
 			// save the current transform into the previous transform
-			body.transform0.set(body.getTransform());
+			body.getInitialTransform().set(body.getTransform());
 		}
 		
 		// clear the joint island flags
@@ -1077,11 +1077,11 @@ public class World implements Shiftable, DataContainer {
 			double t = minToi.getTime();
 			
 			// move the dynamic body to the time of impact
-			body1.transform0.lerp(body1.getTransform(), t, body1.getTransform());
+			body1.getInitialTransform().lerp(body1.getTransform(), t, body1.getTransform());
 			// check if the other body is dynamic
 			if (minBody.isDynamic()) {
 				// if the other body is dynamic then interpolate its transform also
-				minBody.transform0.lerp(minBody.getTransform(), t, minBody.getTransform());
+				minBody.getInitialTransform().lerp(minBody.getTransform(), t, minBody.getTransform());
 			}
 			// this should bring the bodies within d distance from one another
 			// we need to move the bodies more so that they are in collision
