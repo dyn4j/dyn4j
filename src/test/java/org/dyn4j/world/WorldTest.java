@@ -49,7 +49,7 @@ public class WorldTest {
 		BodyFixture f1 = b1.addFixture(Geometry.createCircle(0.5));
 		BodyFixture f2 = b2.addFixture(Geometry.createCircle(0.5));
 		
-		World w = new World();
+		World<Body> w = new World<Body>();
 		WorldCollisionData<Body> data = w.createCollisionData(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
 		
 		TestCase.assertEquals(b1, data.getBody1());

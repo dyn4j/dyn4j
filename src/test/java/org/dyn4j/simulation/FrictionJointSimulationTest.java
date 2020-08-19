@@ -47,7 +47,7 @@ public class FrictionJointSimulationTest {
 	 */
 	@Test
 	public void simulationWithLargeForceTorqueMaximums() {
-		World w = new World();
+		World<Body> w = new World<Body>();
 		// take gravity out the picture
 		w.setGravity(World.ZERO_GRAVITY);
 		
@@ -98,7 +98,7 @@ public class FrictionJointSimulationTest {
 	 */
 	@Test
 	public void simulationWithLowForceTorqueMaximums() {
-		World w = new World();
+		World<Body> w = new World<Body>();
 		// take gravity out the picture
 		w.setGravity(World.ZERO_GRAVITY);
 		

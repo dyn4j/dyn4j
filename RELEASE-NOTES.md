@@ -18,15 +18,16 @@ __ALL__ deprecated APIs will be removed in the next version. The deprecated APIs
 - [#102](https://github.com/dyn4j/dyn4j/issues/102) Added guards on Joint setX methods to ensure that the joined bodies are not awakened unless necessary
 - [#103](https://github.com/dyn4j/dyn4j/issues/103) Updated the FrictionJoint default max force/torque to non-zero values to better illustrate it's use to new users
 - Increased test coverage by 10%+ and greatly improved test quality
+- Parameterized World and Joint classes for better support for extension of the Body class
 
 **Bug Fixes:**
 - [#106](https://github.com/dyn4j/dyn4j/issues/106) PulleyJoint no longer allows negative length
 - [#100](https://github.com/dyn4j/dyn4j/issues/100) Fixed unrealistic falling of bodies under gravity when bound together by a MotorJoint
-- Fix for overflow in the Rotation/Transform classes where it would generate values outside the valid range [1.0, -1.0] of cos(t)/sin(t) which produced NaNs.
-- Fix for the ContactListener.end method not being called in some cases.
+- Fix for overflow in the Rotation/Transform classes where it would generate values outside the valid range [1.0, -1.0] of cos(t)/sin(t) which produced NaNs
+- Fix for the ContactListener.end method not being called in some cases
 
 **Deprecated:**
-- A lot of the components in the dynamics packages have been deprecated and replaced with components in the world packages. The vast majority of deprecated APIs have replacement APIs.
+- A lot of the components in the dynamics packages have been deprecated and replaced with components in the world packages. The vast majority of deprecated APIs have replacement APIs
 
 **Breaking Changes:**
 - [#71](https://github.com/dyn4j/dyn4j/issues/71) Removed all references to UUID in the project as promised in the previous version's deprecation

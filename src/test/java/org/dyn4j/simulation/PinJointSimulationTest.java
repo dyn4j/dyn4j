@@ -48,7 +48,7 @@ public class PinJointSimulationTest {
 	 */
 	@Test
 	public void fixedLinearVelocity() {
-		World w = new World();
+		World<Body> w = new World<Body>();
 		
 		Body body = new Body();
 		body.addFixture(Geometry.createCircle(1.0));

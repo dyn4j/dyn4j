@@ -47,7 +47,7 @@ public class DistanceJointSimulationTest {
 	 */
 	@Test
 	public void distanceChange() {
-		World w = new World();
+		World<Body> w = new World<Body>();
 		// take gravity out the picture
 		w.setGravity(World.ZERO_GRAVITY);
 		

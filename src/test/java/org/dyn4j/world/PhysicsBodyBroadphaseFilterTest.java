@@ -48,7 +48,7 @@ public class PhysicsBodyBroadphaseFilterTest {
 	 */
 	@Test
 	public void enabled() {
-		World world = new World();
+		World<Body> world = new World<Body>();
 		PhysicsBodyBroadphaseFilter<Body> filter = new PhysicsBodyBroadphaseFilter<Body>(world);
 		
 		Body b1 = new Body();
@@ -80,7 +80,7 @@ public class PhysicsBodyBroadphaseFilterTest {
 	 */
 	@Test
 	public void filters() {
-		World world = new World();
+		World<Body> world = new World<Body>();
 		PhysicsBodyBroadphaseFilter<Body> filter = new PhysicsBodyBroadphaseFilter<Body>(world);
 		
 		Body b1 = new Body();
@@ -128,7 +128,7 @@ public class PhysicsBodyBroadphaseFilterTest {
 	 */
 	@Test
 	public void dynamicSensor() {
-		World world = new World();
+		World<Body> world = new World<Body>();
 		PhysicsBodyBroadphaseFilter<Body> filter = new PhysicsBodyBroadphaseFilter<Body>(world);
 		
 		Body b1 = new Body();
@@ -168,7 +168,7 @@ public class PhysicsBodyBroadphaseFilterTest {
 	 */
 	@Test
 	public void jointCollisionAllowed() {
-		World world = new World();
+		World<Body> world = new World<Body>();
 		PhysicsBodyBroadphaseFilter<Body> filter = new PhysicsBodyBroadphaseFilter<Body>(world);
 		
 		Body b1 = new Body();

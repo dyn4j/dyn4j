@@ -74,7 +74,8 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * <b>NOTE</b>: This class uses the {@link Body#setOwner(Object)} and 
  * {@link Body#setFixtureModificationHandler(org.dyn4j.collision.FixtureModificationHandler)}
  * methods to handle certain scenarios like fixture removal on a body or bodies added to
- * more than one world. Callers should <b>NOT</b> use the methods.
+ * more than one world. Likewise, the {@link Joint#setOwner(Object)} method is used to handle
+ * joints being added to the world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0

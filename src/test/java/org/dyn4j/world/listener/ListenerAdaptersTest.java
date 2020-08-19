@@ -102,6 +102,8 @@ public class ListenerAdaptersTest {
 			public double getNormalImpulse() { return 0; }
 			@Override
 			public double getTangentialImpulse() { return 0; }
+			@Override
+			public boolean isSolved() { return true; }
 		};
 		
 		// nothing to assert since they are no-ops with no effect any where
@@ -152,7 +154,7 @@ public class ListenerAdaptersTest {
 		// test that nothing happens, even with null
 		StepListenerAdapter<Body> sla = new StepListenerAdapter<Body>();
 		TimeStep ts = new TimeStep(0.3);
-		World w = new World();
+		World<Body> w = new World<Body>();
 		
 		// nothing to assert since they are no-ops with no effect any where
 		sla.begin(null, w);

@@ -45,7 +45,7 @@ public class TorqueSimulationTest {
 	 */
 	@Test
 	public void applyTimed() {
-		World w = new World();
+		World<Body> w = new World<Body>();
 		Body b = new Body();
 		b.addFixture(Geometry.createCircle(1.0));
 		b.setMass(MassType.NORMAL);

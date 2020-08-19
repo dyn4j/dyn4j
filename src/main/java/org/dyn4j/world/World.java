@@ -27,7 +27,9 @@ package org.dyn4j.world;
 import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.dynamics.joint.Joint;
 
 /**
  * Full implementation of both the {@link CollisionWorld} and {@link PhysicsWorld} interfaces.
@@ -35,12 +37,14 @@ import org.dyn4j.dynamics.TimeStep;
  * <b>NOTE</b>: This class uses the {@link Body#setOwner(Object)} and 
  * {@link Body#setFixtureModificationHandler(org.dyn4j.collision.FixtureModificationHandler)}
  * methods to handle certain scenarios like fixture removal on a body or bodies added to
- * more than one world. Callers should <b>NOT</b> use the methods.
+ * more than one world. Likewise, the {@link Joint#setOwner(Object)} method is used to handle
+ * joints being added to the world. Callers should <b>NOT</b> use these methods.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0
+ * @param <T> the {@link PhysicsBody} type
  */
-public class World extends AbstractPhysicsWorld<Body, WorldCollisionData<Body>> {
+public class World<T extends PhysicsBody> extends AbstractPhysicsWorld<T, WorldCollisionData<T>> {
 	/**
 	 * Default constructor.
 	 */
@@ -61,8 +65,8 @@ public class World extends AbstractPhysicsWorld<Body, WorldCollisionData<Body>> 
 	 * @see org.dyn4j.world.AbstractCollisionWorld#createCollisionData(org.dyn4j.collision.CollisionPair)
 	 */
 	@Override
-	protected WorldCollisionData<Body> createCollisionData(CollisionPair<Body, BodyFixture> pair) {
-		return new WorldCollisionData<Body>(pair);
+	protected WorldCollisionData<T> createCollisionData(CollisionPair<T, BodyFixture> pair) {
+		return new WorldCollisionData<T>(pair);
 	}
 
 	/**

@@ -29,7 +29,7 @@ Add dyn4j to your classpath by adding a Maven dependency from
 <dependency>
     <groupId>org.dyn4j</groupId>
     <artifactId>dyn4j</artifactId>
-    <version>3.4.0</version>
+    <version>4.0.0</version>
 </dependency>
 ```
 
@@ -38,7 +38,7 @@ If you are not using Maven you can download the jar from either of the links abo
 
 #### Step 2: Create a World
 ```java
-World world = new World();
+World<Body> world = new World<Body>();
 ```
 This creates a new simulation environment with default settings.  The default settings use the meter-kilogram-seconds system and include the default pipeline classes.
 
@@ -54,7 +54,7 @@ A body is the primary unit of simulation and completely rigid.  A body is compri
 
 #### Step 4: Add Some Joints
 ```java
-PinJoint joint = new PinJoint(body, new Vector2(0, 0), 4, 0.7, 1000);
+PinJoint<Body> joint = new PinJoint<Body>(body, new Vector2(0, 0), 4, 0.7, 1000);
 world.addJoint(joint);
 ```
 A joint is a constraint on the motion of one or more bodies.  There are many joint types that serve different purposes.  Generally, joints are used to link bodies together in a specified way.  Bodies can have multiple joints attached to them making for some interesting combinations.
