@@ -33,7 +33,11 @@ import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents the collision data the {@link World} class.
+ * Represents the collision data for the {@link World} class.
+ * <p>
+ * This will track the broadphase, narrowphase, manifold generation, and contact constraint stages of
+ * collision detection. Use the {@link #isBroadphaseCollision()} and similar methods to determine the
+ * progress of the collision.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0

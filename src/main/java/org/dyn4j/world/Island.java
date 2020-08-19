@@ -38,6 +38,8 @@ import org.dyn4j.geometry.Vector2;
 
 /**
  * Used to solve the contact constraints and joints for a group of interconnected bodies.
+ * <p>
+ * {@link Island}s are used and setup by the {@link ConstraintGraph} during it's solving process.
  * @author William Bittle
  * @version 4.0.0
  * @since 1.0.0

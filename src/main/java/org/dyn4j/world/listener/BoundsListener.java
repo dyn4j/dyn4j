@@ -42,6 +42,16 @@ import org.dyn4j.collision.Fixture;
 public interface BoundsListener<T extends CollisionBody<E>, E extends Fixture> extends WorldEventListener {
 	/**
 	 * Method called when a {@link CollisionBody} is outside the {@link Bounds} of a simulation.
+	 * <p>
+	 * The {@link CollisionBody} must be fully outside the bounds defined in the world. This means that
+	 * all the fixtures are outside the bounds.
+	 * <p>
+	 * When this is detected the {@link CollisionBody} is set to disabled and is effectively ignored until
+	 * moved back within the bounds and enabled again.
+	 * <p>
+	 * Typically this event is used to clean up bodies that have strayed from the simulation, but be aware
+	 * that the removal of the body cannot be done here. Instead it must be done after the simulation step
+	 * completes.
 	 * @param body the {@link CollisionBody} outside the {@link Bounds}
 	 */
 	public void outside(T body);

@@ -27,6 +27,10 @@
  * Package contains the listeners used in the {@link org.dyn4j.world.CollisionWorld} and 
  * {@link org.dyn4j.world.PhysicsWorld} classes to notify a user of events occurring in
  * the engine.
+ * <p>
+ * Generally, actions that modify the world that this event is generated from should be avoided.
+ * Best practice would be to queue up operations like removal of bodies, adding fixtures, etc. until
+ * the simulation step has completed.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0

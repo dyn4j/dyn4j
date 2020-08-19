@@ -70,6 +70,10 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	 * called when a user removes a fixture or body that's currently in collision.  The 
 	 * {@link #end(ContactCollisionData, Contact)} applies when the fixtures separate and are no longer
 	 * in collision.
+	 * <p>
+	 * This is called before the {@link DestructionListener#destroyed(org.dyn4j.dynamics.contact.ContactConstraint)}
+	 * method in the event processing needed to occur by both listeners. There's no requirement that it must be
+	 * processed in both (or at all) though.
 	 * @param collision the collision data
 	 * @param contact the contact
 	 */
