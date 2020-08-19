@@ -24,8 +24,10 @@
  */
 package org.dyn4j.world.listener;
 
+import org.dyn4j.collision.manifold.ManifoldPointId;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
+import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.SolvedContact;
 import org.dyn4j.world.ContactCollisionData;
@@ -44,13 +46,6 @@ import org.dyn4j.world.PhysicsWorld;
  */
 public interface ContactListener<T extends PhysicsBody> extends WorldEventListener {
 	/**
-	 * Called before contact constraints are solved.
-	 * @param collision the collision data
-	 * @param contact the contact
-	 */
-	public abstract void preSolve(ContactCollisionData<T> collision, Contact contact);
-	
-	/**
 	 * Called when two {@link BodyFixture}s begin to overlap, generating a contact point.
 	 * @param collision the collision data
 	 * @param contact the contact
@@ -59,6 +54,10 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	
 	/**
 	 * Called when two {@link BodyFixture}s begin to separate and the contact point is no longer valid.
+	 * <p>
+	 * This can happen in one of two ways. First, the fixtures in question have separated such that there's
+	 * no longer any collision between them. Second, the fixtures could still be in collision, but the features
+	 * that are in collision on those fixtures have changed.
 	 * @param collision the collision data
 	 * @param contact the contact
 	 */
@@ -66,6 +65,11 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 
 	/**
 	 * Called when a body or fixture is removed from the world that had existing contacts.
+	 * <p>
+	 * This is different than the {@link #end(ContactCollisionData, Contact)} event. This will only be
+	 * called when a user removes a fixture or body that's currently in collision.  The 
+	 * {@link #end(ContactCollisionData, Contact)} applies when the fixtures separate and are no longer
+	 * in collision.
 	 * @param collision the collision data
 	 * @param contact the contact
 	 */
@@ -73,6 +77,13 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	
 	/**
 	 * Called when two {@link BodyFixture}s remain in contact.
+	 * <p>
+	 * For a {@link Contact} to persist, the {@link Settings#isWarmStartingEnabled()} must be true and the
+	 * {@link ManifoldPointId}s must match.
+	 * <p>
+	 * For shapes with vertices only, the manifold ids will be identical when the features of the colliding
+	 * fixures are the same.  For rounded shapes, the manifold points must be within a specified tolerance
+	 * defined in {@link Settings#getMaximumWarmStartDistance()}.
 	 * @param collision the collision data
 	 * @param oldContact the old contact
 	 * @param newContact the new contact
@@ -80,7 +91,18 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	public abstract void persist(ContactCollisionData<T> collision, Contact oldContact, Contact newContact);
 	
 	/**
+	 * Called before contact constraints are solved.
+	 * @param collision the collision data
+	 * @param contact the contact
+	 */
+	public abstract void preSolve(ContactCollisionData<T> collision, Contact contact);
+	
+	/**
 	 * Called after contacts have been solved.
+	 * <p>
+	 * NOTE: This method will be called for {@link SolvedContact}s even when the {@link SolvedContact#isSolved()}
+	 * is false. This should only occur in situations with multiple contact points that produce a linearly
+	 * dependent system. These contacts are thus ignored during solving, but still reported here.
 	 * @param collision the collision data
 	 * @param contact the contact
 	 */

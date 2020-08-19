@@ -42,4 +42,14 @@ public interface SolvedContact extends Contact {
 	 * @return double the accumulated tangential impulse
 	 */
 	public double getTangentialImpulse();
+	
+	/**
+	 * Returns true if this contact was solved.
+	 * <p>
+	 * A contact may not be solved when it's part of a pair of contacts
+	 * that form a linearly dependent system.
+	 * @return boolean
+	 * @since 4.0.0
+	 */
+	public boolean isSolved();
 }

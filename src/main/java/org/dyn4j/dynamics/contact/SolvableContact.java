@@ -75,6 +75,9 @@ final class SolvableContact implements Contact, SolvedContact {
 	/** The velocity bias */
 	double vb;
 	
+	/** True if the contact was ignored during solving */
+	boolean ignored;
+	
 	/**
 	 * Full constructor.
 	 * @param id the manifold point id used for warm starting
@@ -106,44 +109,46 @@ final class SolvableContact implements Contact, SolvedContact {
 		return sb.toString();
 	}
 	
-	/**
-	 * Returns the manifold point id.
-	 * @return {@link ManifoldPointId}
-	 * @since 3.1.2
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.contact.Contact#getId()
 	 */
 	public ManifoldPointId getId() {
 		return this.id;
 	}
 	
-	/**
-	 * Returns the world space collision point.
-	 * @return {@link Vector2} the collision point in world space
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.contact.Contact#getPoint()
 	 */
 	public Vector2 getPoint() {
 		return this.p;
 	}
 	
-	/**
-	 * Returns the penetration depth of this point.
-	 * @return double the penetration depth
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.contact.Contact#getDepth()
 	 */
 	public double getDepth() {
 		return this.depth;
 	}
 	
-	/**
-	 * Returns the accumulated normal impulse applied at this point.
-	 * @return double the accumulated normal impulse
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.contact.SolvedContact#getNormalImpulse()
 	 */
 	public double getNormalImpulse() {
 		return this.jn;
 	}
 	
-	/**
-	 * Returns the accumulated tangential impulse applied at this point.
-	 * @return double the accumulated tangential impulse
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.contact.SolvedContact#getTangentialImpulse()
 	 */
 	public double getTangentialImpulse() {
 		return this.jt;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.contact.SolvedContact#isSolved()
+	 */
+	@Override
+	public boolean isSolved() {
+		return !this.ignored;
 	}
 }

@@ -39,6 +39,7 @@ public interface Contact {
 	 * <p>
 	 * This identifies the contact to warm-starting.
 	 * @return {@link ManifoldPointId}
+	 * @since 3.1.2
 	 */
 	public ManifoldPointId getId();
 	

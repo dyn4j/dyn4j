@@ -265,6 +265,9 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 					if (contact1.depth < contact2.depth) {
 						Collections.swap(contactConstraint.contacts, 0, 1);
 					}
+					
+					// mark the contact as ignored
+					contactConstraint.contacts.get(1).ignored = true;
 				}
 			}
 		}
