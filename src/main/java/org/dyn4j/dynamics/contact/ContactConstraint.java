@@ -242,7 +242,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 					found = true;
 					// notify that this contact was persisted from
 					// an existing contact
-					handler.persist(contact, old);
+					handler.persist(old, contact);
 					
 					// only warm start if it's enabled
 					if (isWarmStartEnabled) {
