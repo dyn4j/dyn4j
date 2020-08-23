@@ -225,50 +225,50 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 			// get the manifold point
 			ManifoldPoint point = points.get(l);
 			// create a contact from the manifold point
-			SolvableContact contact = new SolvableContact(point.getId(),
+			SolvableContact newContact = new SolvableContact(point.getId(),
                   point.getPoint(), 
                   point.getDepth(), 
                   body1.getLocalPoint(point.getPoint()), 
                   body2.getLocalPoint(point.getPoint()));
 			// add the contact to the array
-			contacts.add(contact);
+			contacts.add(newContact);
 			
 			// find a matching contact
 			boolean found = false;
 			int cSize = this.contacts.size();
 			for (int j = cSize - 1; j >= 0; j--) {
-				SolvableContact old = this.contacts.get(j);
-				if ((contact.id == ManifoldPointId.DISTANCE && contact.p.distanceSquared(old.p) <= maxWarmStartDistanceSquared) || contact.id.equals(old.id)) {
+				SolvableContact oldContact = this.contacts.get(j);
+				if ((newContact.id == ManifoldPointId.DISTANCE && newContact.p.distanceSquared(oldContact.p) <= maxWarmStartDistanceSquared) || newContact.id.equals(oldContact.id)) {
 					found = true;
 					// notify that this contact was persisted from
 					// an existing contact
-					handler.persist(old, contact);
+					handler.persist(oldContact, newContact);
 					
 					// only warm start if it's enabled
 					if (isWarmStartEnabled) {
 						// copy last time's data over
-						contact.jn = old.jn;
-						contact.jt = old.jt;
+						newContact.jn = oldContact.jn;
+						newContact.jt = oldContact.jt;
 					}
 					
 					// remove this contact from the current list
 					// so that only "end" contacts are left in the list
-					this.contacts.remove(old);
+					this.contacts.remove(oldContact);
 					break;
 				}
 			}
 			
 			if (!found) {
 				// notify that this contact is new
-				handler.begin(contact);
+				handler.begin(newContact);
 			}
 		}
 		
 		// notify of contacts that have "ended"
 		int cSize = this.contacts.size();
 		for (int j = cSize - 1; j >= 0; j--) {
-			SolvableContact old = this.contacts.get(j);
-			handler.end(old);
+			SolvableContact oldContact = this.contacts.get(j);
+			handler.end(oldContact);
 		}
 		
 		// clear all the old contacts and add
