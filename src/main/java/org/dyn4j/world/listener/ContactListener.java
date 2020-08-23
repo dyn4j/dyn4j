@@ -86,7 +86,7 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	 * {@link ManifoldPointId}s must match.
 	 * <p>
 	 * For shapes with vertices only, the manifold ids will be identical when the features of the colliding
-	 * fixures are the same.  For rounded shapes, the manifold points must be within a specified tolerance
+	 * fixtures are the same.  For rounded shapes, the manifold points must be within a specified tolerance
 	 * defined in {@link Settings#getMaximumWarmStartDistance()}.
 	 * @param collision the collision data
 	 * @param oldContact the old contact
