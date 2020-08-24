@@ -12,7 +12,7 @@
   <packaging>bundle</packaging>
 
   <properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!--
       Define plugin versions as properties so that the Maven Versions Plugin can update them.
@@ -21,18 +21,18 @@
       http://www.mojohaus.org/versions-maven-plugin/
     -->
 
-    <dyn4j.maven-clean-plugin.version>3.0.0</dyn4j.maven-clean-plugin.version>
+    <dyn4j.maven-clean-plugin.version>3.1.0</dyn4j.maven-clean-plugin.version>
     <dyn4j.maven-resources-plugin.version>3.0.0</dyn4j.maven-resources-plugin.version>
     <dyn4j.maven-deploy-plugin.version>2.8.2</dyn4j.maven-deploy-plugin.version>
     <dyn4j.maven-install-plugin.version>2.5.2</dyn4j.maven-install-plugin.version>
-    <dyn4j.maven-compiler-plugin.version>3.7.0</dyn4j.maven-compiler-plugin.version>
-    <dyn4j.maven-surefire-plugin.version>2.21.0</dyn4j.maven-surefire-plugin.version>
-    <dyn4j.maven-source-plugin.version>3.0.1</dyn4j.maven-source-plugin.version>
-    <dyn4j.maven-bundle-plugin.version>3.3.0</dyn4j.maven-bundle-plugin.version>
-    <dyn4j.maven-javadoc-plugin.version>3.0.0</dyn4j.maven-javadoc-plugin.version>
+    <dyn4j.maven-compiler-plugin.version>3.8.1</dyn4j.maven-compiler-plugin.version>
+    <dyn4j.maven-surefire-plugin.version>2.22.0</dyn4j.maven-surefire-plugin.version>
+    <dyn4j.maven-source-plugin.version>3.2.1</dyn4j.maven-source-plugin.version>
+    <dyn4j.maven-bundle-plugin.version>5.1.1</dyn4j.maven-bundle-plugin.version>
+    <dyn4j.maven-javadoc-plugin.version>3.2.0</dyn4j.maven-javadoc-plugin.version>
     <dyn4j.nexus-staging-maven-plugin.version>1.6.8</dyn4j.nexus-staging-maven-plugin.version>
     <dyn4j.maven-gpg-plugin.version>1.6</dyn4j.maven-gpg-plugin.version>
-    <dyn4j.maven-enforcer-plugin.version>3.0.0-M1</dyn4j.maven-enforcer-plugin.version>
+    <dyn4j.maven-enforcer-plugin.version>3.0.0-M3</dyn4j.maven-enforcer-plugin.version>
   </properties>
 
   <organization>
@@ -233,16 +233,6 @@
               <Require-Capability><![CDATA[osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.6))"]]></Require-Capability>
             </instructions>
           </configuration>
-
-          <!-- Use a newer version of bndlib that supports Java 9    -->
-          <!-- See: https://issues.apache.org/jira/browse/FELIX-5698 -->
-          <dependencies>
-            <dependency>
-              <groupId>biz.aQute.bnd</groupId>
-              <artifactId>biz.aQute.bndlib</artifactId>
-              <version>3.5.0</version>
-            </dependency>
-          </dependencies>
         </plugin>
 
         <!--
@@ -265,6 +255,11 @@
                 	<sourceFileExclude>module-info.java</sourceFileExclude>
                 </sourceFileExcludes>
                 <overview>${basedir}/overview.html</overview>
+                <doctitle>dyn4j v${project.version}</doctitle>
+                <show>public</show>
+                <doclint>all</doclint>
+                <noqualifier>all</noqualifier>
+                <excludePackageNames>org.dyn4j.resources</excludePackageNames>
                 <archive>
                   <manifestEntries>
                     <Specification-Title>${project.name}</Specification-Title>
@@ -276,7 +271,6 @@
                     <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
                   </manifestEntries>
                 </archive>
-                <additionalparam>-Xdoclint:none</additionalparam>
               </configuration>
             </execution>
           </executions>
