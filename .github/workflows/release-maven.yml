@@ -21,7 +21,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: '9.0.x'
+          java-version: 11
       
       # release to GitHub packages
       # NOTE: this will fail with error 422 if the version in the pom is the same as an existing package
