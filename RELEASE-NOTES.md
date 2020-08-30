@@ -1,4 +1,4 @@
-## v4.0.0 - _In Development_
+## v4.0.0 - August 29th, 2020
 This version sees massive performance improvements for large worlds, on the order of 30%-40% improvement. In addition, this version sees a big
 change in the API to better segment code for maintainability, testability, and extensibility. Along with those improvements comes lower object
 allocation per iteration and higher visibility into the output of the collision detection/resolution pipelines.
