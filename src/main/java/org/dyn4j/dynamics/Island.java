@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -39,9 +39,12 @@ import org.dyn4j.resources.Messages;
 /**
  * Used to solve the contact constraints and joints for a group of interconnected bodies.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 1.0.0
+ * @deprecated Deprecated in 4.0.0. Use the Island class in the world package instead.
  */
+@Deprecated
+@SuppressWarnings({"rawtypes", "unchecked"})
 final class Island {
 	/** The list of {@link Body}s on this {@link Island} */
 	final List<Body> bodies;
@@ -150,8 +153,8 @@ final class Island {
 			if (invM > Epsilon.E) {
 				// only perform this step if the body does not have
 				// a fixed linear velocity
-				body.velocity.x += (body.force.x * invM + gravity.x * body.gravityScale) * dt;
-				body.velocity.y += (body.force.y * invM + gravity.y * body.gravityScale) * dt;
+				body.linearVelocity.x += (body.force.x * invM + gravity.x * body.gravityScale) * dt;
+				body.linearVelocity.y += (body.force.y * invM + gravity.y * body.gravityScale) * dt;
 			}
 			// av1 = av0 + (t / I) * dt
 			if (invI > Epsilon.E) {
@@ -167,8 +170,8 @@ final class Island {
 				linear = Interval.clamp(linear, 0.0, 1.0);
 				
 				// inline body.velocity.multiply(linear);
-				body.velocity.x *= linear;
-				body.velocity.y *= linear;	
+				body.linearVelocity.x *= linear;
+				body.linearVelocity.y *= linear;	
 			}
 			
 			// apply angular damping
@@ -212,8 +215,8 @@ final class Island {
 			if (body.isStatic()) continue;
 			
 			// compute the translation and rotation for this time step
-			double translationX = body.velocity.x * dt;
-			double translationY = body.velocity.y * dt;
+			double translationX = body.linearVelocity.x * dt;
+			double translationY = body.linearVelocity.y * dt;
 			double translationMagnitudeSquared = translationX * translationX + translationY * translationY;
 			
 			// make sure the translation is not over the maximum
@@ -221,7 +224,7 @@ final class Island {
 				double translationMagnitude = Math.sqrt(translationMagnitudeSquared);
 				double ratio = maxTranslation / translationMagnitude;
 				
-				body.velocity.multiply(ratio);
+				body.linearVelocity.multiply(ratio);
 
 				translationX *= ratio;
 				translationY *= ratio;
@@ -273,18 +276,18 @@ final class Island {
 				// see if the body is allowed to sleep
 				if (body.isAutoSleepingEnabled()) {
 					// check the linear and angular velocity
-					if (body.velocity.getMagnitudeSquared() > sleepLinearVelocitySquared || body.angularVelocity > sleepAngularVelocity) {
+					if (body.linearVelocity.getMagnitudeSquared() > sleepLinearVelocitySquared || body.angularVelocity > sleepAngularVelocity) {
 						// if either the linear or angular velocity is above the 
 						// threshold then reset the sleep time
-						body.sleepTime = 0.0;
+						body.atRestTime = 0.0;
 						minSleepTime = 0.0;
 					} else {
 						// then increment the sleep time
-						body.sleepTime += step.dt;
-						minSleepTime = Math.min(minSleepTime, body.sleepTime);
+						body.atRestTime += step.dt;
+						minSleepTime = Math.min(minSleepTime, body.atRestTime);
 					}
 				} else {
-					body.sleepTime = 0.0;
+					body.atRestTime = 0.0;
 					minSleepTime = 0.0;
 				}
 			}

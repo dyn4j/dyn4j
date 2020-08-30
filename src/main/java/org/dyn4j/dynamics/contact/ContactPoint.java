@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -26,24 +26,27 @@ package org.dyn4j.dynamics.contact;
 
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
 
 /**
  * Represents a contact point and used to report events via the {@link ContactListener}.
  * @author William Bittle
- * @version 3.3.0
+ * @version 4.0.0
  * @since 1.0.0
+ * @deprecated Deprecated in 4.0.0. Use the {@link Contact} or {@link SolvedContact} interfaces instead.
  */
+@Deprecated
 public class ContactPoint {
 	/** The contact point id */
 	protected final ContactPointId id;
 	
 	/** The first {@link Body} in contact */
-	protected final Body body1;
+	protected final PhysicsBody body1;
 	
 	/** The second {@link Body} in contact */
-	protected final Body body2;
+	protected final PhysicsBody body2;
 	
 	/** The first {@link Body}'s {@link BodyFixture} */
 	protected final BodyFixture fixture1;
@@ -75,7 +78,7 @@ public class ContactPoint {
 	 * @param depth the penetration depth
 	 * @param sensor true if the contact is a sensor contact
 	 */
-	public ContactPoint(ContactPointId id, Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2,
+	public ContactPoint(ContactPointId id, PhysicsBody body1, BodyFixture fixture1, PhysicsBody body2, BodyFixture fixture2,
 			Vector2 point, Vector2 normal, double depth, boolean sensor) {
 		this.id = id;
 		this.body1 = body1;
@@ -93,16 +96,16 @@ public class ContactPoint {
 	 * @param constraint the constraint
 	 * @param contact the contact
 	 */
-	public ContactPoint(ContactConstraint constraint, Contact contact) {
-		this.id = new ContactPointId(constraint.id, contact.id);
+	public ContactPoint(ContactConstraint<? extends PhysicsBody> constraint, Contact contact) {
+		this.id = new ContactPointId(constraint.id, contact.getId());
 		this.body1 = constraint.getBody1();
-		this.fixture1 = constraint.fixture1;
+		this.fixture1 = constraint.getFixture1();
 		this.body2 = constraint.getBody2();
-		this.fixture2 = constraint.fixture2;
+		this.fixture2 = constraint.getFixture2();
 		
-		this.point = contact.p;
-		this.normal = constraint.normal;
-		this.depth = contact.depth;
+		this.point = contact.getPoint();
+		this.normal = constraint.getNormal();
+		this.depth = contact.getDepth();
 		
 		this.sensor = constraint.sensor;
 	}
@@ -180,7 +183,7 @@ public class ContactPoint {
 	 * Returns the first {@link Body}.
 	 * @return {@link Body}
 	 */
-	public Body getBody1() {
+	public PhysicsBody getBody1() {
 		return this.body1;
 	}
 	
@@ -188,7 +191,7 @@ public class ContactPoint {
 	 * Returns the second {@link Body}.
 	 * @return {@link Body}
 	 */
-	public Body getBody2() {
+	public PhysicsBody getBody2() {
 		return this.body2;
 	}
 	

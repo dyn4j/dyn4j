@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -24,24 +24,23 @@
  */
 package org.dyn4j.dynamics;
 
-import java.util.ArrayList;
-
-import junit.framework.TestCase;
-
+import org.dyn4j.collision.BasicCollisionPair;
 import org.dyn4j.collision.manifold.Manifold;
-import org.dyn4j.collision.manifold.ManifoldPoint;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Test case for the {@link Island} class.
  * @author William Bittle
- * @version 3.1.1
+ * @version 4.0.0
  * @since 3.1.1
  */
+@Deprecated
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class IslandTest {
 	/**
 	 * Tests the successful creation of an island.
@@ -72,7 +71,12 @@ public class IslandTest {
 		
 		i.add(new Body());
 		i.add(new AngleJoint(new Body(), new Body()));
-		i.add(new ContactConstraint(new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 0, 0));
+		i.add(new ContactConstraint(new BasicCollisionPair(
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0)), 
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0))), 
+				new Manifold(), 0, 0));
 		
 		TestCase.assertEquals(1, i.bodies.size());
 		TestCase.assertEquals(1, i.joints.size());
@@ -88,7 +92,12 @@ public class IslandTest {
 		
 		i.add(new Body());
 		i.add(new AngleJoint(new Body(), new Body()));
-		i.add(new ContactConstraint(new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Body(), new BodyFixture(Geometry.createCircle(1.0)), new Manifold(new ArrayList<ManifoldPoint>(), new Vector2()), 0, 0));
+		i.add(new ContactConstraint(new BasicCollisionPair(
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0)), 
+				new Body(), 
+				new BodyFixture(Geometry.createCircle(1.0))), 
+				new Manifold(), 0, 0));
 		
 		TestCase.assertEquals(1, i.bodies.size());
 		TestCase.assertEquals(1, i.joints.size());

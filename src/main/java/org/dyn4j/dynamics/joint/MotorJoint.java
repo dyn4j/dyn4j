@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -26,9 +26,9 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Step;
+import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
@@ -69,13 +69,14 @@ import org.dyn4j.resources.Messages;
  * character body will move and rotate smoothly, participating in any collision
  * or with other joints to match the infinite mass body.
  * @author William Bittle
- * @version 3.2.1
+ * @version 4.0.0
  * @since 3.1.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Motor_Joint" target="_blank">Documentation</a>
+ * @param <T> the {@link PhysicsBody} type
  */
-public class MotorJoint extends Joint implements Shiftable, DataContainer {
+public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
 	/** The linear target distance from body1's world space center */
-	protected Vector2 linearTarget;
+	protected final Vector2 linearTarget;
 	
 	/** The target angle between the two body's angles */
 	protected double angularTarget;
@@ -92,7 +93,7 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 	// current state
 	
 	/** The pivot mass; K = J * Minv * Jtrans */
-	private Matrix22 K;
+	private final Matrix22 K;
 	
 	/** The mass for the angular constraint */
 	private double angularMass;
@@ -113,12 +114,12 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 	
 	/**
 	 * Minimal constructor.
-	 * @param body1 the first {@link Body}
-	 * @param body2 the second {@link Body}
+	 * @param body1 the first {@link PhysicsBody}
+	 * @param body2 the second {@link PhysicsBody}
 	 * @throws NullPointerException if body1 or body2
 	 * @throws IllegalArgumentException if body1 == body2
 	 */
-	public MotorJoint(Body body1, Body body2) {
+	public MotorJoint(T body1, T body2) {
 		// default no collision allowed
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
@@ -151,10 +152,10 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints(Step step, Settings settings) {
+	public void initializeConstraints(TimeStep step, Settings settings) {
 		Transform t1 = this.body1.getTransform();
 		Transform t2 = this.body2.getTransform();
 		
@@ -189,22 +190,27 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 		this.linearError = d2.subtract(d1);
 		this.angularError = this.getAngularError();
 		
-		// account for variable time step
-		this.linearImpulse.multiply(step.getDeltaTimeRatio());
-		this.angularImpulse *= step.getDeltaTimeRatio();
-		
-		// warm start
-		this.body1.getLinearVelocity().subtract(this.linearImpulse.product(invM1));
-		this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * (r1.cross(this.linearImpulse) + this.angularImpulse));
-		this.body2.getLinearVelocity().add(this.linearImpulse.product(invM2));
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * (r2.cross(this.linearImpulse) + this.angularImpulse));
+		if (settings.isWarmStartingEnabled()) {
+			// account for variable time step
+			this.linearImpulse.multiply(step.getDeltaTimeRatio());
+			this.angularImpulse *= step.getDeltaTimeRatio();
+			
+			// warm start
+			this.body1.getLinearVelocity().subtract(this.linearImpulse.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * (r1.cross(this.linearImpulse) + this.angularImpulse));
+			this.body2.getLinearVelocity().add(this.linearImpulse.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * (r2.cross(this.linearImpulse) + this.angularImpulse));
+		} else {
+			this.linearImpulse.zero();
+			this.angularImpulse = 0.0;
+		}
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints(Step step, Settings settings) {
+	public void solveVelocityConstraints(TimeStep step, Settings settings) {
 		double dt = step.getDeltaTime();
 		double invdt = step.getInverseDeltaTime();
 		
@@ -267,10 +273,10 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints(Step step, Settings settings) {
+	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
 		// nothing to do here for this joint since there is no "hard" constraint
 		return true;
 	}
@@ -355,9 +361,9 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setLinearTarget(Vector2 target) {
 		if (!target.equals(this.linearTarget)) {
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
-			this.linearTarget = target;
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
+			this.linearTarget.set(target);
 		}
 	}
 	
@@ -375,8 +381,8 @@ public class MotorJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public void setAngularTarget(double target) {
 		if (target != this.angularTarget) {
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
 			this.angularTarget = target;
 		}
 	}

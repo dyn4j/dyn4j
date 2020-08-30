@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -26,6 +26,7 @@ package org.dyn4j.dynamics.contact;
 
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
 
@@ -33,15 +34,17 @@ import org.dyn4j.geometry.Shape;
  * Represents and id for a contact constraint between two {@link Convex}
  * {@link Shape}s on two {@link Body}s.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 1.0.0
+ * @deprecated Deprecated in 4.0.0. No longer needed.
  */
+@Deprecated
 public final class ContactConstraintId {
 	/** The first {@link Body} */
-	private final Body body1;
+	private final PhysicsBody body1;
 	
 	/** The second {@link Body} */
-	private final Body body2;
+	private final PhysicsBody body2;
 	
 	/** The first {@link Body}'s {@link Convex} {@link Shape} */
 	private final BodyFixture fixture1;
@@ -56,7 +59,7 @@ public final class ContactConstraintId {
 	 * @param body2 the second {@link Body}
 	 * @param fixture2 the second {@link Body}'s {@link BodyFixture}
 	 */
-	public ContactConstraintId(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2) {
+	public ContactConstraintId(PhysicsBody body1, BodyFixture fixture1, PhysicsBody body2, BodyFixture fixture2) {
 		this.body1 = body1;
 		this.body2 = body2;
 		this.fixture1 = fixture1;
@@ -113,7 +116,7 @@ public final class ContactConstraintId {
 	 * @return Body
 	 * @since 3.4.0
 	 */
-	public Body getBody1() {
+	public PhysicsBody getBody1() {
 		return this.body1;
 	}
 
@@ -122,7 +125,7 @@ public final class ContactConstraintId {
 	 * @return Body
 	 * @since 3.4.0
 	 */
-	public Body getBody2() {
+	public PhysicsBody getBody2() {
 		return this.body2;
 	}
 

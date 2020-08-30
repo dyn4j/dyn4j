@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -27,8 +27,12 @@ package org.dyn4j.dynamics;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
+import org.dyn4j.geometry.Mass;
+import org.dyn4j.geometry.MassType;
 import org.junit.Before;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Tests the methods of the {@link BodyFixture} and {@link Fixture} classes.
@@ -68,6 +72,23 @@ public class BodyFixtureTest {
 	}
 	
 	/**
+	 * Tests the get/set density methods.
+	 */
+	@Test
+	public void getSetDensity() {
+		TestCase.assertEquals(BodyFixture.DEFAULT_DENSITY, fixture.getDensity());
+		
+		fixture.setDensity(1.0);
+		TestCase.assertEquals(1.0, fixture.getDensity());
+		
+		fixture.setDensity(0.001);
+		TestCase.assertEquals(0.001, fixture.getDensity());
+		
+		fixture.setDensity(1000);
+		TestCase.assertEquals(1000.0, fixture.getDensity());
+	}
+
+	/**
 	 * Tests setting the density to a negative value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
@@ -84,13 +105,25 @@ public class BodyFixtureTest {
 	}
 	
 	/**
-	 * Tests setting the density to a valid value
+	 * Tests the get/set friction methods.
 	 */
 	@Test
-	public void setValidDensity() {
-		fixture.setDensity(1.0);
+	public void getSetFriction() {
+		TestCase.assertEquals(BodyFixture.DEFAULT_FRICTION, fixture.getFriction());
+		
+		fixture.setFriction(1.0);
+		TestCase.assertEquals(1.0, fixture.getFriction());
+		
+		fixture.setFriction(0.001);
+		TestCase.assertEquals(0.001, fixture.getFriction());
+		
+		fixture.setFriction(0.0);
+		TestCase.assertEquals(0.0, fixture.getFriction());
+		
+		fixture.setFriction(5);
+		TestCase.assertEquals(5.0, fixture.getFriction());
 	}
-	
+
 	/**
 	 * Tests setting friction to a negative value.
 	 */
@@ -100,15 +133,25 @@ public class BodyFixtureTest {
 	}
 	
 	/**
-	 * Tests setting friction to a valid value
+	 * Tests the get/set restitution methods.
 	 */
 	@Test
-	public void setValidFriction() {
-		fixture.setFriction(0.0);
-		fixture.setFriction(1.0);
-		fixture.setFriction(5.0);
+	public void getSetRestitution() {
+		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION, fixture.getRestitution());
+		
+		fixture.setRestitution(1.0);
+		TestCase.assertEquals(1.0, fixture.getRestitution());
+		
+		fixture.setRestitution(0.001);
+		TestCase.assertEquals(0.001, fixture.getRestitution());
+		
+		fixture.setRestitution(0.0);
+		TestCase.assertEquals(0.0, fixture.getRestitution());
+		
+		fixture.setRestitution(5);
+		TestCase.assertEquals(5.0, fixture.getRestitution());
 	}
-	
+
 	/**
 	 * Tests setting the restitution to a negative value.
 	 */
@@ -116,14 +159,24 @@ public class BodyFixtureTest {
 	public void setNegativeRestitution() {
 		fixture.setRestitution(-1.0);
 	}
-
+	
 	/**
-	 * Tests setting restitution to a valid value
+	 * Tests the toString method.
 	 */
 	@Test
-	public void setValidRestitution() {
-		fixture.setRestitution(0.0);
-		fixture.setRestitution(1.0);
-		fixture.setRestitution(5.0);
+	public void tostring() {
+		TestCase.assertNotNull(fixture.toString());
+	}
+	
+	/**
+	 * Tests the createMass method.
+	 */
+	@Test
+	public void createMass() {
+		Mass mass = fixture.createMass();
+		TestCase.assertNotNull(mass);
+		TestCase.assertEquals(MassType.NORMAL, mass.getType());
+		TestCase.assertTrue(mass.getInertia() > 0);
+		TestCase.assertTrue(mass.getMass() > 0);
 	}
 }

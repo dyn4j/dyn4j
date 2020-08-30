@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -24,9 +24,11 @@
  */
 package org.dyn4j.collision.narrowphase;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Shape;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 
 /**
@@ -36,15 +38,15 @@ import org.dyn4j.geometry.Vector2;
  * The point is the point on the {@link Convex} {@link Shape} where the ray
  * intersects. The normal is the normal of the edge the {@link Ray} intersects.
  * @author William Bittle
- * @version 3.0.2
+ * @version 4.0.0
  * @since 2.0.0
  */
-public class Raycast {
+public class Raycast implements Shiftable, Copyable<Raycast> {
 	/** The hit point */
-	protected Vector2 point;
+	protected final Vector2 point;
 	
 	/** The normal at the hit point */
-	protected Vector2 normal;
+	protected final Vector2 normal;
 	
 	/** The distance from the start of the {@link Ray} to the hit point */
 	protected double distance;
@@ -52,7 +54,10 @@ public class Raycast {
 	/**
 	 * Default constructor.
 	 */
-	public Raycast() {}
+	public Raycast() {
+		this.point = new Vector2();
+		this.normal = new Vector2();
+	}
 	
 	/**
 	 * Full constructor.
@@ -60,9 +65,9 @@ public class Raycast {
 	 * @param normal the normal at the hit point
 	 * @param distance the distance from the start of the {@link Ray} to the hit point
 	 */
-	public Raycast(Vector2 point, Vector2 normal, double distance) {
-		this.point = point;
-		this.normal = normal;
+	protected Raycast(Vector2 point, Vector2 normal, double distance) {
+		this.point = point.copy();
+		this.normal = normal.copy();
 		this.distance = distance;
 	}
 	
@@ -84,8 +89,8 @@ public class Raycast {
 	 * their default values.
 	 */
 	public void clear() {
-		this.point = null;
-		this.normal = null;
+		this.point.zero();
+		this.normal.zero();
 		this.distance = 0.0;
 	}
 	
@@ -102,7 +107,8 @@ public class Raycast {
 	 * @param point the hit point
 	 */
 	public void setPoint(Vector2 point) {
-		this.point = point;
+		this.point.x = point.x;
+		this.point.y = point.y;
 	}
 	
 	/**
@@ -118,7 +124,8 @@ public class Raycast {
 	 * @param normal the normal at the hit point
 	 */
 	public void setNormal(Vector2 normal) {
-		this.normal = normal;
+		this.normal.x = normal.x;
+		this.normal.y = normal.y;
 	}
 	
 	/**
@@ -137,5 +144,35 @@ public class Raycast {
 	 */
 	public void setDistance(double distance) {
 		this.distance = distance;
+	}
+	
+	/**
+	 * Copies (deep) the given {@link Raycast} information to this {@link Raycast}.
+	 * @param raycast the raycast to copy
+	 * @since 4.0.0
+	 */
+	public void copy(Raycast raycast) {
+		this.distance = raycast.distance;
+		this.normal.x = raycast.normal.x;
+		this.normal.y = raycast.normal.y;
+		this.point.x = raycast.point.x;
+		this.point.y = raycast.point.y;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public void shift(Vector2 shift) {
+		this.point.x += shift.x;
+		this.point.y += shift.y;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
+	 */
+	@Override
+	public Raycast copy() {
+		return new Raycast(this.point, this.normal, this.distance);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -24,17 +24,15 @@
  */
 package org.dyn4j.dynamics;
 
-import junit.framework.TestCase;
-
-import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Class used to test the {@link Force} class.
  * @author William Bittle
- * @version 3.1.1
+ * @version 4.0.0
  * @since 1.0.2
  */
 public class ForceTest {
@@ -47,15 +45,22 @@ public class ForceTest {
 		f = new Force(0.3, 2.0);
 		TestCase.assertEquals(0.3, f.force.x);
 		TestCase.assertEquals(2.0, f.force.y);
+		TestCase.assertEquals(0.3, f.getForce().x);
+		TestCase.assertEquals(2.0, f.getForce().y);
 		
 		Force f2 = new Force(f);
-		TestCase.assertEquals(0.3, f.force.x);
-		TestCase.assertEquals(2.0, f.force.y);
+		TestCase.assertEquals(0.3, f2.force.x);
+		TestCase.assertEquals(2.0, f2.force.y);
 		TestCase.assertNotSame(f.force, f2.force);
+		TestCase.assertEquals(0.3, f2.getForce().x);
+		TestCase.assertEquals(2.0, f2.getForce().y);
+		TestCase.assertNotSame(f.getForce(), f2.getForce());
 		
 		f = new Force(new Vector2(2.0, 1.0));
 		TestCase.assertEquals(2.0, f.force.x);
 		TestCase.assertEquals(1.0, f.force.y);
+		TestCase.assertEquals(2.0, f.getForce().x);
+		TestCase.assertEquals(1.0, f.getForce().y);
 	}
 	
 	/**
@@ -114,36 +119,26 @@ public class ForceTest {
 	}
 	
 	/**
-	 * Tests the apply method where the force is retained for two steps.
+	 * Tests the toString method.
 	 */
 	@Test
-	public void applyTimed() {
-		World w = new World();
-		Body b = new Body();
-		b.addFixture(Geometry.createCircle(1.0));
-		b.setMass(MassType.NORMAL);
+	public void tostring() {
+		Force f = new Force();
 		
-		Force f = new Force() {
-			private double time = 0;
-			public boolean isComplete(double elapsedTime) {
-				time += elapsedTime;
-				if (time >= 2.0 / 60.0) {
-					return true;
-				}
-				return false;
-			}
-		};
+		TestCase.assertNotNull(f.toString());
 		
-		b.applyForce(f);
-		w.addBody(b);
+		f.set(2.0, 0.4);
+		TestCase.assertNotNull(f.toString());
+	}
+	
+	/**
+	 * Tests the default isComplete method.
+	 */
+	@Test
+	public void isComplete() {
+		Force f = new Force();
 		
-		w.step(1);
-		
-		// make sure the force is still there
-		TestCase.assertEquals(1, b.forces.size());
-		
-		w.step(1);
-		
-		TestCase.assertEquals(0, b.forces.size());
+		// by default it should be true
+		TestCase.assertTrue(f.isComplete(0.0));
 	}
 }

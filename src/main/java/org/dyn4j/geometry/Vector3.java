@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.Epsilon;
 
 /**
@@ -32,10 +33,10 @@ import org.dyn4j.Epsilon;
  * Used to solve 3x3 systems of equations.
  * @see Vector2
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 1.0.0
  */
-public class Vector3 {
+public class Vector3 implements Copyable<Vector3> {
 	/** The magnitude of the x component of this {@link Vector3} */
 	public double x;
 	
@@ -96,9 +97,8 @@ public class Vector3 {
 		this.z = p2.z - p1.z;
 	}
 	
-	/**
-	 * Returns a copy of this {@link Vector3}.
-	 * @return {@link Vector3}
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
 	 */
 	public Vector3 copy() {
 		return new Vector3(this.x, this.y, this.z);

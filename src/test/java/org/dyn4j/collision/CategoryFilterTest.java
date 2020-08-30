@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -35,6 +35,49 @@ import org.junit.Test;
  * @since 1.0.0
  */
 public class CategoryFilterTest {
+	/**
+	 * Tests the create method with no args.
+	 */
+	@Test
+	public void create() {
+		CategoryFilter f = new CategoryFilter();
+		TestCase.assertEquals(1, f.category);
+		TestCase.assertEquals(Long.MAX_VALUE, f.mask);
+		
+		TestCase.assertEquals(1, f.getCategory());
+		TestCase.assertEquals(Long.MAX_VALUE, f.getMask());
+	}
+	
+	/**
+	 * Tests the equals and hashCode methods.
+	 */
+	@Test
+	public void equalsAndHashCode() {
+		CategoryFilter f1 = new CategoryFilter();
+		CategoryFilter f2 = new CategoryFilter();
+		
+		TestCase.assertTrue(f1.equals(f2));
+		TestCase.assertEquals(f1.hashCode(), f2.hashCode());
+		
+		CategoryFilter f3 = new CategoryFilter(1, 2);
+		
+		TestCase.assertFalse(f1.equals(f3));
+		TestCase.assertFalse(f1.hashCode() == f3.hashCode());
+		
+		CategoryFilter f4 = new CategoryFilter(1, 2);
+		
+		TestCase.assertTrue(f3.equals(f4));
+		TestCase.assertEquals(f3.hashCode(), f4.hashCode());
+		
+		CategoryFilter f5 = new CategoryFilter(1, 3);
+		
+		TestCase.assertFalse(f3.equals(f5));
+		
+		TestCase.assertTrue(f1.equals(f1));
+		TestCase.assertFalse(f1.equals(null));
+		TestCase.assertFalse(f1.equals(new Object()));
+	}
+	
 	/**
 	 * Tests the {@link CategoryFilter}.
 	 */
@@ -64,5 +107,17 @@ public class CategoryFilterTest {
 		// not allowed
 		TestCase.assertFalse(f2.isAllowed(f3));
 		TestCase.assertFalse(f3.isAllowed(f2));
+		
+		// test null
+		TestCase.assertTrue(f1.isAllowed(null));
+	}
+	
+	/**
+	 * Tests the toString method.
+	 */
+	@Test
+	public void tostring() {
+		CategoryFilter f1 = new CategoryFilter();
+		TestCase.assertNotNull(f1.toString());
 	}
 }

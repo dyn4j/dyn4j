@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -35,13 +35,14 @@ import org.dyn4j.DataContainer;
 import org.dyn4j.Listener;
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.BoundsListener;
+import org.dyn4j.collision.CollisionItem;
+import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.Filter;
 import org.dyn4j.collision.Fixture;
+import org.dyn4j.collision.FixtureModificationHandler;
 import org.dyn4j.collision.broadphase.BatchBroadphaseDetector;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.broadphase.BroadphaseFilter;
-import org.dyn4j.collision.broadphase.BroadphaseItem;
-import org.dyn4j.collision.broadphase.BroadphasePair;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
 import org.dyn4j.collision.continuous.TimeOfImpact;
@@ -64,7 +65,7 @@ import org.dyn4j.dynamics.contact.ContactManager;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.dynamics.contact.DefaultContactManager;
 import org.dyn4j.dynamics.contact.SequentialImpulses;
-import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
+import org.dyn4j.dynamics.contact.ForceCollisionTimeOfImpactSolver;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
@@ -86,9 +87,12 @@ import org.dyn4j.resources.Messages;
  * there are multiple {@link CollisionListener}s and <b>any</b> one of them returns false for an event, the collision is skipped.  However,
  * all listeners will still be called no matter if the first returned false.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 1.0.0
+ * @deprecated Deprecated in 4.0.0. Use the World class in the world package instead.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
+@Deprecated
 public class World implements Shiftable, DataContainer {
 	/** Identity Transform instance */
 	private static final Transform IDENTITY = new Transform();
@@ -145,8 +149,8 @@ public class World implements Shiftable, DataContainer {
 	/** The {@link ContactConstraintSolver} */
 	protected ContactConstraintSolver contactConstraintSolver;
 	
-	/** The {@link TimeOfImpactSolver} */
-	protected TimeOfImpactSolver timeOfImpactSolver;
+	/** The {@link ForceCollisionTimeOfImpactSolver} */
+	protected ForceCollisionTimeOfImpactSolver timeOfImpactSolver;
 
 	/** The application data associated */
 	protected Object userData;
@@ -252,7 +256,7 @@ public class World implements Shiftable, DataContainer {
 		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
 		this.contactManager = new DefaultContactManager(initialCapacity);
 		this.contactConstraintSolver = new SequentialImpulses();
-		this.timeOfImpactSolver = new TimeOfImpactSolver();
+		this.timeOfImpactSolver = new ForceCollisionTimeOfImpactSolver();
 		
 		this.bodies = new ArrayList<Body>(initialCapacity.getBodyCount());
 		this.joints = new ArrayList<Joint>(initialCapacity.getJointCount());
@@ -523,14 +527,14 @@ public class World implements Shiftable, DataContainer {
 			// remove the island flag
 			body.setOnIsland(false);
 			// save the current transform into the previous transform
-			body.transform0.set(body.getTransform());
+			body.getInitialTransform().set(body.getTransform());
 		}
 		
 		// clear the joint island flags
 		int jSize = this.joints.size();
 		for (int i = 0; i < jSize; i++) {
 			// get the joint
-			Constraint joint = this.joints.get(i);
+			Joint joint = this.joints.get(i);
 			// set the island flag to false
 			joint.setOnIsland(false);
 		}
@@ -545,13 +549,13 @@ public class World implements Shiftable, DataContainer {
 		// access to the isOnIsland and setOnIsland methods
 		Joint joint;
 		ContactConstraint contactConstraint;
-		Constraint constraint;
+//		Constraint constraint;
 		
 		// loop over the bodies and their contact edges to create the islands
 		for (int i = 0; i < size; i++) {
 			Body seed = this.bodies.get(i);
 			// skip if asleep, in active, static, or already on an island
-			if (seed.isOnIsland() || seed.isAsleep() || !seed.isActive() || seed.isStatic()) continue;
+			if (seed.isOnIsland() || seed.isAsleep() || !seed.isEnabled() || seed.isStatic()) continue;
 			
 			// set the island to the reusable island
 			Island island = this.island;
@@ -578,16 +582,16 @@ public class World implements Shiftable, DataContainer {
 				for (int j = 0; j < ceSize; j++) {
 					ContactEdge contactEdge = body.contacts.get(j);
 					// get the contact constraint
-					constraint = contactConstraint = contactEdge.interaction;
+					contactConstraint = contactEdge.interaction;
 					// skip sensor contacts
 					// check if the contact constraint has already been added to an island
-					if (!contactConstraint.isEnabled() || contactConstraint.isSensor() || constraint.isOnIsland()) continue;
+					if (!contactConstraint.isEnabled() || contactConstraint.isSensor() || contactConstraint.isOnIsland()) continue;
 					// get the other body
 					Body other = contactEdge.other;
 					// add the contact constraint to the island list
 					island.add(contactConstraint);
 					// set the island flag on the contact constraint
-					constraint.setOnIsland(true);
+					contactConstraint.setOnIsland(true);
 					// has the other body been added to an island yet?
 					if (!other.isOnIsland()) {
 						// if not then add this body to the stack
@@ -601,18 +605,18 @@ public class World implements Shiftable, DataContainer {
 					// get the joint edge
 					JointEdge jointEdge = body.joints.get(j);
 					// get the joint
-					constraint = joint = jointEdge.interaction;
+					joint = jointEdge.interaction;
 					// check if the joint is inactive
-					if (!joint.isActive() || constraint.isOnIsland()) continue;
+					if (!joint.isActive() || joint.isOnIsland()) continue;
 					// get the other body
 					Body other = jointEdge.other;
 					// check if the joint has already been added to an island
 					// or if the other body is not active
-					if (!other.isActive()) continue;
+					if (!other.isEnabled()) continue;
 					// add the joint to the island
 					island.add(joint);
 					// set the island flag on the joint
-					constraint.setOnIsland(true);
+					joint.setOnIsland(true);
 					// check if the other body has been added to an island
 					if (!other.isOnIsland()) {
 						// if not then add the body to the stack
@@ -708,14 +712,14 @@ public class World implements Shiftable, DataContainer {
 			for (int i = 0; i < size; i++) {
 				Body body = this.bodies.get(i);
 				// skip if already not active
-				if (!body.isActive()) continue;
+				if (!body.isEnabled()) continue;
 				// clear all the old contacts
 				body.contacts.clear();
 				// check if bounds have been set
 				// check if the body is out of bounds
 				if (this.bounds != null && this.bounds.isOutside(body)) {
 					// set the body to inactive
-					body.setActive(false);
+					body.setEnabled(false);
 					// if so, notify via the listeners
 					for (int j = 0; j < blSize; j++) {
 						BoundsListener bl = boundsListeners.get(j);
@@ -730,14 +734,14 @@ public class World implements Shiftable, DataContainer {
 			for (int i = 0; i < size; i++) {
 				Body body = this.bodies.get(i);
 				// skip if already not active
-				if (!body.isActive()) continue;
+				if (!body.isEnabled()) continue;
 				// clear all the old contacts
 				body.contacts.clear();
 				// check if bounds have been set
 				// check if the body is out of bounds
 				if (this.bounds != null && this.bounds.isOutside(body)) {
 					// set the body to inactive
-					body.setActive(false);
+					body.setEnabled(false);
 					// if so, notify via the listeners
 					for (int j = 0; j < blSize; j++) {
 						BoundsListener bl = boundsListeners.get(j);
@@ -752,17 +756,17 @@ public class World implements Shiftable, DataContainer {
 		// make sure there are some bodies
 		if (size > 0) {
 			// test for collisions via the broad-phase
-			List<BroadphasePair<Body, BodyFixture>> pairs = this.broadphaseDetector.detect(this.detectBroadphaseFilter);
+			List<CollisionPair<Body, BodyFixture>> pairs = this.broadphaseDetector.detect(this.detectBroadphaseFilter);
 			int pSize = pairs.size();
 			boolean allow = true;
 			
 			// using the broad-phase results, test for narrow-phase
 			for (int i = 0; i < pSize; i++) {
-				BroadphasePair<Body, BodyFixture> pair = pairs.get(i);
+				CollisionPair<Body, BodyFixture> pair = pairs.get(i);
 				
 				// get the bodies
-				Body body1 = pair.getCollidable1();
-				Body body2 = pair.getCollidable2();
+				Body body1 = pair.getBody1();
+				Body body2 = pair.getBody2();
 				BodyFixture fixture1 = pair.getFixture1();
 				BodyFixture fixture2 = pair.getFixture2();
 				
@@ -831,8 +835,7 @@ public class World implements Shiftable, DataContainer {
 						}
 						if (!allow) continue;
 						// create a contact constraint
-						ContactConstraint contactConstraint = new ContactConstraint(body1, fixture1, 
-								                                                    body2, fixture2, 
+						ContactConstraint contactConstraint = new ContactConstraint(pair, 
 								                                                    manifold,
 								                                                    this.coefficientMixer.mixFriction(fixture1.getFriction(), fixture2.getFriction()),
 								                                                    this.coefficientMixer.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution()));
@@ -864,6 +867,8 @@ public class World implements Shiftable, DataContainer {
 		
 		// warm start the contact constraints
 		this.contactManager.updateAndNotify(this.getListeners(ContactListener.class), this.settings);
+		
+		this.broadphaseDetector.clearUpdates();
 	}
 	
 	/**
@@ -937,7 +942,7 @@ public class World implements Shiftable, DataContainer {
 	 * After the first {@link Body} is found the two {@link Body}s are interpolated
 	 * to the time of impact.
 	 * <p>
-	 * Then the {@link Body}s are position solved using the {@link TimeOfImpactSolver}
+	 * Then the {@link Body}s are position solved using the {@link ForceCollisionTimeOfImpactSolver}
 	 * to force the {@link Body}s into collision.  This causes the discrete collision
 	 * detector to detect the collision on the next time step.
 	 * @param body1 the {@link Body}
@@ -968,7 +973,7 @@ public class World implements Shiftable, DataContainer {
 			if (body1 == body2) continue;
 			
 			// make sure the other body is active
-			if (!body2.isActive()) continue;
+			if (!body2.isEnabled()) continue;
 
 			// skip other dynamic bodies; we only do TOI for
 			// dynamic vs. static/kinematic unless its a bullet
@@ -1072,11 +1077,11 @@ public class World implements Shiftable, DataContainer {
 			double t = minToi.getTime();
 			
 			// move the dynamic body to the time of impact
-			body1.transform0.lerp(body1.getTransform(), t, body1.getTransform());
+			body1.getInitialTransform().lerp(body1.getTransform(), t, body1.getTransform());
 			// check if the other body is dynamic
 			if (minBody.isDynamic()) {
 				// if the other body is dynamic then interpolate its transform also
-				minBody.transform0.lerp(minBody.getTransform(), t, minBody.getTransform());
+				minBody.getInitialTransform().lerp(minBody.getTransform(), t, minBody.getTransform());
 			}
 			// this should bring the bodies within d distance from one another
 			// we need to move the bodies more so that they are in collision
@@ -1300,15 +1305,15 @@ public class World implements Shiftable, DataContainer {
 		RaycastResult result = null;
 		RaycastBroadphaseFilter bpFilter = new RaycastBroadphaseFilter(ignoreInactive, ignoreSensors, filter);
 		// filter using the broadphase first
-		List<BroadphaseItem<Body, BodyFixture>> items = this.broadphaseDetector.raycast(ray, maxLength, bpFilter);
+		List<CollisionItem<Body, BodyFixture>> items = this.broadphaseDetector.raycast(ray, maxLength, bpFilter);
 		// loop over the list of bodies testing each one
 		int size = items.size();
 		boolean found = false;
 		boolean allow = true;
 		for (int i = 0; i < size; i++) {
 			// get a body to test
-			BroadphaseItem<Body, BodyFixture> item = items.get(i);
-			Body body = item.getCollidable();
+			CollisionItem<Body, BodyFixture> item = items.get(i);
+			Body body = item.getBody();
 			BodyFixture fixture = item.getFixture();
 			Transform transform = body.getTransform();
 
@@ -1755,10 +1760,10 @@ public class World implements Shiftable, DataContainer {
 		boolean allow = true;
 		AABBBroadphaseFilter bpFilter = new AABBBroadphaseFilter(ignoreInactive, ignoreSensors, filter);
 		// use the broadphase to filter first
-		List<BroadphaseItem<Body, BodyFixture>> items = this.broadphaseDetector.detect(aabb, bpFilter);
+		List<CollisionItem<Body, BodyFixture>> items = this.broadphaseDetector.detect(aabb, bpFilter);
 		// loop over the potential collisions
-		for (BroadphaseItem<Body, BodyFixture> item : items) {
-			Body body = item.getCollidable();
+		for (CollisionItem<Body, BodyFixture> item : items) {
+			Body body = item.getBody();
 			BodyFixture fixture = item.getFixture();
 			
 			// only get the minimum fixture
@@ -2047,14 +2052,14 @@ public class World implements Shiftable, DataContainer {
 		int dlSize = listeners.size();
 		
 		AABBBroadphaseFilter bpFilter = new AABBBroadphaseFilter(ignoreInactive, ignoreSensors, filter);
-		List<BroadphaseItem<Body, BodyFixture>> collisions = this.broadphaseDetector.detect(aabb, bpFilter);
+		List<CollisionItem<Body, BodyFixture>> collisions = this.broadphaseDetector.detect(aabb, bpFilter);
 		boolean found = false;
 		
 		int bSize = collisions.size();
 		boolean allow;
 		for (int i = 0; i < bSize; i++) {
-			BroadphaseItem<Body, BodyFixture> item = collisions.get(i);
-			Body body = item.getCollidable();
+			CollisionItem<Body, BodyFixture> item = collisions.get(i);
+			Body body = item.getBody();
 			BodyFixture fixture = item.getFixture();
 			// check body's fixtures next
 			Transform transform = body.getTransform();
@@ -2325,13 +2330,13 @@ public class World implements Shiftable, DataContainer {
 		AABB aabb = convex.createAABB(transform);
 		AABBBroadphaseFilter bpFilter = new AABBBroadphaseFilter(ignoreInactive, ignoreSensors, filter);
 		// test using the broadphase to rule out as many bodies as we can
-		List<BroadphaseItem<Body, BodyFixture>> items = this.broadphaseDetector.detect(aabb, bpFilter);
+		List<CollisionItem<Body, BodyFixture>> items = this.broadphaseDetector.detect(aabb, bpFilter);
 		// now perform a more accurate test
 		int bSize = items.size();
 		boolean found = false;
 		for (int i = 0; i < bSize; i++) {
-			BroadphaseItem<Body, BodyFixture> item = items.get(i);
-			Body body = item.getCollidable();
+			CollisionItem<Body, BodyFixture> item = items.get(i);
+			Body body = item.getBody();
 			BodyFixture fixture = item.getFixture();
 			// get the body transform
 			Transform bt = body.getTransform();
@@ -2704,13 +2709,14 @@ public class World implements Shiftable, DataContainer {
 		// check for null body
 		if (body == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullBody"));
 		// dont allow adding it twice
-		if (body.world == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
+		if (body.getOwner() == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
 		// dont allow a body that already is assigned to another world
-		if (body.world != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
+		if (body.getOwner() != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
 		// add it to the world
 		this.bodies.add(body);
 		// set the world property on the body
-		body.world = this;
+		body.setFixtureModificationHandler(new BodyModificationHandler(body));
+		body.setOwner(this);
 		// add it to the broadphase
 		this.broadphaseDetector.add(body);
 	}
@@ -2725,19 +2731,16 @@ public class World implements Shiftable, DataContainer {
 	public void addJoint(Joint joint) {
 		// check for null joint
 		if (joint == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullJoint"));
-		// implicitly cast to constraint
-		Constraint constraint = joint;
 		// dont allow adding it twice
-		if (constraint.world == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
+		if (joint.getOwner() == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
 		// dont allow a joint that already is assigned to another world
-		if (constraint.world != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
+		if (joint.getOwner() != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
 		// add the joint to the joint list
 		this.joints.add(joint);
-		// set that its attached to this world
-		constraint.world = this;
+		joint.setOwner(this);
 		// get the associated bodies
-		Body body1 = joint.getBody1();
-		Body body2 = joint.getBody2();
+		Body body1 = (Body)joint.getBody1();
+		Body body2 = (Body)joint.getBody2();
 		// create a joint edge from the first body to the second
 		JointEdge jointEdge1 = new JointEdge(body2, joint);
 		// add the edge to the body
@@ -2839,7 +2842,8 @@ public class World implements Shiftable, DataContainer {
 		// only remove joints and contacts if the body was removed
 		if (removed) {
 			// set the world property to null
-			body.world = null;
+			body.setFixtureModificationHandler(null);
+			body.setOwner(null);
 			
 			// remove the body from the broadphase
 			this.broadphaseDetector.remove(body);
@@ -2854,9 +2858,7 @@ public class World implements Shiftable, DataContainer {
 				aIterator.remove();
 				// get the joint
 				Joint joint = jointEdge.interaction;
-				// set the world property to null
-				Constraint constraint = joint;
-				constraint.world = null;
+				joint.setOwner(null);
 				// get the other body
 				Body other = jointEdge.other;
 				// wake up the other body
@@ -2968,12 +2970,11 @@ public class World implements Shiftable, DataContainer {
 		// see if the given joint was removed
 		if (removed) {
 			// set the world property to null
-			Constraint constraint = joint;
-			constraint.world = null;
+			joint.setOwner(null);
 			
 			// get the involved bodies
-			Body body1 = joint.getBody1();
-			Body body2 = joint.getBody2();
+			Body body1 = (Body)joint.getBody1();
+			Body body2 = (Body)joint.getBody2();
 			
 			// remove the joint edges from body1
 			Iterator<JointEdge> iterator = body1.joints.iterator();
@@ -3088,7 +3089,8 @@ public class World implements Shiftable, DataContainer {
 			// clear all the contacts
 			body.contacts.clear();
 			// set the world to null
-			body.world = null;
+			body.setFixtureModificationHandler(null);
+			body.setOwner(null);
 		}
 		// do we need to notify?
 		if (notify) {
@@ -3097,9 +3099,7 @@ public class World implements Shiftable, DataContainer {
 			for (int i = 0; i < jsize; i++) {
 				// get the joint
 				Joint joint = this.joints.get(i);
-				// set the world property to null
-				Constraint constraint = joint;
-				constraint.world = null;
+				joint.setOwner(null);
 				// call the destruction listeners
 				for (DestructionListener dl : listeners) {
 					dl.destroyed(joint);
@@ -3165,13 +3165,11 @@ public class World implements Shiftable, DataContainer {
 		for (int i = 0; i < jSize; i++) {
 			// remove the joint from the joint list
 			Joint joint = this.joints.get(i);
-			// set the world property to null
-			Constraint constraint = joint;
-			constraint.world = null;
+			joint.setOwner(null);
 			
 			// get the involved bodies
-			Body body1 = joint.getBody1();
-			Body body2 = joint.getBody2();
+			Body body1 = (Body)joint.getBody1();
+			Body body2 = (Body)joint.getBody2();
 			
 			// remove the joint edges from body1
 			Iterator<JointEdge> iterator = body1.joints.iterator();
@@ -3864,5 +3862,28 @@ public class World implements Shiftable, DataContainer {
 	public void setAccumulatedTime(double elapsedTime) {
 		if (elapsedTime < 0.0) return;
 		this.time = elapsedTime;
+	}
+	
+	private final class BodyModificationHandler implements FixtureModificationHandler<BodyFixture> {
+		private final Body body;
+		
+		public BodyModificationHandler(Body body) {
+			this.body = body;
+		}
+
+		@Override
+		public void onFixtureAdded(BodyFixture fixture) {
+			World.this.broadphaseDetector.add(this.body, fixture);
+		}
+		
+		@Override
+		public void onFixtureRemoved(BodyFixture fixture) {
+			World.this.broadphaseDetector.remove(this.body, fixture);
+		}
+		
+		@Override
+		public void onAllFixturesRemoved() {
+			World.this.broadphaseDetector.remove(this.body);
+		}
 	}
 }

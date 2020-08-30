@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2017 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.resources.Messages;
 
 /**
@@ -41,10 +42,10 @@ import org.dyn4j.resources.Messages;
  * <p>
  * The {@link #expand(double)} method can be used to expand the bounds of the {@link AABB} by some amount.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 3.0.0
  */
-public class AABB implements Translatable {
+public class AABB implements Translatable, Copyable<AABB> {
 	/** The minimum extent along the x-axis */
 	protected double minX;
 	
@@ -166,10 +167,8 @@ public class AABB implements Translatable {
 		this.maxY = aabb.maxY;
 	}
 	
-	/**
-	 * Returns a copy of this {@link AABB}.
-	 * @return {@link AABB}
-	 * @since 3.4.0
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
 	 */
 	public AABB copy() {
 		return new AABB(this);
@@ -210,6 +209,43 @@ public class AABB implements Translatable {
 		.append(")")
 		.append("]");
 		return sb.toString();
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		long temp;
+		// have to do this because Double.hashcode is Java 8
+		temp = Double.doubleToLongBits(this.maxX);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(this.maxY);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(this.minX);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(this.minY);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (this == obj) return true;
+		if (obj instanceof AABB) {
+			AABB other = (AABB) obj;
+			return this.maxX == other.maxX &&
+					this.minX == other.minX &&
+					this.maxY == other.maxY &&
+					this.minY == other.minY;
+		}
+		return false;
 	}
 	
 	/* (non-Javadoc)
@@ -294,6 +330,22 @@ public class AABB implements Translatable {
 		this.maxY = Math.max(this.maxY, aabb.maxY);
 		return this;
 	}
+
+	/**
+	 * Performs a union of the given {@link AABB}s and places the result
+	 * into this {@link AABB} and then returns this {@link AABB}.
+	 * @param aabb1 the first {@link AABB} to union
+	 * @param aabb2 the second {@link AABB} to union
+	 * @return {@link AABB}
+	 * @since 4.0.0
+	 */
+	public AABB union(AABB aabb1, AABB aabb2) {
+		this.minX = Math.min(aabb1.minX, aabb2.minX);
+		this.minY = Math.min(aabb1.minY, aabb2.minY);
+		this.maxX = Math.max(aabb1.maxX, aabb2.maxX);
+		this.maxY = Math.max(aabb1.maxY, aabb2.maxY);
+		return this;
+	}
 	
 	/**
 	 * Performs a union of this {@link AABB} and the given {@link AABB} returning
@@ -320,6 +372,36 @@ public class AABB implements Translatable {
 		this.minY = Math.max(this.minY, aabb.minY);
 		this.maxX = Math.min(this.maxX, aabb.maxX);
 		this.maxY = Math.min(this.maxY, aabb.maxY);
+		
+		// check for a bad AABB
+		if (this.minX > this.maxX || this.minY > this.maxY) {
+			// the two AABBs were not overlapping
+			// set this AABB to a degenerate one
+			this.minX = 0.0;
+			this.minY = 0.0;
+			this.maxX = 0.0;
+			this.maxY = 0.0;
+		}
+		
+		return this;
+	}
+	
+	/**
+	 * Performs the intersection of the given {@link AABB}s and places
+	 * the result into this {@link AABB} and then returns this {@link AABB}.
+	 * <p>
+	 * If the given {@link AABB}s do not overlap, this {@link AABB} is
+	 * set to a zero {@link AABB}.
+	 * @param aabb1 the first {@link AABB} to intersect
+	 * @param aabb2 the second {@link AABB} to intersect
+	 * @return {@link AABB}
+	 * @since 4.0.0
+	 */
+	public AABB intersection(AABB aabb1, AABB aabb2) {
+		this.minX = Math.max(aabb1.minX, aabb2.minX);
+		this.minY = Math.max(aabb1.minY, aabb2.minY);
+		this.maxX = Math.min(aabb1.maxX, aabb2.maxX);
+		this.maxY = Math.min(aabb1.maxY, aabb2.maxY);
 		
 		// check for a bad AABB
 		if (this.minX > this.maxX || this.minY > this.maxY) {
@@ -383,7 +465,7 @@ public class AABB implements Translatable {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Returns a new {@link AABB} of this AABB expanded by half the given expansion
 	 * in both the x and y directions.
@@ -473,6 +555,17 @@ public class AABB implements Translatable {
 	 */
 	public boolean isDegenerate(double error) {
 		return Math.abs(this.maxX - this.minX) <= error || Math.abs(this.maxY - this.minY) <= error;
+	}
+	
+	/**
+	 * Returns the center of the AABB.
+	 * @return {@link Vector2}
+	 * @since 4.0.0
+	 */
+	public Vector2 getCenter() {
+		return new Vector2(
+				this.minX + (this.maxX - this.minX) * 0.5,
+				this.minY + (this.maxY - this.minY) * 0.5);
 	}
 	
 	/**

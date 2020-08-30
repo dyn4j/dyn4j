@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -32,7 +32,7 @@ import org.junit.Test;
 /**
  * Tests the methods of the {@link Settings} class.
  * @author William Bittle
- * @version 3.1.1
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class SettingsTest {
@@ -114,10 +114,10 @@ public class SettingsTest {
 	@Test
 	public void setSleep() {
 		settings.reset();
-		settings.setAutoSleepingEnabled(false);
-		TestCase.assertFalse(settings.isAutoSleepingEnabled());
-		settings.setAutoSleepingEnabled(true);
-		TestCase.assertTrue(settings.isAutoSleepingEnabled());
+		settings.setAtRestDetectionEnabled(false);
+		TestCase.assertFalse(settings.isAtRestDetectionEnabled());
+		settings.setAtRestDetectionEnabled(true);
+		TestCase.assertTrue(settings.isAtRestDetectionEnabled());
 	}
 	
 	/**
@@ -125,9 +125,9 @@ public class SettingsTest {
 	 */
 	@Test
 	public void setValidSleepLinearVelocity() {
-		settings.setSleepLinearVelocity(3.0);
-		TestCase.assertEquals(3.0, settings.getSleepLinearVelocity());
-		TestCase.assertEquals(9.0, settings.getSleepLinearVelocitySquared());
+		settings.setMaximumAtRestLinearVelocity(3.0);
+		TestCase.assertEquals(3.0, settings.getMaximumAtRestLinearVelocity());
+		TestCase.assertEquals(9.0, settings.getMaximumAtRestLinearVelocitySquared());
 	}
 	
 	/**
@@ -135,7 +135,7 @@ public class SettingsTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeSleepLinearVelocity() {
-		settings.setSleepLinearVelocity(-1.0);
+		settings.setMaximumAtRestLinearVelocity(-1.0);
 	}
 	
 	/**
@@ -143,9 +143,9 @@ public class SettingsTest {
 	 */
 	@Test
 	public void setValidSleepAngularVelocity() {
-		settings.setSleepAngularVelocity(2.0);
-		TestCase.assertEquals(2.0, settings.getSleepAngularVelocity());
-		TestCase.assertEquals(4.0, settings.getSleepAngularVelocitySquared());
+		settings.setMaximumAtRestAngularVelocity(2.0);
+		TestCase.assertEquals(2.0, settings.getMaximumAtRestAngularVelocity());
+		TestCase.assertEquals(4.0, settings.getMaximumAtRestAngularVelocitySquared());
 	}
 	
 	/**
@@ -153,7 +153,7 @@ public class SettingsTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeSleepAngularVelocity() {
-		settings.setSleepAngularVelocity(-1.0);
+		settings.setMaximumAtRestAngularVelocity(-1.0);
 	}
 	
 	/**
@@ -161,8 +161,8 @@ public class SettingsTest {
 	 */
 	@Test
 	public void setValidSleepTime() {
-		settings.setSleepTime(12.0);
-		TestCase.assertEquals(12.0, settings.getSleepTime());
+		settings.setMinimumAtRestTime(12.0);
+		TestCase.assertEquals(12.0, settings.getMinimumAtRestTime());
 	}
 	
 	/**
@@ -170,7 +170,7 @@ public class SettingsTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeSleepTime() {
-		settings.setSleepTime(-1.0);
+		settings.setMinimumAtRestTime(-1.0);
 	}
 	
 	/**
@@ -232,9 +232,9 @@ public class SettingsTest {
 	 */
 	@Test
 	public void setValidWarmStartDistance() {
-		settings.setWarmStartDistance(2.0);
-		TestCase.assertEquals(2.0, settings.getWarmStartDistance());
-		TestCase.assertEquals(4.0, settings.getWarmStartDistanceSquared());
+		settings.setMaximumWarmStartDistance(2.0);
+		TestCase.assertEquals(2.0, settings.getMaximumWarmStartDistance());
+		TestCase.assertEquals(4.0, settings.getMaximumWarmStartDistanceSquared());
 	}
 	
 	/**
@@ -242,7 +242,21 @@ public class SettingsTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeWarmStartDistance() {
-		settings.setWarmStartDistance(-2.0);
+		settings.setMaximumWarmStartDistance(-2.0);
+	}
+	
+	/**
+	 * Tests the get/set of warm starting enabled flag.
+	 */
+	@Test
+	public void getSetWarmStartingEnabled() {
+		TestCase.assertTrue(settings.isWarmStartingEnabled());
+		
+		settings.setWarmStartingEnabled(false);
+		TestCase.assertFalse(settings.isWarmStartingEnabled());
+		
+		settings.setWarmStartingEnabled(true);
+		TestCase.assertTrue(settings.isWarmStartingEnabled());
 	}
 	
 	/**
@@ -357,10 +371,27 @@ public class SettingsTest {
 	 * @since 2.2.3
 	 */
 	@Test
-	public void setContinuousDetectionMode() {
+	public void getSetContinuousDetectionMode() {
 		settings.setContinuousDetectionMode(ContinuousDetectionMode.ALL);
 		TestCase.assertEquals(ContinuousDetectionMode.ALL, settings.getContinuousDetectionMode());
 		settings.setContinuousDetectionMode(ContinuousDetectionMode.NONE);
 		TestCase.assertEquals(ContinuousDetectionMode.NONE, settings.getContinuousDetectionMode());
+	}
+
+	/**
+	 * Tests the set continuous collision detection mode w/ null.
+	 * @since 4.0.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullContinuousDetectionMode() {
+		settings.setContinuousDetectionMode(null);
+	}
+	
+	/**
+	 * Tests the toString method.
+	 */
+	@Test
+	public void tostring() {
+		TestCase.assertNotNull(settings.toString());
 	}
 }

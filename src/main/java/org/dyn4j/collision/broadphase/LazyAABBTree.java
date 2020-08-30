@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2017 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -28,10 +28,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.collision.CollisionItem;
+import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.dynamics.World;
@@ -52,20 +55,22 @@ import org.dyn4j.geometry.Vector2;
  * This structure keeps the bodies sorted by the radius of their fixtures and rebuilds the tree each time in order to construct better trees.
  * 
  * @author Manolis Tsamis
- * @param <E> the {@link Collidable} type
- * @param <T> the {@link Fixture} type
- * @version 3.4.0
+ * @version 4.0.0
  * @since 3.4.0
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
+ * @deprecated Deprecated in 4.0.0. Use a different {@link BroadphaseDetector} instead.
  */
-public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends AbstractBroadphaseDetector<E, T> implements BatchBroadphaseDetector<E, T> {
+@Deprecated
+public final class LazyAABBTree<T extends CollisionBody<E>, E extends Fixture> extends AbstractBroadphaseDetector<T, E> implements BatchBroadphaseDetector<T, E> {
 	/** The root node of the tree */
 	LazyAABBTreeNode root;
 	
 	/** Id to leaf map for fast lookup in tree of list */
-	final Map<BroadphaseKey, LazyAABBTreeLeaf<E, T>> elementMap;
+	final Map<CollisionItem<T, E>, LazyAABBTreeLeaf<T, E>> elementMap;
 	
 	/** List of all leafs, either on tree or not */
-	final List<LazyAABBTreeLeaf<E, T>> elements;
+	final List<LazyAABBTreeLeaf<T, E>> elements;
 	
 	/** Whether there's new data to sort */
 	boolean sorted = true;
@@ -92,8 +97,8 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * @throws IllegalArgumentException if initialCapacity is less than zero
 	 */
 	public LazyAABBTree(int initialCapacity) {
-		this.elements = new ArrayList<LazyAABBTreeLeaf<E, T>>(initialCapacity);
-		this.elementMap = new HashMap<BroadphaseKey, LazyAABBTreeLeaf<E, T>>(initialCapacity);
+		this.elements = new ArrayList<LazyAABBTreeLeaf<T, E>>(initialCapacity);
+		this.elementMap = new HashMap<CollisionItem<T, E>, LazyAABBTreeLeaf<T, E>>(initialCapacity);
 	}
 	
 	/**
@@ -101,7 +106,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * but does not update the AABBs of elements.
 	 */
 	void batchRebuild() {
-		for (LazyAABBTreeLeaf<E, T> node : this.elements) {
+		for (LazyAABBTreeLeaf<T, E> node : this.elements) {
 			node.setOnTree(false);
 		}
 		
@@ -115,7 +120,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 */
 	@Override
 	public void batchUpdate() {
-		for (LazyAABBTreeLeaf<E, T> node : this.elements) {
+		for (LazyAABBTreeLeaf<T, E> node : this.elements) {
 			node.setOnTree(false);
 			node.updateAABB();
 		}
@@ -125,13 +130,13 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
 	 */
 	@Override
-	public void add(E collidable, T fixture) {
-		// create a new node for the collidable
-		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
-		LazyAABBTreeLeaf<E, T> existing = this.elementMap.get(key);
+	public void add(T body, E fixture) {
+		// create a new node for the body
+		CollisionItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
+		LazyAABBTreeLeaf<T, E> existing = this.elementMap.get(key);
 		
 		if (existing != null) {
 			// update existing node
@@ -143,7 +148,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			existing.updateAABB();
 		} else {
 			// add new node
-			LazyAABBTreeLeaf<E, T> node = new LazyAABBTreeLeaf<E, T>(collidable, fixture);
+			LazyAABBTreeLeaf<T, E> node = new LazyAABBTreeLeaf<T, E>(body, fixture);
 			
 			this.elementMap.put(key, node);
 			this.elements.add(node);
@@ -155,13 +160,21 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
 	 */
 	@Override
-	public boolean remove(E collidable, T fixture) {
-		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
+	public boolean remove(T body, E fixture) {
+		CollisionItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
+		return this.remove(key);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.CollisionItem)
+	 */
+	@Override
+	public boolean remove(CollisionItem<T, E> item) {
 		// find the node in the map
-		LazyAABBTreeLeaf<E, T> node = this.elementMap.remove(key);
+		LazyAABBTreeLeaf<T, E> node = this.elementMap.remove(item);
 		// make sure it was found
 		
 		if (node != null) {
@@ -187,7 +200,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * 
 	 * @param leaf the leaf to remove
 	 */
-	void remove(LazyAABBTreeLeaf<E, T> leaf) {
+	void remove(LazyAABBTreeLeaf<T, E> leaf) {
 		// check the root node
 		if (leaf == this.root) {
 			// set the root to null
@@ -221,37 +234,76 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
 	 */
 	@Override
-	public void update(E collidable, T fixture) {
+	public void update(T body, E fixture) {
 		// In the way the add and update are described in BroadphaseDetector, their functionallity is identical
 		// so just redirect the work to add for less duplication.
-		this.add(collidable, fixture);
+		this.add(body, fixture);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#clearUpdates()
 	 */
 	@Override
-	public AABB getAABB(E collidable, T fixture) {
-		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
-		LazyAABBTreeLeaf<E, T> node = this.elementMap.get(key);
+	public void clearUpdates() {
+		// no-op
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdated(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	public boolean isUpdated(T body, E fixture) {
+		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#setUpdated(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	public void setUpdated(T body, E fixture) {
+		// no-op
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdated(org.dyn4j.collision.CollisionItem)
+	 */
+	@Override
+	public boolean isUpdated(CollisionItem<T, E> item) {
+		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.CollisionItem)
+	 */
+	@Override
+	public AABB getAABB(CollisionItem<T, E> item) {
+		LazyAABBTreeLeaf<T, E> node = this.elementMap.get(item);
 		
 		if (node != null && !node.mustRemove()) {
 			return node.aabb;
 		}
 		
-		return fixture.getShape().createAABB(collidable.getTransform());
+		return item.getFixture().getShape().createAABB(item.getBody().getTransform());
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
 	 */
 	@Override
-	public boolean contains(E collidable, T fixture) {
-		BroadphaseKey key = BroadphaseKey.get(collidable, fixture);
+	public boolean contains(T body, E fixture) {
+		CollisionItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
 		return this.elementMap.containsKey(key);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.CollisionItem)
+	 */
+	@Override
+	public boolean contains(CollisionItem<T, E> item) {
+		return this.elementMap.containsKey(item);
 	}
 	
 	/* (non-Javadoc)
@@ -280,10 +332,11 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.collision.broadphase.BroadphaseFilter)
 	 */
+	@Deprecated
 	@Override
-	public List<BroadphasePair<E, T>> detect(BroadphaseFilter<E, T> filter) {
+	public List<CollisionPair<T, E>> detect(BroadphaseFilter<T, E> filter) {
 		int eSize = Collisions.getEstimatedCollisionPairs(size());
-		List<BroadphasePair<E, T>> pairs = new ArrayList<BroadphasePair<E, T>>(eSize);
+		List<CollisionPair<T, E>> pairs = new ArrayList<CollisionPair<T, E>>(eSize);
 		
 		// this will not happen, unless the user makes more detect calls outside of the World class
 		// so it can be considered rare
@@ -294,6 +347,14 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		this.buildAndDetect(filter, pairs);
 		
 		return pairs;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detectIterator(boolean)
+	 */
+	@Override
+	public Iterator<CollisionPair<T, E>> detectIterator(boolean forceFullDetection) {
+		return this.detect(new BroadphaseFilterAdapter<T, E>()).iterator();
 	}
 	
 	/**
@@ -310,7 +371,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			// Important: because we're removing elements this.elements.size() can change in the loop
 			// so we must call it in each loop iteration
 			for (int i = 0; i < this.elements.size(); i++) {
-				LazyAABBTreeLeaf<E, T> node = this.elements.get(i);
+				LazyAABBTreeLeaf<T, E> node = this.elements.get(i);
 				
 				if (node.mustRemove()) {
 					// removed nodes are not on the tree, no need to check.
@@ -347,9 +408,9 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 */
 	void ensureSorted() {
 		if (!this.sorted) {
-			Collections.sort(this.elements, new Comparator<LazyAABBTreeLeaf<E, T>>() {
+			Collections.sort(this.elements, new Comparator<LazyAABBTreeLeaf<T, E>>() {
 				@Override
-				public int compare(LazyAABBTreeLeaf<E, T> o1, LazyAABBTreeLeaf<E, T> o2) {
+				public int compare(LazyAABBTreeLeaf<T, E> o1, LazyAABBTreeLeaf<T, E> o2) {
 					// Important heuristic: sort by size of fixtures.
 					// Radius is used here because the AABBs are not yet computed,
 					// but this works just as fine.
@@ -380,7 +441,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		if (this.pendingInserts) {
 			int size = this.elements.size();
 			for (int i = 0; i < size; i++) {
-				LazyAABBTreeLeaf<E, T> node = this.elements.get(i);
+				LazyAABBTreeLeaf<T, E> node = this.elements.get(i);
 				
 				if (!node.isOnTree()) {
 					this.insert(node);
@@ -408,13 +469,13 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * @param filter the broadphase filter
 	 * @param pairs List a list containing the results
 	 */
-	void buildAndDetect(BroadphaseFilter<E, T> filter, List<BroadphasePair<E, T>> pairs) {
+	void buildAndDetect(BroadphaseFilter<T, E> filter, List<CollisionPair<T, E>> pairs) {
 		this.doPendingRemoves();
 		this.ensureSorted();
 		
 		int size = this.elements.size();
 		for (int i = 0; i < size; i++) {
-			LazyAABBTreeLeaf<E, T> node = this.elements.get(i);
+			LazyAABBTreeLeaf<T, E> node = this.elements.get(i);
 			
 			this.insertAndDetect(node, filter, pairs);
 		}
@@ -457,7 +518,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * 
 	 * @param item the leaf to insert
 	 */
-	void insert(LazyAABBTreeLeaf<E, T> item) {
+	void insert(LazyAABBTreeLeaf<T, E> item) {
 		this.insert(item, false, null, null);
 	}
 	
@@ -468,7 +529,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * @param filter the broadphase filter
 	 * @param pairs a list containing the results
 	 */
-	void insertAndDetect(LazyAABBTreeLeaf<E, T> item, BroadphaseFilter<E, T> filter, List<BroadphasePair<E, T>> pairs) {
+	void insertAndDetect(LazyAABBTreeLeaf<T, E> item, BroadphaseFilter<T, E> filter, List<CollisionPair<T, E>> pairs) {
 		this.insert(item, true, filter, pairs);
 	}
 	
@@ -482,7 +543,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * @param filter the broadphase filter
 	 * @param pairs List a list containing the results
 	 */
-	void insert(LazyAABBTreeLeaf<E, T> item, final boolean detect, BroadphaseFilter<E, T> filter, List<BroadphasePair<E, T>> pairs) {
+	void insert(LazyAABBTreeLeaf<T, E> item, final boolean detect, BroadphaseFilter<T, E> filter, List<CollisionPair<T, E>> pairs) {
 		// Mark that this leaf is now on the tree
 		item.setOnTree(true);
 		
@@ -575,19 +636,19 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * Note that in contrast to {@link DynamicAABBTree} we don't need to check if one node was tested for collision.
 	 * Because the nodes are tested while being inserted each pair will only be tested once, so we skip those tests.
 	 */
-	private void detectWhileBuilding(LazyAABBTreeLeaf<E, T> node, LazyAABBTreeNode root, BroadphaseFilter<E, T> filter, List<BroadphasePair<E, T>> pairs) {
+	private void detectWhileBuilding(LazyAABBTreeLeaf<T, E> node, LazyAABBTreeNode root, BroadphaseFilter<T, E> filter, List<CollisionPair<T, E>> pairs) {
 		// test the node itself
 		// check for leaf node
 		// non-leaf nodes always have a left child
 		if (root.isLeaf()) {
 			@SuppressWarnings("unchecked")
-			LazyAABBTreeLeaf<E, T> leaf = (LazyAABBTreeLeaf<E, T>) root;
+			LazyAABBTreeLeaf<T, E> leaf = (LazyAABBTreeLeaf<T, E>) root;
 			
-			if (filter.isAllowed(node.collidable, node.fixture, leaf.collidable, leaf.fixture)) {
-				BroadphasePair<E, T> pair = new BroadphasePair<E, T>(
-						node.collidable,	// A
+			if (filter.isAllowed(node.body, node.fixture, leaf.body, leaf.fixture)) {
+				BroadphasePair<T, E> pair = new BroadphasePair<T, E>(
+						node.body,	// A
 						node.fixture,
-						leaf.collidable,	// B
+						leaf.body,	// B
 						leaf.fixture);	
 				// add the pair to the list of pairs
 				pairs.add(pair);
@@ -602,8 +663,9 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.AABB)
 	 */
+	@Deprecated
 	@Override
-	public List<BroadphaseItem<E, T>> detect(AABB aabb, BroadphaseFilter<E, T> filter) {
+	public List<CollisionItem<T, E>> detect(AABB aabb, BroadphaseFilter<T, E> filter) {
 		this.build();
 		
 		if (this.root == null) {
@@ -611,13 +673,21 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		}
 		
 		int eSize = Collisions.getEstimatedCollisionsPerObject();
-		List<BroadphaseItem<E, T>> list = new ArrayList<BroadphaseItem<E, T>>(eSize);
+		List<CollisionItem<T, E>> list = new ArrayList<CollisionItem<T, E>>(eSize);
 		
 		if (aabb.overlaps(this.root.aabb)) {
 			this.detect(aabb, this.root, filter, list);	
 		}
 		
 		return list;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detectIterator(org.dyn4j.geometry.AABB)
+	 */
+	@Override
+	public Iterator<CollisionItem<T, E>> detectIterator(AABB aabb) {
+		return this.detect(aabb, new BroadphaseFilterAdapter<T, E>()).iterator();
 	}
 	
 	/**
@@ -627,17 +697,17 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	 * @param filter the filter
 	 * @param list the results list
 	 */
-	private void detect(AABB aabb, LazyAABBTreeNode node, BroadphaseFilter<E, T> filter, List<BroadphaseItem<E, T>> list) {
+	private void detect(AABB aabb, LazyAABBTreeNode node, BroadphaseFilter<T, E> filter, List<CollisionItem<T, E>> list) {
 		// test the node itself
 		// check for leaf node
 		// non-leaf nodes always have a left child
 		
 		if (node.isLeaf()) {
 			@SuppressWarnings("unchecked")
-			LazyAABBTreeLeaf<E, T> leaf = (LazyAABBTreeLeaf<E, T>)node;
-			// its a leaf so add the collidable
-			if (filter.isAllowed(aabb, leaf.collidable, leaf.fixture)) {
-				list.add(new BroadphaseItem<E, T>(leaf.collidable, leaf.fixture));
+			LazyAABBTreeLeaf<T, E> leaf = (LazyAABBTreeLeaf<T, E>)node;
+			// its a leaf so add the body
+			if (filter.isAllowed(aabb, leaf.body, leaf.fixture)) {
+				list.add(new BroadphaseItem<T, E>(leaf.body, leaf.fixture));
 			}
 			// return and check other limbs
 		} else {
@@ -650,8 +720,9 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#raycast(org.dyn4j.geometry.Ray, double)
 	 */
+	@Deprecated
 	@Override
-	public List<BroadphaseItem<E, T>> raycast(Ray ray, double length, BroadphaseFilter<E, T> filter) {
+	public List<CollisionItem<T, E>> raycast(Ray ray, double length, BroadphaseFilter<T, E> filter) {
 		this.build();
 		
 		if (this.root == null) {
@@ -682,7 +753,7 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		
 		// get the estimated collision count
 		int eSize = Collisions.getEstimatedRaycastCollisions(this.elementMap.size());
-		List<BroadphaseItem<E, T>> items = new ArrayList<BroadphaseItem<E, T>>(eSize);
+		List<CollisionItem<T, E>> items = new ArrayList<CollisionItem<T, E>>(eSize);
 		LazyAABBTreeNode node = this.root;
 		
 		// perform a iterative, stack-less, traversal of the tree
@@ -691,12 +762,12 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 			if (aabb.overlaps(node.aabb)) {
 				// if they do overlap, then check the left child node
 				if (node.isLeaf()) {
-					if (this.raycast(s, length, invDx, invDy, node.aabb)) {
+					if (AbstractBroadphaseDetector.raycast(s, length, invDx, invDy, node.aabb)) {
 						// if both are null, then this is a leaf node
 						@SuppressWarnings("unchecked")
-						LazyAABBTreeLeaf<E, T> leaf = (LazyAABBTreeLeaf<E, T>)node;
-						if (filter.isAllowed(ray, length, leaf.collidable, leaf.fixture)) {
-							items.add(new BroadphaseItem<E, T>(leaf.collidable, leaf.fixture));
+						LazyAABBTreeLeaf<T, E> leaf = (LazyAABBTreeLeaf<T, E>)node;
+						if (filter.isAllowed(ray, length, leaf.body, leaf.fixture)) {
+							items.add(new BroadphaseItem<T, E>(leaf.body, leaf.fixture));
 						}
 						// if its a leaf node then we need to go back up the
 						// tree and test nodes we haven't yet
@@ -735,6 +806,14 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		}
 		
 		return items;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detectIterator(org.dyn4j.geometry.Ray, double)
+	 */
+	@Override
+	public Iterator<CollisionItem<T, E>> raycastIterator(Ray ray, double length) {
+		return this.raycast(ray, length, new BroadphaseFilterAdapter<T, E>()).iterator();
 	}
 	
 	/* (non-Javadoc)
@@ -891,13 +970,43 @@ public class LazyAABBTree<E extends Collidable<T>, T extends Fixture> extends Ab
 		return 0;
 	}
 	
-	/* 
-	 * (non-Javadoc)
+	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#supportsAABBExpansion()
 	 */
 	@Override
 	public boolean supportsAABBExpansion() {
 		return false;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdateTrackingEnabled()
+	 */
+	@Override
+	public boolean isUpdateTrackingEnabled() {
+		return false;
+	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isAABBExpansionSupported()
+	 */
+	@Override
+	public boolean isAABBExpansionSupported() {
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdateTrackingSupported()
+	 */
+	@Override
+	public boolean isUpdateTrackingSupported() {
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#optimize()
+	 */
+	@Override
+	public void optimize() {
+		// no-op
+	}
 }

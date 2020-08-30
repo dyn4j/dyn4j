@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -63,6 +63,15 @@ public class AABBTest {
 		TestCase.assertEquals( 0.500, aabb.getMinY(), 1.0e-3);
 		TestCase.assertEquals(-0.500, aabb.getMaxX(), 1.0e-3);
 		TestCase.assertEquals( 1.500, aabb.getMaxY(), 1.0e-3);
+	}
+	
+	/**
+	 * Creates an aabb from a negative radius.
+	 * @since 4.0.0
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createRadiusNegative() {
+		new AABB(new Vector2(-1.0, 1.0), -1.0);
 	}
 	
 	/**
@@ -298,12 +307,15 @@ public class AABBTest {
 		
 		// test containment
 		TestCase.assertTrue(aabb.contains(0.0, 0.5));
+		TestCase.assertTrue(aabb.contains(new Vector2(0.0, 0.5)));
 		
 		// test no containment
 		TestCase.assertFalse(aabb.contains(0.0, 2.0));
+		TestCase.assertFalse(aabb.contains(new Vector2(0.0, 2.0)));
 		
 		// test on edge
 		TestCase.assertTrue(aabb.contains(0.0, 1.0));
+		TestCase.assertTrue(aabb.contains(new Vector2(0.0, 1.0)));
 	}
 	
 	/**
@@ -324,6 +336,18 @@ public class AABBTest {
 		// test using separated aabbs (should give a zero AABB)
 		AABB aabb3 = new AABB(-4.0, 2.0, -3.0, 4.0);
 		aabbr = aabb1.getIntersection(aabb3);
+		TestCase.assertEquals(0.0, aabbr.getMinX(), 1.0E-4);
+		TestCase.assertEquals(0.0, aabbr.getMinY(), 1.0E-4);
+		TestCase.assertEquals(0.0, aabbr.getMaxX(), 1.0E-4);
+		TestCase.assertEquals(0.0, aabbr.getMaxY(), 1.0E-4);
+		
+		aabbr.intersection(aabb1, aabb2);
+		TestCase.assertEquals(-1.0, aabbr.getMinX(), 1.0E-4);
+		TestCase.assertEquals(0.0, aabbr.getMinY(), 1.0E-4);
+		TestCase.assertEquals(2.0, aabbr.getMaxX(), 1.0E-4);
+		TestCase.assertEquals(0.5, aabbr.getMaxY(), 1.0E-4);
+		
+		aabbr.intersection(aabb1, aabb3);
 		TestCase.assertEquals(0.0, aabbr.getMinX(), 1.0E-4);
 		TestCase.assertEquals(0.0, aabbr.getMinY(), 1.0E-4);
 		TestCase.assertEquals(0.0, aabbr.getMaxX(), 1.0E-4);
@@ -354,5 +378,45 @@ public class AABBTest {
 		TestCase.assertFalse(aabb.isDegenerate());
 		TestCase.assertFalse(aabb.isDegenerate(Epsilon.E));
 		TestCase.assertTrue(aabb.isDegenerate(0.000001));
+	}
+	
+	/**
+	 * Tests the equals method.
+	 */
+	@Test
+	public void testEquals() {
+		AABB aabb1 = new AABB(-2.0, 0.0, 2.0, 1.0);
+		AABB aabb2 = new AABB(-1.0, -2.0, 5.0, 2.0);
+		AABB aabb3 = new AABB(-1.0, -2.0, 5.0, 2.0);
+		
+		TestCase.assertFalse(aabb1.equals(null));
+		TestCase.assertTrue(aabb1.equals(aabb1));
+		TestCase.assertFalse(aabb1.equals(aabb2));
+		TestCase.assertFalse(aabb1.equals(aabb3));
+		TestCase.assertTrue(aabb2.equals(aabb3));
+		TestCase.assertFalse(aabb1.equals(new Object()));
+	}
+	
+	/**
+	 * Tests the hashcode method.
+	 */
+	@Test
+	public void testHashcode() {
+		AABB aabb1 = new AABB(-2.0, 0.0, 2.0, 1.0);
+		AABB aabb2 = new AABB(-1.0, -2.0, 5.0, 2.0);
+		AABB aabb3 = new AABB(-1.0, -2.0, 5.0, 2.0);
+		
+		TestCase.assertEquals(aabb1.hashCode(), aabb1.hashCode());
+		TestCase.assertEquals(aabb2.hashCode(), aabb3.hashCode());
+		TestCase.assertFalse(aabb1.hashCode() == aabb2.hashCode());
+	}
+	
+	/**
+	 * Tests the toString method.
+	 */
+	@Test
+	public void testToString() {
+		AABB aabb1 = new AABB(-2.0, 0.0, 2.0, 1.0);
+		TestCase.assertNotNull(aabb1.toString());
 	}
 }

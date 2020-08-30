@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -43,9 +43,12 @@ import org.dyn4j.resources.Messages;
  * Represents the default contact manager that reports beginning, persisted, and
  * ending contacts and performs warm starting by default.
  * @author William Bittle
- * @version 3.3.0
+ * @version 4.0.0
  * @since 3.3.0
+ * @deprecated Deprecated in 4.0.0. No longer needed.
  */
+@Deprecated
+@SuppressWarnings({"rawtypes"})
 public class DefaultContactManager implements ContactManager, Shiftable {
 	/** The contact constraint queue */
 	private final List<ContactConstraint> constraintQueue;
@@ -132,6 +135,7 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.contact.SimpleContactManager#updateAndNotify(java.util.List, org.dyn4j.dynamics.Settings)
 	 */
+	@SuppressWarnings("unchecked")
 	public void updateAndNotify(List<ContactListener> listeners, Settings settings) {
 		// get the size of the list
 		int size = this.constraintQueue.size();
@@ -151,7 +155,7 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 			// define the old contact constraint
 			ContactConstraint oldContactConstraint = null;
 			
-			List<Contact> contacts = newContactConstraint.contacts;
+			List<SolvableContact> contacts = newContactConstraint.contacts;
 			int nsize = contacts.size();
 			
 			// get the old contact constraint
@@ -162,19 +166,19 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 			
 			// check if the contact constraint exists
 			if (oldContactConstraint != null) {
-				List<Contact> ocontacts = oldContactConstraint.contacts;
+				List<SolvableContact> ocontacts = oldContactConstraint.contacts;
 				int osize = ocontacts.size();
 				// create an array for removed contacts
 				boolean[] persisted = new boolean[osize];
 				// warm start the constraint
 				for (int j = nsize - 1; j >= 0; j--) {
 					// get the new contact
-					Contact newContact = contacts.get(j);
+					SolvableContact newContact = contacts.get(j);
 					// loop over the old contacts
 					boolean found = false;
 					for (int k = 0; k < osize; k++) {
 						// get the old contact
-						Contact oldContact = ocontacts.get(k);
+						SolvableContact oldContact = ocontacts.get(k);
 						// check if the id type is distance, if so perform a distance check using the warm start distance
 						// else just compare the ids
 						if ((newContact.id == ManifoldPointId.DISTANCE && newContact.p.distanceSquared(oldContact.p) <= warmStartDistanceSquared) 
@@ -229,7 +233,7 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 					// check the boolean array
 					if (!persisted[j]) {
 						// get the contact
-						Contact contact = ocontacts.get(j);
+						SolvableContact contact = ocontacts.get(j);
 						// notify of new contact (begin of contact)
 						ContactPoint point = new ContactPoint(newContactConstraint, contact);
 						// call the listeners
@@ -244,7 +248,7 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 				// if the old contact point was not found notify of the new contact
 				for (int j = nsize - 1; j >= 0; j--) {
 					// get the contact
-					Contact contact = contacts.get(j);
+					SolvableContact contact = contacts.get(j);
 					// notify of new contact (begin of contact)
 					ContactPoint point = new ContactPoint(newContactConstraint, contact);
 					// call the listeners and set the enabled flag to the result
@@ -276,7 +280,7 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 				int rsize = contactConstraint.contacts.size();
 				for (int i = 0; i < rsize; i++) {
 					// get the contact
-					Contact contact = contactConstraint.contacts.get(i);
+					SolvableContact contact = (SolvableContact) contactConstraint.contacts.get(i);
 					// set the contact point values
 					ContactPoint point = new ContactPoint(contactConstraint, contact);
 					// call the listeners
@@ -305,6 +309,7 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.contact.ContactManager#preSolveNotify(java.util.List)
 	 */
+	@SuppressWarnings("unchecked")
 	public void preSolveNotify(List<ContactListener> listeners) {
 		int lsize = listeners != null ? listeners.size() : 0;
 		
@@ -320,7 +325,7 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 			// iterate backwards so we can remove
 			for (int j = csize - 1; j >= 0; j--) {
 				// get the contact
-				Contact contact = contactConstraint.contacts.get(j);
+				SolvableContact contact = (SolvableContact) contactConstraint.contacts.get(j);
 				// notify of the contact that will be solved
 				ContactPoint point = new ContactPoint(contactConstraint, contact);
 				// call the listeners and set the enabled flag to the result
@@ -359,7 +364,7 @@ public class DefaultContactManager implements ContactManager, Shiftable {
 			int rsize = contactConstraint.contacts.size();
 			for (int j = 0; j < rsize; j++) {
 				// get the contact
-				Contact contact = contactConstraint.contacts.get(j);
+				SolvableContact contact = (SolvableContact) contactConstraint.contacts.get(j);
 				// set the contact point values
 				SolvedContactPoint point = new SolvedContactPoint(contactConstraint, contact);
 				// notify of them being solved

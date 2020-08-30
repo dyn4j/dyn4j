@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -24,67 +24,62 @@
  */
 package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.AbstractCollisionPair;
+import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.Fixture;
 
 /**
- * Represents a pair of {@link Collidable} {@link Fixture}s that have been detected as
- * colliding in a {@link BroadphaseDetector}.
+ * An implementation of the {@link CollisionPair} interface used by the {@link BroadphaseDetector}s.
  * @author William Bittle
- * @param <E> the {@link Collidable} type
- * @param <T> the {@link Fixture} type
- * @version 3.2.0
+ * @version 4.0.0
  * @since 1.0.0
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
  */
-public final class BroadphasePair<E extends Collidable<T>, T extends Fixture> {
+final class BroadphasePair<T extends CollisionBody<E>, E extends Fixture> extends AbstractCollisionPair<T, E> implements CollisionPair<T, E> {
 	
 	// the first
 	
-	/** The first {@link Collidable} */
-	final E collidable1;
+	/** The first {@link CollisionBody} */
+	T body1;
 	
-	/** The first {@link Collidable}'s {@link Fixture} */
-	final T fixture1;
+	/** The first {@link CollisionBody}'s {@link Fixture} */
+	E fixture1;
 	
 	// the second
 	
-	/** The second {@link Collidable} */
-	final E collidable2;
+	/** The second {@link CollisionBody} */
+	T body2;
 	
-	/** The second {@link Collidable}'s {@link Fixture} */
-	final T fixture2;
+	/** The second {@link CollisionBody}'s {@link Fixture} */
+	E fixture2;
 	
 	/**
-	 * Minimal constructor.
-	 * @param collidable1 the first collidable
-	 * @param fixture1 the first collidable's fixture
-	 * @param collidable2 the second collidable
-	 * @param fixture2 the second collidable's fixture
+	 * Default constructor.
 	 */
-	public BroadphasePair(E collidable1, T fixture1, E collidable2, T fixture2) {
-		this.collidable1 = collidable1;
+	BroadphasePair() {}
+	
+	/**
+	 * Full constructor.
+	 * @param body1 the first body
+	 * @param fixture1 the first body's fixture
+	 * @param body2 the second body
+	 * @param fixture2 the second body's fixture
+	 */
+	public BroadphasePair(T body1, E fixture1, T body2, E fixture2) {
+		this.body1 = body1;
 		this.fixture1 = fixture1;
-		this.collidable2 = collidable2;
+		this.body2 = body2;
 		this.fixture2 = fixture2;
 	}
 	
 	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
+	 * @see java.lang.Object#equals()
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj == this) return true;
-		if (obj instanceof BroadphasePair) {
-			BroadphasePair<?, ?> pair = (BroadphasePair<?, ?>)obj;
-			if (pair.collidable1 == this.collidable1 &&
-				pair.fixture1 == this.fixture1 &&
-				pair.collidable2 == this.collidable2 &&
-				pair.fixture2 == this.fixture2) {
-				return true;
-			}
-		}
-		return false;
+		return AbstractCollisionPair.equals(this, obj);
 	}
 	
 	/* (non-Javadoc)
@@ -92,12 +87,7 @@ public final class BroadphasePair<E extends Collidable<T>, T extends Fixture> {
 	 */
 	@Override
 	public int hashCode() {
-		int hash = 17;
-		hash = hash * 31 + this.collidable1.hashCode();
-		hash = hash * 31 + this.fixture1.hashCode();
-		hash = hash * 31 + this.collidable2.hashCode();
-		hash = hash * 31 + this.fixture2.hashCode();
-		return hash;
+		return AbstractCollisionPair.getHashCode(this.body1, this.fixture1, this.body2, this.fixture2);
 	}
 	
 	/* (non-Javadoc)
@@ -106,43 +96,99 @@ public final class BroadphasePair<E extends Collidable<T>, T extends Fixture> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("BroadphasePair[Collidable1=").append(this.collidable1.hashCode())
+		sb.append("BroadphasePair[Body1=").append(this.body1.hashCode())
 		.append("|Fixture1=").append(this.fixture1.hashCode())
-		.append("|Collidable2=").append(this.collidable2.hashCode())
+		.append("|Body2=").append(this.body2.hashCode())
 		.append("|Fixture2=").append(this.fixture2.hashCode())
 		.append("]");
 		return sb.toString();
 	}
 
-	/**
-	 * Returns the first {@link Collidable}.
-	 * @return E
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionPair#getBody1()
 	 */
-	public E getCollidable1() {
-		return this.collidable1;
+	public T getBody1() {
+		return this.body1;
 	}
 
-	/**
-	 * Returns the first {@link Fixture}.
-	 * @return T
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionPair#getFixture1()
 	 */
-	public T getFixture1() {
+	public E getFixture1() {
 		return this.fixture1;
 	}
 	
-	/**
-	 * Returns the second {@link Collidable}.
-	 * @return E
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionPair#getBody2()
 	 */
-	public E getCollidable2() {
-		return this.collidable2;
+	public T getBody2() {
+		return this.body2;
 	}
 
-	/**
-	 * Returns the second {@link Fixture}.
-	 * @return T
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionPair#getFixture2()
 	 */
-	public T getFixture2() {
+	public E getFixture2() {
 		return this.fixture2;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
+	 */
+	@Override
+	public BroadphasePair<T, E> copy() {
+		return new BroadphasePair<T, E>(this.body1, this.fixture1, this.body2, this.fixture2);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionPair#getBody(org.dyn4j.collision.CollisionBody)
+	 */
+	@Override
+	public T getBody(CollisionBody<?> body) {
+		if (this.body1 == body) {
+			return this.body1;
+		} else if (this.body2 == body) {
+			return this.body2;
+		}
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionPair#getFixture(org.dyn4j.collision.CollisionBody)
+	 */
+	@Override
+	public E getFixture(CollisionBody<?> body) {
+		if (this.body1 == body) {
+			return this.fixture1;
+		} else if (this.body2 == body) {
+			return this.fixture2;
+		}
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionPair#getOtherBody(org.dyn4j.collision.CollisionBody)
+	 */
+	@Override
+	public T getOtherBody(CollisionBody<?> body) {
+		if (this.body1 == body) {
+			return this.body2;
+		} else if (this.body2 == body) {
+			return this.body1;
+		}
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionPair#getOtherFixture(org.dyn4j.collision.CollisionBody)
+	 */
+	@Override
+	public E getOtherFixture(CollisionBody<?> body) {
+		if (this.body1 == body) {
+			return this.fixture2;
+		} else if (this.body2 == body) {
+			return this.fixture1;
+		}
+		return null;
 	}
 }

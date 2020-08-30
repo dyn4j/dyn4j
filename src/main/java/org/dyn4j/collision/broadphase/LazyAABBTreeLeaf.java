@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -24,7 +24,7 @@
  */
 package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.Transform;
 
@@ -34,17 +34,19 @@ import org.dyn4j.geometry.Transform;
  * The leaf nodes in a {@link LazyAABBTree} are the nodes that contain the {@link Fixture} AABBs.
  * 
  * @author Manolis Tsamis
- * @param <E> the {@link Collidable} type
- * @param <T> the {@link Fixture} type
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
  * @version 3.4.0
  * @since 3.4.0
+ * @deprecated Deprecated in 4.0.0.
  */
-final class LazyAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends LazyAABBTreeNode {
-	/** The {@link Collidable} */
-	E collidable;
+@Deprecated
+final class LazyAABBTreeLeaf<T extends CollisionBody<E>, E extends Fixture> extends LazyAABBTreeNode {
+	/** The {@link CollisionBody} */
+	T body;
 	
 	/** The {@link Fixture} */
-	T fixture;
+	E fixture;
 	
 	/** Flag storing whether this leaf is in the tree currently */
 	private boolean onTree = false;
@@ -54,11 +56,11 @@ final class LazyAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends
 	
 	/**
 	 * Minimal constructor.
-	 * @param collidable the collidable
+	 * @param body the body
 	 * @param fixture the fixture
 	 */
-	public LazyAABBTreeLeaf(E collidable, T fixture) {
-		this.collidable = collidable;
+	public LazyAABBTreeLeaf(T body, E fixture) {
+		this.body = body;
 		this.fixture = fixture;
 		
 		// calculate the initial AABB
@@ -69,7 +71,7 @@ final class LazyAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends
 	 * Updates the AABB of this leaf
 	 */
 	public void updateAABB() {
-		Transform transform = collidable.getTransform();
+		Transform transform = body.getTransform();
 		this.aabb = fixture.getShape().createAABB(transform);
 	}
 	
@@ -118,7 +120,7 @@ final class LazyAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends
 		if (obj == this) return true;
 		if (obj instanceof LazyAABBTreeLeaf) {
 			LazyAABBTreeLeaf<?, ?> leaf = (LazyAABBTreeLeaf<?, ?>)obj;
-			if (leaf.collidable == this.collidable &&
+			if (leaf.body == this.body &&
 				leaf.fixture == this.fixture) {
 				return true;
 			}
@@ -132,7 +134,7 @@ final class LazyAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends
 	@Override
 	public int hashCode() {
 		int hash = 17;
-		hash = hash * 31 + this.collidable.hashCode();
+		hash = hash * 31 + this.body.hashCode();
 		hash = hash * 31 + this.fixture.hashCode();
 		return hash;
 	}
@@ -143,7 +145,7 @@ final class LazyAABBTreeLeaf<E extends Collidable<T>, T extends Fixture> extends
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("LazyAABBTreeLeaf[Collidable=").append(this.collidable.hashCode())
+		sb.append("LazyAABBTreeLeaf[Body=").append(this.body.hashCode())
 		  .append("|Fixture=").append(this.fixture.hashCode())
 		  .append("|AABB=").append(this.aabb.toString())
 		  .append("|OnTree=").append(this.onTree)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -26,10 +26,9 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Step;
-import org.dyn4j.geometry.Geometry;
+import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Shiftable;
@@ -63,16 +62,17 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Renamed from MouseJoint in 3.2.0.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Pin_Joint" target="_blank">Documentation</a>
+ * @param <T> the {@link PhysicsBody} type
  */
-public class PinJoint extends Joint implements Shiftable, DataContainer {
+public class PinJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
 	/** The world space target point */
-	protected Vector2 target;
+	protected final Vector2 target;
 	
 	/** The local anchor point for the body */
-	protected Vector2 anchor;
+	protected final Vector2 anchor;
 	
 	/** The oscillation frequency in hz */
 	protected double frequency;
@@ -84,16 +84,22 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 	protected double maximumForce;
 	
 	// current state
+
+	/** The stiffness (k) of the spring */
+	private double stiffness;
 	
-	/** The constraint mass; K = J * Minv * Jtrans */
-	private Matrix22 K;
-	
+	/** The damping coefficient of the spring-damper */
+	private double damping;
+
 	/** The bias for adding work to the constraint (simulating a spring) */
 	private Vector2 bias;
 	
 	/** The damping portion of the constraint */
 	private double gamma;
 
+	/** The constraint mass; K = J * Minv * Jtrans */
+	private final Matrix22 K;
+	
 	// output
 	
 	/** The impulse applied to the body to satisfy the constraint */
@@ -109,7 +115,7 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 	 * @throws NullPointerException if body or anchor is null
 	 * @throws IllegalArgumentException if frequency is less than or equal to zero, or if dampingRatio is less than zero or greater than one, or if maxForce is less than zero
 	 */
-	public PinJoint(Body body, Vector2 anchor, double frequency, double dampingRatio, double maximumForce) {
+	public PinJoint(T body, Vector2 anchor, double frequency, double dampingRatio, double maximumForce) {
 		super(body, body, false);
 		// check for a null anchor
 		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.pin.nullAnchor"));
@@ -120,14 +126,19 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 		// verity the max force
 		if (maximumForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.pin.invalidMaximumForce"));
 		
-		this.target = anchor;
+		this.target = anchor.copy();
 		this.anchor = body.getLocalPoint(anchor);
 		this.frequency = frequency;
 		this.dampingRatio = dampingRatio;
 		this.maximumForce = maximumForce;
 		
 		// initialize
+		this.stiffness = 0.0;
+		this.damping = 0.0;
+		this.gamma = 0.0;
+		this.bias = new Vector2();
 		this.K = new Matrix22();
+		
 		this.impulse = new Vector2();
 	}
 	
@@ -148,11 +159,11 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints(Step step, Settings settings) {
-		Body body = this.body2;
+	public void initializeConstraints(TimeStep step, Settings settings) {
+		T body = this.body2;
 		Transform transform = body.getTransform();
 		
 		Mass mass = this.body2.getMass();
@@ -169,28 +180,34 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 			m = mass.getInertia();
 		}
 		
-		// compute the natural frequency; f = w / (2 * pi) -> w = 2 * pi * f
-		double w = Geometry.TWO_PI * this.frequency;
-		// compute the damping coefficient; dRatio = d / (2 * m * w) -> d = 2 * m * w * dRatio
-		double d = 2.0 * m * this.dampingRatio * w;
-		// compute the spring constant; w = sqrt(k / m) -> k = m * w * w
-		double k = m * w * w;
+		// recompute spring reduced mass (m), stiffness (k), and damping (d)
+		// since frequency, dampingRatio, or the masses of the joined bodies
+		// could change
+		if (this.frequency > 0.0) {
+			double nf = this.getNaturalFrequency(this.frequency);
+			
+			this.stiffness = this.getSpringStiffness(m, nf);
+			this.damping = this.getSpringDampingCoefficient(m, nf, this.dampingRatio);
+		} else {
+			this.stiffness = 0.0;
+			this.damping = 0.0;
+		}
 		
 		// get the delta time
 		double dt = step.getDeltaTime();
-		// compute gamma = CMF = 1 / (hk + d)
-		this.gamma = dt * (d + dt * k);
-		// check for zero before inverting
-		if (this.gamma > Epsilon.E) {
-			this.gamma = 1.0 / this.gamma;
-		}
+		
+		// compute the CIM
+		this.gamma = this.getConstraintImpulseMixing(dt, this.stiffness, this.damping);
+		
+		// compute the ERP
+		double erp = this.getErrorReductionParameter(dt, this.stiffness, this.damping);
 		
 		// compute the r vector
 		Vector2 r = transform.getTransformedR(body.getLocalCenter().to(this.anchor));
 		
 		// compute the bias = ERP where ERP = hk / (hk + d)
 		this.bias = body.getWorldCenter().add(r).difference(this.target);
-		this.bias.multiply(dt * k * this.gamma);
+		this.bias.multiply(erp);
 		
 		// compute the K inverse matrix
 		this.K.m00 = invM + r.y * r.y * invI;
@@ -203,17 +220,21 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 		this.K.m11 += this.gamma;
 		
 		// warm start
-		this.impulse.multiply(step.getDeltaTimeRatio());
-		body.getLinearVelocity().add(this.impulse.product(invM));
-		body.setAngularVelocity(body.getAngularVelocity() + invI * r.cross(this.impulse));
+		if (settings.isWarmStartingEnabled()) {
+			this.impulse.multiply(step.getDeltaTimeRatio());
+			body.getLinearVelocity().add(this.impulse.product(invM));
+			body.setAngularVelocity(body.getAngularVelocity() + invI * r.cross(this.impulse));
+		} else {
+			this.impulse.zero();
+		}
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints(Step step, Settings settings) {
-		Body body = this.body2;
+	public void solveVelocityConstraints(TimeStep step, Settings settings) {
+		T body = this.body2;
 		Transform transform = body.getTransform();
 		
 		Mass mass = this.body2.getMass();
@@ -248,10 +269,10 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints(Step step, Settings settings) {
+	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
 		// nothing to do here for this joint
 		return true;
 	}
@@ -324,9 +345,9 @@ public class PinJoint extends Joint implements Shiftable, DataContainer {
 		// only wake the body if the target has changed
 		if (!target.equals(this.target)) {
 			// wake up the body
-			this.body2.setAsleep(false);
+			this.body2.setAtRest(false);
 			// set the new target
-			this.target = target;
+			this.target.set(target);
 		}
 	}
 	

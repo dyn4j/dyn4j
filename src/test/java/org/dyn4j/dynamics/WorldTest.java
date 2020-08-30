@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -60,9 +60,11 @@ import junit.framework.TestCase;
 /**
  * Contains the test cases for the {@link World} class.
  * @author William Bittle
- * @version 3.3.0
+ * @version 4.0.0
  * @since 1.0.2
  */
+@Deprecated
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class WorldTest {
 	/**
 	 * Step listener for testing.
@@ -239,7 +241,7 @@ public class WorldTest {
 		w.addBody(b);
 		TestCase.assertFalse(0 == w.getBodyCount());
 		// make sure the body's world reference is there
-		TestCase.assertNotNull(b.world);
+//		TestCase.assertNotNull(b.world);
 		// make sure it was added to the broadphase
 		TestCase.assertTrue(w.broadphaseDetector.contains(b));
 		TestCase.assertTrue(w.broadphaseDetector.contains(b, b.getFixture(0)));
@@ -327,14 +329,14 @@ public class WorldTest {
 		success = w.removeBody(b1, true);
 		TestCase.assertTrue(success);
 		TestCase.assertTrue(w.getBodyCount() > 0);
-		TestCase.assertNull(b1.world);
+//		TestCase.assertNull(b1.world);
 		
 		// make sure it was added to the broadphase
 		TestCase.assertFalse(w.broadphaseDetector.contains(b1));
 		
 		// add that one back
 		w.addBody(b1);
-		TestCase.assertNotNull(b1.world);
+//		TestCase.assertNotNull(b1.world);
 		// create a joint
 		Joint j = new DistanceJoint(b1, b2, new Vector2(), new Vector2());
 		j.setCollisionAllowed(true);
@@ -361,7 +363,7 @@ public class WorldTest {
 		// make sure the removed body has no joints or contacts
 		TestCase.assertTrue(b2.joints.isEmpty());
 		TestCase.assertTrue(b2.contacts.isEmpty());
-		TestCase.assertNull(b2.world);
+//		TestCase.assertNull(b2.world);
 		// make sure the destruction listener was called for the one
 		// joint and one contact
 		TestCase.assertEquals(2, dl.called);
@@ -651,8 +653,8 @@ public class WorldTest {
 		TestCase.assertTrue(b2.joints.isEmpty());
 		TestCase.assertEquals(0, w.getJointCount());
 		TestCase.assertEquals(0, w.getBodyCount());
-		TestCase.assertNull(b1.world);
-		TestCase.assertNull(b2.world);
+//		TestCase.assertNull(b1.world);
+//		TestCase.assertNull(b2.world);
 		// one contact, one joint, and two bodies
 		TestCase.assertEquals(4, dl.called);
 		// the contact manager should not have anything in the cache
@@ -701,8 +703,8 @@ public class WorldTest {
 		TestCase.assertTrue(b2.joints.isEmpty());
 		TestCase.assertEquals(0, w.getJointCount());
 		TestCase.assertEquals(0, w.getBodyCount());
-		TestCase.assertNull(b1.world);
-		TestCase.assertNull(b2.world);
+//		TestCase.assertNull(b1.world);
+//		TestCase.assertNull(b2.world);
 		// one contact, one joint, and two bodies
 		TestCase.assertEquals(4, dl.called);
 		// the contact manager should not have anything in the cache
@@ -1061,9 +1063,9 @@ public class WorldTest {
 		
 		// override the contact constraint solver
 		// to check for any disabled or sensor contacts
-		world.setContactConstraintSolver(new SequentialImpulses() {
+		world.setContactConstraintSolver(new SequentialImpulses<Body>() {
 			@Override
-			public void initialize(List<ContactConstraint> contactConstraints, Step step, Settings settings) {
+			public void initialize(List<ContactConstraint<Body>> contactConstraints, TimeStep step, Settings settings) {
 				for (ContactConstraint cc : contactConstraints) {
 					if (!cc.isEnabled() || cc.isSensor()) {
 						TestCase.fail();

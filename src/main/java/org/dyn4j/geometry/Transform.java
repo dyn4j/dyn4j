@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -24,15 +24,17 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.Copyable;
+
 /**
  * Represents a transformation matrix.
  * <p>
  * Supported operations are rotation and translation.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 1.0.0
  */
-public class Transform implements Transformable {
+public class Transform implements Transformable, Copyable<Transform> {
 	/**
 	 * NOTE: as of being deprecated this instance is no longer immutable.
 	 * @deprecated create your own instances of {@link Transform} instead; since 3.4.0
@@ -105,8 +107,8 @@ public class Transform implements Transformable {
 	 */
 	void rotate(double c, double s) {
 		// perform an optimized version of matrix multiplication
-		double cost = c * this.cost - s * this.sint;
-		double sint = s * this.cost + c * this.sint;
+		double cost = Interval.clamp(c * this.cost - s * this.sint, -1.0, 1.0);
+		double sint = Interval.clamp(s * this.cost + c * this.sint, -1.0, 1.0);
 		double x   = c * this.x - s * this.y;
 		double y   = s * this.x + c * this.y;
 		
@@ -144,8 +146,8 @@ public class Transform implements Transformable {
 	void rotate(double c, double s, double x, double y) {
 		// perform an optimized version of the matrix multiplication:
 		// M(new) = inverse(T) * R * T * M(old)
-		double cost = c * this.cost - s * this.sint;
-		double sint = s * this.cost + c * this.sint;
+		double cost = Interval.clamp(c * this.cost - s * this.sint, -1.0, 1.0);
+		double sint = Interval.clamp(s * this.cost + c * this.sint, -1.0, 1.0);
 		this.cost = cost;
 		this.sint = sint;
 		
@@ -204,9 +206,8 @@ public class Transform implements Transformable {
 		this.y += vector.y;
 	}
 	
-	/**
-	 * Copies this {@link Transform}.
-	 * @return {@link Transform}
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
 	 */
 	public Transform copy() {
 		return new Transform(this);
@@ -232,6 +233,15 @@ public class Transform implements Transformable {
 		this.sint = 0;
 		this.x = 0;
 		this.y = 0;
+	}
+	
+	/**
+	 * Returns true if this {@link Transform} is an identity transform.
+	 * @return boolean
+	 * @since 4.0.0
+	 */
+	public boolean isIdentity() {
+		return this.cost == 1.0 && this.sint == 0.0 && this.x == 0.0 && this.y == 0.0;
 	}
 	
 	/**
@@ -696,8 +706,8 @@ public class Transform implements Transformable {
 		double cos = Math.cos(theta);
 		double sin = Math.sin(theta);
 		
-		double cost = cos * this.cost - sin * this.sint;
-		double sint = sin * this.cost + cos * this.sint;
+		double cost = Interval.clamp(cos * this.cost - sin * this.sint, -1.0, 1.0);
+		double sint = Interval.clamp(sin * this.cost + cos * this.sint, -1.0, 1.0);
 		this.cost = cost;
 		this.sint = sint;
 	}

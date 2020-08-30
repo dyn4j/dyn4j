@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dyn4j.Epsilon;
-import org.dyn4j.collision.Collidable;
+import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Ray;
@@ -108,7 +108,7 @@ import org.dyn4j.resources.Messages;
  * was added last, many optimizations can be done.  For these optimizations please refer
  * to the source documentation on {@link Gjk#checkSimplex(List, Vector2)}.
  * <p>
- * Once {@link Gjk} has found that the two {@link Collidable}s are penetrating it will exit 
+ * Once {@link Gjk} has found that the two {@link CollisionBody}s are penetrating it will exit 
  * and hand off the resulting simplex to a {@link MinkowskiPenetrationSolver} to find the
  * collision depth and normal.
  * <p>
@@ -118,7 +118,7 @@ import org.dyn4j.resources.Messages;
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 1.0.0
  * @see Epa
  * @see <a href="http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/" target="_blank">GJK (Gilbert-Johnson-Keerthi)</a>
@@ -456,7 +456,8 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 				// in the direction of n so we can stop now
 				// normalize d
 				d.normalize();
-				separation.normal = d;
+				separation.normal.x = d.x;
+				separation.normal.y = d.y;
 				// compute the real distance
 				separation.distance = -c.point.dot(d);
 				// get the closest points
@@ -479,7 +480,8 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 				// nearly zero separation)
 				d.normalize();
 				separation.distance = p1.normalize();
-				separation.normal = d;
+				separation.normal.x = d.x;
+				separation.normal.y = d.y;
 				this.findClosestPoints(a, c, separation);
 				return true;
 			} else if (p2Mag <= Epsilon.E) {
@@ -487,7 +489,8 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 				// nearly zero separation)
 				d.normalize();
 				separation.distance = p2.normalize();
-				separation.normal = d;
+				separation.normal.x = d.x;
+				separation.normal.y = d.y;
 				this.findClosestPoints(c, b, separation);
 				return true;
 			}
@@ -507,7 +510,8 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		// if we made it here then we know that we hit the maximum number of iterations
 		// this is really a catch all termination case
 		d.normalize();
-		separation.normal = d;
+		separation.normal.x = d.x;
+		separation.normal.y = d.y;
 		separation.distance = -c.point.dot(d);
 		// get the closest points
 		this.findClosestPoints(a, b, separation);
@@ -569,8 +573,10 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			}
 		}
 		// set the new points in the separation object
-		separation.point1 = p1;
-		separation.point2 = p2;
+		separation.point1.x = p1.x;
+		separation.point1.y = p1.y;
+		separation.point2.x = p2.x;
+		separation.point2.y = p2.y;
 	}
 	
 	/**
@@ -736,8 +742,11 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 		}
 		
 		// set the raycast result values
-		raycast.point = x;
-		raycast.normal = n; n.normalize();
+		raycast.point.x = x.x;
+		raycast.point.y = x.y;
+		raycast.normal.x = n.x;
+		raycast.normal.y = n.y;
+		raycast.normal.normalize();
 		raycast.distance = lambda;
 		
 		// return true to indicate that we were successful

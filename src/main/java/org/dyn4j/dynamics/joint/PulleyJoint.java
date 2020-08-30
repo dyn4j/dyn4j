@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -26,9 +26,9 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Step;
+import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
@@ -63,23 +63,24 @@ import org.dyn4j.resources.Messages;
  * behave as if connected by flexible rope pass in <code>true</code> to the 
  * {@link #setSlackEnabled(boolean)} method.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 2.1.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Pulley_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/12/pulley-constraint/" target="_blank">Pulley Constraint</a>
+ * @param <T> the {@link PhysicsBody} type
  */
-public class PulleyJoint extends Joint implements Shiftable, DataContainer {
-	/** The world space pulley anchor point for the first {@link Body} */
-	protected Vector2 pulleyAnchor1;
+public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
+	/** The world space pulley anchor point for the first {@link PhysicsBody} */
+	protected final Vector2 pulleyAnchor1;
 	
-	/** The world space pulley anchor point for the second {@link Body} */
-	protected Vector2 pulleyAnchor2;
+	/** The world space pulley anchor point for the second {@link PhysicsBody} */
+	protected final Vector2 pulleyAnchor2;
 	
-	/** The local anchor point on the first {@link Body} */
-	protected Vector2 localAnchor1;
+	/** The local anchor point on the first {@link PhysicsBody} */
+	protected final Vector2 localAnchor1;
 	
-	/** The local anchor point on the second {@link Body} */
-	protected Vector2 localAnchor2;
+	/** The local anchor point on the second {@link PhysicsBody} */
+	protected final Vector2 localAnchor2;
 	
 	/** The pulley ratio for modeling a block-and-tackle */
 	protected double ratio;
@@ -90,21 +91,15 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	// current state
 	
 	/** The state of the limit (only used for slack) */
-	private LimitState limitState;
-	
-	/** The original length of the first side of the pulley */
-	private final double length1;
-	
-	/** The original length of the second side of the pulley */
-	private final double length2;
+	private boolean underLength;
 	
 	/** The total length of the pulley system */
 	private double length;
 	
-	/** The normal from the first pulley anchor to the first {@link Body} anchor */
+	/** The normal from the first pulley anchor to the first {@link PhysicsBody} anchor */
 	private Vector2 n1;
 	
-	/** The normal from the second pulley anchor to the second {@link Body} anchor */
+	/** The normal from the second pulley anchor to the second {@link PhysicsBody} anchor */
 	private Vector2 n2;
 	
 	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */
@@ -118,17 +113,17 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	/**
 	 * Minimal constructor.
 	 * <p>
-	 * Creates a pulley joint between the two given {@link Body}s using the given anchor points.
-	 * @param body1 the first {@link Body}
-	 * @param body2 the second {@link Body}
+	 * Creates a pulley joint between the two given {@link PhysicsBody}s using the given anchor points.
+	 * @param body1 the first {@link PhysicsBody}
+	 * @param body2 the second {@link PhysicsBody}
 	 * @param pulleyAnchor1 the first pulley anchor point
 	 * @param pulleyAnchor2 the second pulley anchor point
-	 * @param bodyAnchor1 the first {@link Body}'s anchor point
-	 * @param bodyAnchor2 the second {@link Body}'s anchor point
+	 * @param bodyAnchor1 the first {@link PhysicsBody}'s anchor point
+	 * @param bodyAnchor2 the second {@link PhysicsBody}'s anchor point
 	 * @throws NullPointerException if body1, body2, pulleyAnchor1, pulleyAnchor2, bodyAnchor1, or bodyAnchor2 is null
 	 * @throws IllegalArgumentException if body1 == body2
 	 */
-	public PulleyJoint(Body body1, Body body2, Vector2 pulleyAnchor1, Vector2 pulleyAnchor2, Vector2 bodyAnchor1, Vector2 bodyAnchor2) {
+	public PulleyJoint(T body1, T body2, Vector2 pulleyAnchor1, Vector2 pulleyAnchor2, Vector2 bodyAnchor1, Vector2 bodyAnchor2) {
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
 		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
@@ -147,16 +142,16 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 		// default the ratio and minimum length
 		this.ratio = 1.0;
 		// compute the lengths
-		this.length1 = bodyAnchor1.distance(pulleyAnchor1);
-		this.length2 = bodyAnchor2.distance(pulleyAnchor2);
+		double length1 = bodyAnchor1.distance(pulleyAnchor1);
+		double length2 = bodyAnchor2.distance(pulleyAnchor2);
 		// compute the lengths
 		// length = l1 + ratio * l2
-		this.length = this.length1 + this.length2;
+		this.length = length1 + length2;
 		// initialize the other fields
 		this.impulse = 0.0;
 		// initialize the slack parameters
 		this.slackEnabled = false;
-		this.limitState = LimitState.AT_UPPER;
+		this.underLength = false;
 	}
 	
 	/* (non-Javadoc)
@@ -177,10 +172,10 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints(Step step, Settings settings) {
+	public void initializeConstraints(TimeStep step, Settings settings) {
 		double linearTolerance = settings.getLinearTolerance();
 		
 		Transform t1 = this.body1.getTransform();
@@ -215,7 +210,7 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 		
 		// check if we need to solve the constraint
 		if (l > this.length || !this.slackEnabled) {
-			this.limitState = LimitState.AT_UPPER;
+			this.underLength = false;
 			
 			// check for near zero length
 			if (l1 <= 10.0 * linearTolerance) {
@@ -242,33 +237,35 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 				this.invK = 0.0;
 			}
 			
-			// warm start the constraints taking
-			// variable time steps into account
-			double dtRatio = step.getDeltaTimeRatio();
-			this.impulse *= dtRatio;
-			
-			// compute the impulse along the axes
-			Vector2 J1 = this.n1.product(-this.impulse);
-			Vector2 J2 = this.n2.product(-this.ratio * this.impulse);
-			
-			// apply the impulse
-			this.body1.getLinearVelocity().add(J1.product(invM1));
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J1));
-			this.body2.getLinearVelocity().add(J2.product(invM2));
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J2));
+			if (settings.isWarmStartingEnabled()) {
+				// warm start the constraints taking
+				// variable time steps into account
+				double dtRatio = step.getDeltaTimeRatio();
+				this.impulse *= dtRatio;
+				
+				// compute the impulse along the axes
+				Vector2 J1 = this.n1.product(-this.impulse);
+				Vector2 J2 = this.n2.product(-this.ratio * this.impulse);
+				
+				// apply the impulse
+				this.body1.getLinearVelocity().add(J1.product(invM1));
+				this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J1));
+				this.body2.getLinearVelocity().add(J2.product(invM2));
+				this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J2));
+			}
 		} else {
 			// clear the impulse and don't solve anything
 			this.impulse = 0;
-			this.limitState = LimitState.INACTIVE;
+			this.underLength = true;
 		}
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints(Step step, Settings settings) {
-		if (this.limitState != LimitState.INACTIVE) {
+	public void solveVelocityConstraints(TimeStep step, Settings settings) {
+		if (!this.underLength) {
 			Transform t1 = this.body1.getTransform();
 			Transform t2 = this.body2.getTransform();
 			Mass m1 = this.body1.getMass();
@@ -306,11 +303,11 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints(Step step, Settings settings) {
-		if (this.limitState != LimitState.INACTIVE) {
+	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
+		if (this.underLength) {
 			double linearTolerance = settings.getLinearTolerance();
 			
 			Transform t1 = this.body1.getTransform();
@@ -368,9 +365,7 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 			double C = this.length - l1 - this.ratio * l2;
 			linearError = Math.abs(C);
 			
-			// clamping the impulse does not work with the limit state
 			// clamp the error
-//			C = Interval.clamp(C + linearTolerance, -maxLinearCorrection, maxLinearCorrection);
 			double impulse = -this.invK * C;
 			
 			// compute the impulse along the axes
@@ -384,9 +379,9 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 			this.body2.rotateAboutCenter(r2.cross(J2) * invI2);
 			
 			return linearError < linearTolerance;
-		} else {
-			return true;
 		}
+		
+		return true;
 	}
 	
 	/* (non-Javadoc)
@@ -433,7 +428,7 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns the pulley anchor point for the first {@link Body}
+	 * Returns the pulley anchor point for the first {@link PhysicsBody}
 	 * in world coordinates.
 	 * @return {@link Vector2}
 	 */
@@ -442,7 +437,7 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/**
-	 * Returns the pulley anchor point for the second {@link Body}
+	 * Returns the pulley anchor point for the second {@link PhysicsBody}
 	 * in world coordinates.
 	 * @return {@link Vector2}
 	 */
@@ -474,14 +469,14 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 		if (this.length != length) {
 			this.length = length;
 			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
 		}
 	}
 	
 	/**
 	 * Returns the current length from the first pulley anchor point to the
-	 * anchor point on the first {@link Body}.
+	 * anchor point on the first {@link PhysicsBody}.
 	 * <p>
 	 * This is used, in conjunction with length2, to compute the total length
 	 * when the ratio is changed.
@@ -495,7 +490,7 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 
 	/**
 	 * Returns the current length from the second pulley anchor point to the
-	 * anchor point on the second {@link Body}.
+	 * anchor point on the second {@link PhysicsBody}.
 	 * <p>
 	 * This is used, in conjunction with length1, to compute the total length
 	 * when the ratio is changed.
@@ -531,11 +526,9 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 		if (ratio != this.ratio) {
 			// set the new ratio
 			this.ratio = ratio;
-			// compute the new length
-			this.length = this.length1 + this.ratio * this.length2;
 			// wake up both bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
 		}
 	}
 	
@@ -563,8 +556,10 @@ public class PulleyJoint extends Joint implements Shiftable, DataContainer {
 	 * Returns the current state of the limit.
 	 * @return {@link LimitState}
 	 * @since 3.2.0
+	 * @deprecated Deprecated in 4.0.0.
 	 */
+	@Deprecated
 	public LimitState getLimitState() {
-		return this.limitState;
+		return LimitState.INACTIVE;
 	}
 }

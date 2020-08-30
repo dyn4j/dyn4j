@@ -1,17 +1,43 @@
-## v3.4.1 - _In Development_
+## v4.0.0 - _In Development_
+This version sees massive performance improvements for large worlds, on the order of 30%-40% improvement. In addition, this version sees a big
+change in the API to better segment code for maintainability, testability, and extensibility. Along with those improvements comes lower object
+allocation per iteration and higher visibility into the output of the collision detection/resolution pipelines.
+
+__IMPORTANT!__ This version of dyn4j keeps a number of deprecated APIs in place, but makes no attempt to allow the deprecated API to work with 
+the new APIs. The recommendation is that if you want to take advantage of the new features and performance enhancements, you will need to remove
+all references to deprecated API.
+
+__ALL__ deprecated APIs will be removed in the next version. The deprecated APIs should be used for upgrading only.
 
 **New Features:**
+- [#99](https://github.com/dyn4j/dyn4j/issues/99) Major performance enhancements for large worlds (30-40%) and some small enhancements for small-medium worlds
+- [#99](https://github.com/dyn4j/dyn4j/issues/99) Added new objects to track collision over time to reduce allocation per frame.
+- [#99](https://github.com/dyn4j/dyn4j/issues/99) Added new API to easily see the entire output of the collision detection/resolution pipelines
+- New predictive joint limits
+- New linear limits on the Wheel Joint
 - [#102](https://github.com/dyn4j/dyn4j/issues/102) Added guards on Joint setX methods to ensure that the joined bodies are not awakened unless necessary
 - [#103](https://github.com/dyn4j/dyn4j/issues/103) Updated the FrictionJoint default max force/torque to non-zero values to better illustrate it's use to new users
+- Increased test coverage by 10%+ and greatly improved test quality
+- Parameterized World and Joint classes for better support for extension of the Body class
 
 **Bug Fixes:**
 - [#106](https://github.com/dyn4j/dyn4j/issues/106) PulleyJoint no longer allows negative length
 - [#100](https://github.com/dyn4j/dyn4j/issues/100) Fixed unrealistic falling of bodies under gravity when bound together by a MotorJoint
-    
+- Fix for overflow in the Rotation/Transform classes where it would generate values outside the valid range [1.0, -1.0] of cos(t)/sin(t) which produced NaNs
+- Fix for the ContactListener.end method not being called in some cases
+
 **Deprecated:**
-  
+- A lot of the components in the dynamics packages have been deprecated and replaced with components in the world packages. The vast majority of deprecated APIs have replacement APIs
+
 **Breaking Changes:**
-- [#71](https://github.com/dyn4j/dyn4j/issues/71) Removed all references to UUID in the project as promised in the previous version's deprecation.
+- [#71](https://github.com/dyn4j/dyn4j/issues/71) Removed all references to UUID in the project as promised in the previous version's deprecation
+- Adding a Joint to a world now requires the bodies to be added first
+- The BroadphaseDetector.getAABB methods will now always return an expanded AABB if that feature is supported
+- The Body.getChangeInOrientation method now returns the minimum angular change when the angular velocity is zero
+- The BodyFixture class now enforces the friction/restitution coefficients to be non-negative
+- The ContactConstraint class now enforces the friction/restitution coefficients to be non-negative
+- The TimeStep (formerly Step) class now enforces the delta time to be greater than zero
+- Some listener methods have been removed, renamed, or moved.
   
 **Other:**
 - [#98](https://github.com/dyn4j/dyn4j/issues/98) Replaced release-notes.txt with RELEASE-NOTES.md for better formatting and maintenance.

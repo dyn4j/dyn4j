@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -24,12 +24,13 @@
  */
 package org.dyn4j.dynamics.contact;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.dyn4j.Epsilon;
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Step;
+import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix22;
@@ -37,15 +38,16 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents an impulse based rigid {@link Body} physics collision resolver.
+ * Represents an impulse based rigid {@link PhysicsBody} physics collision resolver.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.0
  * @since 3.2.0
+ * @param <T> the {@link PhysicsBody} type
  */
-public class SequentialImpulses implements ContactConstraintSolver {
+public class SequentialImpulses<T extends PhysicsBody> implements ContactConstraintSolver<T> {
 	
 	/**
-	 * Compute the mass coefficient for a {@link Contact}.
+	 * Compute the mass coefficient for a {@link SolvableContact}.
 	 * 
 	 * @param contactConstraint The {@link ContactConstraint} of the contact
 	 * @param contact The contact
@@ -53,12 +55,12 @@ public class SequentialImpulses implements ContactConstraintSolver {
 	 * @return The mass coefficient
 	 * @since 3.4.0
 	 */
-	private double getMassCoefficient(ContactConstraint contactConstraint, Contact contact, Vector2 n) {
+	private double getMassCoefficient(ContactConstraint<T> contactConstraint, SolvableContact contact, Vector2 n) {
 		return this.getMassCoefficient(contactConstraint, contact.r1, contact.r2, n);
 	}
 	
 	/**
-	 * Compute the mass coefficient for a {@link Contact}.
+	 * Compute the mass coefficient for a {@link SolvableContact}.
 	 * 
 	 * @param contactConstraint The {@link ContactConstraint} of the contact
 	 * @param r1 The contact.r1 field
@@ -67,7 +69,7 @@ public class SequentialImpulses implements ContactConstraintSolver {
 	 * @return The mass coefficient
 	 * @since 3.4.0
 	 */
-	private double getMassCoefficient(ContactConstraint contactConstraint, Vector2 r1, Vector2 r2, Vector2 n) {
+	private double getMassCoefficient(ContactConstraint<T> contactConstraint, Vector2 r1, Vector2 r2, Vector2 n) {
 		Mass m1 = contactConstraint.getBody1().getMass();
 		Mass m2 = contactConstraint.getBody2().getMass();
 		
@@ -85,9 +87,9 @@ public class SequentialImpulses implements ContactConstraintSolver {
 	 * @param J
 	 * @since 3.4.0
 	 */
-	private void updateBodies(ContactConstraint contactConstraint, Contact contact, Vector2 J) {
-		Body b1 = contactConstraint.getBody1();
-		Body b2 = contactConstraint.getBody2();
+	private void updateBodies(ContactConstraint<T> contactConstraint, SolvableContact contact, Vector2 J) {
+		PhysicsBody b1 = contactConstraint.getBody1();
+		PhysicsBody b2 = contactConstraint.getBody2();
 		Mass m1 = b1.getMass();
 		Mass m2 = b2.getMass();
 		
@@ -104,11 +106,11 @@ public class SequentialImpulses implements ContactConstraintSolver {
 	 * Compute the relative velocity to the {@link ContactConstraint}'s normal.
 	 * 
 	 * @param contactConstraint The {@link ContactConstraint}
-	 * @param contact The {@link Contact}
+	 * @param contact The {@link SolvableContact}
 	 * @return double
 	 * @since 3.4.0
 	 */
-	private double getRelativeVelocityAlongNormal(ContactConstraint contactConstraint, Contact contact) {
+	private double getRelativeVelocityAlongNormal(ContactConstraint<T> contactConstraint, SolvableContact contact) {
 		Vector2 rv = this.getRelativeVelocity(contactConstraint, contact);
 		return contactConstraint.normal.dot(rv);
 	}
@@ -117,13 +119,13 @@ public class SequentialImpulses implements ContactConstraintSolver {
 	 * Compute the relative velocity of this {@link ContactConstraint}'s bodies.
 	 * 
 	 * @param contactConstraint The {@link ContactConstraint}
-	 * @param contact The {@link Contact}
+	 * @param contact The {@link SolvableContact}
 	 * @return The relative velocity vector
 	 * @since 3.4.0
 	 */
-	private Vector2 getRelativeVelocity(ContactConstraint contactConstraint, Contact contact) {
-		Body b1 = contactConstraint.getBody1();
-		Body b2 = contactConstraint.getBody2();
+	private Vector2 getRelativeVelocity(ContactConstraint<T> contactConstraint, SolvableContact contact) {
+		PhysicsBody b1 = contactConstraint.getBody1();
+		PhysicsBody b2 = contactConstraint.getBody2();
 		
 		Vector2 lv1 = contact.r1.cross(b1.getAngularVelocity()).add(b1.getLinearVelocity());
 		Vector2 lv2 = contact.r2.cross(b2.getAngularVelocity()).add(b2.getLinearVelocity());
@@ -133,26 +135,26 @@ public class SequentialImpulses implements ContactConstraintSolver {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.contact.ContactConstraintSolver#initialize(java.util.List, org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.contact.ContactConstraintSolver#initialize(java.util.List, org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
-	public void initialize(List<ContactConstraint> contactConstraints, Step step, Settings settings) {
+	public void initialize(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings) {
 		// get the restitution velocity from the settings object
 		double restitutionVelocity = settings.getRestitutionVelocity();
 		
 		// loop through the contact constraints
 		int size = contactConstraints.size();
 		for (int i = 0; i < size; i++) {
-			ContactConstraint contactConstraint = contactConstraints.get(i);
+			ContactConstraint<T> contactConstraint = contactConstraints.get(i);
 			
 			// get the contacts
-			List<Contact> contacts = contactConstraint.contacts;
+			List<SolvableContact> contacts = contactConstraint.contacts;
 			// get the size
 			int cSize = contacts.size();
 			if (cSize == 0) return; 
 			
 			// get the bodies
-			Body b1 = contactConstraint.getBody1();
-			Body b2 = contactConstraint.getBody2();
+			PhysicsBody b1 = contactConstraint.getBody1();
+			PhysicsBody b2 = contactConstraint.getBody2();
 			// get the body transforms
 			Transform t1 = b1.getTransform();
 			Transform t2 = b2.getTransform();
@@ -176,7 +178,7 @@ public class SequentialImpulses implements ContactConstraintSolver {
 			
 			// loop through the contact points
 			for (int j = 0; j < cSize; j++) {
-				Contact contact = contacts.get(j);
+				SolvableContact contact = contacts.get(j);
 				
 				// calculate ra and rb
 				contact.r1 = c1.to(contact.p);
@@ -202,8 +204,8 @@ public class SequentialImpulses implements ContactConstraintSolver {
 			// does this contact have 2 points?
 			if (cSize == 2) {
 				// setup the block solver
-				Contact contact1 = contacts.get(0);
-				Contact contact2 = contacts.get(1);
+				SolvableContact contact1 = contacts.get(0);
+				SolvableContact contact2 = contacts.get(1);
 				
 				double rn1A = contact1.r1.cross(N);
 				double rn1B = contact1.r2.cross(N);
@@ -218,8 +220,28 @@ public class SequentialImpulses implements ContactConstraintSolver {
 				K.m11 = invM1 + invM2 + invI1 * rn2A * rn2A + invI2 * rn2B * rn2B;
 				
 				// check the condition number of the matrix
+				
+				// typically you would take the matrix and compute
+				// one of the norms (1, max, infinity, etc), do the same
+				// for the inverse of the matrix, then multiply the two
+				// to get the condition number
+				
+				// instead, box2d takes a bit of a short cut by only
+				// evaluating the norm for a single element:
+				// ||A||      = m00
+				// ||inv(A)|| = m00 / determinant
+				// cond(A) = m00 * m00 / determinant
+				
+				// then, instead of dividing by the determinant we use
+				// it as part of the predicate for ill-conditioned
+				// m00 * m00 = cond(A) * determinant
+				// m00 * m00 < maxCondition * determinant
+				
+				// what's interesting about this is that the values i've seen here are very
+				// close to the values produced by the max-norm
 				final double maxCondition = 1000.0;
-				if (K.m00 * K.m00 < maxCondition * K.determinant()) {
+				final double det = K.determinant();
+				if (K.m00 * K.m00 < maxCondition * det) {
 					// if the condition number is below the max then we can
 					// assume that we can invert K
 					contactConstraint.K = K;
@@ -229,17 +251,23 @@ public class SequentialImpulses implements ContactConstraintSolver {
 					
 					// it looks like this will only be the case if the points are
 					// close to being the same point.  If they were the same point
-					// then the constraints would be redundant
+					// then the constraints would be redundant and solving them would
+					// produce instability.
+					
 					// just choose one of the points as the point to solve
 					
-					// let's choose the deepest point
-					if (contact1.depth > contact2.depth) {
-						// then remove the second contact
-						contactConstraint.contacts.remove(1);
-					} else {
-						// then remove the first contact
-						contactConstraint.contacts.remove(0);
+					// we're going to keep both points so that we don't keep emitting end
+					// notifications for these points and instead just set the number of 
+					// constraints to solve to 1
+					contactConstraint.size = 1;
+					
+					// then we're going to solve the one with the most depth
+					if (contact1.depth < contact2.depth) {
+						Collections.swap(contactConstraint.contacts, 0, 1);
 					}
+					
+					// mark the contact as ignored
+					contactConstraint.contacts.get(1).ignored = true;
 				}
 			}
 		}
@@ -254,7 +282,7 @@ public class SequentialImpulses implements ContactConstraintSolver {
 	 * @param step the time step information
 	 * @param settings the current settings
 	 */
-	protected void warmStart(List<ContactConstraint> contactConstraints, Step step, Settings settings) {
+	protected void warmStart(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings) {
 		// pre divide for performance
 		double ratio = 1.0 / step.getDeltaTimeRatio();
 		
@@ -263,7 +291,7 @@ public class SequentialImpulses implements ContactConstraintSolver {
 		
 		// we have to perform a separate loop to warm start
 		for (int i = 0; i < size; i++) {
-			ContactConstraint contactConstraint = contactConstraints.get(i);
+			ContactConstraint<T> contactConstraint = contactConstraints.get(i);
 			
 			// get the penetration axis
 			Vector2 N = contactConstraint.normal;
@@ -271,11 +299,11 @@ public class SequentialImpulses implements ContactConstraintSolver {
 			Vector2 T = contactConstraint.tangent;
 			
 			// get the contacts and contact size
-			List<Contact> contacts = contactConstraint.getContacts();
-			int cSize = contacts.size();
+			List<SolvableContact> contacts = contactConstraint.contacts;
+			int cSize = contactConstraint.size;
 			
 			for (int j = 0; j < cSize; j++) {
-				Contact contact = contacts.get(j);
+				SolvableContact contact = contacts.get(j);
 				
 				// scale the accumulated impulses by the delta time ratio
 				contact.jn *= ratio;
@@ -287,18 +315,19 @@ public class SequentialImpulses implements ContactConstraintSolver {
 			}
 		}
 	}
+	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.contact.ContactConstraintSolver#solveVelocityContraints(java.util.List, org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.contact.ContactConstraintSolver#solveVelocityContraints(java.util.List, org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
-	public void solveVelocityContraints(List<ContactConstraint> contactConstraints, Step step, Settings settings) {
+	public void solveVelocityContraints(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings) {
 		// loop through the contact constraints
 		int size = contactConstraints.size();
 		for (int i = 0; i < size; i++) {
-			ContactConstraint contactConstraint = contactConstraints.get(i);
+			ContactConstraint<T> contactConstraint = contactConstraints.get(i);
 			
 			// get the contact list
-			List<Contact> contacts = contactConstraint.contacts;
-			int cSize = contacts.size();
+			List<SolvableContact> contacts = contactConstraint.contacts;
+			int cSize = contactConstraint.size;
 			if (cSize == 0) continue;
 			
 			// get the penetration axis and tangent
@@ -309,7 +338,7 @@ public class SequentialImpulses implements ContactConstraintSolver {
 			
 			// evaluate friction impulse
 			for (int k = 0; k < cSize; k++) {
-				Contact contact = contacts.get(k);
+				SolvableContact contact = contacts.get(k);
 				
 				// get the relative velocity
 				Vector2 rv = this.getRelativeVelocity(contactConstraint, contact);
@@ -337,7 +366,7 @@ public class SequentialImpulses implements ContactConstraintSolver {
 			// check the number of contacts to solve
 			if (cSize == 1) {
 				// if its one then solve the one contact
-				Contact contact = contacts.get(0);
+				SolvableContact contact = contacts.get(0);
 				
 				// get the relative velocity and project it onto the penetration normal
 				double rvn = this.getRelativeVelocityAlongNormal(contactConstraint, contact);
@@ -389,8 +418,8 @@ public class SequentialImpulses implements ContactConstraintSolver {
 				//    = A * x + b'
 				// b' = b - A * a;
 				
-				Contact contact1 = contacts.get(0);
-				Contact contact2 = contacts.get(1);
+				SolvableContact contact1 = contacts.get(0);
+				SolvableContact contact2 = contacts.get(1);
 				
 				// create a vector containing the current accumulated impulses
 				Vector2 a = new Vector2(contact1.jn, contact2.jn);
@@ -490,9 +519,9 @@ public class SequentialImpulses implements ContactConstraintSolver {
 	 * @param a
 	 * @since 3.4.0
 	 */
-	private void updateBodies(ContactConstraint contactConstraint, Contact contact1, Contact contact2, Vector2 x, Vector2 a) {
-		Body b1 = contactConstraint.getBody1();
-		Body b2 = contactConstraint.getBody2();
+	private void updateBodies(ContactConstraint<T> contactConstraint, SolvableContact contact1, SolvableContact contact2, Vector2 x, Vector2 a) {
+		PhysicsBody b1 = contactConstraint.getBody1();
+		PhysicsBody b2 = contactConstraint.getBody2();
 		Mass m1 = b1.getMass();
 		Mass m2 = b2.getMass();
 		
@@ -521,9 +550,9 @@ public class SequentialImpulses implements ContactConstraintSolver {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.contact.ContactConstraintSolver#solvePositionContraints(java.util.List, org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.contact.ContactConstraintSolver#solvePositionContraints(java.util.List, org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
-	public boolean solvePositionContraints(List<ContactConstraint> contactConstraints, Step step, Settings settings) {
+	public boolean solvePositionContraints(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings) {
 		// immediately return true if there are no contact constraints to solve
 		if (contactConstraints.isEmpty()) return true;
 		
@@ -539,16 +568,16 @@ public class SequentialImpulses implements ContactConstraintSolver {
 		// loop through the contact constraints
 		int size = contactConstraints.size();
 		for (int i = 0; i < size; i++) {
-			ContactConstraint contactConstraint = contactConstraints.get(i);
+			ContactConstraint<T> contactConstraint = contactConstraints.get(i);
 			
 			// get the contact list
-			List<Contact> contacts = contactConstraint.contacts;
-			int cSize = contacts.size();
+			List<SolvableContact> contacts = contactConstraint.contacts;
+			int cSize = contactConstraint.size;
 			if (cSize == 0) continue;
 			
 			// get the bodies
-			Body b1 = contactConstraint.getBody1();
-			Body b2 = contactConstraint.getBody2();
+			PhysicsBody b1 = contactConstraint.getBody1();
+			PhysicsBody b2 = contactConstraint.getBody2();
 			// get their transforms
 			Transform t1 = b1.getTransform();
 			Transform t2 = b2.getTransform();
@@ -561,7 +590,7 @@ public class SequentialImpulses implements ContactConstraintSolver {
 
 			// solve normal constraints
 			for (int k = 0; k < cSize; k++) {
-				Contact contact = contacts.get(k);
+				SolvableContact contact = contacts.get(k);
 				
 				// get the world centers of mass
 				// NOTE: the world center needs to be recomputed each iteration because

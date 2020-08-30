@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -32,12 +32,12 @@ import org.dyn4j.geometry.Shape;
 import org.dyn4j.resources.Messages;
 
 /**
- * Represents a piece of a {@link Body}.
+ * Represents a piece of a {@link PhysicsBody}.
  * <p>
  * {@link BodyFixture} extends the {@link Fixture} class, adding physical features
  * like density and friction.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 2.0.0
  * @see Fixture
  */
@@ -98,7 +98,7 @@ public class BodyFixture extends Fixture implements DataContainer {
 	 * @throws IllegalArgumentException if density is less than or equal to zero
 	 */
 	public void setDensity(double density) {
-		if (density <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.body.fixture.invalidDensity"));
+		if (density <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidDensity"));
 		this.density = density;
 	}
 	
@@ -129,14 +129,11 @@ public class BodyFixture extends Fixture implements DataContainer {
 	 * <p>
 	 * A higher value of friction will slow the object down faster.  A friction value of
 	 * zero represents no friction.
-	 * <p>
-	 * Since two {@link BodyFixture}s participate in a collision, their coefficients will
-	 * be mixed by a {@link CoefficientMixer} to product a single value for the collision.
 	 * @param friction the coefficient of friction; must be greater than zero
 	 * @throws IllegalArgumentException if friction is less than zero
 	 */
 	public void setFriction(double friction) {
-		if (friction < 0) throw new IllegalArgumentException(Messages.getString("dynamics.body.fixture.invalidFriction"));
+		if (friction < 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidFriction"));
 		this.friction = friction;
 	}
 	
@@ -159,14 +156,11 @@ public class BodyFixture extends Fixture implements DataContainer {
 	 * <p>
 	 * Due to floating point precision and accuracy, a value of 1.0 may not produce a fully
 	 * ellastic bounce (all the velocity is retained).
-	 * <p>
-	 * Since two {@link BodyFixture}s participate in a collision, their coefficients will
-	 * be mixed by a {@link CoefficientMixer} to product a single value for the collision.
 	 * @param restitution the coefficient of restitution; must be greater than zero
 	 * @throws IllegalArgumentException if restitution is less than zero
 	 */
 	public void setRestitution(double restitution) {
-		if (restitution < 0) throw new IllegalArgumentException(Messages.getString("dynamics.body.fixture.invalidRestitution"));
+		if (restitution < 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidRestitution"));
 		this.restitution = restitution;
 	}
 	

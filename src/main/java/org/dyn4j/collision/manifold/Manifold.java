@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -27,9 +27,11 @@ package org.dyn4j.collision.manifold;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
+import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
 
 /**
@@ -40,31 +42,35 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * All {@link ManifoldPoint}s are in world space coordinates.
  * @author William Bittle
- * @version 3.0.2
+ * @version 4.0.0
  * @since 1.0.0
  */
-public class Manifold {
+public class Manifold implements Shiftable, Copyable<Manifold> {
 	/** The {@link ManifoldPoint} in world space */
-	protected List<ManifoldPoint> points;
+	protected final List<ManifoldPoint> points;
 	
 	/** The penetration normal */
-	protected Vector2 normal;
+	protected final Vector2 normal;
 	
 	/**
 	 * Default constructor.
 	 */
 	public Manifold() {
 		this.points = new ArrayList<ManifoldPoint>(2);
+		this.normal = new Vector2();
 	}
 	
 	/**
 	 * Full constructor.
-	 * @param points the manifold points
 	 * @param normal the manifold normal
+	 * @param points the manifold points
 	 */
-	public Manifold(List<ManifoldPoint> points, Vector2 normal) {
-		this.points = points;
-		this.normal = normal;
+	protected Manifold(Vector2 normal, List<ManifoldPoint> points) {
+		this.points = new ArrayList<ManifoldPoint>(points.size());
+		this.normal = normal.copy();
+		for (ManifoldPoint mp : points) {
+			this.points.add(mp.copy());
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -89,7 +95,7 @@ public class Manifold {
 	 */
 	public void clear() {
 		this.points.clear();
-		this.normal = null;
+		this.normal.zero();
 	}
 	
 	/**
@@ -113,7 +119,10 @@ public class Manifold {
 	 * @param points the point list
 	 */
 	public void setPoints(List<ManifoldPoint> points) {
-		this.points = points;
+		this.points.clear();
+		for (ManifoldPoint point : points) {
+			this.points.add(point.copy());
+		}
 	}
 	
 	/**
@@ -123,6 +132,40 @@ public class Manifold {
 	 * @param normal the manifold normal
 	 */
 	public void setNormal(Vector2 normal) {
-		this.normal = normal;
+		this.normal.x = normal.x;
+		this.normal.y = normal.y;
+	}
+	
+	/**
+	 * Copies (deep) the given {@link Manifold} to this {@link Manifold}.
+	 * @param manifold the manifold to copy
+	 * @since 4.0.0
+	 */
+	public void copy(Manifold manifold) {
+		this.normal.x = manifold.normal.x;
+		this.normal.y = manifold.normal.y;
+		this.points.clear();
+		for (ManifoldPoint point : manifold.points) {
+			this.points.add(point.copy());
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public void shift(Vector2 shift) {
+		for (ManifoldPoint point : this.points) {
+			point.point.x += shift.x;
+			point.point.y += shift.y;
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.Copyable#copy()
+	 */
+	@Override
+	public Manifold copy() {
+		return new Manifold(this.normal, this.points);
 	}
 }

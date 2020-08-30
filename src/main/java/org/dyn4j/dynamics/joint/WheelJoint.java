@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -10,12 +10,12 @@
  *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
  *     and the following disclaimer in the documentation and/or other materials provided with the 
  *     distribution.
- *   * Neither the name of dyn4j nor the names of its contributors may be used to endorse or 
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
  *     promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
@@ -26,10 +26,9 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
-import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.dynamics.Step;
-import org.dyn4j.geometry.Geometry;
+import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Shiftable;
@@ -54,17 +53,40 @@ import org.dyn4j.resources.Messages;
  * anchor point.  The motor speed can be positive or negative to indicate a
  * clockwise or counter-clockwise rotation.  The maximum motor torque must be 
  * greater than zero for the motor to apply any motion.
+ * <p>
+ * The joint also supports upper and lower limits. The limits represent the
+ * maximum displacement from the anchor point along the given axis.
  * @author William Bittle
- * @version 3.4.1
+ * @version 4.0.0
  * @since 3.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Wheel_Joint" target="_blank">Documentation</a>
+ * @param <T> the {@link PhysicsBody} type
  */
-public class WheelJoint extends Joint implements Shiftable, DataContainer {
-	/** The local anchor point on the first {@link Body} */
-	protected Vector2 localAnchor1;
+public class WheelJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
+	/** The local anchor point on the first {@link PhysicsBody} */
+	protected final Vector2 localAnchor1;
 	
-	/** The local anchor point on the second {@link Body} */
-	protected Vector2 localAnchor2;
+	/** The local anchor point on the second {@link PhysicsBody} */
+	protected final Vector2 localAnchor2;
+
+	/** The axis representing the allowed line of motion */
+	private final Vector2 xAxis;
+	
+	/** The perpendicular axis of the line of motion */
+	private final Vector2 yAxis;
+	
+	// limits
+	
+	/** True if the limits are enabled */
+	protected boolean limitEnabled;
+	
+	/** the upper limit in meters */
+	protected double upperLimit;
+	
+	/** the lower limit in meters */
+	protected double lowerLimit;
+	
+	// motor
 	
 	/** Whether the motor is enabled or not */
 	protected boolean motorEnabled;
@@ -75,21 +97,21 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	/** The maximum torque the motor can apply in newton-meters */
 	protected double maximumMotorTorque;
 	
+	// spring damper
+	
 	/** The oscillation frequency in hz */
 	protected double frequency;
 	
 	/** The damping ratio */
 	protected double dampingRatio;
 
-	// internal
-	
-	/** The axis representing the allowed line of motion */
-	private final Vector2 xAxis;
-	
-	/** The perpendicular axis of the line of motion */
-	private final Vector2 yAxis;
-	
 	// current state
+
+	/** The stiffness of the spring */
+	private double stiffness;
+	
+	/** The damping coefficient */
+	private double damping;
 	
 	/** The bias for adding work to the constraint (simulating a spring) */
 	private double bias;
@@ -97,8 +119,14 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	/** The damping portion of the constraint */
 	private double gamma;
 	
+	/** The current translation along the allowed line of motion */
+	private double translation;
+	
 	/** The point-on-line constraint mass; K = J * Minv * Jtrans */
 	private double invK;
+	
+	/** The mass along the axis of allowed motion */
+	private double axialMass;
 	
 	/** The spring/damper constraint mass */
 	private double springMass;
@@ -129,6 +157,12 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	/** The accumulated impulse for warm starting */
 	private double impulse;
 	
+	/** The lower limit impulse */
+	private double lowerImpulse;
+	
+	/** The upper limit impulse */
+	private double upperImpulse;
+	
 	/** The impulse applied by the spring/damper */
 	private double springImpulse;
 	
@@ -137,14 +171,14 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	
 	/**
 	 * Minimal constructor.
-	 * @param body1 the first {@link Body}
-	 * @param body2 the second {@link Body}
+	 * @param body1 the first {@link PhysicsBody}
+	 * @param body2 the second {@link PhysicsBody}
 	 * @param anchor the anchor point in world coordinates
 	 * @param axis the axis of allowed motion
 	 * @throws NullPointerException if body1, body2, anchor, or axis is null
 	 * @throws IllegalArgumentException if body1 == body2
 	 */
-	public WheelJoint(Body body1, Body body2, Vector2 anchor, Vector2 axis) {
+	public WheelJoint(T body1, T body2, Vector2 anchor, Vector2 axis) {
 		super(body1, body2, false);
 		// verify the bodies are not the same instance
 		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
@@ -152,6 +186,7 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor"));
 		// check for a null axis
 		if (axis == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAxis"));
+		
 		// set the anchor point
 		this.localAnchor1 = body1.getLocalPoint(anchor);
 		this.localAnchor2 = body2.getLocalPoint(anchor);
@@ -162,25 +197,45 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 		// get the perpendicular axis
 		this.yAxis = this.xAxis.getRightHandOrthogonalVector();
 		
-		// initialize
-		this.invK = 0.0;
-		this.impulse = 0.0;
-		this.motorMass = 0.0;
-		this.motorImpulse = 0.0;
-		this.springMass = 0.0;
-		this.springImpulse = 0.0;
+		// limits
+		this.limitEnabled = false;
+		this.lowerLimit = 0.0;
+		this.upperLimit = 0.0;
 		
-		// requires a spring damper by definition of the constraint.
-		// if a spring/damper isn't needed, then use the RevoluteJoint instead.
+		// motor
+		this.motorEnabled = false;
+		this.motorSpeed = 0.0;
+		this.maximumMotorTorque = 1000.0;
+		
+		// spring
 		this.frequency = 8.0;
 		this.dampingRatio = 0.0;
+		
+		// initialize
+		this.stiffness = 0.0;
+		this.damping = 0.0;
 		this.gamma = 0.0;
 		this.bias = 0.0;
 		
-		// no motor
-		this.motorEnabled = false;
-		this.maximumMotorTorque = 0.0;
-		this.motorSpeed = 0.0;
+		this.translation = 0.0;
+		
+		this.invK = 0.0;
+		this.axialMass = 0.0;
+		this.motorMass = 0.0;
+		this.springMass = 0.0;
+
+		this.perp = null;
+		this.axis = null;
+		this.a1 = 0.0;
+		this.a2 = 0.0;
+		this.s1 = 0.0;
+		this.s2 = 0.0;
+		
+		this.impulse = 0.0;
+		this.lowerImpulse = 0.0;
+		this.upperImpulse = 0.0;
+		this.motorImpulse = 0.0;
+		this.springImpulse = 0.0;
 	}
 	
 	/* (non-Javadoc)
@@ -202,10 +257,10 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#initializeConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void initializeConstraints(Step step, Settings settings) {
+	public void initializeConstraints(TimeStep step, Settings settings) {
 		Transform t1 = this.body1.getTransform();
 		Transform t2 = this.body2.getTransform();
 		
@@ -240,52 +295,72 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 			}
 		}
 		
-		// compute the spring mass for the spring constraint
+		// a1 = r1.cross(axis)
+		// a2 = (r2 + d).cross(axis)
+		this.a1 = r1.cross(this.axis);
+		this.a2 = r2.sum(d).cross(this.axis);
+		double invMass = invM1 + invM2 + this.a1 * this.a1 * invI1 + this.a2 * this.a2 * invI2;
+		if (invMass > Epsilon.E) {
+			this.axialMass = 1.0 / invMass;
+		} else {
+			this.axialMass = 0.0;
+		}
+		
+		this.springMass = 0.0;
+		this.gamma = 0.0;
+		this.bias = 0.0;
+		
+		// recompute spring reduced mass (m), stiffness (k), and damping (d)
+		// since frequency, dampingRatio, or the masses of the joined bodies
+		// could change
 		if (this.frequency > 0.0) {
-			// then we include the spring constraint
-			// a1 = r1.cross(axis)
-			// a2 = (r2 + d).cross(axis)
-			this.a1 = r1.cross(this.axis);
-			this.a2 = r2.sum(d).cross(this.axis);
-			double invMass = invM1 + invM2 + this.a1 * this.a1 * invI1 + this.a2 * this.a2 * invI2;
-			// make sure we don't divide by zero
-			if (invMass > Epsilon.E) {
-				// invert the spring mass
-				this.springMass = 1.0 / invMass;
-				// compute the current spring extension (we are solving for zero here)
-				double c = d.dot(axis);
-				// get the delta time
-				double dt = step.getDeltaTime();
-				// compute the natural frequency; f = w / (2 * pi) -> w = 2 * pi * f
-				double w = Geometry.TWO_PI * this.frequency;
-				// compute the damping coefficient; dRatio = d / (2 * m * w) -> d = 2 * m * w * dRatio
-				double dc = 2.0 * this.springMass * this.dampingRatio * w;
-				// compute the spring constant; w = sqrt(k / m) -> k = m * w * w
-				double k = this.springMass * w * w;
-				
-				// compute gamma = CMF = 1 / (hk + d)
-				this.gamma = dt * (dc + dt * k);
-				// check for zero before inverting
-				this.gamma = Math.abs(this.gamma) <= Epsilon.E ? 0.0 : 1.0 / this.gamma;			
-				// compute the bias = x * ERP where ERP = hk / (hk + d)
-				this.bias = c * dt * k * this.gamma;
-				
-				// compute the effective mass			
-				this.springMass = invMass + this.gamma;
-				// check for zero before inverting
-				this.springMass = Math.abs(this.springMass) <= Epsilon.E ? 0.0 : 1.0 / this.springMass;
+			double lm = this.getReducedMass();
+			double nf = this.getNaturalFrequency(this.frequency);
+			
+			this.stiffness = this.getSpringStiffness(lm, nf);
+			this.damping = this.getSpringDampingCoefficient(lm, nf, this.dampingRatio);
+		} else {
+			this.stiffness = 0.0;
+			this.damping = 0.0;
+		}
+		
+		// compute the spring mass for the spring constraint
+		if (this.stiffness > 0.0 && invMass > 0.0) {
+			this.springMass = this.axialMass;
+			
+			// compute the current spring extension (we are solving for zero here)
+			double c = d.dot(this.axis);
+			// get the delta time
+			double dt = step.getDeltaTime();
+
+			this.gamma = this.getConstraintImpulseMixing(dt, this.stiffness, this.damping);
+			double erp = this.getErrorReductionParameter(dt, this.stiffness, this.damping);
+			
+			this.bias = c * erp;
+			
+			// compute the effective mass			
+			this.springMass = invMass + this.gamma;
+			// check for zero before inverting
+			if (this.springMass > Epsilon.E) {
+				this.springMass = 1.0 / this.springMass;
 			}
 		} else {
-			// don't include the spring constraint
 			this.springMass = 0.0;
 			this.springImpulse = 0.0;
+		}
+		
+		if (this.limitEnabled) {
+			this.translation = this.axis.dot(d);
+		} else {
+			this.lowerImpulse = 0.0;
+			this.upperImpulse = 0.0;
 		}
 		
 		// check if the motor is enabled
 		if (this.motorEnabled) {
 			// compute the motor mass
 			this.motorMass = invI1 + invI2;
-			if (Math.abs(this.motorMass) > Epsilon.E) {
+			if (this.motorMass > Epsilon.E) {
 				this.motorMass = 1.0 / this.motorMass;
 			}
 		} else {
@@ -295,33 +370,43 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 		}
 		
 		// warm start
-		// account for variable time step
-		this.impulse *= step.getDeltaTimeRatio();
-		this.springImpulse *= step.getDeltaTimeRatio();
-		this.motorImpulse *= step.getDeltaTimeRatio();
-		
-		// we only compute the impulse for body1 since body2's impulse is
-		// just the negative of body1's impulse
-		Vector2 P = new Vector2();
-		// perp.product(impulse) + axis.product(springImpulse)
-		P.x = this.perp.x * this.impulse + this.springImpulse * this.axis.x;
-		P.y = this.perp.y * this.impulse + this.springImpulse * this.axis.y;
-		
-		double l1 = this.impulse * this.s1 + this.springImpulse * this.a1 + this.motorImpulse;
-		double l2 = this.impulse * this.s2 + this.springImpulse * this.a2 + this.motorImpulse;
-		
-		// apply the impulses
-		this.body1.getLinearVelocity().add(P.product(invM1));
-		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * l1);
-		this.body2.getLinearVelocity().subtract(P.product(invM2));
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * l2);
+		if (settings.isWarmStartingEnabled()) {
+			// account for variable time step
+			this.impulse *= step.getDeltaTimeRatio();
+			this.springImpulse *= step.getDeltaTimeRatio();
+			this.motorImpulse *= step.getDeltaTimeRatio();
+			
+			double axialImpulse = this.springImpulse + this.lowerImpulse - this.upperImpulse;
+			
+			// we only compute the impulse for body1 since body2's impulse is
+			// just the negative of body1's impulse
+			Vector2 P = new Vector2();
+			// perp.product(impulse) + axis.product(springImpulse)
+			P.x = this.perp.x * this.impulse + axialImpulse * this.axis.x;
+			P.y = this.perp.y * this.impulse + axialImpulse * this.axis.y;
+			
+			double l1 = this.impulse * this.s1 + axialImpulse * this.a1 + this.motorImpulse;
+			double l2 = this.impulse * this.s2 + axialImpulse * this.a2 + this.motorImpulse;
+			
+			// apply the impulses
+			this.body1.getLinearVelocity().add(P.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * l1);
+			this.body2.getLinearVelocity().subtract(P.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * l2);
+		} else {
+			this.impulse = 0.0;
+			this.lowerImpulse = 0.0;
+			this.upperImpulse = 0.0;
+			this.motorImpulse = 0.0;
+			this.springImpulse = 0.0;
+		}
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solveVelocityConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public void solveVelocityConstraints(Step step, Settings settings) {
+	public void solveVelocityConstraints(TimeStep step, Settings settings) {
 		Mass m1 = this.body1.getMass();
 		Mass m2 = this.body2.getMass();
 		
@@ -372,6 +457,50 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 			w2 -= impulse * invI2;
 		}
 		
+		if (this.limitEnabled) {
+			// lower limit
+			{
+				double C = this.translation - this.lowerLimit;
+				double Cdot = this.axis.dot(v1.difference(v2)) + this.a1 * w1 - this.a2 * w2;
+				double impulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * step.getInverseDeltaTime());
+				double oldImpulse = this.lowerImpulse;
+				this.lowerImpulse = Math.max(this.lowerImpulse + impulse, 0.0);
+				impulse = this.lowerImpulse - oldImpulse;
+				
+				// compute the applied impulses
+				// Pc = Jtrans * lambda
+				Vector2 P = this.axis.product(impulse);
+				double l1 = impulse * this.a1;
+				double l2 = impulse * this.a2;
+				
+				v1.add(P.product(invM1));
+				w1 += l1 * invI1;
+				v2.subtract(P.product(invM2));
+				w2 -= l2 * invI2;
+			}
+			
+			// upper limit
+			{
+				double C = this.upperLimit - this.translation;
+				double Cdot = this.axis.dot(v2.difference(v1)) + this.a2 * w2 - this.a1 * w1;
+				double impulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * step.getInverseDeltaTime());
+				double oldImpulse = this.upperImpulse;
+				this.upperImpulse = Math.max(this.upperImpulse + impulse, 0.0);
+				impulse = this.upperImpulse - oldImpulse;
+				
+				// compute the applied impulses
+				// Pc = Jtrans * lambda
+				Vector2 P = this.axis.product(impulse);
+				double l1 = impulse * this.a1;
+				double l2 = impulse * this.a2;
+				
+				v1.subtract(P.product(invM1));
+				w1 -= l1 * invI1;
+				v2.add(P.product(invM2));
+				w2 += l2 * invI2;
+			}
+		}
+		
 		// finally, solve the point-on-line constraint
 		{
 			double Cdt = this.perp.dot(v1.difference(v2)) + this.s1 * w1 - this.s2 * w2;
@@ -398,10 +527,10 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.Step, org.dyn4j.dynamics.Settings)
+	 * @see org.dyn4j.dynamics.joint.Joint#solvePositionConstraints(org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	@Override
-	public boolean solvePositionConstraints(Step step, Settings settings) {
+	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
 		double linearTolerance = settings.getLinearTolerance();
 		
 		Transform t1 = this.body1.getTransform();
@@ -415,6 +544,57 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
+		double linearError = 0.0;
+		
+		if (this.limitEnabled) {
+			Vector2 c1 = this.body1.getWorldCenter();
+			Vector2 c2 = this.body2.getWorldCenter();
+			
+			Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
+			Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
+			
+			Vector2 d = c1.sum(r1).subtract(c2.sum(r2));
+			
+			Vector2 axis = this.body2.getWorldVector(this.xAxis);
+			double a1 = r1.cross(axis);
+			double a2 = r2.sum(d).cross(axis);
+			
+			double C = 0.0;
+			double translation = axis.dot(d);
+			
+			if (Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * linearTolerance) {
+				C = translation;
+			} else if (translation <= this.lowerLimit) {
+				C = Math.min(translation - this.lowerLimit, 0.0);
+			} else if (translation >= this.upperLimit) {
+				C = Math.max(translation - this.upperLimit, 0.0);
+			}
+			
+			if (C != 0.0) {
+				double invMass = invM1 + invM2 + a1 * a1 * invI1 + a2 * a2 * invI2;
+				double impulse = 0.0;
+				if (invMass > Epsilon.E) {
+					impulse = -C / invMass;
+				}
+				
+				// compute the applied impulses
+				// Pc = Jtrans * lambda
+				Vector2 P = axis.product(impulse);
+				double l1 = impulse * a1;
+				double l2 = impulse * a2;
+				
+				this.body1.translate(P.product(invM1));
+				this.body1.rotateAboutCenter(l1 * invI1);
+				
+				this.body2.translate(P.product(-invM2));
+				this.body2.rotateAboutCenter(-l2 * invI2);
+				
+				linearError = Math.abs(C);
+			}
+			
+		}
+		
+		// solve the point on line constraint
 		Vector2 c1 = this.body1.getWorldCenter();
 		Vector2 c2 = this.body2.getWorldCenter();
 		
@@ -422,27 +602,27 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
 		Vector2 d = c1.sum(r1).subtract(c2.sum(r2));
-		this.axis = this.body2.getWorldVector(this.xAxis);
-		this.perp = this.body2.getWorldVector(this.yAxis);
 		
-		double Cx = this.perp.dot(d);
+		Vector2 perp = this.body2.getWorldVector(this.yAxis);
+		double s1 = r1.cross(perp);
+		double s2 = r2.sum(d).cross(perp);
 		
-		double k = invM1 + invM2 + this.s1 * this.s1 * invI1 + this.s2 * this.s2 * invI2;
+		double Cx = perp.dot(d);
+		
+		double invMass = invM1 + invM2 + s1 * s1 * invI1 + s2 * s2 * invI2;
 		double impulse = 0.0;
 		
 		// make sure k is not zero
-		if (k > Epsilon.E) {
-			impulse = -Cx / k;
-		} else {
-			impulse = 0.0;
+		if (invMass > Epsilon.E) {
+			impulse = -Cx / invMass;
 		}
 		
 		// apply the impulse
 		Vector2 P = new Vector2();
-		P.x = this.perp.x * impulse;
-		P.y = this.perp.y * impulse;
-		double l1 = this.s1 * impulse;
-		double l2 = this.s2 * impulse;
+		P.x = perp.x * impulse;
+		P.y = perp.y * impulse;
+		double l1 = s1 * impulse;
+		double l2 = s2 * impulse;
 		
 		this.body1.translate(P.product(invM1));
 		this.body1.rotateAboutCenter(l1 * invI1);
@@ -450,8 +630,10 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 		this.body2.translate(P.product(-invM2));
 		this.body2.rotateAboutCenter(-l2 * invI2);
 		
+		linearError = Math.max(linearError, Math.abs(Cx));
+		
 		// return if we corrected the error enough
-		return Math.abs(Cx) <= linearTolerance;
+		return linearError <= linearTolerance;
 	}
 	
 	/* (non-Javadoc)
@@ -477,8 +659,8 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	public Vector2 getReactionForce(double invdt) {
 		Vector2 force = new Vector2();
 		// compute the impulse
-		force.x = this.impulse * this.perp.x + this.springImpulse * this.axis.x;
-		force.y = this.impulse * this.perp.y + this.springImpulse * this.axis.y;
+		force.x = this.impulse * this.perp.x + (this.springImpulse + this.lowerImpulse + this.upperImpulse) * this.axis.x;
+		force.y = this.impulse * this.perp.y + (this.springImpulse + this.lowerImpulse + this.upperImpulse) * this.axis.y;
 		// multiply by invdt to obtain the force
 		force.multiply(invdt);
 		return force;
@@ -585,7 +767,9 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	 * Since the frequency cannot be less than or equal to zero, this should
 	 * always returne true.
 	 * @return boolean
+	 * @deprecated Deprecated in 4.0.0. Use the {@link #isSpringEnabled()} method instead.
 	 */
+	@Deprecated
 	public boolean isSpring() {
 		return this.frequency > 0.0;
 	}
@@ -594,8 +778,29 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	 * Returns true if this wheel joint is a spring wheel joint
 	 * with damping.
 	 * @return boolean
+	 * @deprecated Deprecated in 4.0.0. Use the {@link #isSpringDamperEnabled()} method instead.
 	 */
+	@Deprecated
 	public boolean isSpringDamper() {
+		return this.frequency > 0.0 && this.dampingRatio > 0.0;
+	}
+
+	/**
+	 * Returns true if this distance joint is a spring distance joint.
+	 * @return boolean
+	 * @since 4.0.0
+	 */
+	public boolean isSpringEnabled() {
+		return this.frequency > 0.0;
+	}
+	
+	/**
+	 * Returns true if this distance joint is a spring distance joint
+	 * with damping.
+	 * @return boolean
+	 * @since 4.0.0
+	 */
+	public boolean isSpringDamperEnabled() {
 		return this.frequency > 0.0 && this.dampingRatio > 0.0;
 	}
 	
@@ -618,8 +823,8 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 		// make sure its within range
 		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidDampingRatio"));
 		// wake up both bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
+		this.body1.setAtRest(false);
+		this.body2.setAtRest(false);
 		// set the new value
 		this.dampingRatio = dampingRatio;
 	}
@@ -643,8 +848,8 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 		// check for valid value
 		if (frequency <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequencyZero"));
 		// wake up both bodies
-		this.body1.setAsleep(false);
-		this.body2.setAsleep(false);
+		this.body1.setAtRest(false);
+		this.body2.setAtRest(false);
 		// set the new value
 		this.frequency = frequency;
 	}
@@ -664,8 +869,8 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	public void setMotorEnabled(boolean motorEnabled) {
 		if (this.motorEnabled != motorEnabled) {
 			// wake up the joined bodies
-			this.body1.setAsleep(false);
-			this.body2.setAsleep(false);
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
 			// set the new value
 			this.motorEnabled = motorEnabled;
 		}
@@ -688,8 +893,8 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 		if (this.motorSpeed != motorSpeed) {
 			if (this.motorEnabled) {
 				// wake up the joined bodies
-				this.body1.setAsleep(false);
-				this.body2.setAsleep(false);
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
 			}
 			// set the new value
 			this.motorSpeed = motorSpeed;
@@ -719,8 +924,8 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 		if (this.maximumMotorTorque != maximumMotorTorque) {
 			if (this.motorEnabled) {
 				// wake up the joined bodies
-				this.body1.setAsleep(false);
-				this.body2.setAsleep(false);
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
 			}
 			// set the new value
 			this.maximumMotorTorque = maximumMotorTorque;
@@ -734,6 +939,121 @@ public class WheelJoint extends Joint implements Shiftable, DataContainer {
 	 */
 	public double getMotorTorque(double invdt) {
 		return this.motorImpulse * invdt;
+	}
+	
+
+	/**
+	 * Returns true if the limit is enabled.
+	 * @return boolean
+	 */
+	public boolean isLimitEnabled() {
+		return this.limitEnabled;
+	}
+	
+	/**
+	 * Enables or disables the limit.
+	 * @param flag true if the limit should be enabled
+	 */
+	public void setLimitEnabled(boolean flag) {
+		// check if its changing
+		if (this.limitEnabled != flag) {
+			// wake up both bodies
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
+			// set the new value
+			this.limitEnabled = flag;
+			// clear the accumulated limit impulse
+			this.lowerImpulse = 0.0;
+			this.upperImpulse = 0.0;
+		}
+	}
+	
+	/**
+	 * Returns the upper limit in meters.
+	 * @return double
+	 */
+	public double getUpperLimit() {
+		return this.upperLimit;
+	}
+	
+	/**
+	 * Sets the upper limit.
+	 * <p>
+	 * Must be greater than or equal to the current lower limit.
+	 * @param upperLimit the upper limit in meters
+	 * @throws IllegalArgumentException if upperLimit is less than the current lower limit
+	 */
+	public void setUpperLimit(double upperLimit) {
+		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
+		if (this.upperLimit != upperLimit) {
+			// only wake the bodies if the motor is enabled and the limit has changed
+			if (this.limitEnabled) {
+				// wake up the bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+			// set the new value
+			this.upperLimit = upperLimit;
+			// clear accumulated impulse
+			this.upperImpulse = 0.0;
+		}
+	}
+	
+	/**
+	 * Returns the lower limit in meters.
+	 * @return double
+	 */
+	public double getLowerLimit() {
+		return this.lowerLimit;
+	}
+	
+	/**
+	 * Sets the lower limit.
+	 * <p>
+	 * Must be less than or equal to the current upper limit.
+	 * @param lowerLimit the lower limit in meters
+	 * @throws IllegalArgumentException if lowerLimit is greater than the current upper limit
+	 */
+	public void setLowerLimit(double lowerLimit) {
+		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
+		if (this.lowerLimit != lowerLimit) {
+			// only wake the bodies if the motor is enabled and the limit has changed
+			if (this.limitEnabled) {
+				// wake up the bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+			// set the new value
+			this.lowerLimit = lowerLimit;
+			// clear accumulated impulse
+			this.lowerImpulse = 0.0;
+		}
+	}
+	
+	/**
+	 * Sets the upper and lower limits.
+	 * <p>
+	 * The lower limit must be less than or equal to the upper limit.
+	 * @param lowerLimit the lower limit in meters
+	 * @param upperLimit the upper limit in meters
+	 * @throws IllegalArgumentException if the lowerLimit is greater than upperLimit
+	 */
+	public void setLimits(double lowerLimit, double upperLimit) {
+		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
+		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
+			// only wake the bodies if the motor is enabled and one of the limits has changed
+			if (this.limitEnabled) {
+				// wake up the bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+			// set the values
+			this.lowerLimit = lowerLimit;
+			this.upperLimit = upperLimit;
+			// clear accumulated impulse
+			this.lowerImpulse = 0.0;
+			this.upperImpulse = 0.0;
+		}
 	}
 	
 	/**
