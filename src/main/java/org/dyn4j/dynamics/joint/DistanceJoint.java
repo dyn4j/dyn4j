@@ -50,7 +50,7 @@ import org.dyn4j.resources.Messages;
  * zero.  A good starting point is a frequency of 8.0 and damping ratio of 0.3
  * then adjust as necessary.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Distance_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>
@@ -372,27 +372,6 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	public void shift(Vector2 shift) {
 		// nothing to translate here since the anchor points are in local coordinates
 		// they will move with the bodies
-	}
-	
-	/**
-	 * Returns true if this distance joint is a spring distance joint.
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. Use the {@link #isSpringEnabled()} method instead.
-	 */
-	@Deprecated
-	public boolean isSpring() {
-		return this.frequency > 0.0;
-	}
-	
-	/**
-	 * Returns true if this distance joint is a spring distance joint
-	 * with damping.
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. Use the {@link #isSpringDamperEnabled()} method instead.
-	 */
-	@Deprecated
-	public boolean isSpringDamper() {
-		return this.frequency > 0.0 && this.dampingRatio > 0.0;
 	}
 	
 	/**

@@ -38,12 +38,6 @@ import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.TestCollisionBody;
-import org.dyn4j.collision.broadphase.AbstractBroadphaseDetector;
-import org.dyn4j.collision.broadphase.BroadphaseDetector;
-import org.dyn4j.collision.broadphase.BruteForceBroadphase;
-import org.dyn4j.collision.broadphase.DynamicAABBTree;
-import org.dyn4j.collision.broadphase.LazyAABBTree;
-import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Ray;
@@ -60,11 +54,10 @@ import junit.framework.TestCase;
 /**
  * Class used to test the {@link BroadphaseDetector} methods.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 3.0.0
  */
 @RunWith(Parameterized.class)
-@SuppressWarnings("deprecation")
 public class BroadphaseTest {
 	/**
 	 * We will be testing all broadphases one by one
@@ -78,15 +71,13 @@ public class BroadphaseTest {
     	BroadphaseDetector<TestCollisionBody, Fixture> tree1 = new DynamicAABBTree<TestCollisionBody, Fixture>(); tree1.setUpdateTrackingEnabled(false);
     	BroadphaseDetector<TestCollisionBody, Fixture> tree2 = new DynamicAABBTree<TestCollisionBody, Fixture>(); tree2.setUpdateTrackingEnabled(true);
     	BroadphaseDetector<TestCollisionBody, Fixture> bf1 = new BruteForceBroadphase<TestCollisionBody, Fixture>();
-    	BroadphaseDetector<TestCollisionBody, Fixture> lazy1 = new LazyAABBTree<TestCollisionBody, Fixture>();
     	
     	return Arrays.asList(
 			new Object[] { sap1 },
 			new Object[] { sap2 },
 			new Object[] { tree1 },
 			new Object[] { tree2 },
-			new Object[] { bf1 },
-			new Object[] { lazy1 }
+			new Object[] { bf1 }
 		);
     }
 	
@@ -792,10 +783,7 @@ public class BroadphaseTest {
 		TestCase.assertEquals(3, this.broadphase.size());
 		
 		this.broadphase.remove(ct1, ct1.getFixture(0));
-		if (this.broadphase instanceof LazyAABBTree) {
-			((LazyAABBTree<?, ?>)this.broadphase).doPendingRemoves();
-		}
-		
+
 		TestCase.assertEquals(2, this.broadphase.size());
 		
 		this.broadphase.clear();

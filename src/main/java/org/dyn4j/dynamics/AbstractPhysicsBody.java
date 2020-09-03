@@ -47,7 +47,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Abstract implementation of the {@link PhysicsBody} interface.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
  */
 public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixture> implements PhysicsBody, CollisionBody<BodyFixture>, Transformable, DataContainer, Ownable {
@@ -207,14 +207,6 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		super.addFixture(fixture);
 		// return the fixture so the caller can configure it
 		return fixture;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.PhysicsBody#setMass()
-	 */
-	@Deprecated
-	public AbstractPhysicsBody setMass() {
-		return this.setMass(MassType.NORMAL);
 	}
 	
 	/* (non-Javadoc)
@@ -736,47 +728,11 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.PhysicsBody#isActive()
-	 */
-	@Deprecated
-	@Override
-	public boolean isActive() {
-		return this.enabled;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.PhysicsBody#setActive(boolean)
-	 */
-	@Deprecated
-	@Override
-	public void setActive(boolean flag) {
-		this.enabled = flag;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.PhysicsBody#setAutoSleepingEnabled(boolean)
-	 */
-	@Deprecated
-	@Override
-	public void setAutoSleepingEnabled(boolean flag) {
-		this.setAtRestDetectionEnabled(flag);
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.PhysicsBody#setAtRestDetectionEnabled(boolean)
 	 */
 	@Override
 	public void setAtRestDetectionEnabled(boolean flag) {
 		this.atRestDetectionEnabled = flag;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.PhysicsBody#isAutoSleepingEnabled()
-	 */
-	@Deprecated
-	@Override
-	public boolean isAutoSleepingEnabled() {
-		return this.isAtRestDetectionEnabled();
 	}
 	
 	/* (non-Javadoc)
@@ -788,29 +744,11 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.PhysicsBody#isAsleep()
-	 */
-	@Deprecated
-	@Override
-	public boolean isAsleep() {
-		return this.isAtRest();
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.PhysicsBody#isAtRest()
 	 */
 	@Override
 	public boolean isAtRest() {
 		return this.atRest;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.PhysicsBody#setAsleep(boolean)
-	 */
-	@Deprecated
-	@Override
-	public void setAsleep(boolean flag) {
-		this.setAtRest(flag);
 	}
 	
 	/* (non-Javadoc)

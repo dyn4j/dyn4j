@@ -44,25 +44,11 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a {@link SolvableContact} constraint for each {@link PhysicsBody} pair.  
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
  * @param <T> The {@link PhysicsBody} type
  */
 public final class ContactConstraint<T extends PhysicsBody> implements Shiftable {
-	/** 
-	 * The unique contact id 
-	 * @deprecated Deprecated in 4.0.0.
-	 */
-	@Deprecated
-	protected final ContactConstraintId id;
-
-	/**
-	 * True if this joint is on an island.
-	 * @deprecated Deprecated in 4.0.0. No replacement needed.
-	 */
-	@Deprecated
-	boolean onIsland;
-	
 	/** The collision pair */
 	protected final CollisionPair<T, BodyFixture> pair;
 	
@@ -105,64 +91,10 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	/**
 	 * Full constructor.
 	 * @param pair the pair
-	 * @param manifold the contact {@link Manifold}
-	 * @param friction the friction for the contact constraint
-	 * @param restitution the restitution for the contact constraint
 	 */
-	@Deprecated
-	public ContactConstraint(CollisionPair<T, BodyFixture> pair, Manifold manifold, double friction, double restitution) {
-		// set the pair
-		this.pair = pair;
-		// create the constraint id
-		this.id = new ContactConstraintId(pair.getBody1(), pair.getFixture1(), pair.getBody2(), pair.getFixture2());
-		this.onIsland = false;
-		// get the manifold points
-		List<ManifoldPoint> points = manifold.getPoints();
-		// get the manifold point size
-		int mSize = points.size();
-		// create contact array
-		this.contacts = new ArrayList<SolvableContact>(mSize);
-		this.contactsUnmodifiable = Collections.unmodifiableList(this.contacts);
-		// create contacts for each point
-		for (int l = 0; l < mSize; l++) {
-			// get the manifold point
-			ManifoldPoint point = points.get(l);
-			// create a contact from the manifold point
-			SolvableContact contact = new SolvableContact(point.getId(),
-	              point.getPoint(), 
-	              point.getDepth(), 
-	              pair.getBody1().getLocalPoint(point.getPoint()), 
-	              pair.getBody2().getLocalPoint(point.getPoint()));
-			// add the contact to the array
-			this.contacts.add(contact);
-		}
-		// set the normal
-		this.normal = manifold.getNormal();
-		// set the tangent
-		this.tangent = this.normal.getLeftHandOrthogonalVector();
-		// set coefficients
-		this.friction = friction;
-		this.restitution = restitution;
-		// set the sensor flag (if either fixture is a sensor then the
-		// contact constraint between the fixtures is a sensor)
-		this.sensor = pair.getFixture1().isSensor() || pair.getFixture2().isSensor();
-		// by default the tangent speed is zero
-		this.tangentSpeed = 0;
-		this.enabled = true;
-		this.size = manifold.getPoints().size();
-	}
-	
-	/**
-	 * Full constructor.
-	 * @param pair the pair
-	 */
-	@SuppressWarnings("deprecation")
 	public ContactConstraint(CollisionPair<T, BodyFixture> pair) {
 		// set the pair
 		this.pair = pair;
-		// create the constraint id
-		this.id = new ContactConstraintId(pair.getBody1(), pair.getFixture1(), pair.getBody2(), pair.getFixture2());
-		this.onIsland = false;
 		// create contact array
 		this.contacts = new ArrayList<SolvableContact>(2);
 		this.contactsUnmodifiable = Collections.unmodifiableList(this.contacts);
@@ -320,16 +252,6 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 			// c.p1 and c.p2 are in local coordinates
 			// and don't need to be shifted
 		}
-	}
-	
-	/**
-	 * Returns the contact constraint id.
-	 * @return {@link ContactConstraintId}
-	 * @deprecated Deprecated in 4.0.0. No replacement.
-	 */
-	@Deprecated
-	public ContactConstraintId getId() {
-		return this.id;
 	}
 	
 	/**
@@ -553,25 +475,5 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 */
 	public boolean isEnabled() {
 		return this.enabled;
-	}
-
-	/**
-	 * Returns true if this contact constraint is on an island.
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. No replacement needed.
-	 */
-	@Deprecated
-	public boolean isOnIsland() {
-		return this.onIsland;
-	}
-	
-	/**
-	 * Flags this contact constraint as being on an island.
-	 * @param flag true if this contact constraint is on an island
-	 * @deprecated Deprecated in 4.0.0. No replacement needed.
-	 */
-	@Deprecated
-	public void setOnIsland(boolean flag) {
-		this.onIsland = flag;
 	}
 }

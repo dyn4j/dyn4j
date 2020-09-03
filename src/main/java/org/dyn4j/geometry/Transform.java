@@ -31,17 +31,10 @@ import org.dyn4j.Copyable;
  * <p>
  * Supported operations are rotation and translation.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
  */
 public class Transform implements Transformable, Copyable<Transform> {
-	/**
-	 * NOTE: as of being deprecated this instance is no longer immutable.
-	 * @deprecated create your own instances of {@link Transform} instead; since 3.4.0
-	 */
-	@Deprecated
-	public static final Transform IDENTITY = new Transform();
-	
 	/** the cosine of the rotation angle */
 	protected double cost = 1.0;
 	

@@ -29,7 +29,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Responsible for housing all of the dynamics engine's settings.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
  */
 public class Settings {
@@ -60,36 +60,8 @@ public class Settings {
 	 */
 	public static final double DEFAULT_MINIMUM_AT_REST_TIME = 0.5;
 
-	/** 
-	 * The default maximum velocity for a {@link PhysicsBody} to go to sleep; in meters/second
-	 * @deprecated Deprecated in 4.0.0. Use {@link #DEFAULT_MAXIMUM_AT_REST_LINEAR_VELOCITY} instead.
-	 */
-	@Deprecated
-	public static final double DEFAULT_SLEEP_LINEAR_VELOCITY = DEFAULT_MAXIMUM_AT_REST_LINEAR_VELOCITY;
-	
-	/** 
-	 * The default maximum angular velocity for a {@link PhysicsBody} to go to sleep; in radians/second 
-	 * @deprecated Deprecated in 4.0.0. Use {@link #DEFAULT_MAXIMUM_AT_REST_ANGULAR_VELOCITY} instead.
-	 */
-	@Deprecated
-	public static final double DEFAULT_SLEEP_ANGULAR_VELOCITY = DEFAULT_MAXIMUM_AT_REST_ANGULAR_VELOCITY;
-	
-	/** 
-	 * The default required time a {@link PhysicsBody} must maintain small motion so that its put to sleep; in seconds
-	 * @deprecated Deprecated in 4.0.0. Use {@link #DEFAULT_MINIMUM_AT_REST_TIME} instead.
-	 */
-	@Deprecated
-	public static final double DEFAULT_SLEEP_TIME = 0.5;
-	
 	/** The default number of solver iterations */
 	public static final int DEFAULT_SOLVER_ITERATIONS = 10;
-
-	/** 
-	 * The default warm starting distance; in meters<sup>2</sup> 
-	 * @deprecated Deprecated in 4.0.0. Use {@link #DEFAULT_MAXIMUM_WARM_START_DISTANCE} instead.
-	 */
-	@Deprecated
-	public static final double DEFAULT_WARM_START_DISTANCE = 1.0e-2;
 
 	/** 
 	 * The default warm starting distance; in meters<sup>2</sup> 
@@ -403,26 +375,6 @@ public class Settings {
 	}
 
 	/**
-	 * Returns true if the engine automatically puts {@link PhysicsBody}s to sleep.
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. Use {@link #isAtRestDetectionEnabled()} instead.
-	 */
-	@Deprecated
-	public boolean isAutoSleepingEnabled() {
-		return this.atRestDetectionEnabled;
-	}
-	
-	/**
-	 * Sets whether the engine automatically puts {@link PhysicsBody}s to sleep.
-	 * @param flag true if {@link PhysicsBody}s should be put to sleep automatically
-	 * @deprecated Deprecated in 4.0.0. Use {@link #setAtRestDetectionEnabled(boolean)} instead.
-	 */
-	@Deprecated
-	public void setAutoSleepingEnabled(boolean flag) {
-		this.atRestDetectionEnabled = flag;
-	}
-	
-	/**
 	 * Returns true if the engine automatically flags {@link PhysicsBody}s as at-rest.
 	 * @return boolean
 	 * @since 4.0.0
@@ -441,50 +393,9 @@ public class Settings {
 	}
 	
 	/**
-	 * Returns the sleep linear velocity.
-	 * @return double the sleep velocity.
-	 * @see #setSleepLinearVelocity(double)
-	 * @deprecated Deprecated in 4.0.0. Use {@link #getMaximumAtRestLinearVelocity()} instead.
-	 */
-	@Deprecated
-	public double getSleepLinearVelocity() {
-		return this.maximumAtRestLinearVelocity;
-	}
-	
-	/**
-	 * Returns the sleep linear velocity squared.
-	 * @see #getSleepLinearVelocity()
-	 * @see #setSleepLinearVelocity(double)
-	 * @return double
-	 * @deprecated Deprecated in 4.0.0. Use {@link #getMaximumAtRestLinearVelocitySquared()} instead.
-	 */
-	@Deprecated
-	public double getSleepLinearVelocitySquared() {
-		return this.maximumAtRestLinearVelocitySquared;
-	}
-
-	/**
-	 * Sets the sleep linear velocity.
-	 * <p>
-	 * The sleep linear velocity is the maximum velocity a {@link PhysicsBody} can have
-	 * to be put to sleep.
-	 * <p>
-	 * Valid values are in the range [0, &infin;] meters/second
-	 * @param sleepLinearVelocity the sleep linear velocity
-	 * @throws IllegalArgumentException if sleepLinearVelocity is less than zero
-	 * @deprecated Deprecated in 4.0.0. Use {@link #setMaximumAtRestLinearVelocity(double)} instead.
-	 */
-	@Deprecated
-	public void setSleepLinearVelocity(double sleepLinearVelocity) {
-		if (sleepLinearVelocity < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidSleepLinearVelocity"));
-		this.maximumAtRestLinearVelocity = sleepLinearVelocity;
-		this.maximumAtRestLinearVelocitySquared = sleepLinearVelocity * sleepLinearVelocity;
-	}
-	
-	/**
 	 * Returns the maximum at-rest linear velocity.
 	 * @return double the maximum at-rest velocity
-	 * @see #setSleepLinearVelocity(double)
+	 * @see #setMaximumAtRestLinearVelocity(double)
 	 * @since 4.0.0
 	 */
 	public double getMaximumAtRestLinearVelocity() {
@@ -494,7 +405,7 @@ public class Settings {
 	/**
 	 * Returns the maximum at-rest linear velocity squared.
 	 * @see #getMaximumAtRestLinearVelocity()
-	 * @see #setSleepLinearVelocity(double)
+	 * @see #setMaximumAtRestLinearVelocity(double)
 	 * @return double
 	 * @since 4.0.0
 	 */
@@ -517,47 +428,6 @@ public class Settings {
 		if (maximumAtRestLinearVelocity < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidMaximumAtRestLinearVelocity"));
 		this.maximumAtRestLinearVelocity = maximumAtRestLinearVelocity;
 		this.maximumAtRestLinearVelocitySquared = maximumAtRestLinearVelocity * maximumAtRestLinearVelocity;
-	}
-	
-	/**
-	 * Returns the sleep angular velocity.
-	 * @return double the sleep angular velocity.
-	 * @see #setSleepAngularVelocity(double)
-	 * @deprecated Deprecated in 4.0.0. Use {@link #getMaximumAtRestAngularVelocity()} instead.
-	 */
-	@Deprecated
-	public double getSleepAngularVelocity() {
-		return this.maximumAtRestAngularVelocity;
-	}
-	
-	/**
-	 * Returns the sleep angular velocity squared.
-	 * @see #getSleepAngularVelocity()
-	 * @see #setSleepAngularVelocity(double)
-	 * @return double
-	 * @deprecated Deprecated in 4.0.0. Use {@link #getMaximumAtRestAngularVelocitySquared()} instead.
-	 */
-	@Deprecated
-	public double getSleepAngularVelocitySquared() {
-		return this.maximumAtRestAngularVelocitySquared;
-	}
-
-	/**
-	 * Sets the sleep angular velocity.
-	 * <p>
-	 * The sleep angular velocity is the maximum angular velocity a {@link PhysicsBody} can have
-	 * to be put to sleep.
-	 * <p>
-	 * Valid values are in the range [0, &infin;] radians/second
-	 * @param sleepAngularVelocity the sleep angular velocity
-	 * @throws IllegalArgumentException if sleepAngularVelocity is less than zero
-	 * @deprecated Deprecated in 4.0.0. Use {@link #setMaximumAtRestAngularVelocity(double)} instead.
-	 */
-	@Deprecated
-	public void setSleepAngularVelocity(double sleepAngularVelocity) {
-		if (sleepAngularVelocity < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidSleepAngularVelocity"));
-		this.maximumAtRestAngularVelocity = sleepAngularVelocity;
-		this.maximumAtRestAngularVelocitySquared = sleepAngularVelocity * sleepAngularVelocity;
 	}
 	
 	/**
@@ -598,34 +468,6 @@ public class Settings {
 		this.maximumAtRestAngularVelocitySquared = maximumAtRestAngularVelocity * maximumAtRestAngularVelocity;
 	}
 	
-	/**
-	 * Returns the sleep time.
-	 * @return double the sleep time
-	 * @see #setSleepTime(double)
-	 * @deprecated Deprecated in 4.0.0. Use {@link #getMinimumAtRestTime()} instead.
-	 */
-	@Deprecated
-	public double getSleepTime() {
-		return this.minimumAtRestTime;
-	}
-
-	/**
-	 * Sets the sleep time.
-	 * <p>
-	 * The sleep time is the amount of time a body must be motionless
-	 * before being put to sleep.
-	 * <p>
-	 * Valid values are in the range [0, &infin;] seconds
-	 * @param sleepTime the sleep time
-	 * @throws IllegalArgumentException if sleepTime is less than zero
-	 * @deprecated Deprecated in 4.0.0. Use {@link #setMinimumAtRestTime(double)} instead.
-	 */
-	@Deprecated
-	public void setSleepTime(double sleepTime) {
-		if (sleepTime < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidSleepTime"));
-		this.minimumAtRestTime = sleepTime;
-	}
-
 	/**
 	 * Returns the minimum time that a {@link PhysicsBody} is motionless before being flagged as at-rest.
 	 * @return double the minimum at-rest time
@@ -695,48 +537,6 @@ public class Settings {
 		this.positionConstraintSolverIterations = positionConstraintSolverIterations;
 	}
 	
-	/**
-	 * Returns the warm start distance.
-	 * @return double the warm start distance
-	 * @see #setWarmStartDistance(double)
-	 * @deprecated Deprecated in 4.0.0. Use {@link #getMaximumWarmStartDistance()} instead.
-	 */
-	@Deprecated
-	public double getWarmStartDistance() {
-		return this.maximumWarmStartDistance;
-	}
-	
-	/**
-	 * Returns the warm start distance squared.
-	 * @see #getWarmStartDistance()
-	 * @see #setWarmStartDistance(double)
-	 * @return double
-	 * @deprecated Deprecated in 4.0.0. Use {@link #getMaximumWarmStartDistanceSquared()} instead.
-	 */
-	@Deprecated
-	public double getWarmStartDistanceSquared() {
-		return maximumWarmStartDistanceSquared;
-	}
-
-	/**
-	 * Sets the warm start distance.
-	 * <p>
-	 * The maximum distance from one point to another to consider the points to be the
-	 * same.  This distance is used to determine if the points can carry over another
-	 * point's accumulated impulses to be used for warm starting the constraint solver.
-	 * <p>
-	 * Valid values are in the range [0, &infin;] meters
-	 * @param warmStartDistance the warm start distance
-	 * @throws IllegalArgumentException if warmStartDistance is less than zero
-	 * @deprecated Deprecated in 4.0.0. Use {@link #setMaximumWarmStartDistance(double)} instead.
-	 */
-	@Deprecated
-	public void setWarmStartDistance(double warmStartDistance) {
-		if (warmStartDistance < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidWarmStartDistance"));
-		this.maximumWarmStartDistance = warmStartDistance;
-		this.maximumWarmStartDistanceSquared = this.maximumWarmStartDistance * this.maximumWarmStartDistance;
-	}
-
 	/**
 	 * Returns the maximum warm start distance.
 	 * @return double the warm start distance

@@ -28,7 +28,6 @@ import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
-import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.dynamics.joint.Joint;
 
 /**
@@ -40,7 +39,7 @@ import org.dyn4j.dynamics.joint.Joint;
  * more than one world. Likewise, the {@link Joint#setOwner(Object)} method is used to handle
  * joints being added to the world. Callers should <b>NOT</b> use these methods.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -67,15 +66,5 @@ public class World<T extends PhysicsBody> extends AbstractPhysicsWorld<T, WorldC
 	@Override
 	protected WorldCollisionData<T> createCollisionData(CollisionPair<T, BodyFixture> pair) {
 		return new WorldCollisionData<T>(pair);
-	}
-
-	/**
-	 * Returns the current time step information.
-	 * @return {@link TimeStep}
-	 * @deprecated Deprecated in 4.0.0. Use the {@link #getTimeStep()} method instead.
-	 */
-	@Deprecated
-	public TimeStep getStep() {
-		return this.timeStep;
 	}
 }

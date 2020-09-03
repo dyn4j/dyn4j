@@ -54,7 +54,7 @@ import org.dyn4j.geometry.Vector2;
  * This property is used to test the other broad-phase detectors correctly.
  * 
  * @author Manolis Tsamis
- * @version 4.0.0
+ * @version 4.1.0
  * @since 3.4.0
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
@@ -255,15 +255,6 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 	@Override
 	public double getAABBExpansion() {
 		return 0;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#supportsAABBExpansion()
-	 */
-	@Override
-	@Deprecated
-	public boolean supportsAABBExpansion() {
-		return false;
 	}
 	
 	/* (non-Javadoc)

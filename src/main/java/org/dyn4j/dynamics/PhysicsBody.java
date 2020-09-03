@@ -72,7 +72,7 @@ import org.dyn4j.geometry.Vector2;
  * tunneling depending on the CCD setting in the world's {@link Settings}.  Use this if the body 
  * is a fast moving body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
  */
 public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, Shiftable, DataContainer, Ownable {
@@ -126,20 +126,6 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @since 3.1.1
 	 */
 	public BodyFixture addFixture(Convex convex, double density, double friction, double restitution);
-	
-	/**
-	 * This method should be called after fixture modification
-	 * is complete.
-	 * <p>
-	 * This method will calculate a total mass for the body 
-	 * given the masses of the fixtures.
-	 * <p>
-	 * This method will always set this body's mass type to Normal.
-	 * @return {@link PhysicsBody} this body
-	 * @deprecated removed in 3.2.0 use {@link #setMass(MassType)} instead
-	 */
-	@Deprecated
-	public PhysicsBody setMass();
 	
 	/**
 	 * This is a shortcut method for the {@link #setMass(org.dyn4j.geometry.MassType)}
@@ -433,41 +419,6 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	public boolean isDynamic();
 	
 	/**
-	 * Sets whether this {@link PhysicsBody} is active or not.
-	 * @param flag true if this {@link PhysicsBody} should be active
-	 * @deprecated Deprecated in 4.0.0. Use {@link #setEnabled(boolean)} instead.
-	 */
-	@Deprecated
-	public void setActive(boolean flag);
-	
-	/**
-	 * Returns true if this {@link PhysicsBody} is active.
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. Use {@link #isEnabled()} instead.
-	 */
-	@Deprecated
-	public boolean isActive();
-
-	/**
-	 * Sets the {@link PhysicsBody} to allow or disallow automatic sleeping.
-	 * @param flag true if the {@link PhysicsBody} is allowed to sleep
-	 * @since 1.2.0
-	 * @deprecated Deprecated in 4.0.0. Use {@link #setAtRestDetectionEnabled(boolean)} instead.
-	 */
-	@Deprecated
-	public void setAutoSleepingEnabled(boolean flag);
-
-	/**
-	 * Returns true if this {@link PhysicsBody} is allowed to be 
-	 * put to sleep automatically.
-	 * @return boolean
-	 * @since 1.2.0
-	 * @deprecated Deprecated in 4.0.0. Use {@link #isAtRestDetectionEnabled()} instead.
-	 */
-	@Deprecated
-	public boolean isAutoSleepingEnabled();
-	
-	/**
 	 * Determines whether this {@link PhysicsBody} can participate in automatic
 	 * at-rest detection.
 	 * @param flag true if it should
@@ -483,25 +434,6 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 */
 	public boolean isAtRestDetectionEnabled();
 
-	/**
-	 * Sets whether this {@link PhysicsBody} is awake or not.
-	 * <p>
-	 * If flag is true, this body's velocity, angular velocity,
-	 * force, torque, and accumulators are cleared.
-	 * @param flag true if the body should be put to sleep
-	 * @deprecated Deprecated in 4.0.0. Use {@link #setAtRest(boolean)} instead.
-	 */
-	@Deprecated
-	public void setAsleep(boolean flag);
-
-	/**
-	 * Returns true if this {@link PhysicsBody} is sleeping.
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. Use {@link #isAtRest()} instead.
-	 */
-	@Deprecated
-	public boolean isAsleep();
-	
 	/**
 	 * Sets whether this {@link PhysicsBody} is at-rest or not.
 	 * <p>
@@ -622,7 +554,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	/**
 	 * Sets the linear velocity.
 	 * <p>
-	 * Call the {@link #setAsleep(boolean)} method to wake up the {@link PhysicsBody}
+	 * Call the {@link #setAtRest(boolean)} method to wake up the {@link PhysicsBody}
 	 * if the {@link PhysicsBody} is asleep and the velocity is not zero.
 	 * @param velocity the desired velocity
 	 * @throws NullPointerException if velocity is null
@@ -633,7 +565,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	/**
 	 * Sets the linear velocity.
 	 * <p>
-	 * Call the {@link #setAsleep(boolean)} method to wake up the {@link PhysicsBody}
+	 * Call the {@link #setAtRest(boolean)} method to wake up the {@link PhysicsBody}
 	 * if the {@link PhysicsBody} is asleep and the velocity is not zero.
 	 * @param x the linear velocity along the x-axis
 	 * @param y the linear velocity along the y-axis
@@ -650,7 +582,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	/**
 	 * Sets the angular velocity in radians per second
 	 * <p>
-	 * Call the {@link #setAsleep(boolean)} method to wake up the {@link PhysicsBody}
+	 * Call the {@link #setAtRest(boolean)} method to wake up the {@link PhysicsBody}
 	 * if the {@link PhysicsBody} is asleep and the velocity is not zero.
 	 * @param angularVelocity the angular velocity in radians per second
 	 */

@@ -42,7 +42,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Abstract implementation of a {@link BroadphaseDetector}.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
@@ -241,24 +241,6 @@ public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E e
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.collision.broadphase.BroadphaseFilter)
-	 */
-	@Deprecated
-	@Override
-	public List<CollisionPair<T, E>> detect(BroadphaseFilter<T, E> filter) {
-		int eSize = Collisions.getEstimatedCollisionPairs(this.size());
-		List<CollisionPair<T, E>> items = new ArrayList<CollisionPair<T,E>>(eSize);
-		Iterator<CollisionPair<T, E>> it = this.detectIterator(true);
-		while (it.hasNext()) {
-			CollisionPair<T, E> item = it.next();
-			if (filter.isAllowed(item.getBody1(), item.getFixture1(), item.getBody2(), item.getFixture2())) {
-				items.add(item.copy());
-			}
-		}
-		return items;
-	}
-
-	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.AABB)
 	 */
 	@Override
@@ -274,24 +256,6 @@ public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E e
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.AABB, org.dyn4j.collision.broadphase.BroadphaseFilter)
-	 */
-	@Deprecated
-	@Override
-	public List<CollisionItem<T, E>> detect(AABB aabb, BroadphaseFilter<T, E> filter) {
-		int eSize = Collisions.getEstimatedCollisionsPerObject();
-		List<CollisionItem<T, E>> items = new ArrayList<CollisionItem<T,E>>(eSize);
-		Iterator<CollisionItem<T, E>> it = this.detectIterator(aabb);
-		while (it.hasNext()) {
-			CollisionItem<T, E> item = it.next();
-			if (filter.isAllowed(aabb, item.getBody(), item.getFixture())) {
-				items.add(item.copy());
-			}
-		}
-		return items;
-	}
-
-	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.Ray, double)
 	 */
 	@Override
@@ -302,24 +266,6 @@ public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E e
 		while (it.hasNext()) {
 			CollisionItem<T, E> item = it.next();
 			items.add(item.copy());
-		}
-		return items;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.Ray, length, org.dyn4j.collision.broadphase.BroadphaseFilter)
-	 */
-	@Deprecated
-	@Override
-	public List<CollisionItem<T, E>> raycast(Ray ray, double length, BroadphaseFilter<T, E> filter) {
-		int eSize = Collisions.getEstimatedRaycastCollisions(this.size());
-		List<CollisionItem<T, E>> items = new ArrayList<CollisionItem<T,E>>(eSize);
-		Iterator<CollisionItem<T, E>> it = this.raycastIterator(ray, length);
-		while (it.hasNext()) {
-			CollisionItem<T, E> item = it.next();
-			if (filter.isAllowed(ray, length, item.getBody(), item.getFixture())) {
-				items.add(item.copy());
-			}
 		}
 		return items;
 	}
@@ -358,15 +304,6 @@ public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E e
 		if (tmin > length) return false;
 		// along the ray, tmax should be larger than tmin
 		return tmax >= tmin;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#supportsAABBExpansion()
-	 */
-	@Override
-	@Deprecated
-	public boolean supportsAABBExpansion() {
-		return true;
 	}
 	
 	/* (non-Javadoc)

@@ -69,7 +69,7 @@ import org.dyn4j.geometry.Transform;
  * The {@link #detect(Convex, Transform, Convex, Transform)} method does not use the current state of the broad-phase,
  * but the {@link #detect(CollisionBody, CollisionBody)} does.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
@@ -388,21 +388,6 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * been added to this {@link BroadphaseDetector} and returns the list of potential
 	 * pairs.
 	 * <p>
-	 * Use the <code>filter</code> parameter to further reduce the number of potential pairs.
-	 * @param filter the broad-phase filter
-	 * @return List&lt;{@link BroadphasePair}&gt;
-	 * @since 3.2.0
-	 * @see #detect()
-	 * @deprecated Deprecated in 4.0.0. Use the {@link #detect()} method instead.
-	 */
-	@Deprecated
-	public abstract List<CollisionPair<T, E>> detect(BroadphaseFilter<T, E> filter);
-	
-	/**
-	 * Performs collision detection on all {@link CollisionBody} {@link Fixture}s that have 
-	 * been added to this {@link BroadphaseDetector} and returns the list of potential
-	 * pairs.
-	 * <p>
 	 * The returned pairs from this method will depend on the {@link #isUpdateTrackingEnabled()}
 	 * flag. If the flag is true, then only updated pairs will be emitted, otherwise all pairs
 	 * are emitted.
@@ -437,21 +422,6 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	public abstract Iterator<CollisionItem<T, E>> detectIterator(AABB aabb);
 	
 	/**
-	 * Performs a broad-phase collision test using the given {@link AABB} and returns
-	 * the items that overlap.
-	 * <p>
-	 * Use the <code>filter</code> parameter to further reduce the number of items returned.
-	 * @param aabb the {@link AABB} to test
-	 * @param filter the broad-phase filter
-	 * @return List&lt;{@link CollisionItem}&gt;
-	 * @since 3.2.0
-	 * @see #detect(AABB)
-	 * @deprecated Deprecated in 4.0.0. Use the {@link #detect(AABB)} method instead
-	 */
-	@Deprecated
-	public abstract List<CollisionItem<T, E>> detect(AABB aabb, BroadphaseFilter<T, E> filter);
-
-	/**
 	 * Performs a raycast over all the bodies in the broad-phase and returns the
 	 * items that intersect.
 	 * @param ray the {@link Ray}
@@ -472,22 +442,6 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	public abstract Iterator<CollisionItem<T, E>> raycastIterator(Ray ray, double length);
 	
 	/**
-	 * Performs a preliminary raycast over all the bodies in the broad-phase and returns the
-	 * items that intersect.
-	 * <p>
-	 * Use the <code>filter</code> parameter to further reduce the number of items returned.
-	 * @param ray the {@link Ray}
-	 * @param length the length of the ray; 0.0 for infinite length
-	 * @param filter the broad-phase filter
-	 * @return List&lt;{@link BroadphaseItem}&gt;
-	 * @since 3.2.0
-	 * @see #raycast(Ray, double)
-	 * @deprecated Deprecated in 4.0.0. Use the {@link #raycast(Ray, double)} method instead
-	 */
-	@Deprecated
-	public abstract List<CollisionItem<T, E>> raycast(Ray ray, double length, BroadphaseFilter<T, E> filter);
-	
-	/**
 	 * Returns true if this broad-phase detector considers the given bodies to be in collision.
 	 * @param a the first {@link CollisionBody}
 	 * @param b the second {@link CollisionBody}
@@ -506,14 +460,6 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * @return boolean
 	 */
 	public abstract boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2);
-	
-	/**
-	 * Returns whether this particular {@link BroadphaseDetector} supports expanding AABBs.
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. Use the {@link #isAABBExpansionSupported()} method instead.
-	 */
-	@Deprecated
-	public abstract boolean supportsAABBExpansion();
 	
 	/**
 	 * Returns whether this particular {@link BroadphaseDetector} supports expanding AABBs.

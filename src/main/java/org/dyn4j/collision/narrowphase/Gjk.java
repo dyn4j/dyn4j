@@ -118,7 +118,7 @@ import org.dyn4j.resources.Messages;
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
  * @see Epa
  * @see <a href="http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/" target="_blank">GJK (Gilbert-Johnson-Keerthi)</a>
@@ -913,32 +913,5 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	public void setMinkowskiPenetrationSolver(MinkowskiPenetrationSolver minkowskiPenetrationSolver) {
 		if (minkowskiPenetrationSolver == null) throw new NullPointerException(Messages.getString("collision.narrowphase.gjk.nullMinkowskiPenetrationSolver"));
 		this.minkowskiPenetrationSolver = minkowskiPenetrationSolver;
-	}
-
-	/**
-	 * Returns the maximum number of iterations the {@link Gjk} algorithm will perform when
-	 * computing the distance between two separated bodies.
-	 * @return int the number of {@link Gjk} distance iterations
-	 * @see #setMaxIterations(int)
-	 * @deprecated replaced with {@link #getMaxDistanceIterations()} since 3.3.0
-	 */
-	@Deprecated
-	public int getMaxIterations() {
-		return this.maxDistanceIterations;
-	}
-
-	/**
-	 * Sets the maximum number of iterations the {@link Gjk} algorithm will perform when
-	 * computing the distance between two separated bodies.
-	 * <p>
-	 * Valid values are in the range [5, &infin;].
-	 * @param maxIterations the maximum number of {@link Gjk} iterations
-	 * @throws IllegalArgumentException if maxIterations is less than 5
-	 * @deprecated replaced with {@link #setMaxDistanceIterations(int)} since 3.3.0
-	 */
-	@Deprecated
-	public void setMaxIterations(int maxIterations) {
-		if (maxIterations < 5) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidMaximumIterations"));
-		this.maxDistanceIterations = maxIterations;
 	}
 }
