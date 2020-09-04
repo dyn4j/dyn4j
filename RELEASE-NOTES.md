@@ -1,3 +1,14 @@
+## v4.1.0 - _IN DEVELOPMENT_
+**New Features:**
+
+**Bug Fixes:**
+
+**Deprecated:**
+
+**Breaking Changes:**
+  
+**Other:**
+
 ## v4.0.0 - August 29th, 2020
 This version sees massive performance improvements for large worlds, on the order of 30%-40% improvement. In addition, this version sees a big
 change in the API to better segment code for maintainability, testability, and extensibility. Along with those improvements comes lower object
