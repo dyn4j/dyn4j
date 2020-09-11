@@ -626,8 +626,8 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 	public Vector2 getReactionForce(double invdt) {
 		Vector2 force = new Vector2();
 		// compute the impulse
-		force.x = this.impulse.x * this.perp.x + (this.motorImpulse + this.lowerImpulse + this.upperImpulse) * this.axis.x;
-		force.y = this.impulse.x * this.perp.y + (this.motorImpulse + this.lowerImpulse + this.upperImpulse) * this.axis.y;
+		force.x = this.impulse.x * this.perp.x + (this.motorImpulse + this.lowerImpulse - this.upperImpulse) * this.axis.x;
+		force.y = this.impulse.x * this.perp.y + (this.motorImpulse + this.lowerImpulse - this.upperImpulse) * this.axis.y;
 		// multiply by invdt to obtain the force
 		force.multiply(invdt);
 		return force;
