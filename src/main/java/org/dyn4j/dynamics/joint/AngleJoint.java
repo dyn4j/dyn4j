@@ -78,7 +78,7 @@ import org.dyn4j.resources.Messages;
  * the world space center points for the joined bodies.  This constraint 
  * doesn't need anchor points.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 2.2.2
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Angle_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/12/angle-constraint/" target="_blank">Angle Constraint</a>
@@ -190,6 +190,11 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 			this.upperImpulse = 0.0;
 		}
 		
+		// handle the ratio changing or limits be activated
+		if (this.limitEnabled || this.ratio == 1.0) {
+			this.impulse = 0.0;
+		}
+		
 		if (settings.isWarmStartingEnabled()) {
 			// account for variable time step
 			double dtr = step.getDeltaTimeRatio();
@@ -228,7 +233,6 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		// solve the limit constraints
 		// check if the limit constraint is enabled
 		if (this.limitEnabled && !this.fixedRotation) {
 			// lower limit
@@ -258,12 +262,14 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 			}
 		}
 
+		// apply the ratio
 		if (!this.limitEnabled && this.ratio != 1.0) {
 			// the limit is inactive and the ratio is not one
 			// get the relative velocity
 			double C = this.body1.getAngularVelocity() - this.ratio * this.body2.getAngularVelocity();
 			// get the impulse required to obtain the speed
 			double impulse = this.axialMass * -C;
+			this.impulse += impulse;
 			
 			// apply the impulse
 			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * impulse);
@@ -361,7 +367,7 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	 */
 	@Override
 	public double getReactionTorque(double invdt) {
-		return this.impulse * invdt;
+		return (this.impulse + this.lowerImpulse - this.upperImpulse) * invdt;
 	}
 	
 	/* (non-Javadoc)
