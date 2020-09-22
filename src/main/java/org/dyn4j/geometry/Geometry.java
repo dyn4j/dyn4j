@@ -1850,7 +1850,7 @@ public final class Geometry {
 			// create a link to span the first and last vertex
 			Vector2 p1 = vertices[0].copy();
 			Vector2 p2 = vertices[size - 1].copy();
-			Link link = new Link(p1, p2);
+			Link link = new Link(p2, p1);
 			// wire it up
 			Link prev = links.get(links.size() - 1);
 			Link next = links.get(0);
