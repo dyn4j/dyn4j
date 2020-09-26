@@ -57,7 +57,7 @@ import org.dyn4j.resources.Messages;
  * The joint also supports upper and lower limits. The limits represent the
  * maximum displacement from the anchor point along the given axis.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 3.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Wheel_Joint" target="_blank">Documentation</a>
  * @param <T> the {@link PhysicsBody} type
