@@ -1,5 +1,10 @@
 ## v4.0.1 - September 26th, 2020
 
+[Milestone](https://github.com/dyn4j/dyn4j/milestone/5?closed=1) |
+[Tag](https://github.com/dyn4j/dyn4j/tree/4.0.1) |
+[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/4.0.1/bundle) |
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=4.0.1)
+
 **New Features:**
 - [#136](https://github.com/dyn4j/dyn4j/issues/136) Added back a listener method to allow setting the sensor/enabled flags on Contact Constraints during collision detection
 
@@ -11,6 +16,12 @@
 - [#137](https://github.com/dyn4j/dyn4j/issues/137) Clean up of test import warnings
 
 ## v4.0.0 - August 29th, 2020
+
+[Milestone](https://github.com/dyn4j/dyn4j/milestone/4?closed=1) |
+[Tag](https://github.com/dyn4j/dyn4j/tree/4.0.0) |
+[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/4.0.0/bundle) |
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=4.0.0)
+
 This version sees massive performance improvements for large worlds, on the order of 30%-40% improvement. In addition, this version sees a big
 change in the API to better segment code for maintainability, testability, and extensibility. Along with those improvements comes lower object
 allocation per iteration and higher visibility into the output of the collision detection/resolution pipelines.
