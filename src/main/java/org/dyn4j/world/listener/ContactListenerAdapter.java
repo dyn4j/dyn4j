@@ -26,13 +26,14 @@ package org.dyn4j.world.listener;
 
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.contact.Contact;
+import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.SolvedContact;
 import org.dyn4j.world.ContactCollisionData;
 
 /**
  * Convenience class for implementing the {@link ContactListener} interface.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -44,23 +45,23 @@ public class ContactListenerAdapter<T extends PhysicsBody> implements ContactLis
 	public void begin(ContactCollisionData<T> collision, Contact contact) {}
 
 	/* (non-Javadoc)
+	 * @see org.dyn4j.world.listener.ContactListener#persist(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact, org.dyn4j.dynamics.contact.Contact)
+	 */
+	@Override
+	public void persist(ContactCollisionData<T> collision, Contact oldContact, Contact newContact) {}
+
+	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.ContactListener#end(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact)
 	 */
 	@Override
 	public void end(ContactCollisionData<T> collision, Contact contact) {}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.ContactListener#destroyed(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact)
+	 * @see org.dyn4j.world.listener.ContactListener#collision(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.ContactConstraint)
 	 */
 	@Override
-	public void destroyed(ContactCollisionData<T> collision, Contact contact) {}
+	public void collision(ContactCollisionData<T> collision, ContactConstraint<T> contactConstraint) {}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.listener.ContactListener#persist(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact, org.dyn4j.dynamics.contact.Contact)
-	 */
-	@Override
-	public void persist(ContactCollisionData<T> collision, Contact oldContact, Contact newContact) {}
-
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.ContactListener#preSolve(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact)
 	 */
@@ -72,5 +73,11 @@ public class ContactListenerAdapter<T extends PhysicsBody> implements ContactLis
 	 */
 	@Override
 	public void postSolve(ContactCollisionData<T> collision, SolvedContact contact) {}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.listener.ContactListener#destroyed(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact)
+	 */
+	@Override
+	public void destroyed(ContactCollisionData<T> collision, Contact contact) {}
 
 }

@@ -63,7 +63,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link AbstractPhysicsWorld} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 4.0.0
  */
 public class AbstractPhysicsWorldTest {
@@ -136,6 +136,8 @@ public class AbstractPhysicsWorldTest {
 		public void begin(ContactCollisionData<Body> collision, Contact contact) { }
 		@Override
 		public void end(ContactCollisionData<Body> collision, Contact contact) { this.end++; }
+		@Override
+		public void collision(ContactCollisionData<Body> collision, ContactConstraint<Body> contactConstraint) {}
 		@Override
 		public void destroyed(ContactCollisionData<Body> collision, Contact contact) { this.destroyed++; }
 		@Override
