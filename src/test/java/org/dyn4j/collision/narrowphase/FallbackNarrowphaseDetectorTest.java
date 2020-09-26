@@ -24,14 +24,6 @@
  */
 package org.dyn4j.collision.narrowphase;
 
-import junit.framework.TestCase;
-
-import org.dyn4j.collision.narrowphase.FallbackCondition;
-import org.dyn4j.collision.narrowphase.FallbackNarrowphaseDetector;
-import org.dyn4j.collision.narrowphase.Gjk;
-import org.dyn4j.collision.narrowphase.PairwiseTypedFallbackCondition;
-import org.dyn4j.collision.narrowphase.Sat;
-import org.dyn4j.collision.narrowphase.SingleTypedFallbackCondition;
 import org.dyn4j.geometry.Capsule;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Ellipse;
@@ -40,10 +32,12 @@ import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Rectangle;
 import org.junit.Test;
 
+import junit.framework.TestCase;
+
 /**
  * Test case for the {@link FallbackNarrowphaseDetector} class.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.1
  * @since 3.1.5
  */
 public class FallbackNarrowphaseDetectorTest {

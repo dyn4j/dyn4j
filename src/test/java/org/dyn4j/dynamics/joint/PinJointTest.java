@@ -25,7 +25,6 @@
 package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.dynamics.Body;
-import org.dyn4j.dynamics.joint.PinJoint;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
@@ -34,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link PinJoint} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 1.0.2
  */
 public class PinJointTest extends AbstractJointTest {
