@@ -77,7 +77,7 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * more than one world. Likewise, the {@link Joint#setOwner(Object)} method is used to handle
  * joints being added to the world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
@@ -1226,11 +1226,11 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			V collision = iterator.next();
 
 			// get the current contact constraint data
-			ContactConstraint<T> cc = collision.getContactConstraint();
+			ContactConstraint<T> contactConstraint = collision.getContactConstraint();
 			
 			// we can exit early if the collision didn't make it to the manifold stage
 			// and there's no existing contacts to report ending
-			if (!collision.isManifoldCollision() && cc.getContacts().size() == 0) {
+			if (!collision.isManifoldCollision() && contactConstraint.getContacts().size() == 0) {
 				continue;
 			}
 			
@@ -1240,7 +1240,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// update the contact constraint
 			// NOTE: in the case of an empty manifold, this method will also report
 			//       end notifications for any existing contacts
-			cc.update(collision.getManifold(), this.settings, wsh);
+			contactConstraint.update(collision.getManifold(), this.settings, wsh);
 			
 			// we only want to add interaction edges if the collision actually made it past
 			// the manifold generation stage and all listeners allowed it to proceed
@@ -1249,12 +1249,17 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 				collision.setContactConstraintCollision(true);
 				
 				// build the contact edges
-				this.constraintGraph.addContactConstraint(cc);
+				this.constraintGraph.addContactConstraint(contactConstraint);
+				
+				// let any contact listeners churn on it
+				for (ContactListener<T> listener : this.contactListeners) {
+					listener.collision(collision, contactConstraint);
+				}
 				
 				// add it to a list of contact-constraint only collisions for
 				// quicker post/pre solve notification if it's enabled and
 				// not a sensor collision
-				if (cc.isEnabled() && !cc.isSensor()) {
+				if (contactConstraint.isEnabled() && !contactConstraint.isSensor()) {
 					this.contactCollisions.add(collision);
 				}
 			}
