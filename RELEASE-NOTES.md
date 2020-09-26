@@ -1,4 +1,4 @@
-## v4.0.1 - _TBD_
+## v4.0.1 - September 26th, 2020
 
 **New Features:**
 - [#136](https://github.com/dyn4j/dyn4j/issues/136) Added back a listener method to allow setting the sensor/enabled flags on Contact Constraints during collision detection
