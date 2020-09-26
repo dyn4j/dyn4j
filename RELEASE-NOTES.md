@@ -1,3 +1,15 @@
+## v4.0.1 - _TBD_
+
+**New Features:**
+- [#136](https://github.com/dyn4j/dyn4j/issues/136) Added back a listener method to allow setting the sensor/enabled flags on Contact Constraints during collision detection
+
+**Bug Fixes:**
+- [#130](https://github.com/dyn4j/dyn4j/issues/130) Fixed the getReactionForce/Torque methods to return the proper values
+- [#135](https://github.com/dyn4j/dyn4j/issues/135) Fixed issue with Geometry.createLinks when using closed = true would not produce the correct end linkage
+  
+**Other:**
+- [#137](https://github.com/dyn4j/dyn4j/issues/137) Clean up of test import warnings
+
 ## v4.0.0 - August 29th, 2020
 This version sees massive performance improvements for large worlds, on the order of 30%-40% improvement. In addition, this version sees a big
 change in the API to better segment code for maintainability, testability, and extensibility. Along with those improvements comes lower object
