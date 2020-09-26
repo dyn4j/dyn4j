@@ -56,7 +56,7 @@ import org.dyn4j.resources.Messages;
  * separate, but it's recommended that they start separated instead. If the lower
  * limit is not being used, then the initial state doesn't matter.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 2.2.1
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Rope_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>
@@ -211,7 +211,7 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 			this.upperImpulse *= step.getDeltaTimeRatio();
 			this.lowerImpulse *= step.getDeltaTimeRatio();
 			
-			Vector2 J = this.n.product(this.upperImpulse - this.lowerImpulse);
+			Vector2 J = this.n.product(this.lowerImpulse - this.upperImpulse);
 			this.body1.getLinearVelocity().add(J.product(invM1));
 			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
 			this.body2.getLinearVelocity().subtract(J.product(invM2));
@@ -249,44 +249,40 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 			double invdt = step.getInverseDeltaTime();
 			// upper limit (max length)
 			if (this.upperLimitEnabled) {
-				double d = this.length - this.upperLimit;
-				if (d < 0.0) {
-					double Jv = this.n.dot(v1.difference(v2));
-					
-					// compute lambda (the magnitude of the impulse)
-					double j = -this.invK * (Jv + d * invdt);
-					double oldImpulse = this.upperImpulse;
-					this.upperImpulse = Math.min(0.0, this.upperImpulse + j);
-					j = this.upperImpulse - oldImpulse;
-					
-					// apply the impulse
-					Vector2 J = this.n.product(j);
-					this.body1.getLinearVelocity().add(J.product(invM1));
-					this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
-					this.body2.getLinearVelocity().subtract(J.product(invM2));
-					this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(J));
-				}
+				double d = this.length - this.lowerLimit;
+				double Jv = this.n.dot(v1.difference(v2));
+				
+				// compute lambda (the magnitude of the impulse)
+				double impulse = -this.invK * (Jv + Math.max(d, 0.0) * invdt);
+				double oldImpulse = this.lowerImpulse;
+				this.lowerImpulse = Math.max(0.0, this.lowerImpulse + impulse);
+				impulse = this.lowerImpulse - oldImpulse;
+				
+				// apply the impulse
+				Vector2 J = this.n.product(impulse);
+				this.body1.getLinearVelocity().add(J.product(invM1));
+				this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
+				this.body2.getLinearVelocity().subtract(J.product(invM2));
+				this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(J));
 			}
 			
 			// lower limit (min length)
 			if (this.lowerLimitEnabled) {
-				double d = this.lowerLimit - this.length;
-				if (d < 0.0) {
-					double Jv = this.n.dot(v2.difference(v1));
-
-					// compute lambda (the magnitude of the impulse)
-					double j = -this.invK * (Jv + d * invdt);
-					double oldImpulse = this.lowerImpulse;
-					this.lowerImpulse = Math.min(0.0, this.lowerImpulse + j);
-					j = this.lowerImpulse - oldImpulse;
-					
-					// apply the impulse
-					Vector2 J = this.n.product(j);
-					this.body1.getLinearVelocity().subtract(J.product(invM1));
-					this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * r1.cross(J));
-					this.body2.getLinearVelocity().add(J.product(invM2));
-					this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J));
-				}
+				double d = this.upperLimit - this.length;
+				double Jv = this.n.dot(v2.difference(v1));
+				
+				// compute lambda (the magnitude of the impulse)
+				double impulse = -this.invK * (Jv + Math.max(d, 0.0) * invdt);
+				double oldImpulse = this.upperImpulse;
+				this.upperImpulse = Math.max(0.0, this.upperImpulse + impulse);
+				impulse = this.upperImpulse - oldImpulse;
+				
+				// apply the impulse
+				Vector2 J = this.n.product(impulse);
+				this.body1.getLinearVelocity().subtract(J.product(invM1));
+				this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * r1.cross(J));
+				this.body2.getLinearVelocity().add(J.product(invM2));
+				this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J));
 			}
 		}
 	}
@@ -367,7 +363,7 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 	 */
 	@Override
 	public Vector2 getReactionForce(double invdt) {
-		return this.n.product((this.upperImpulse + this.lowerImpulse) * invdt);
+		return this.n.product((this.lowerImpulse - this.upperImpulse) * invdt);
 	}
 	
 	/**

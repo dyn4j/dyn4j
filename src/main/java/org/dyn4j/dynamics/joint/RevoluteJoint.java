@@ -72,7 +72,7 @@ import org.dyn4j.resources.Messages;
  * clockwise or counter-clockwise rotation.  The maximum motor torque must be 
  * greater than zero for the motor to apply any motion.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Revolute_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/07/point-to-point-constraint/" target="_blank">Point-to-Point Constraint</a>
@@ -488,7 +488,7 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	 */
 	@Override
 	public double getReactionTorque(double invdt) {
-		return (this.lowerImpulse + this.upperImpulse) * invdt;
+		return (this.lowerImpulse - this.upperImpulse) * invdt;
 	}
 	
 	/* (non-Javadoc)

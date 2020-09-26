@@ -69,7 +69,7 @@ import org.dyn4j.resources.Messages;
  * or opposite the axis direction.  The maximum motor force must be greater 
  * than zero for the motor to apply any motion.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Prismatic_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2011/03/prismatic-constraint/" target="_blank">Prismatic Constraint</a>
@@ -626,8 +626,8 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 	public Vector2 getReactionForce(double invdt) {
 		Vector2 force = new Vector2();
 		// compute the impulse
-		force.x = this.impulse.x * this.perp.x + (this.motorImpulse + this.lowerImpulse + this.upperImpulse) * this.axis.x;
-		force.y = this.impulse.x * this.perp.y + (this.motorImpulse + this.lowerImpulse + this.upperImpulse) * this.axis.y;
+		force.x = this.impulse.x * this.perp.x + (this.motorImpulse + this.lowerImpulse - this.upperImpulse) * this.axis.x;
+		force.y = this.impulse.x * this.perp.y + (this.motorImpulse + this.lowerImpulse - this.upperImpulse) * this.axis.y;
 		// multiply by invdt to obtain the force
 		force.multiply(invdt);
 		return force;
