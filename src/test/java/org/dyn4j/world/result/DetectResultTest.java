@@ -31,10 +31,6 @@ import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.world.CoefficientMixer;
-import org.dyn4j.world.result.ConvexCastResult;
-import org.dyn4j.world.result.ConvexDetectResult;
-import org.dyn4j.world.result.DetectResult;
-import org.dyn4j.world.result.RaycastResult;
 import org.junit.Test;
 
 import junit.framework.TestCase;
@@ -42,7 +38,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link CoefficientMixer} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 4.0.0
  */
 public class DetectResultTest {

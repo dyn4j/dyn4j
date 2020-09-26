@@ -24,18 +24,17 @@
  */
 package org.dyn4j.dynamics.contact;
 
-import junit.framework.TestCase;
-
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.dynamics.contact.ContactConstraintId;
 import org.dyn4j.geometry.Rectangle;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Tests the methods of the {@link ContactConstraintId} class.
  * @author William Bittle
- * @version 2.0.0
+ * @version 4.0.1
  * @since 1.0.0
  */
 @Deprecated

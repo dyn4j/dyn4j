@@ -35,14 +35,6 @@ import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.World;
-import org.dyn4j.dynamics.contact.ContactAdapter;
-import org.dyn4j.dynamics.contact.ContactConstraint;
-import org.dyn4j.dynamics.contact.ContactListener;
-import org.dyn4j.dynamics.contact.ContactManager;
-import org.dyn4j.dynamics.contact.ContactPoint;
-import org.dyn4j.dynamics.contact.DefaultContactManager;
-import org.dyn4j.dynamics.contact.PersistedContactPoint;
-import org.dyn4j.dynamics.contact.SolvedContactPoint;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
@@ -54,7 +46,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link DefaultContactManager} class.
  * @author William Bittle
- * @version 3.3.0
+ * @version 4.0.1
  * @since 1.0.2
  */
 @Deprecated

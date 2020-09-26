@@ -24,10 +24,6 @@
  */
 package org.dyn4j.collision.continuous;
 
-import junit.framework.TestCase;
-
-import org.dyn4j.collision.continuous.ConservativeAdvancement;
-import org.dyn4j.collision.continuous.TimeOfImpact;
 import org.dyn4j.collision.narrowphase.DistanceDetector;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.geometry.Convex;
@@ -37,13 +33,15 @@ import org.dyn4j.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
 
+import junit.framework.TestCase;
+
 /**
  * Test class for the {@link ConservativeAdvancement} class.
  * <p>
  * All bodies in this test must be infinite mass so that the
  * World class doesn't solve their TOI when a step is performed.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.1
  * @since 1.2.0
  */
 public class ConservativeAdvancementTest {

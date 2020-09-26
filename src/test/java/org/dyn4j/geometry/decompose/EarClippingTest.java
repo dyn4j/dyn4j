@@ -26,18 +26,17 @@ package org.dyn4j.geometry.decompose;
 
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.geometry.decompose.EarClipping;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Test case for the {@link EarClipping} class.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.1
  * @since 2.2.0
  */
 public class EarClippingTest extends AbstractDecomposeTest {

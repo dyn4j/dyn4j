@@ -38,12 +38,6 @@ import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.TestCollisionBody;
-import org.dyn4j.collision.broadphase.AbstractBroadphaseDetector;
-import org.dyn4j.collision.broadphase.BroadphaseDetector;
-import org.dyn4j.collision.broadphase.BruteForceBroadphase;
-import org.dyn4j.collision.broadphase.DynamicAABBTree;
-import org.dyn4j.collision.broadphase.LazyAABBTree;
-import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Ray;
@@ -60,7 +54,7 @@ import junit.framework.TestCase;
 /**
  * Class used to test the {@link BroadphaseDetector} methods.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 3.0.0
  */
 @RunWith(Parameterized.class)
