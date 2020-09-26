@@ -35,7 +35,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link Geometry} class.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.1
  * @since 1.0.0
  */
 public class GeometryTest {
@@ -300,6 +300,7 @@ public class GeometryTest {
 	
 	/**
 	 * Tests the createLinks method.
+	 * @since 4.0.1
 	 */
 	@Test
 	public void createLinks() {
