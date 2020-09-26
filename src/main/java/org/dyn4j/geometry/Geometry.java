@@ -42,7 +42,7 @@ import org.dyn4j.resources.Messages;
  * This class also contains various helper methods for cleaning vector arrays and lists and performing
  * various operations on {@link Shape}s.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.1
  * @since 1.0.0
  */
 public final class Geometry {
@@ -1850,7 +1850,7 @@ public final class Geometry {
 			// create a link to span the first and last vertex
 			Vector2 p1 = vertices[0].copy();
 			Vector2 p2 = vertices[size - 1].copy();
-			Link link = new Link(p1, p2);
+			Link link = new Link(p2, p1);
 			// wire it up
 			Link prev = links.get(links.size() - 1);
 			Link next = links.get(0);
