@@ -488,7 +488,7 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	 */
 	@Override
 	public double getReactionTorque(double invdt) {
-		return (this.lowerImpulse - this.upperImpulse) * invdt;
+		return (this.motorImpulse + this.lowerImpulse - this.upperImpulse) * invdt;
 	}
 	
 	/* (non-Javadoc)
