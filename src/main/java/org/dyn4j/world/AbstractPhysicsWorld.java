@@ -338,7 +338,6 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	public void addBody(T body) {
 		super.addBody(body);
 		this.constraintGraph.addBody(body);
-		body.getPreviousTransform().set(body.getTransform());
 		this.ccdBroadphase.add(body);
 	}
 

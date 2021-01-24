@@ -1,13 +1,36 @@
 ## v4.1.0 - _IN DEVELOPMENT_
+This version sees massive performance improvement for large worlds, on the order of 10x, when using Continuous Collision Detection (CCD).
+These changes required a number of breaking changes to the org.dyn4j.broadphase APIs and related classes.  In general, if you aren't
+interacting with the broadphase directly, then you'll see minimal changes (a few listeners have updated and the CollisionData class
+is slightly different).
+
 **New Features:**
+- [#122](https://github.com/dyn4j/dyn4j/issues/122) Major performance enhancements for CCD (10x in large worlds)
+- [#63](https://github.com/dyn4j/dyn4j/issues/63) Enhanced the broadphase API to allow for additional use-cases (like CCD)
 
 **Bug Fixes:**
+- FallbackConditions are no longer equal based on content/hashcode
+- Gjk now returns better separating points, normal and depth in some cases
+- ConservativeAdvancement now returns false if the bodies are near collision in their previous transform
+- ConservativeAdvancement now exits immediately if it advances to where collision occurs to improve resolution
+- ForceCollisionTimeOfImpactSolver now only translates the bodies being resolved
 
 **Deprecated:**
 
 **Breaking Changes:**
+- CollisionPair was changed from CollisionPair<CollisionBody, Fixture> to CollisionPair<T>
+- AbstractCollisionPair was changed from AbstractCollisionPair<CollisionBody, Fixture> to AbstractCollisionPair<T>
+- BasicCollisionPair was changed from BasicCollisionPair<CollisionBody, Fixture> to BasicCollisionPair<T>
+- BroadphaseDetector was changed from BroadphaseDetector<CollisionBody, Fixture> to BroadphaseDetector<T>
+- AbstractBroadphaseDetector was changed from AbstractBroadphaseDetector<CollisionBody, Fixture> to AbstractBroadphaseDetector<T>
+- BruteForceDetector, DynamicAABBTree, and SAP broadphase detector constructors were changed to accept BroadphaseFilter, AABProducer, and AABBExpansionMethod arguments
+- AABB.createAABBFromPoints was renamed to AABB.createFromPoints
+- The org.dyn4j.world.BroadphaseFilter was renamed to BroadphaseCollisionDataFilter to not collide with the org.dyn4j.broadphase.BroadphaseFilter
   
 **Other:**
+- [#125](https://github.com/dyn4j/dyn4j/issues/125) All deprecated API as of 4.0.0 has been removed.
+- [#124](https://github.com/dyn4j/dyn4j/issues/124) Continued improvement and coverage of JUnit test cases (up 4%).
+- [#156](https://github.com/dyn4j/dyn4j/issues/156) Javadoc includes protected methods again.
 
 ## v4.0.0 - August 29th, 2020
 This version sees massive performance improvements for large worlds, on the order of 30%-40% improvement. In addition, this version sees a big

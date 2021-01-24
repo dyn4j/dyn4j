@@ -245,6 +245,8 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		// set the world property on the body
 		body.setFixtureModificationHandler(new BodyModificationHandler(body));
 		body.setOwner(this);
+		// set the previous transform to the current transform
+		body.getPreviousTransform().set(body.getTransform());
 		// add it to the broadphase
 		this.broadphaseDetector.add(body);
 	}
