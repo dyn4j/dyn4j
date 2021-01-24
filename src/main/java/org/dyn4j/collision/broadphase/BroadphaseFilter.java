@@ -22,27 +22,21 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision;
-
-import org.dyn4j.Copyable;
+package org.dyn4j.collision.broadphase;
 
 /**
- * Represents a collision between two {@link CollisionBody}'s {@link Fixture}s.
+ * Represents a filter used during a {@link BroadphaseDetector}'s pair detection process.
  * @author William Bittle
- * @param <T> the object type
  * @version 4.1.0
- * @since 4.0.0
+ * @since 4.1.0
+ * @param <T> the object type
  */
-public interface CollisionPair<T> extends Copyable<CollisionPair<T>> {
+public interface BroadphaseFilter<T> {
 	/**
-	 * Returns the first object.
-	 * @return T
+	 * Returns true if the detection of the objects should proceed.
+	 * @param object1 the first object
+	 * @param object2 the second object
+	 * @return boolean
 	 */
-	public T getFirst();
-
-	/**
-	 * Returns the second object.
-	 * @return T
-	 */
-	public T getSecond();
+	public boolean isAllowed(T object1, T object2);
 }

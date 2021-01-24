@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -39,7 +39,7 @@ import org.dyn4j.world.listener.CollisionListener;
 /**
  * Represents a container for all the collision information between a {@link CollisionPair}.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
@@ -60,7 +60,7 @@ public interface CollisionData<T extends CollisionBody<E>, E extends Fixture> ex
 	 * <ul>
 	 * <li>The {@link CollisionPair} was detected by the {@link BroadphaseDetector} or was detected in a prior iteration</li>
 	 * <li>The {@link CollisionPair} was confirmed to have their {@link AABB}s still overlapping</li>
-	 * <li>The {@link CollisionPair} was NOT filtered by the {@link BroadphaseFilter}</li>
+	 * <li>The {@link CollisionPair} was NOT filtered by the {@link BroadphaseCollisionDataFilter}</li>
 	 * <li>The {@link CollisionPair} was NOT filtered by any of the {@link CollisionListener#collision(BroadphaseCollisionData)} method calls</li>
 	 * </ul>
 	 * @param flag true if the above conditions are met

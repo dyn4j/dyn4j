@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
@@ -49,7 +50,7 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * This interface also expands on the {@link CollisionWorld} adding other features like joints, gravity,
  * etc.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
@@ -503,6 +504,21 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 */
 	public ContactConstraintSolver<T> getContactConstraintSolver();
 
+	/**
+	 * Sets the CCD broad-phase collision detection algorithm.
+	 * @param broadphaseDetector the broad-phase detection algorithm
+	 * @throws NullPointerException if the given detector is null
+	 * @since 4.1.0
+	 */
+	public void setContinuousCollisionDetectionBroadphaseDetector(BroadphaseDetector<T> broadphaseDetector);
+	
+	/**
+	 * Returns the CCD broad-phase collision detection algorithm.
+	 * @return {@link BroadphaseDetector}&lt;T&gt;
+	 * @since 4.1.0
+	 */
+	public BroadphaseDetector<T> getContinuousCollisionDetectionBroadphaseDetector();
+	
 	/**
 	 * Sets the {@link TimeOfImpactSolver} for this world.
 	 * @param timeOfImpactSolver the time of impact solver

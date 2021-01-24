@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ package org.dyn4j.collision.narrowphase;
  * <p>
  * By default conditions will be remain in the order they are added unless alternate sort indices are supplied.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.1.0
  * @since 3.1.5
  */
 public abstract class AbstractFallbackCondition implements FallbackCondition, Comparable<FallbackCondition> {
@@ -52,32 +52,6 @@ public abstract class AbstractFallbackCondition implements FallbackCondition, Co
 		return this.getSortIndex() - o.getSortIndex();
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.lang.hashCode#equals()
-	 */
-	@Override
-	public int hashCode() {
-		int result = 1;
-		result = 31 * result + sortIndex;
-		return result;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (obj instanceof AbstractFallbackCondition) {
-			AbstractFallbackCondition other = (AbstractFallbackCondition) obj;
-			if (this.sortIndex == other.sortIndex) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.narrowphase.FallbackCondition#getSortIndex()
 	 */

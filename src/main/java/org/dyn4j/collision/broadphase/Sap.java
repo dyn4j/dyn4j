@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,12 +32,10 @@ import java.util.NoSuchElementException;
 
 import org.dyn4j.BinarySearchTree;
 import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Ray;
-import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 /**
@@ -51,58 +49,68 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * This algorithm is O(n) for all {@link #detect(AABB)} and {@link #raycast(Ray, double)} methods.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
- * @param <T> the {@link CollisionBody} type
- * @param <E> the {@link Fixture} type
+ * @param <T> the object type
  */
-public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends AbstractBroadphaseDetector<T, E> implements BroadphaseDetector<T, E> {
+public final class Sap<T> extends AbstractBroadphaseDetector<T> implements BroadphaseDetector<T> {
 	/** Sorted tree set of proxies */
-	private BinarySearchTree<AABBBroadphaseProxy<T, E>> tree;
+	private BinarySearchTree<AABBBroadphaseProxy<T>> tree;
 	
 	/** Id to proxy map for fast lookup */
-	private final Map<CollisionItem<T, E>, AABBBroadphaseProxy<T, E>> map;
+	private final Map<T, AABBBroadphaseProxy<T>> nodes;
 
 	/** Id to proxy map for fast lookup */
-	private final Map<CollisionItem<T, E>, AABBBroadphaseProxy<T, E>> updated;
+	private final Map<T, AABBBroadphaseProxy<T>> updated;
 	
 	/** A reusable {@link AABB} for updates to reduce allocation */
 	private final AABB updatedAABB;
 	
-	/** Default constructor. */
-	public Sap() {
-		this(BroadphaseDetector.DEFAULT_INITIAL_CAPACITY);
+	/** 
+	 * Default constructor.
+	 * @param broadphaseFilter the broadphase filter
+	 * @param aabbProducer the AABB producer
+	 * @param aabbExpansionMethod the AABB expansion method 
+	 * @throws NullPointerException if broadphaseFilter, aabbProducer or aabbExpansionMethod are null
+	 */
+	public Sap(BroadphaseFilter<T> broadphaseFilter, AABBProducer<T> aabbProducer, AABBExpansionMethod<T> aabbExpansionMethod) {
+		this(broadphaseFilter, aabbProducer, aabbExpansionMethod, BroadphaseDetector.DEFAULT_INITIAL_CAPACITY);
 	}
 	
 	/**
 	 * Full constructor.
 	 * <p>
 	 * Allows fine tuning of the initial capacity of local storage for faster running times.
+	 * @param broadphaseFilter the broadphase filter
+	 * @param aabbProducer the AABB producer
+	 * @param aabbExpansionMethod the AABB expansion method
 	 * @param initialCapacity the initial capacity of local storage
+	 * @throws NullPointerException if broadphaseFilter, aabbProducer or aabbExpansionMethod are null
 	 * @throws IllegalArgumentException if initialCapacity is less than zero
 	 * @since 3.1.1
 	 */
-	public Sap(int initialCapacity) {
-		this.tree = new BinarySearchTree<AABBBroadphaseProxy<T, E>>(true);
+	public Sap(BroadphaseFilter<T> broadphaseFilter, AABBProducer<T> aabbProducer, AABBExpansionMethod<T> aabbExpansionMethod, int initialCapacity) {
+		super(broadphaseFilter, aabbProducer, aabbExpansionMethod);
+		
+		this.tree = new BinarySearchTree<AABBBroadphaseProxy<T>>(true);
 		// 0.75 = 3/4, we can garuantee that the hashmap will not need to be rehashed
 		// if we take capacity / load factor
 		// the default load factor is 0.75 according to the javadocs, but lets assign it to be sure
-		this.map = new HashMap<CollisionItem<T, E>, AABBBroadphaseProxy<T, E>>(initialCapacity * 4 / 3 + 1, 0.75f);
-		this.updated = new LinkedHashMap<CollisionItem<T, E>, AABBBroadphaseProxy<T, E>>(initialCapacity * 4 / 3 + 1, 0.75f);
+		this.nodes = new HashMap<T, AABBBroadphaseProxy<T>>(initialCapacity * 4 / 3 + 1, 0.75f);
+		this.updated = new LinkedHashMap<T, AABBBroadphaseProxy<T>>(initialCapacity * 4 / 3 + 1, 0.75f);
 		this.updatedAABB = new AABB(0,0,0,0);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(java.lang.Object)
 	 */
 	@Override
-	public void add(T body, E fixture) {
-		BroadphaseItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
-		AABBBroadphaseProxy<T, E> proxy = this.map.get(key);
+	public void add(T object) {
+		AABBBroadphaseProxy<T> proxy = this.nodes.get(object);
 		if (proxy == null) {
-			this.add(key, body, fixture);
+			this.insert(object);
 		} else {
-			this.update(key, proxy, body, fixture);
+			this.update(proxy, object);
 		}
 	}
 	
@@ -111,75 +119,62 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 	 * <p>
 	 * This method assumes the given arguments are all non-null and that the
 	 * {@link CollisionBody} {@link Fixture} is not currently in this broad-phase.
-	 * @param key the key for the body-fixture pair
-	 * @param body the body
-	 * @param fixture the fixture
+	 * @param object the object
 	 */
-	void add(BroadphaseItem<T, E> key, T body, E fixture) {
-		Transform tx = body.getTransform();
-		fixture.getShape().computeAABB(tx, this.updatedAABB);
+	void insert(T object) {
+		this.aabbProducer.compute(object, this.updatedAABB);
 		// expand the aabb
-		this.updatedAABB.expand(this.expansion);
+		this.aabbExpansionMethod.expand(object, this.updatedAABB);
 		// create a new node for the body
-		AABBBroadphaseProxy<T, E> proxy = new AABBBroadphaseProxy<T, E>(key, this.updatedAABB.copy());
+		AABBBroadphaseProxy<T> proxy = new AABBBroadphaseProxy<T>(object);
+		proxy.aabb.set(this.updatedAABB);
 		// add the proxy to the map
-		this.map.put(key, proxy);
+		this.nodes.put(object, proxy);
 		// are we tracking updates?
 		if (this.updateTrackingEnabled) {
-			this.updated.put(key, proxy);
+			this.updated.put(object, proxy);
 		}
 		// insert the node into the tree
 		this.tree.insert(proxy);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(java.lang.Object)
 	 */
 	@Override
-	public boolean remove(T body, E fixture) {
-		CollisionItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
-		
+	public boolean remove(T object) {
 		// find the proxy in the map
-		AABBBroadphaseProxy<T, E> proxy = this.map.remove(key);
+		AABBBroadphaseProxy<T> proxy = this.nodes.remove(object);
 		// make sure it was found
 		if (proxy != null) {
 			// remove the proxy from the tree
 			this.tree.remove(proxy);
-			this.updated.remove(key);
+			this.updated.remove(object);
 			return true;
 		}
 		return false;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.CollisionItem)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update()
 	 */
 	@Override
-	public boolean remove(CollisionItem<T, E> item) {
-		// find the proxy in the map
-		AABBBroadphaseProxy<T, E> proxy = this.map.remove(item);
-		// make sure it was found
-		if (proxy != null) {
-			// remove the proxy from the tree
-			this.tree.remove(proxy);
-			this.updated.remove(item);
-			return true;
+	public void update() {
+		for (AABBBroadphaseProxy<T> proxy : this.nodes.values()) {
+			this.update(proxy.item);
 		}
-		return false;
 	}
-
+	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update(java.lang.Object)
 	 */
 	@Override
-	public void update(T body, E fixture) {
-		BroadphaseItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
-		
-		AABBBroadphaseProxy<T, E> proxy = this.map.get(key);
+	public void update(T object) {
+		AABBBroadphaseProxy<T> proxy = this.nodes.get(object);
 		if (proxy != null) {
-			this.update(key, proxy, body, fixture);
+			this.update(proxy, object);
 		} else {
-			this.add(key, body, fixture);
+			this.insert(object);
 		}
 	}
 	
@@ -187,69 +182,56 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 	 * Internal update method.
 	 * <p>
 	 * This method assumes the given arguments are all non-null.
-	 * @param key the key for the body-fixture pair
 	 * @param proxy the current node in the tree
-	 * @param body the body
-	 * @param fixture the fixture
+	 * @param object the object
 	 */
-	void update(CollisionItem<T, E> key, AABBBroadphaseProxy<T, E> proxy, T body, E fixture) {
-		Transform tx = body.getTransform();
-		// create the new aabb
-		fixture.getShape().computeAABB(tx, this.updatedAABB);
+	void update(AABBBroadphaseProxy<T> proxy, T object) {
+		this.aabbProducer.compute(object, this.updatedAABB);
 		// see if the old aabb contains the new one
 		if (proxy.aabb.contains(this.updatedAABB)) {
 			// if so, don't do anything
 			return;
 		}
 		// otherwise expand the new aabb
-		this.updatedAABB.expand(this.expansion);
+		this.aabbExpansionMethod.expand(object, this.updatedAABB);
 		// remove the current proxy from the tree
 		this.tree.remove(proxy);
 		// set the new aabb
 		proxy.aabb.set(this.updatedAABB);
 		// are we tracking updates?
 		if (this.updateTrackingEnabled) {
-			this.updated.put(key, proxy);
+			this.updated.put(object, proxy);
 		}
 		// reinsert the proxy
 		this.tree.insert(proxy);
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdated(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdated(java.lang.Object)
 	 */
 	@Override
-	public boolean isUpdated(T body, E fixture) {
+	public boolean isUpdated(T object) {
+		if (!this.nodes.containsKey(object)) {
+			return false;
+		}
+		
 		if (!this.updateTrackingEnabled) {
 			return true;
 		}
-		CollisionItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
-		return this.updated.containsKey(key);
+
+		return this.updated.containsKey(object);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdated(org.dyn4j.collision.CollisionItem)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#setUpdated(java.lang.Object)
 	 */
 	@Override
-	public boolean isUpdated(CollisionItem<T, E> item) {
-		if (!this.updateTrackingEnabled) {
-			return true;
-		}
-		return this.updated.containsKey(item);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#setUpdated(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
-	 */
-	@Override
-	public void setUpdated(T body, E fixture) {
+	public void setUpdated(T object) {
 		if (!this.updateTrackingEnabled) {
 			return;
 		}
-		
-		CollisionItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
-		AABBBroadphaseProxy<T, E> proxy = this.map.get(key);
-		this.updated.put(key, proxy);
+		AABBBroadphaseProxy<T> proxy = this.nodes.get(object);
+		this.updated.put(object, proxy);
 	}
 	
 	/* (non-Javadoc)
@@ -261,33 +243,30 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.CollisionItem)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(java.lang.Object)
 	 */
 	@Override
-	public AABB getAABB(CollisionItem<T, E> item) {
-		AABBBroadphaseProxy<T, E> proxy = this.map.get(item);
+	public AABB getAABB(T object) {
+		AABBBroadphaseProxy<T> proxy = this.nodes.get(object);
 		if (proxy != null) {
 			return proxy.aabb;
 		}
 		
-		return item.getFixture().getShape().createAABB(item.getBody().getTransform()).expand(this.expansion);
+		AABB aabb = this.aabbProducer.compute(object);
+		if (aabb.isDegenerate()) {
+			return aabb;
+		}
+		
+		this.aabbExpansionMethod.expand(object, aabb);
+		return aabb;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(java.lang.Object)
 	 */
 	@Override
-	public boolean contains(T body, E fixture) {
-		CollisionItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
-		return this.map.containsKey(key);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.CollisionItem)
-	 */
-	@Override
-	public boolean contains(CollisionItem<T, E> item) {
-		return this.map.containsKey(item);
+	public boolean contains(T object) {
+		return this.nodes.containsKey(object);
 	}
 	
 	/* (non-Javadoc)
@@ -295,7 +274,7 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 	 */
 	@Override
 	public void clear() {
-		this.map.clear();
+		this.nodes.clear();
 		this.tree.clear();
 		this.updated.clear();
 	}
@@ -305,7 +284,15 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 	 */
 	@Override
 	public int size() {
-		return this.map.size();
+		return this.nodes.size();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdateTrackingSupported()
+	 */
+	@Override
+	public boolean isUpdateTrackingSupported() {
+		return true;
 	}
 
 	/* (non-Javadoc)
@@ -330,26 +317,26 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detectIterator(boolean)
 	 */
 	@Override
-	public Iterator<CollisionPair<T, E>> detectIterator(boolean forceFullDetection) {
+	public Iterator<CollisionPair<T>> detectIterator(boolean forceFullDetection) {
 		if (forceFullDetection || !this.updateTrackingEnabled) {
-			return new DetectIterator(this.tree.iterator());
+			return new DetectPairsIterator(this.tree.iterator());
 		}
-		return new DetectIterator(this.updated.values().iterator());
+		return new DetectPairsIterator(this.updated.values().iterator());
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detectIterator(org.dyn4j.geometry.AABB)
 	 */
 	@Override
-	public Iterator<CollisionItem<T, E>> detectIterator(AABB aabb) {
+	public Iterator<T> detectIterator(AABB aabb) {
 		return new DetectAABBIterator(aabb);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detectIterator(org.dyn4j.geometry.Ray, double)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#raycastIterator(org.dyn4j.geometry.Ray, double)
 	 */
 	@Override
-	public Iterator<CollisionItem<T, E>> raycastIterator(Ray ray, double length) {
+	public Iterator<T> raycastIterator(Ray ray, double length) {
 		return new DetectRayIterator(ray, length);
 	}
 	
@@ -359,9 +346,9 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 	@Override
 	public void shift(Vector2 shift) {
 		// loop over all the proxies and translate their aabb
-		Iterator<AABBBroadphaseProxy<T, E>> it = this.tree.iterator();
+		Iterator<AABBBroadphaseProxy<T>> it = this.tree.iterator();
 		while (it.hasNext()) {
-			AABBBroadphaseProxy<T, E> proxy = it.next();
+			AABBBroadphaseProxy<T> proxy = it.next();
 			proxy.aabb.translate(shift);
 		}
 	}
@@ -380,24 +367,24 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 	 * @version 4.0.0
 	 * @since 4.0.0
 	 */
-	private final class DetectIterator implements Iterator<CollisionPair<T, E>> {
+	private final class DetectPairsIterator implements Iterator<CollisionPair<T>> {
 		/** An iterator for all the objects to test */
-		private final Iterator<AABBBroadphaseProxy<T, E>> outerIterator;
+		private final Iterator<AABBBroadphaseProxy<T>> outerIterator;
 
 		/** Internal state to track pairs already tested */
-		private final Map<CollisionItem<T, E>, Boolean> tested;
+		private final Map<T, Boolean> tested;
 		
 		/** The current outer-iterator object to test with */
-		private AABBBroadphaseProxy<T, E> currentProxy;
+		private AABBBroadphaseProxy<T> currentProxy;
 		
 		/** The inner-iterator for all objects to test with the current object */
-		private Iterator<AABBBroadphaseProxy<T, E>> innerIterator;
+		private Iterator<AABBBroadphaseProxy<T>> innerIterator;
 		
 		/** A reusable pair to output collisions */
-		private final BroadphasePair<T, E> currentPair;
+		private final BroadphasePair<T> currentPair;
 		
 		/** A reusable pair to output collisions */
-		private final BroadphasePair<T, E> nextPair;
+		private final BroadphasePair<T> nextPair;
 		
 		/** True if there's another pair */
 		private boolean hasNext;
@@ -406,9 +393,9 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 		 * Minimal constructor.
 		 * @param iterator the iterator of items to test
 		 */
-		public DetectIterator(Iterator<AABBBroadphaseProxy<T, E>> iterator) {
+		public DetectPairsIterator(Iterator<AABBBroadphaseProxy<T>> iterator) {
 			this.outerIterator = iterator;
-			this.tested = new HashMap<CollisionItem<T, E>, Boolean>();
+			this.tested = new HashMap<T, Boolean>();
 			this.currentProxy = null;
 			this.innerIterator = null;
 			
@@ -416,8 +403,8 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 				this.currentProxy = this.outerIterator.next();
 			}
 			
-			this.currentPair = new BroadphasePair<T, E>();
-			this.nextPair = new BroadphasePair<T, E>();
+			this.currentPair = new BroadphasePair<T>();
+			this.nextPair = new BroadphasePair<T>();
 			this.hasNext = this.findNext();
 		}
 		
@@ -433,13 +420,11 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 		 * @see java.util.Iterator#next()
 		 */
 		@Override
-		public CollisionPair<T, E> next() {
+		public CollisionPair<T> next() {
 			if (this.hasNext) {
 				// copy over to the one we return
-				this.currentPair.body1 = this.nextPair.body1;
-				this.currentPair.fixture1 = this.nextPair.fixture1;
-				this.currentPair.body2 = this.nextPair.body2;
-				this.currentPair.fixture2 = this.nextPair.fixture2;
+				this.currentPair.first = this.nextPair.first;
+				this.currentPair.second = this.nextPair.second;
 				
 				// find the next pair
 				this.hasNext = this.findNext();
@@ -473,10 +458,10 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 				
 				// iterate over everything past the current
 				while (this.innerIterator.hasNext()) {
-					AABBBroadphaseProxy<T, E> test = this.innerIterator.next();
+					AABBBroadphaseProxy<T> test = this.innerIterator.next();
 					
 					// dont compare objects against themselves
-					if (test.item.body == this.currentProxy.item.body) continue;
+					if (!Sap.this.broadphaseFilter.isAllowed(this.currentProxy.item, test.item)) continue;
 					
 					// dont compare object that have already been compared
 					boolean tested = this.tested.containsKey(test.item);
@@ -488,10 +473,8 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 					// the >= is to support degenerate intervals created by vertical segments
 					if (this.currentProxy.aabb.getMaxX() >= test.aabb.getMinX()) {
 						if (this.currentProxy.aabb.overlaps(test.aabb)) {
-							this.nextPair.body1 = this.currentProxy.item.body;
-							this.nextPair.fixture1 = this.currentProxy.item.fixture;
-							this.nextPair.body2 = test.item.body;
-							this.nextPair.fixture2 = test.item.fixture;
+							this.nextPair.first = this.currentProxy.item;
+							this.nextPair.second = test.item;
 							
 							// in this iterator we can immediately exit when we find a collision
 							// because the outer/inner iterator track our position so we can
@@ -529,15 +512,15 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 	 * @version 4.0.0
 	 * @since 4.0.0
 	 */
-	private final class DetectAABBIterator implements Iterator<CollisionItem<T, E>> {
+	private final class DetectAABBIterator implements Iterator<T> {
 		/** The {@link AABB} to test */
 		private final AABB aabb;
 		
 		/** An iterator for all the objects to test */
-		private final Iterator<AABBBroadphaseProxy<T, E>> iterator;
+		private final Iterator<AABBBroadphaseProxy<T>> iterator;
 		
 		/** The next item */
-		private CollisionItem<T, E> nextItem;
+		private T nextItem;
 		
 		/**
 		 * Minimal constructor.
@@ -562,9 +545,9 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 		 * @see java.util.Iterator#next()
 		 */
 		@Override
-		public CollisionItem<T, E> next() {
+		public T next() {
 			if (this.nextItem != null) {
-				CollisionItem<T, E> item = this.nextItem;
+				T item = this.nextItem;
 				this.findNext();
 				return item;
 			}
@@ -584,7 +567,7 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 			
 			// iterate over everything past the current
 			while (this.iterator.hasNext()) {
-				AABBBroadphaseProxy<T, E> test = this.iterator.next();
+				AABBBroadphaseProxy<T> test = this.iterator.next();
 				
 				// test overlap
 				// the >= is to support degenerate intervals created by vertical segments
@@ -616,7 +599,7 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 	 * @version 4.0.0
 	 * @since 4.0.0
 	 */
-	private final class DetectRayIterator implements Iterator<CollisionItem<T, E>> {
+	private final class DetectRayIterator implements Iterator<T> {
 		/** The ray to test with */
 		private final Ray ray;
 		
@@ -633,10 +616,10 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 		private final double invDy;
 		
 		/** The iterator for testing all objects in this broadphase */
-		private final Iterator<AABBBroadphaseProxy<T, E>> iterator;
+		private final Iterator<AABBBroadphaseProxy<T>> iterator;
 		
 		/** The next item */
-		private CollisionItem<T, E> nextItem;
+		private T nextItem;
 		
 		/**
 		 * Minimal constructor.
@@ -663,7 +646,7 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 			double y2 = s.y + d.y * l;
 			
 			// create the aabb
-			this.aabb = AABB.createAABBFromPoints(x1, y1, x2, y2);
+			this.aabb = AABB.createFromPoints(x1, y1, x2, y2);
 			
 			// precompute
 			this.invDx = 1.0 / d.x;
@@ -684,9 +667,9 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 		 * @see java.util.Iterator#next()
 		 */
 		@Override
-		public CollisionItem<T, E> next() {
+		public T next() {
 			if (this.nextItem != null) {
-				CollisionItem<T, E> item = this.nextItem;
+				T item = this.nextItem;
 				this.findNext();
 				return item;
 			}
@@ -710,7 +693,7 @@ public final class Sap<T extends CollisionBody<E>, E extends Fixture> extends Ab
 			
 			// just iterate all pairs - the iterator maintains the position
 			while (this.iterator.hasNext()) {
-				AABBBroadphaseProxy<T, E> b = this.iterator.next();
+				AABBBroadphaseProxy<T> b = this.iterator.next();
 				
 				if (b.aabb.getMaxX() >= this.aabb.getMinX()) {
 					if (this.aabb.overlaps(b.aabb)) {

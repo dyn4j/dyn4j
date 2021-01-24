@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -22,33 +22,19 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.world;
-
-import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.collision.CollisionItem;
-import org.dyn4j.collision.CollisionPair;
-import org.dyn4j.collision.Fixture;
-import org.dyn4j.collision.broadphase.BroadphaseDetector;
+package org.dyn4j.collision.broadphase;
 
 /**
- * Represents a class that defines rules to exclude results from {@link BroadphaseDetector}.
- * <p>
- * The intent is that instances of this class would be used to help filter {@link CollisionPair}s and 
- * {@link CollisionItem}s emitted from the {@link BroadphaseDetector}s.
+ * Represents a wrapper around a {@link BroadphaseDetector}.
  * @author William Bittle
- * @version 4.0.0
- * @since 3.2.0
- * @param <T> the {@link CollisionBody} type
- * @param <E> the {@link Fixture} type
+ * @version 4.1.0
+ * @since 4.1.0
+ * @param <T> the object type
  */
-public interface BroadphaseFilter<T extends CollisionBody<E>, E extends Fixture> {
+public interface BroadphaseDetectorDecorator<T> extends BroadphaseDetector<T> {
 	/**
-	 * Returns true if this result should be added to the results list.
-	 * @param body1 the first {@link CollisionBody}
-	 * @param fixture1 the first {@link CollisionBody}s {@link Fixture}
-	 * @param body2 the second {@link CollisionBody}
-	 * @param fixture2 the second {@link CollisionBody}s {@link Fixture}
-	 * @return boolean
+	 * Returns the wrapped {@link BroadphaseDetector}.
+	 * @return {@link BroadphaseDetector}
 	 */
-	public abstract boolean isAllowed(T body1, E fixture1, T body2, E fixture2);
+	public BroadphaseDetector<T> getDecoratedBroadphaseDetector();
 }

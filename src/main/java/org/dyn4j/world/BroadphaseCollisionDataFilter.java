@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,35 +25,30 @@
 package org.dyn4j.world;
 
 import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.collision.Filter;
+import org.dyn4j.collision.CollisionItem;
+import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.Fixture;
+import org.dyn4j.collision.broadphase.BroadphaseDetector;
 
 /**
- * The default filter for {@link CollisionWorld}s that filters {@link Fixture}s by 
- * their {@link Filter}s and their enable flags.
+ * Represents a class that defines rules to ignore results from {@link BroadphaseDetector}.
  * <p>
- * It's recommended that this class be extended when creating custom {@link BroadphaseFilter}s to ensure
- * the default functionality is retained. 
+ * The intent is that instances of this class would be used to help filter {@link CollisionPair}s and 
+ * {@link CollisionItem}s emitted from the {@link BroadphaseDetector}s.
  * @author William Bittle
+ * @version 4.1.0
+ * @since 4.1.0
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
- * @version 4.0.0
- * @since 3.2.0
  */
-public class CollisionBodyBroadphaseFilter<T extends CollisionBody<E>, E extends Fixture> extends BroadphaseFilterAdapter<T, E> implements BroadphaseFilter<T, E> {
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture, org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+public interface BroadphaseCollisionDataFilter<T extends CollisionBody<E>, E extends Fixture> {
+	/**
+	 * Returns true if this result should be added to the results list.
+	 * @param body1 the first {@link CollisionBody}
+	 * @param fixture1 the first {@link CollisionBody}s {@link Fixture}
+	 * @param body2 the second {@link CollisionBody}
+	 * @param fixture2 the second {@link CollisionBody}s {@link Fixture}
+	 * @return boolean
 	 */
-	@Override
-	public boolean isAllowed(T body1, E fixture1, T body2, E fixture2) {
-		// inactive objects don't have collision detection/response
-		if (!body1.isEnabled() || !body2.isEnabled()) {
-			return false;
-		}
-		
-		// compare the filters
-		Filter filter1 = fixture1.getFilter();
-		Filter filter2 = fixture2.getFilter();
-		return filter1.isAllowed(filter2);
-	}
+	public abstract boolean isAllowed(T body1, E fixture1, T body2, E fixture2);
 }

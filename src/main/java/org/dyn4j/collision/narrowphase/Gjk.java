@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -453,15 +453,13 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			double projection = c.point.dot(d);
 			if ((projection - a.point.dot(d)) < this.distanceEpsilon) {
 				// then the new point we just made is not far enough
-				// in the direction of n so we can stop now
-				// normalize d
-				d.normalize();
-				separation.normal.x = d.x;
-				separation.normal.y = d.y;
-				// compute the real distance
-				separation.distance = -c.point.dot(d);
+				// in the direction of n so we can stop now and
 				// get the closest points
-				this.findClosestPoints(a, b, separation);
+				
+				// if the projection of c is negative that means we got
+				// worse and need to go back and use b
+				this.findClosestPoints(a, projection < 0 ? b : c, separation);
+				
 				// return true to indicate separation
 				return true;
 			}
@@ -478,19 +476,11 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			if (p1Mag <= Epsilon.E) {
 				// if so then we have a separation (although its
 				// nearly zero separation)
-				d.normalize();
-				separation.distance = p1.normalize();
-				separation.normal.x = d.x;
-				separation.normal.y = d.y;
 				this.findClosestPoints(a, c, separation);
 				return true;
 			} else if (p2Mag <= Epsilon.E) {
 				// if so then we have a separation (although its
 				// nearly zero separation)
-				d.normalize();
-				separation.distance = p2.normalize();
-				separation.normal.x = d.x;
-				separation.normal.y = d.y;
 				this.findClosestPoints(c, b, separation);
 				return true;
 			}
@@ -507,12 +497,10 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 				d = p2;
 			}
 		}
+		
 		// if we made it here then we know that we hit the maximum number of iterations
 		// this is really a catch all termination case
-		d.normalize();
-		separation.normal.x = d.x;
-		separation.normal.y = d.y;
-		separation.distance = -c.point.dot(d);
+		
 		// get the closest points
 		this.findClosestPoints(a, b, separation);
 		// return true to indicate separation
@@ -572,11 +560,19 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 				p2.y = a.supportPoint2.y + l2 * (b.supportPoint2.y - a.supportPoint2.y);
 			}
 		}
+		
 		// set the new points in the separation object
 		separation.point1.x = p1.x;
 		separation.point1.y = p1.y;
 		separation.point2.x = p2.x;
 		separation.point2.y = p2.y;
+		
+		// compute the normal and distance from the closest points
+		Vector2 n = p1.to(p2);
+		double d = n.normalize();
+		separation.normal.x = n.x;
+		separation.normal.y = n.y;
+		separation.distance = d;
 	}
 	
 	/**

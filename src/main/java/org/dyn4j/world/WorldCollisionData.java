@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.world;
 
+import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.narrowphase.Penetration;
@@ -39,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
  * collision detection. Use the {@link #isBroadphaseCollision()} and similar methods to determine the
  * progress of the collision.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -57,7 +58,7 @@ public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisi
 	private boolean contactConstraintCollision;
 	
 	/** The collision pair */
-	private final CollisionPair<T, BodyFixture> pair;
+	private final CollisionPair<CollisionItem<T, BodyFixture>> pair;
 	
 	/** The narrowphase data */
 	private final Penetration penetration;
@@ -72,7 +73,7 @@ public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisi
 	 * Minimal constructor.
 	 * @param pair the collision pair
 	 */
-	public WorldCollisionData(CollisionPair<T, BodyFixture> pair) {
+	public WorldCollisionData(CollisionPair<CollisionItem<T, BodyFixture>> pair) {
 		this.pair = pair;
 		this.penetration = new Penetration();
 		this.manifold = new Manifold();
@@ -88,7 +89,7 @@ public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisi
 	 * @see org.dyn4j.world.BroadphaseCollisionData#getPair()
 	 */
 	@Override
-	public CollisionPair<T, BodyFixture> getPair() {
+	public CollisionPair<CollisionItem<T, BodyFixture>> getPair() {
 		return this.pair;
 	}
 	
@@ -97,7 +98,7 @@ public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisi
 	 */
 	@Override
 	public T getBody1() {
-		return this.pair.getBody1();
+		return this.pair.getFirst().getBody();
 	}
 
 	/* (non-Javadoc)
@@ -105,7 +106,7 @@ public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisi
 	 */
 	@Override
 	public BodyFixture getFixture1() {
-		return this.pair.getFixture1();
+		return this.pair.getFirst().getFixture();
 	}
 
 	/* (non-Javadoc)
@@ -113,7 +114,7 @@ public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisi
 	 */
 	@Override
 	public T getBody2() {
-		return this.pair.getBody2();
+		return this.pair.getSecond().getBody();
 	}
 
 	/* (non-Javadoc)
@@ -121,7 +122,7 @@ public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisi
 	 */
 	@Override
 	public BodyFixture getFixture2() {
-		return this.pair.getFixture2();
+		return this.pair.getSecond().getFixture();
 	}
 
 	/* (non-Javadoc)

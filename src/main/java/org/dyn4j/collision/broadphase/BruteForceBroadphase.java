@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,20 +24,15 @@
  */
 package org.dyn4j.collision.broadphase;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
-import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Ray;
-import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 /**
@@ -56,105 +51,87 @@ import org.dyn4j.geometry.Vector2;
  * @author Manolis Tsamis
  * @version 4.1.0
  * @since 3.4.0
- * @param <T> the {@link CollisionBody} type
- * @param <E> the {@link Fixture} type
+ * @param <T> the object type
  */
-public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fixture> extends AbstractBroadphaseDetector<T, E> implements BroadphaseDetector<T, E> {
+public final class BruteForceBroadphase<T> extends AbstractBroadphaseDetector<T> {
 	/** Id to node map for fast lookup */
-	final Map<CollisionItem<T, E>, AABBBroadphaseProxy<T, E>> map;
+	private final Map<T, AABBBroadphaseProxy<T>> map;
 	
 	/**
 	 * Default constructor.
+	 * @param broadphaseFilter the broadphase filter
+	 * @param aabbProducer the AABB producer
+	 * @throws NullPointerException if broadphaseFilter or aabbProducer are null
 	 */
-	public BruteForceBroadphase() {
-		this.map = new LinkedHashMap<CollisionItem<T, E>, AABBBroadphaseProxy<T,E>>();
+	public BruteForceBroadphase(BroadphaseFilter<T> broadphaseFilter, AABBProducer<T> aabbProducer) {
+		super(broadphaseFilter, aabbProducer, new NullAABBExpansionMethod<T>());
+		this.map = new LinkedHashMap<T, AABBBroadphaseProxy<T>>();
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(java.lang.Object)
 	 */
 	@Override
-	public void add(T body, E fixture) {
-		BroadphaseItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
-		AABBBroadphaseProxy<T, E> node = this.map.get(key);
-		
-		Transform tx = body.getTransform();
-		AABB aabb = fixture.getShape().createAABB(tx);
+	public void add(T object) {
+		AABBBroadphaseProxy<T> node = this.map.get(object);
+		AABB aabb = this.aabbProducer.compute(object);
 		
 		if (node != null) {
 			// if the body-fixture has already been added just update it
 			node.aabb.set(aabb);
 		} else {
 			// else add the new node
-			this.map.put(key, new AABBBroadphaseProxy<T, E>(key, aabb));
+			node = new AABBBroadphaseProxy<T>(object);
+			node.aabb.set(aabb);
+			this.map.put(object, node);
 		}
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(java.lang.Object)
 	 */
 	@Override
-	public boolean remove(T body, E fixture) {
-		CollisionItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
-		return this.remove(key);
+	public boolean remove(T object) {
+		AABBBroadphaseProxy<T> proxy = this.map.remove(object);
+		return proxy != null;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.CollisionItem)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update()
 	 */
 	@Override
-	public boolean remove(CollisionItem<T, E> item) {
-		AABBBroadphaseProxy<T, E> node = this.map.remove(item);
-		return node != null;
+	public void update() {
+		for (AABBBroadphaseProxy<T> proxy : this.map.values()) {
+			this.update(proxy.item);
+		}
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update(java.lang.Object)
 	 */
 	@Override
-	public void update(T body, E fixture) {
-		this.add(body, fixture);
+	public void update(T object) {
+		this.add(object);
 	}
-	
+
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdated(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdated(java.lang.Object)
 	 */
 	@Override
-	public boolean isUpdated(T body, E fixture) {
+	public boolean isUpdated(T object) {
+		if (!this.map.containsKey(object)) {
+			return false;
+		}
+		
 		// every run is a new run of everything
 		return true;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdated(org.dyn4j.collision.CollisionItem)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#setUpdated(java.lang.Object)
 	 */
 	@Override
-	public boolean isUpdated(CollisionItem<T, E> item) {
-		// every run is a new run of everything
-		return true;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#setUpdated(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
-	 */
-	@Override
-	public void setUpdated(T body, E fixture) {
-		// no-op
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdateTrackingEnabled()
-	 */
-	@Override
-	public boolean isUpdateTrackingEnabled() {
-		return false;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#setUpdateTrackingEnabled(boolean)
-	 */
-	@Override
-	public void setUpdateTrackingEnabled(boolean flag) {
+	public void setUpdated(T object) {
 		// no-op
 	}
 	
@@ -167,34 +144,24 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.CollisionItem)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(java.lang.Object)
 	 */
 	@Override
-	public AABB getAABB(CollisionItem<T, E> item) {
-		AABBBroadphaseProxy<T, E> node = this.map.get(item);
+	public AABB getAABB(T object) {
+		AABBBroadphaseProxy<T> node = this.map.get(object);
 		
 		if (node != null) {
 			return node.aabb;
 		}
-		
-		return item.getFixture().getShape().createAABB(item.getBody().getTransform());
+		return this.aabbProducer.compute(object);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(java.lang.Object)
 	 */
 	@Override
-	public boolean contains(T body, E fixture) {
-		CollisionItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
-		return this.map.containsKey(key);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.CollisionItem)
-	 */
-	@Override
-	public boolean contains(CollisionItem<T, E> item) {
-		return this.map.containsKey(item);
+	public boolean contains(T object) {
+		return this.map.containsKey(object);
 	}
 	
 	/* (non-Javadoc)
@@ -217,7 +184,7 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detectIterator(boolean)
 	 */
 	@Override
-	public Iterator<CollisionPair<T, E>> detectIterator(boolean forceFullDetection) {
+	public Iterator<CollisionPair<T>> detectIterator(boolean forceFullDetection) {
 		return new DetectPairsIterator();
 	}
 	
@@ -225,15 +192,15 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detectIterator(org.dyn4j.geometry.AABB)
 	 */
 	@Override
-	public Iterator<CollisionItem<T, E>> detectIterator(AABB aabb) {
+	public Iterator<T> detectIterator(AABB aabb) {
 		return new DetectAABBIterator(aabb);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detectIterator(org.dyn4j.geometry.Ray, double)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#raycastIterator(org.dyn4j.geometry.Ray, double)
 	 */
 	@Override
-	public Iterator<CollisionItem<T, E>> raycastIterator(Ray ray, double length) {
+	public Iterator<T> raycastIterator(Ray ray, double length) {
 		return new DetectRayIterator(ray, length);
 	}
 	
@@ -242,31 +209,29 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 	 */
 	@Override
 	public void shift(Vector2 shift) {
-		Collection<AABBBroadphaseProxy<T, E>> nodes = this.map.values();
-		
-		for (AABBBroadphaseProxy<T, E> node : nodes) {
+		for (AABBBroadphaseProxy<T> node : this.map.values()) {
 			node.aabb.translate(shift);
 		}
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABBExpansion()
+	 * @see org.dyn4j.collision.broadphase.AbstractBroadphaseDetector#setUpdateTrackingEnabled(boolean)
 	 */
 	@Override
-	public double getAABBExpansion() {
-		return 0;
+	public void setUpdateTrackingEnabled(boolean flag) {
+		// no-op
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.AbstractBroadphaseDetector#isAABBExpansionSupported()
+	 * @see org.dyn4j.collision.broadphase.AbstractBroadphaseDetector#isUpdateTrackingEnabled()
 	 */
 	@Override
-	public boolean isAABBExpansionSupported() {
+	public boolean isUpdateTrackingEnabled() {
 		return false;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.AbstractBroadphaseDetector#isUpdateTrackingSupported()
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdateTrackingSupported()
 	 */
 	@Override
 	public boolean isUpdateTrackingSupported() {
@@ -287,24 +252,24 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 	 * @version 4.0.0
 	 * @since 4.0.0
 	 */
-	private final class DetectPairsIterator implements Iterator<CollisionPair<T, E>> {
+	private final class DetectPairsIterator implements Iterator<CollisionPair<T>> {
 		/** An iterator for all the objects to test */
-		private final Iterator<AABBBroadphaseProxy<T, E>> outerIterator;
+		private final Iterator<AABBBroadphaseProxy<T>> outerIterator;
 		
 		/** Internal state to track pairs already tested */
-		private final Map<CollisionItem<T, E>, Boolean> tested;
+		private final Map<T, Boolean> tested;
 		
 		/** The current outer-iterator object to test with */
-		private AABBBroadphaseProxy<T, E> currentProxy;
+		private AABBBroadphaseProxy<T> currentProxy;
 		
 		/** The inner-iterator for all objects to test with the current object */
-		private Iterator<AABBBroadphaseProxy<T, E>> innerIterator;
+		private Iterator<AABBBroadphaseProxy<T>> innerIterator;
 		
 		/** A reusable pair to output collisions */
-		private final BroadphasePair<T, E> currentPair;
+		private final BroadphasePair<T> currentPair;
 		
 		/** A reusable pair to output collisions */
-		private final BroadphasePair<T, E> nextPair;
+		private final BroadphasePair<T> nextPair;
 		
 		/** True if there's another pair */
 		private boolean hasNext;
@@ -313,7 +278,7 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		 * Default constructor.
 		 */
 		public DetectPairsIterator() {
-			this.tested = new HashMap<CollisionItem<T, E>, Boolean>();
+			this.tested = new HashMap<T, Boolean>();
 			this.outerIterator = BruteForceBroadphase.this.map.values().iterator();
 			
 			// get the first item to test
@@ -322,8 +287,8 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 				this.currentProxy = this.outerIterator.next();
 			}
 			
-			this.currentPair = new BroadphasePair<T, E>();
-			this.nextPair = new BroadphasePair<T, E>();
+			this.currentPair = new BroadphasePair<T>();
+			this.nextPair = new BroadphasePair<T>();
 			this.hasNext = this.findNext();
 		}
 		
@@ -339,13 +304,11 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		 * @see java.util.Iterator#next()
 		 */
 		@Override
-		public CollisionPair<T, E> next() {
+		public CollisionPair<T> next() {
 			if (this.hasNext) {
 				// copy over to the one we return
-				this.currentPair.body1 = this.nextPair.body1;
-				this.currentPair.fixture1 = this.nextPair.fixture1;
-				this.currentPair.body2 = this.nextPair.body2;
-				this.currentPair.fixture2 = this.nextPair.fixture2;
+				this.currentPair.first = this.nextPair.first;
+				this.currentPair.second = this.nextPair.second;
 				
 				// find the next pair
 				this.hasNext = this.findNext();
@@ -379,20 +342,18 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 				
 				// iterate all other objects
 				while (this.innerIterator.hasNext()) {
-					AABBBroadphaseProxy<T, E> b = this.innerIterator.next();
+					AABBBroadphaseProxy<T> b = this.innerIterator.next();
 					
 					// if they are the same body, then skip it
-					if (b.item.body == this.currentProxy.item.body) continue;
+					if (!BruteForceBroadphase.this.broadphaseFilter.isAllowed(this.currentProxy.item, b.item)) continue;
 					
 					// if this pair has already been tested, then skip it
 					boolean tested = this.tested.containsKey(b.item);
 					if (tested) continue;
 					
 					if (this.currentProxy.aabb.overlaps(b.aabb)) {
-						this.nextPair.body1 = this.currentProxy.item.body;
-						this.nextPair.fixture1 = this.currentProxy.item.fixture;
-						this.nextPair.body2 = b.item.body;
-						this.nextPair.fixture2 = b.item.fixture;
+						this.nextPair.first = this.currentProxy.item;
+						this.nextPair.second = b.item;
 						
 						// in this iterator we can immediately exit when we find a collision
 						// because the outer/inner iterator track our position so we can
@@ -426,15 +387,15 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 	 * @version 4.0.0
 	 * @since 4.0.0
 	 */
-	private final class DetectAABBIterator implements Iterator<CollisionItem<T, E>> {
+	private final class DetectAABBIterator implements Iterator<T> {
 		/** The {@link AABB} to test with */
 		private final AABB aabb;
 		
 		/** The iterator for testing all objects in this broadphase */
-		private final Iterator<AABBBroadphaseProxy<T, E>> iterator;
+		private final Iterator<AABBBroadphaseProxy<T>> iterator;
 		
 		/** The next item */
-		private CollisionItem<T, E> nextItem;
+		private T nextItem;
 		
 		/**
 		 * Minimal constructor.
@@ -458,9 +419,9 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		 * @see java.util.Iterator#next()
 		 */
 		@Override
-		public CollisionItem<T, E> next() {
+		public T next() {
 			if (this.nextItem != null) {
-				CollisionItem<T, E> item = this.nextItem;
+				T item = this.nextItem;
 				this.findNext();
 				return item;
 			}
@@ -484,7 +445,7 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 			
 			// just iterate all pairs - the iterator maintains the position
 			while (this.iterator.hasNext()) {
-				AABBBroadphaseProxy<T, E> b = this.iterator.next();
+				AABBBroadphaseProxy<T> b = this.iterator.next();
 				if (this.aabb.overlaps(b.aabb)) {
 					this.nextItem = b.item;
 					return true;
@@ -501,7 +462,7 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 	 * @version 4.0.0
 	 * @since 4.0.0
 	 */
-	private final class DetectRayIterator implements Iterator<CollisionItem<T, E>> {
+	private final class DetectRayIterator implements Iterator<T> {
 		/** The ray to test with */
 		private final Ray ray;
 		
@@ -515,10 +476,10 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		private final double invDy;
 		
 		/** The iterator for testing all objects in this broadphase */
-		private final Iterator<AABBBroadphaseProxy<T, E>> iterator;
+		private final Iterator<AABBBroadphaseProxy<T>> iterator;
 		
 		/** The next item */
-		private CollisionItem<T, E> nextItem;
+		private T nextItem;
 		
 		/**
 		 * Minimal constructor.
@@ -554,9 +515,9 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 		 * @see java.util.Iterator#next()
 		 */
 		@Override
-		public CollisionItem<T, E> next() {
+		public T next() {
 			if (this.nextItem != null) {
-				CollisionItem<T, E> item = this.nextItem;
+				T item = this.nextItem;
 				this.findNext();
 				return item;
 			}
@@ -579,7 +540,7 @@ public final class BruteForceBroadphase<T extends CollisionBody<E>, E extends Fi
 			this.nextItem = null;
 			
 			while (this.iterator.hasNext()) {
-				AABBBroadphaseProxy<T, E> b = this.iterator.next();
+				AABBBroadphaseProxy<T> b = this.iterator.next();
 				if (AbstractBroadphaseDetector.raycast(this.ray.getStart(), this.length, this.invDx, this.invDy, b.aabb)) {
 					this.nextItem = b.item;
 					return true;

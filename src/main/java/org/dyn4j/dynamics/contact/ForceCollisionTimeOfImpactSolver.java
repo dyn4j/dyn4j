@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,10 +40,10 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * This class will translate and rotate the {@link Body}s into a collision.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 2.0.0
  * @param <T> the {@link PhysicsBody} type
- */ 
+ */
 public class ForceCollisionTimeOfImpactSolver<T extends PhysicsBody> implements TimeOfImpactSolver<T> {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.contact.TimeOfImpactSolver#solve(org.dyn4j.dynamics.PhysicsBody, org.dyn4j.dynamics.PhysicsBody, org.dyn4j.collision.continuous.TimeOfImpact, org.dyn4j.dynamics.Settings)
@@ -92,11 +92,17 @@ public class ForceCollisionTimeOfImpactSolver<T extends PhysicsBody> implements 
 		
 		Vector2 J = n.product(impulse);
 
-		// translate and rotate the objects
-		body1.translate(J.product(invMass1));
-		body1.rotate(invI1 * r1.cross(J), c1.x, c1.y);
+		// NOTE: previously I was moving the bodies to collision AND rotating them
+		// Now I'm just translating them to remove the gap instead.  This loses some
+		// very small amount of rotation, but should behave much better
 		
-		body2.translate(J.product(-invMass2));
-		body2.rotate(-invI2 * r2.cross(J), c2.x, c2.y);
+		// translate and rotate the objects
+		Vector2 tx1 = J.product(invMass1);
+		body1.translate(tx1);
+//		body1.rotate(invI1 * r1.cross(J), c1.x, c1.y);
+		
+		Vector2 tx2 = J.product(-invMass2);
+		body2.translate(tx2);
+//		body2.rotate(-invI2 * r2.cross(J), c2.x, c2.y);
 	}
 }

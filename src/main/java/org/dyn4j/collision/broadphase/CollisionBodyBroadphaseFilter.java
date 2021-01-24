@@ -22,27 +22,23 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision;
+package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.Copyable;
+import org.dyn4j.collision.CollisionBody;
 
 /**
- * Represents a collision between two {@link CollisionBody}'s {@link Fixture}s.
+ * A {@link BroadphaseFilter} that ensures {@link CollisionBody}s are not compared to themselves.
  * @author William Bittle
- * @param <T> the object type
  * @version 4.1.0
- * @since 4.0.0
+ * @since 4.1.0
+ * @param <T> the {@link CollisionBody} type
  */
-public interface CollisionPair<T> extends Copyable<CollisionPair<T>> {
-	/**
-	 * Returns the first object.
-	 * @return T
+public final class CollisionBodyBroadphaseFilter<T extends CollisionBody<?>> implements BroadphaseFilter<T> {
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(java.lang.Object, java.lang.Object)
 	 */
-	public T getFirst();
-
-	/**
-	 * Returns the second object.
-	 * @return T
-	 */
-	public T getSecond();
+	@Override
+	public boolean isAllowed(T object1, T object2) {
+		return object1 != object2;
+	}
 }

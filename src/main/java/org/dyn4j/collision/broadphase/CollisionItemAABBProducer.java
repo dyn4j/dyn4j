@@ -22,27 +22,47 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision;
+package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.Copyable;
+import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.collision.CollisionItem;
+import org.dyn4j.collision.Fixture;
+import org.dyn4j.geometry.AABB;
+import org.dyn4j.geometry.Transform;
 
 /**
- * Represents a collision between two {@link CollisionBody}'s {@link Fixture}s.
+ * {@link AABBProducer} for {@link CollisionItem}s (a {@link CollisionBody} and {@link Fixture} pair).
+ * <p>
+ * This class produces a tight fitting AABB around the {@link CollisionItem}'s {@link Fixture} using the
+ * {@link CollisionBody}'s current transform.
  * @author William Bittle
- * @param <T> the object type
  * @version 4.1.0
- * @since 4.0.0
+ * @since 4.1.0
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
  */
-public interface CollisionPair<T> extends Copyable<CollisionPair<T>> {
-	/**
-	 * Returns the first object.
-	 * @return T
+public final class CollisionItemAABBProducer<T extends CollisionBody<E>, E extends Fixture> implements AABBProducer<CollisionItem<T, E>> {
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.AABBProducer#compute(java.lang.Object)
 	 */
-	public T getFirst();
+	@Override
+	public AABB compute(CollisionItem<T, E> object) {
+		CollisionBody<?> body = object.getBody();
+		Fixture fixture = object.getFixture();
+		Transform tx = body.getTransform();
+		AABB aabb = fixture.getShape().createAABB(tx);
+		return aabb;
+	}
 
-	/**
-	 * Returns the second object.
-	 * @return T
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.AABBProducer#compute(java.lang.Object, org.dyn4j.geometry.AABB)
 	 */
-	public T getSecond();
+	@Override
+	public void compute(CollisionItem<T, E> object, AABB result) {
+		CollisionBody<?> body = object.getBody();
+		Fixture fixture = object.getFixture();
+		Transform tx = body.getTransform();
+		fixture.getShape().computeAABB(tx, result);
+		
+	}
 }

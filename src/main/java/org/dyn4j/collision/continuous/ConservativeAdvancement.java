@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This method is described in "Continuous Collision Detection and Physics" by Erwin Coumans (Draft).
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.1.0
  * @since 1.2.0
  */
 public class ConservativeAdvancement implements TimeOfImpactDetector {
@@ -108,10 +108,8 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 		double d = separation.getDistance();
 		// check if the distance is less than the tolerance
 		if (d < this.distanceEpsilon) {
-			// fill up the toi
-			toi.time = 0.0;
-			toi.separation.copy(separation);
-			return true;
+			// we can't do any better than static detection then...
+			return false;
 		}
 		// get the separation normal
 		Vector2 n = separation.getNormal();
@@ -178,8 +176,9 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 			transform2.lerp(dp2, da2, l, lerpTx2);
 			
 			// find closest points
+			separation.clear();
 			separated = this.distanceDetector.distance(convex1, lerpTx1, convex2, lerpTx2, separation);
-			d = separation.getDistance();
+			
 			// check for intersection
 			if (!separated) {
 				// the shapes are intersecting.  This should
@@ -187,21 +186,11 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 				// of the algorithm, however because of numeric
 				// error it will.
 				
-				// back up to half the distance epsilon
-				l -= 0.5 * this.distanceEpsilon / drel;
-				// interpolate
-				transform1.lerp(dp1, da1, l, lerpTx1);
-				transform2.lerp(dp2, da2, l, lerpTx2);
-				// compute a new separation
-				this.distanceDetector.distance(convex1, lerpTx1, convex2, lerpTx2, separation);
-				// get the distance
-				d = separation.getDistance();
-				// the separation here could still be close to zero if the
-				// objects are rotating very fast, in which case just assume
-				// this is as close as we can get
-				
-				// break from the loop since we have detected the
-				// time of impact but had to fix the distance
+				// originally i tried backing up half the advancement
+				// but this is worse, we basically need to give up
+				// at this point and return the time and an empty
+				// separation so that the shapes can be advanced
+				// to the time and be in collision
 				break;
 			}
 			

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,12 +27,24 @@ package org.dyn4j.world;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.dyn4j.DataContainer;
+import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.Filter;
+import org.dyn4j.collision.broadphase.AABBExpansionMethod;
+import org.dyn4j.collision.broadphase.AABBProducer;
+import org.dyn4j.collision.broadphase.BroadphaseDetector;
+import org.dyn4j.collision.broadphase.BroadphaseFilter;
+import org.dyn4j.collision.broadphase.CollisionBodyBroadphaseFilter;
+import org.dyn4j.collision.broadphase.DynamicAABBTree;
+import org.dyn4j.collision.broadphase.StaticValueAABBExpansionMethod;
 import org.dyn4j.collision.continuous.TimeOfImpact;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
@@ -44,10 +56,10 @@ import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactConstraintSolver;
 import org.dyn4j.dynamics.contact.ContactUpdateHandler;
+import org.dyn4j.dynamics.contact.ForceCollisionTimeOfImpactSolver;
 import org.dyn4j.dynamics.contact.SequentialImpulses;
 import org.dyn4j.dynamics.contact.SolvedContact;
 import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
-import org.dyn4j.dynamics.contact.ForceCollisionTimeOfImpactSolver;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
@@ -77,7 +89,7 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * more than one world. Likewise, the {@link Joint#setOwner(Object)} method is used to handle
  * joints being added to the world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
@@ -101,6 +113,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	/** The {@link TimeOfImpactSolver} */
 	protected TimeOfImpactSolver<T> timeOfImpactSolver;
 
+	/** The CCD {@link BroadphaseDetector} */
+	protected BroadphaseDetector<T> ccdBroadphase;
+	
 	/** The {@link Joint} list */
 	protected final List<Joint<T>> joints;
 
@@ -137,6 +152,11 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 
 	/** The accumulated time */
 	protected double time;
+
+	/** True if an update to the collision data or interaction graph is needed before a step of the engine */
+	protected boolean updateRequired;
+	
+	// collision tracking
 	
 	/** The constraint graph between bodies */
 	protected final ConstraintGraph<T> constraintGraph;
@@ -144,8 +164,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	/** A temporary list of only the {@link ContactConstraint} collisions from the last detection; cleared and refilled each step */
 	protected final List<V> contactCollisions;
 
-	/** True if an update to the collision data or interaction graph is needed before a step of the engine */
-	protected boolean updateRequired;
+	/** The full set of tracked CCD collision data */
+	protected final Set<CollisionPair<T>> ccdCollisionData;
 	
 	/**
 	 * Default constructor.
@@ -181,10 +201,21 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// override the broadphase filter
 		// the CollisionWorld uses the DefaultBroadphaseFilter but 
 		// the PhysicsWorld needs to use the DetectBroadphaseFilter
-		this.broadphaseFilter = new PhysicsBodyBroadphaseFilter<T>(this);
+		this.broadphaseFilter = new PhysicsBodyBroadphaseCollisionDataFilter<T>(this);
 		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
 		this.contactConstraintSolver = new SequentialImpulses<T>();
 		this.timeOfImpactSolver = new ForceCollisionTimeOfImpactSolver<T>();
+		
+		// build the CCD broadphase detector
+		final BroadphaseFilter<T> broadphaseFilter = new CollisionBodyBroadphaseFilter<T>();
+		final AABBProducer<T> aabbProducer = new PhysicsBodySweptAABBProducer<T>();
+		final AABBExpansionMethod<T> expansionMethod = new StaticValueAABBExpansionMethod<T>(0.2);
+		this.ccdBroadphase = new DynamicAABBTree<T>(
+				broadphaseFilter,
+				aabbProducer, 
+				expansionMethod, 
+				initialBodyCapacity);
+		this.ccdBroadphase.setUpdateTrackingEnabled(true);
 		
 		this.joints = new ArrayList<Joint<T>>(initialJointCapacity);
 		this.jointsUnmodifiable = Collections.unmodifiableList(this.joints);
@@ -204,6 +235,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		int estimatedCollisionPairs = Collisions.getEstimatedCollisionPairs(initialBodyCapacity);
 		this.constraintGraph = new ConstraintGraph<T>(initialBodyCapacity, initialJointCapacity);
 		this.contactCollisions = new ArrayList<V>(estimatedCollisionPairs);
+		this.ccdCollisionData = new LinkedHashSet<CollisionPair<T>>();
 		this.updateRequired = true;
 	}
 	
@@ -306,8 +338,10 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	public void addBody(T body) {
 		super.addBody(body);
 		this.constraintGraph.addBody(body);
+		body.getPreviousTransform().set(body.getTransform());
+		this.ccdBroadphase.add(body);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.PhysicsWorld#addJoint(org.dyn4j.dynamics.joint.Joint)
 	 */
@@ -542,6 +576,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			
 			// remove the body from the broadphase
 			this.broadphaseDetector.remove(body);
+			// remove the body from the ccd broadphase
+			this.ccdBroadphase.remove(body);
 			// remove from the interaction graph
 			ConstraintGraphNode<T> node = this.constraintGraph.removeBody(body);
 			
@@ -651,6 +687,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	protected void clear() {
 		this.bodies.clear();
 		this.broadphaseDetector.clear();
+		this.ccdBroadphase.clear();
 		this.collisionData.clear();
 		this.constraintGraph.clear();
 		this.contactCollisions.clear();
@@ -796,6 +833,33 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	@Override
 	public ContactConstraintSolver<T> getContactConstraintSolver() {
 		return this.contactConstraintSolver;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getContinuousCollisionDetectionBroadphaseDetector()
+	 */
+	@Override
+	public BroadphaseDetector<T> getContinuousCollisionDetectionBroadphaseDetector() {
+		return this.ccdBroadphase;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#setContinuousCollisionDetectionBroadphaseDetector(org.dyn4j.collision.broadphase.BroadphaseDetector)
+	 */
+	@Override
+	public void setContinuousCollisionDetectionBroadphaseDetector(BroadphaseDetector<T> broadphaseDetector) {
+		// check for null
+		if (broadphaseDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBroadphaseDetector"));
+		
+		// set the new detector
+		this.ccdBroadphase = broadphaseDetector;
+		
+		// re-add all bodies to the broadphase
+		int size = this.bodies.size();
+		for (int i = 0; i < size; i++) {
+			T body = this.bodies.get(i);
+			this.ccdBroadphase.add(body);
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -1179,18 +1243,24 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			}
 		}
 		
-		// make sure CCD is enabled
-		if (continuousDetectionMode != ContinuousDetectionMode.NONE) {
-			// solve time of impact
-			this.solveTOI(continuousDetectionMode);
-		}
-		
 		// notify the step listener
 		for (int i = 0; i < sSize; i++) {
 			StepListener<T> sl = stepListeners.get(i);
 			sl.postSolve(this.timeStep, this);
 		}
-		
+
+		// make sure CCD is enabled
+		if (continuousDetectionMode != ContinuousDetectionMode.NONE) {
+			// update the CCD broadphase
+			this.ccdBroadphase.update();
+			
+			// solve any time of impact events that were missed
+			this.solveTOI(continuousDetectionMode);
+
+			// clear the ccd broadphase updates so that on the next iteration
+			this.ccdBroadphase.clearUpdates();
+		}
+
 		// after all has been updated find new contacts
 		// this is done so that the user has the latest contacts
 		// and the broadphase has the latest AABBs, etc.
@@ -1226,11 +1296,11 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			V collision = iterator.next();
 
 			// get the current contact constraint data
-			ContactConstraint<T> cc = collision.getContactConstraint();
+			ContactConstraint<T> contactConstraint = collision.getContactConstraint();
 			
 			// we can exit early if the collision didn't make it to the manifold stage
 			// and there's no existing contacts to report ending
-			if (!collision.isManifoldCollision() && cc.getContacts().size() == 0) {
+			if (!collision.isManifoldCollision() && contactConstraint.getContacts().size() == 0) {
 				continue;
 			}
 			
@@ -1240,7 +1310,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// update the contact constraint
 			// NOTE: in the case of an empty manifold, this method will also report
 			//       end notifications for any existing contacts
-			cc.update(collision.getManifold(), this.settings, wsh);
+			contactConstraint.update(collision.getManifold(), this.settings, wsh);
 			
 			// we only want to add interaction edges if the collision actually made it past
 			// the manifold generation stage and all listeners allowed it to proceed
@@ -1249,12 +1319,17 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 				collision.setContactConstraintCollision(true);
 				
 				// build the contact edges
-				this.constraintGraph.addContactConstraint(cc);
+				this.constraintGraph.addContactConstraint(contactConstraint);
+				
+				// let any contact listeners churn on it
+				for (ContactListener<T> listener : this.contactListeners) {
+					listener.collision(collision);
+				}
 				
 				// add it to a list of contact-constraint only collisions for
 				// quicker post/pre solve notification if it's enabled and
 				// not a sensor collision
-				if (cc.isEnabled() && !cc.isSensor()) {
+				if (contactConstraint.isEnabled() && !contactConstraint.isSensor()) {
 					this.contactCollisions.add(collision);
 				}
 			}
@@ -1262,65 +1337,139 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	}
 	
 	/**
-	 * Solves the time of impact for all the {@link PhysicsBody}s in this world.
+	 * Solves any Time-of-Impact events (collision events that were missed by the
+	 * discrete collision detection algorithms).
 	 * <p>
-	 * This method solves for the time of impact for each {@link PhysicsBody} iteratively
-	 * and pairwise.
-	 * <p>
-	 * The cases considered are dependent on the given collision detection mode.
-	 * <p>
-	 * Cases skipped (including the converse of the above):
-	 * <ul>
-	 * <li>Inactive, asleep, or non-moving bodies</li>
-	 * <li>Bodies connected via a joint with the collision flag set to false</li>
-	 * <li>Bodies already in contact</li>
-	 * <li>Fixtures whose filters return false</li>
-	 * <li>Sensor fixtures</li>
-	 * </ul>
-	 * @param mode the continuous collision detection mode
-	 * @see ContinuousDetectionMode
-	 * @since 1.2.0
+	 * Returns true if any TOI event was resolved. When true, the bodies involved
+	 * had their transforms modified an another discrete collision detection is required.
+	 * @param mode the mode
+	 * @return boolean 
 	 */
-	protected void solveTOI(ContinuousDetectionMode mode) {
-		List<TimeOfImpactListener<T>> listeners = this.timeOfImpactListeners;
-		// get the number of bodies
-		int size = this.bodies.size();
+	protected boolean solveTOI(ContinuousDetectionMode mode) {
+		// handled scenarios:
+		// 1. Dynamic vs. Static
+		// 2. Dynamic vs. Bullet
+		// 3. Bullet vs. Static
 		
+		List<TimeOfImpactListener<T>> listeners = this.timeOfImpactListeners;
+
 		// check the CCD mode
 		boolean bulletsOnly = (mode == ContinuousDetectionMode.BULLETS_ONLY);
 		
-		// loop over all the bodies and find the minimum TOI for each
-		// dynamic body
-		for (int i = 0; i < size; i++) {
-			// get the body
-			T body = this.bodies.get(i);
+		Iterator<CollisionPair<T>> pairIterator = this.ccdBroadphase.detectIterator();
+		while(pairIterator.hasNext()) {
+			// NOTE: since the broadphase reuses the pair object, make sure to make a copy of it
+			CollisionPair<T> pair = pairIterator.next().copy();
+			this.ccdCollisionData.add(pair);
+		}
+		
+		Map<T, List<T>> pairMapping = new HashMap<T, List<T>>();
+		Iterator<CollisionPair<T>> iterator = this.ccdCollisionData.iterator();
+		while (iterator.hasNext()) {
+			CollisionPair<T> pair = iterator.next();
+			T body1 = pair.getFirst();
+			T body2 = pair.getSecond();
+			
+			// since the broadphase is a new-overlap-only detection
+			// we need to check every item in the stored set of collisions:
+			//		1. check if they were updated
+			// 		2. if so, then check if their AABBs still overlap
+
+			// we need to remove the pair if either body/fixture doesn't exist anymore too
+			if (!this.ccdBroadphase.contains(body1) ||
+				!this.ccdBroadphase.contains(body2)) {
+				iterator.remove();
+			}
+			
+			if (this.ccdBroadphase.isUpdated(body1) || this.ccdBroadphase.isUpdated(body2)) {
+				// then we need to verify the pair is still valid
+				boolean overlaps = this.ccdBroadphase.detect(body1, body2);
+				if (!overlaps) {
+					// remove the collision from the set of collisions
+					iterator.remove();
+				}
+			}
 			
 			// if we are only doing CCD on bullets only, then check
 			// to make sure that the current body is a bullet
-			if (bulletsOnly && !body.isBullet()) continue;
+			if (bulletsOnly && !body1.isBullet() && !body2.isBullet()) continue;
 			
 			// otherwise we process all dynamic bodies
 
 			// we don't want to mess with disabled bodies
-			if (!body.isEnabled()) continue;
-				
-			// we don't process kinematic or static bodies except with
-			// dynamic bodies (in other words b1 must always be a dynamic
-			// body)
-			if (body.getMass().isInfinite()) continue;
+			if (!body1.isEnabled() || !body2.isEnabled()) continue;
 			
-			// don't bother with bodies that did not have their
-			// positions integrated, if they were not added to an island then
-			// that means they didn't move
+			// we don't allow dynamic vs. dynamic unless one (or both) is a bullet
+			if (body1.isDynamic() && body2.isDynamic()) {
+				// one of them has to be a bullet
+				if (!body1.isBullet() && !body2.isBullet()) {
+					continue;
+				}
+			}
+			
+			// if both are infinite, then there's no way to resolve them anyway
+			if (body1.getMass().isInfinite() && body2.getMass().isInfinite()) continue;
 			
 			// we can also check for sleeping bodies and skip those since
 			// they will only be asleep after being stationary for a set
 			// time period
-			if (body.isAtRest()) continue;
+			if (body1.isAtRest() && body2.isAtRest()) continue;
 
-			// solve for time of impact
-			this.solveTOI(body, listeners);
+			// check for joints who's collision is not allowed
+			if (!this.isJointCollisionAllowed(body1, body2)) continue;
+			
+			// check for bodies already in collision
+			if (this.isInContact(body1, body2)) continue;
+			
+			// check listeners
+			boolean allow = true;
+			for (TimeOfImpactListener<T> tl : listeners) {
+				if (!tl.collision(body1, body2)) {
+					// if any toi listener doesnt allow it, then don't allow it
+					// we need to allow all listeners to be notified before we continue
+					allow = false;
+				}
+			}
+			if (!allow) continue;
+			
+			// group the remaining events together based on the first
+			// dynamic body found
+			if (body1.isDynamic()) {
+				List<T> list = pairMapping.get(body1);
+				if (list != null) {
+					list.add(body2);
+				} else {
+					list = new ArrayList<T>();
+					list.add(body2);
+					pairMapping.put(body1, list);
+				}
+			}
+			
+			if (body2.isDynamic()) {
+				List<T> list = pairMapping.get(body2);
+				if (list != null) {
+					list.add(body1);
+				} else {
+					list = new ArrayList<T>();
+					list.add(body1);
+					pairMapping.put(body2, list);
+				}
+			}
 		}
+		
+		// solve the individual groups
+		boolean solved = false;
+		for (T body1 : pairMapping.keySet()) {
+			List<T> others = pairMapping.get(body1);
+			
+			// solve for time of impact
+			boolean ss = this.solveTOI(body1, others, listeners);
+			
+			// track if anything was solved
+			solved |= ss;
+		}
+		
+		return solved;
 	}
 	
 	/**
@@ -1339,15 +1488,13 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * to force the {@link PhysicsBody}s into collision.  This causes the discrete collision
 	 * detector to detect the collision on the next time step.
 	 * @param body1 the {@link PhysicsBody}
+	 * @param others the other bodies to test against
 	 * @param listeners the list of {@link TimeOfImpactListener}s
+	 * @return boolean true if a time of impact event was resolved
 	 * @since 3.1.0
 	 */
-	protected void solveTOI(T body1, List<TimeOfImpactListener<T>> listeners) {
-		int size = this.bodies.size();
-		
-		// generate a swept AABB for this body
-		AABB aabb1 = body1.createSweptAABB();
-		boolean bullet = body1.isBullet();
+	protected boolean solveTOI(T body1, List<T> others, List<TimeOfImpactListener<T>> listeners) {
+		int size = others.size();
 		
 		// setup the initial time bounds [0, 1]
 		double t1 = 0.0;
@@ -1357,35 +1504,20 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		TimeOfImpact minToi = null;
 		T minBody = null;
 		
+		// used to save a few allocations
+		CollisionItemAdapter<T, BodyFixture> reusableItem = new CollisionItemAdapter<T, BodyFixture>();
+		
 		// loop over all the other bodies to find the minimum TOI
 		for (int i = 0; i < size; i++) {
 			// get the other body
-			T body2 = this.bodies.get(i);
-
-			// skip this test if they are the same body
-			if (body1 == body2) continue;
-			
-			// make sure the other body is active
-			if (!body2.isEnabled()) continue;
-
-			// skip other dynamic bodies; we only do TOI for
-			// dynamic vs. static/kinematic unless its a bullet
-			if (body2.isDynamic() && !bullet) continue;
-			
-			// check for joints who's collision is not allowed
-			if (!this.isJointCollisionAllowed(body1, body2)) continue;
-			
-			// check for bodies already in collision
-			if (this.isInContact(body1, body2)) continue;
-
-			// create a swept AABB for the other body
-			AABB aabb2 = body2.createSweptAABB();
-			// if the swept AABBs don't overlap then don't bother testing them
-			if (!aabb1.overlaps(aabb2)) continue; 
+			T body2 = others.get(i);
 
 			TimeOfImpact toi = new TimeOfImpact();
 			int fc1 = body1.getFixtureCount();
 			int fc2 = body2.getFixtureCount();
+
+			// small acceleration for multi-fixture static bodies
+			boolean b2IsStaticAndMultiFixture = body2.isStatic() && fc2 > 1;
 			
 			// get the velocities for the time step since we want
 			// [t1, t2] to be bound to this time step
@@ -1409,15 +1541,35 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			
 			// test against all fixture pairs taking the fixture
 			// with the smallest time of impact
-			for (int j = 0; j < fc1; j++) {
-				BodyFixture f1 = body1.getFixture(j);
+			for (int k = 0; k < fc2; k++) {
+				BodyFixture f2 = body2.getFixture(k);
+				
+				// if the second body is static, we can accelerate a bit
+				// more by checking the swept AABB of the first body
+				// against the non-swept AABB of the second body's fixture
+				// this is primarily for multi-fixture static bodies
+				// NOTE: a static body is not moving and has infinite mass
+				// NOTE: the first body will always be a dynamic body
+				if (b2IsStaticAndMultiFixture) {
+					// use body1 SWEPT AABB
+					AABB b1SweptAABB = this.ccdBroadphase.getAABB(body1);
+					
+					// use body2-fixture2 STATIC AABB
+					reusableItem.set(body2, f2);
+					AABB b2StaticAABB = this.broadphaseDetector.getAABB(reusableItem);
+					
+					// if they don't overlap, then they can't possibly have a TOI
+					if (!b1SweptAABB.overlaps(b2StaticAABB)) {
+						continue;
+					}
+				}
 				
 				// skip sensor fixtures
-				if (f1.isSensor()) continue;
+				if (f2.isSensor()) continue;
 				
-				for (int k = 0; k < fc2; k++) {
-					BodyFixture f2 = body2.getFixture(k);
-					
+				for (int j = 0; j < fc1; j++) {
+					BodyFixture f1 = body1.getFixture(j);
+
 					// skip sensor fixtures
 					if (f2.isSensor()) continue;
 
@@ -1429,6 +1581,17 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 						continue;
 					}
 					
+					// check listeners
+					boolean allow = true;
+					for (TimeOfImpactListener<T> tl : listeners) {
+						if (!tl.collision(body1, f1, body2, f2)) {
+							// if any toi listener doesnt allow it, then don't allow it
+							// we need to allow all listeners to be notified before we continue
+							allow = false;
+						}
+					}
+					if (!allow) continue;
+					
 					Convex c1 = f1.getShape();
 					Convex c2 = f2.getShape();
 					
@@ -1436,11 +1599,18 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 					if (this.timeOfImpactDetector.getTimeOfImpact(c1, tx1, v1, av1, c2, tx2, v2, av2, t1, t2, toi)) {
 						// get the time of impact
 						double t = toi.getTime();
+						
+						// if we detect a time of impact at the beginning
+						// we can't handle this, we need to give up now
+						if (t == 0.0) {
+							return false;
+						}
+						
 						// check if the time of impact is less than
 						// the current time of impact
 						if (t < t2) {
 							// if it is then ask the listeners if we should use this collision
-							boolean allow = true;
+							allow = true;
 							for (TimeOfImpactListener<T> tl : listeners) {
 								if (!tl.collision(body1, f1, body2, f2, toi)) {
 									// if any toi listener doesnt allow it, then don't allow it
@@ -1469,6 +1639,11 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// get the time of impact info
 			double t = minToi.getTime();
 			
+//			// skip it if the time of impact is at the beginning
+//			if (t == 0.0) {
+//				return false;
+//			}
+//			
 			// move the dynamic body to the time of impact
 			body1.getPreviousTransform().lerp(body1.getTransform(), t, body1.getTransform());
 			// check if the other body is dynamic
@@ -1481,12 +1656,21 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// so that on the next time step they are solved by the discrete
 			// collision detector
 			
+			// sometimes we get the exact location and the distance is zero
+			// the solver won't do anything with zero, so let's go ahead and exit
+			if (minToi.getSeparation().getDistance() <= 0.0) {
+				return true;
+			}
+			
 			// performs position correction on the body/bodies so that they are
 			// in collision and will be detected in the next time step
 			this.timeOfImpactSolver.solve(body1, minBody, minToi, this.settings);
 			
 			// this method does not conserve time
+			return true;
 		}
+		
+		return false;
 	}
 	
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,12 +29,11 @@ import org.dyn4j.Copyable;
 /**
  * Abstract implementation of the {@link CollisionPair} interface.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
- * @param <T> the {@link CollisionBody} type
- * @param <E> the {@link Fixture} type
+ * @param <T> the object type
  */
-public abstract class AbstractCollisionPair<T extends CollisionBody<E>, E extends Fixture> implements CollisionPair<T, E>, Copyable<CollisionPair<T, E>> {
+public abstract class AbstractCollisionPair<T> implements CollisionPair<T>, Copyable<CollisionPair<T>> {
 
 	// NOTE: if we ever move to Java 8 or higher, move these methods to the CollisionPair interface
 	
@@ -54,29 +53,39 @@ public abstract class AbstractCollisionPair<T extends CollisionBody<E>, E extend
 	}
 	
 	/**
+	 * Returns the hashcode for a pair of objects assuming order doesn't matter.
+	 * @param item1 the first object
+	 * @param item2 the second object
+	 * @return int
+	 * @since 4.1.0
+	 */
+	public static int getHashCode(Object item1, Object item2) {
+		int h1 = item1.hashCode();
+		int h2 = item2.hashCode();
+		// the total can be in any order
+		return h1 + h2;
+	}
+	
+	/**
 	 * Returns true if the given pair and object are equal.
 	 * @param pairA the first pair
 	 * @param obj the other object
 	 * @return boolean
 	 */
-	public static boolean equals(CollisionPair<?, ?> pairA, Object obj) {
+	public static boolean equals(CollisionPair<?> pairA, Object obj) {
 		if (obj == pairA) return true;
 		if (obj == null || pairA == null) return false;
 		if (obj instanceof CollisionPair) {
-			CollisionPair<?, ?> pairB = (CollisionPair<?, ?>)obj;
+			CollisionPair<?> pairB = (CollisionPair<?>)obj;
 			
-			CollisionBody<?> c1a = pairA.getBody1();
-			Fixture f1a = pairA.getFixture1();
-			CollisionBody<?> c2a = pairA.getBody2();
-			Fixture f2a = pairA.getFixture2();
+			Object a1 = pairA.getFirst();
+			Object a2 = pairA.getSecond();
 			
-			CollisionBody<?> c1b = pairB.getBody1();
-			Fixture f1b = pairB.getFixture1();
-			CollisionBody<?> c2b = pairB.getBody2();
-			Fixture f2b = pairB.getFixture2();
+			Object b1 = pairB.getFirst();
+			Object b2 = pairB.getSecond();
 			
-			return (c1b == c1a && f1b == f1a && c2b == c2a && f2b == f2a) || 
-				   (c1b == c2a && f1b == f2a && c2b == c1a && f2b == f1a);
+			return (a1.equals(b1) && a2.equals(b2)) ||
+				   (a1.equals(b2) && a2.equals(b1));
 		}
 		return false;
 	}

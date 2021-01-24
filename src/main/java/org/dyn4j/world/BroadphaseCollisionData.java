@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,13 +25,14 @@
 package org.dyn4j.world;
 
 import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.Fixture;
 
 /**
  * Represents a broadphase collision.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
@@ -41,7 +42,7 @@ public interface BroadphaseCollisionData<T extends CollisionBody<E>, E extends F
 	 * Returns the collision pair.
 	 * @return {@link CollisionPair}
 	 */
-	public CollisionPair<T, E> getPair();
+	public CollisionPair<CollisionItem<T, E>> getPair();
 	
 	/**
 	 * Returns the first {@link CollisionBody}.

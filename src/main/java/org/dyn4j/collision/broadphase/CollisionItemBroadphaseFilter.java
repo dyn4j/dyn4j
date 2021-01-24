@@ -22,27 +22,28 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision;
+package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.Copyable;
+import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.collision.CollisionItem;
+import org.dyn4j.collision.Fixture;
 
 /**
- * Represents a collision between two {@link CollisionBody}'s {@link Fixture}s.
+ * A {@link BroadphaseFilter} that ensures {@link CollisionItem}s of the same body are not compared.
  * @author William Bittle
- * @param <T> the object type
  * @version 4.1.0
- * @since 4.0.0
+ * @since 4.1.0
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
  */
-public interface CollisionPair<T> extends Copyable<CollisionPair<T>> {
-	/**
-	 * Returns the first object.
-	 * @return T
+public final class CollisionItemBroadphaseFilter<T extends CollisionBody<E>, E extends Fixture> implements BroadphaseFilter<CollisionItem<T, E>> {
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(java.lang.Object, java.lang.Object)
 	 */
-	public T getFirst();
-
-	/**
-	 * Returns the second object.
-	 * @return T
-	 */
-	public T getSecond();
+	@Override
+	public boolean isAllowed(CollisionItem<T, E> object1, CollisionItem<T, E> object2) {
+		// make sure the body-fixture collision items are different
+		// make sure that we aren't checking fixtures in the same body
+		return object1 != object2 && object1.getBody() != object2.getBody();
+	}
 }

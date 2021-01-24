@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -471,49 +471,6 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	public boolean isBullet();
 	
 	/**
-	 * Returns an AABB that contains the maximal space in which
-	 * the {@link CollisionBody} exists from the initial transform
-	 * to the final transform.
-	 * <p>
-	 * This method takes the bounding circle, using the world center
-	 * and rotation disc radius, at the initial and final transforms
-	 * and creates an AABB containing both.
-	 * <p>
-	 * This method will return a degenerate AABB if the body has zero 
-	 * fixtures.  If this body has one or more fixtures, but didn't move, an AABB 
-	 * with a width and height equal to the rotation disc radius is returned.
-	 * <p>
-	 * <b>NOTE</b>: To get an accurate result from this method, one of the 
-	 * <code>setMass</code> methods should be called to set the 
-	 * rotation disc radius before calling this method.
-	 * @return {@link AABB}
-	 * @since 3.1.1
-	 */
-	public AABB createSweptAABB();
-	
-	/**
-	 * Creates a swept {@link AABB} from the given start and end {@link Transform}s
-	 * using the fixtures on this {@link PhysicsBody}.
-	 * <p>
-	 * This method takes the bounding circle, using the world center
-	 * and rotation disc radius, at the initial and final transforms
-	 * and creates an AABB containing both.
-	 * <p>
-	 * This method will return a degenerate AABB if the body has zero 
-	 * fixtures.  If this body has one or more fixtures, but didn't move, an AABB 
-	 * with a width and height equal to the rotation disc radius is returned.
-	 * <p>
-	 * <b>NOTE</b>: To get an accurate result from this method, one of the 
-	 * <code>setMass</code> methods should be called to set the 
-	 * rotation disc radius before calling this method.
-	 * @param initialTransform the initial {@link Transform}
-	 * @param finalTransform the final {@link Transform}
-	 * @return {@link AABB}
-	 * @since 3.1.1
-	 */
-	public AABB createSweptAABB(Transform initialTransform, Transform finalTransform);
-	
-	/**
 	 * Returns the change in position computed from last frame's transform
 	 * and this frame's transform.
 	 * @return Vector2
@@ -674,4 +631,68 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @since 3.0.0
 	 */
 	public void setGravityScale(double scale);
+	
+	/**
+	 * Returns a swept {@link AABB} that contains the maximal space in which the {@link PhysicsBody} exists from the 
+	 * initial transform to the final transform.
+	 * <p>
+	 * The AABB returned from this method can vary based on the state of the body, the number of fixtures,
+	 * whether the body was rotating or not, and so on. This method attempts to return the tightest fitting
+	 * AABB possible, but it should not be relied on.
+	 * <p>
+	 * <b>NOTE</b>: This method is dependent upon the {@link #getRotationDiscRadius()} and {@link #getWorldCenter()}
+	 * methods in some scenarios, please ensure these are properly setup before calling this method.
+	 * @return {@link AABB}
+	 * @since 3.1.1
+	 */
+	public abstract AABB createSweptAABB();
+	
+	/**
+	 * Creates a swept {@link AABB} from the given start and end {@link Transform}s
+	 * using the fixtures on this {@link PhysicsBody}.
+	 * <p>
+	 * The AABB returned from this method can vary based on the state of the body, the number of fixtures,
+	 * whether the body was rotating or not, and so on. This method attempts to return the tightest fitting
+	 * AABB possible, but it should not be relied on.
+	 * <p>
+	 * <b>NOTE</b>: This method is dependent upon the {@link #getRotationDiscRadius()} and {@link #getWorldCenter()}
+	 * methods in some scenarios, please ensure these are properly setup before calling this method.
+	 * @param initialTransform the initial {@link Transform}
+	 * @param finalTransform the final {@link Transform}
+	 * @return {@link AABB}
+	 * @since 3.1.1
+	 */
+	public abstract AABB createSweptAABB(Transform initialTransform, Transform finalTransform);
+	
+	/**
+	 * Computes a swept {@link AABB} that contains the maximal space in which the {@link PhysicsBody} 
+	 * exists from the initial transform to the final transform and places the result in the given AABB.
+	 * <p>
+	 * The AABB returned from this method can vary based on the state of the body, the number of fixtures,
+	 * whether the body was rotating or not, and so on. This method attempts to return the tightest fitting
+	 * AABB possible, but it should not be relied on.
+	 * <p>
+	 * <b>NOTE</b>: This method is dependent upon the {@link #getRotationDiscRadius()} and {@link #getWorldCenter()}
+	 * methods in some scenarios, please ensure these are properly setup before calling this method.
+	 * @param result the AABB to set
+	 * @since 4.1.0
+	 */
+	public abstract void computeSweptAABB(AABB result);
+	
+	/**
+	 * Computes a swept {@link AABB} from the given start and end {@link Transform}s
+	 * using the fixtures on this {@link PhysicsBody} and places the result in the given AABB.
+	 * <p>
+	 * The AABB returned from this method can vary based on the state of the body, the number of fixtures,
+	 * whether the body was rotating or not, and so on. This method attempts to return the tightest fitting
+	 * AABB possible, but it should not be relied on.
+	 * <p>
+	 * <b>NOTE</b>: This method is dependent upon the {@link #getRotationDiscRadius()} and {@link #getWorldCenter()}
+	 * methods in some scenarios, please ensure these are properly setup before calling this method.
+	 * @param initialTransform the initial {@link Transform}
+	 * @param finalTransform the final {@link Transform}
+	 * @param result the AABB to set
+	 * @since 4.1.0
+	 */
+	public abstract void computeSweptAABB(Transform initialTransform, Transform finalTransform, AABB result);
 }

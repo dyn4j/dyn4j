@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -505,6 +505,24 @@ public class Transform implements Transformable, Copyable<Transform> {
 	public Transform getTranslationTransform() {
 		Transform t = new Transform(1.0, 0.0, this.x, this.y);
 		return t;
+	}
+	
+	/**
+	 * Returns the cosine of the angle of rotation of this transform.
+	 * @return double
+	 * @since 4.1.0
+	 */
+	public double getCost() {
+		return this.cost;
+	}
+	
+	/**
+	 * Returns the sine of the angle of rotation of this transform.
+	 * @return double
+	 * @since 4.1.0
+	 */
+	public double getSint() {
+		return this.sint;
 	}
 	
 	/**

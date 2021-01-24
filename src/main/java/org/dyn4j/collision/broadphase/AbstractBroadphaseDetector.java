@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,116 +28,59 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.Collisions;
-import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
 /**
  * Abstract implementation of a {@link BroadphaseDetector}.
  * @author William Bittle
  * @version 4.1.0
  * @since 1.0.0
- * @param <T> the {@link CollisionBody} type
- * @param <E> the {@link Fixture} type
+ * @param <T> the object type
  */
-public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E extends Fixture> implements BroadphaseDetector<T, E> {
-	/** The {@link AABB} expansion value */
-	protected double expansion;
+public abstract class AbstractBroadphaseDetector<T> implements BroadphaseDetector<T> {
+	/** The AABB producer */
+	protected final AABBProducer<T> aabbProducer;
 	
+	/** The AABB expansion method */
+	protected final AABBExpansionMethod<T> aabbExpansionMethod;
+	
+	/** The broadphase filter to cull pairs */
+	protected final BroadphaseFilter<T> broadphaseFilter;
+
 	/** True if update tracking is enabled */
 	protected boolean updateTrackingEnabled;
 	
 	/**
-	 * Default constructor.
+	 * Minimal constructor.
+	 * @param broadphaseFilter the broadphase filter
+	 * @param aabbProducer the AABB producer
+	 * @param aabbExpansionMethod the AABB expansion method
+	 * @throws NullPointerException if broadphaseFilter, aabbProducer or aabbExpansionMethod are null
 	 */
-	public AbstractBroadphaseDetector() {
-		this.expansion = BroadphaseDetector.DEFAULT_AABB_EXPANSION;
-		this.updateTrackingEnabled = true;
+	public AbstractBroadphaseDetector(
+			BroadphaseFilter<T> broadphaseFilter, 
+			AABBProducer<T> aabbProducer,
+			AABBExpansionMethod<T> aabbExpansionMethod) {
+		
+		if (broadphaseFilter == null) throw new NullPointerException(Messages.getString("collision.broadphase.nullBroadphaseFilter"));
+		if (aabbProducer == null) throw new NullPointerException(Messages.getString("collision.broadphase.nullAABBProducer"));
+		if (aabbExpansionMethod == null) throw new NullPointerException(Messages.getString("collision.broadphase.nullAABBExpansionMethod"));
+		
+		this.aabbProducer = aabbProducer;
+		this.aabbExpansionMethod = aabbExpansionMethod;
+		this.broadphaseFilter = broadphaseFilter;
+		this.updateTrackingEnabled = false;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#add(org.dyn4j.collision.CollisionBody)
-	 */
-	@Override
-	public void add(T body) {
-		int size = body.getFixtureCount();
-		// iterate over the new list
-		for (int i = 0; i < size; i++) {
-			E fixture = body.getFixture(i);
-			this.add(body, fixture);
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#remove(org.dyn4j.collision.CollisionBody)
-	 */
-	@Override
-	public void remove(T body) {
-		int size = body.getFixtureCount();
-		if (size == 0) return;
-		// create an item to reuse so we don't allocate a bunch of these
-		BroadphaseItem<T, E> item = new BroadphaseItem<T, E>(body, null);
-		for (int i = 0; i < size; i++) {
-			E fixture = body.getFixture(i);
-			item.fixture = fixture;
-			this.remove(item);
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#update(org.dyn4j.collision.CollisionBody)
-	 */
-	@Override
-	public void update(T body) {
-		int size = body.getFixtureCount();
-		// iterate over the new list
-		for (int i = 0; i < size; i++) {
-			E fixture = body.getFixture(i);
-			this.update(body, fixture);
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#setUpdated(org.dyn4j.collision.CollisionBody)
-	 */
-	@Override
-	public void setUpdated(T body) {
-		int size = body.getFixtureCount();
-		// iterate over the new list
-		for (int i = 0; i < size; i++) {
-			E fixture = body.getFixture(i);
-			this.setUpdated(body, fixture);
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdated(org.dyn4j.collision.CollisionBody)
-	 */
-	@Override
-	public boolean isUpdated(T body) {
-		int size = body.getFixtureCount();
-		if (size == 0) return false;
-		boolean updated = false;
-		// create an item to reuse so we don't allocate a bunch of these
-		BroadphaseItem<T, E> item = new BroadphaseItem<T, E>(body, null);
-		// iterate over the new list
-		for (int i = 0; i < size; i++) {
-			E fixture = body.getFixture(i);
-			item.fixture = fixture;
-			updated |= this.isUpdated(item);
-		}
-		return updated;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.CollisionBody)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public boolean detect(T a, T b) {
@@ -149,35 +92,6 @@ public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E e
 			return true;
 		}
 		return false;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.CollisionBody)
-	 */
-	@Override
-	public AABB getAABB(T body) {
-		int size = body.getFixtureCount();
-		if (size == 0) {
-			return new AABB(0, 0, 0, 0);
-		}
-		// create an item to reuse so we don't allocate a bunch of these
-		BroadphaseItem<T, E> item = new BroadphaseItem<T, E>(body, body.getFixture(0));
-		AABB union = this.getAABB(item).copy();
-		for (int i = 1; i < size; i++) {
-			item.fixture = body.getFixture(i);
-			AABB aabb = this.getAABB(item);
-			union.union(aabb);
-		}
-		return union;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABB(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
-	 */
-	@Override
-	public AABB getAABB(T body, E fixture) {
-		CollisionItem<T, E> key = new BroadphaseItem<T, E>(body, fixture);
-		return this.getAABB(key);
 	}
 	
 	/* (non-Javadoc)
@@ -198,30 +112,10 @@ public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E e
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#contains(org.dyn4j.collision.CollisionBody)
-	 */
-	@Override
-	public boolean contains(T body) {
-		int size = body.getFixtureCount();
-		if (size == 0) return false;
-		// create an item to reuse so we don't allocate a bunch of these
-		BroadphaseItem<T, E> item = new BroadphaseItem<T, E>(body, null);
-		for (int i = 0; i < size; i++) {
-			E fixture = body.getFixture(i);
-			item.fixture = fixture;
-			if (!this.contains(item)) {
-				return false;
-			}
-		}
-		
-		return true;
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect()
 	 */
 	@Override
-	public List<CollisionPair<T, E>> detect() {
+	public List<CollisionPair<T>> detect() {
 		return this.detect(true);
 	}
 	
@@ -229,43 +123,51 @@ public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E e
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(boolean)
 	 */
 	@Override
-	public List<CollisionPair<T, E>> detect(boolean forceFullDetection) {
+	public List<CollisionPair<T>> detect(boolean forceFullDetection) {
 		int eSize = Collisions.getEstimatedCollisionPairs(this.size());
-		List<CollisionPair<T, E>> items = new ArrayList<CollisionPair<T,E>>(eSize);
-		Iterator<CollisionPair<T, E>> it = this.detectIterator(forceFullDetection);
+		List<CollisionPair<T>> items = new ArrayList<CollisionPair<T>>(eSize);
+		Iterator<CollisionPair<T>> it = this.detectIterator(forceFullDetection);
 		while (it.hasNext()) {
-			CollisionPair<T, E> item = it.next();
+			CollisionPair<T> item = it.next();
 			items.add(item.copy());
 		}
 		return items;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detectIterator()
+	 */
+	@Override
+	public Iterator<CollisionPair<T>> detectIterator() {
+		return this.detectIterator(false);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.AABB)
 	 */
 	@Override
-	public List<CollisionItem<T, E>> detect(AABB aabb) {
+	public List<T> detect(AABB aabb) {
 		int eSize = Collisions.getEstimatedCollisionsPerObject();
-		List<CollisionItem<T, E>> items = new ArrayList<CollisionItem<T,E>>(eSize);
-		Iterator<CollisionItem<T, E>> it = this.detectIterator(aabb);
+		List<T> items = new ArrayList<T>(eSize);
+		Iterator<T> it = this.detectIterator(aabb);
 		while (it.hasNext()) {
-			CollisionItem<T, E> item = it.next();
-			items.add(item.copy());
+			T item = it.next();
+			items.add(item);
 		}
 		return items;
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#detect(org.dyn4j.geometry.Ray, double)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#raycast(org.dyn4j.geometry.Ray, double)
 	 */
 	@Override
-	public List<CollisionItem<T, E>> raycast(Ray ray, double length) {
+	public List<T> raycast(Ray ray, double length) {
 		int eSize = Collisions.getEstimatedRaycastCollisions(this.size());
-		List<CollisionItem<T, E>> items = new ArrayList<CollisionItem<T,E>>(eSize);
-		Iterator<CollisionItem<T, E>> it = this.raycastIterator(ray, length);
+		List<T> items = new ArrayList<T>(eSize);
+		Iterator<T> it = this.raycastIterator(ray, length);
 		while (it.hasNext()) {
-			CollisionItem<T, E> item = it.next();
-			items.add(item.copy());
+			T item = it.next();
+			items.add(item);
 		}
 		return items;
 	}
@@ -307,35 +209,27 @@ public abstract class AbstractBroadphaseDetector<T extends CollisionBody<E>, E e
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isAABBExpansionSupported()
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABBProducer()
 	 */
 	@Override
-	public boolean isAABBExpansionSupported() {
-		return true;
+	public AABBProducer<T> getAABBProducer() {
+		return this.aabbProducer;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#isUpdateTrackingSupported()
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABBExpansionMethod()
 	 */
 	@Override
-	public boolean isUpdateTrackingSupported() {
-		return true;
+	public AABBExpansionMethod<T> getAABBExpansionMethod() {
+		return this.aabbExpansionMethod;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getAABBExpansion()
+	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#getBroadphaseFilter()
 	 */
 	@Override
-	public double getAABBExpansion() {
-		return this.expansion;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.broadphase.BroadphaseDetector#setAABBExpansion(double)
-	 */
-	@Override
-	public void setAABBExpansion(double expansion) {
-		this.expansion = expansion;
+	public BroadphaseFilter<T> getBroadphaseFilter() {
+		return this.broadphaseFilter;
 	}
 	
 	/* (non-Javadoc)

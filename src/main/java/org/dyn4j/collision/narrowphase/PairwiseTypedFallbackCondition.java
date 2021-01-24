@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import org.dyn4j.geometry.Convex;
  * <p>
  * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.1.0
  * @since 3.1.5
  */
 public class PairwiseTypedFallbackCondition extends TypedFallbackCondition implements FallbackCondition, Comparable<FallbackCondition> {
@@ -131,41 +131,6 @@ public class PairwiseTypedFallbackCondition extends TypedFallbackCondition imple
 		this.strict1 = strict1;
 		this.type2 = type2;
 		this.strict2 = strict2;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.narrowphase.AbstractFallbackCondition#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + (this.strict1 ? 1231 : 1237);
-		result = prime * result + (this.strict2 ? 1231 : 1237);
-		result = prime * result + ((this.type1 == null) ? 0 : this.type1.hashCode());
-		result = prime * result + ((this.type2 == null) ? 0 : this.type2.hashCode());
-		return result;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj == this) return true;
-		if (obj instanceof PairwiseTypedFallbackCondition) {
-			PairwiseTypedFallbackCondition pfc = (PairwiseTypedFallbackCondition)obj;
-			// the types must be equal
-			if (((pfc.type1 == this.type1 && pfc.type2 == this.type2) || 
-				 (pfc.type1 == this.type2 && pfc.type2 == this.type1)) &&
-				 // and their strictness must be equal
-			      pfc.strict1 == this.strict1 && pfc.strict2 == this.strict2 &&
-			      pfc.sortIndex == this.sortIndex) {
-				return true;
-			}
-		}
-		return false;
 	}
 	
 	/* (non-Javadoc)

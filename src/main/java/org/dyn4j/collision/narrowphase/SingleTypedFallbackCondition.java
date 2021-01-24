@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import org.dyn4j.geometry.Convex;
  * <p>
  * Note: this class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.1.0
  * @since 3.1.5
  */
 public class SingleTypedFallbackCondition extends TypedFallbackCondition implements FallbackCondition, Comparable<FallbackCondition> {
@@ -82,36 +82,6 @@ public class SingleTypedFallbackCondition extends TypedFallbackCondition impleme
 		this.strict = strict;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.narrowphase.AbstractFallbackCondition#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + (this.strict ? 1231 : 1237);
-		result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
-		return result;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.narrowphase.AbstractFallbackCondition#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (this == obj) return true;
-		if (obj instanceof SingleTypedFallbackCondition) {
-			SingleTypedFallbackCondition other = (SingleTypedFallbackCondition) obj;
-			if (this.strict == other.strict
-			 && this.type == other.type
-			 && this.sortIndex == other.sortIndex) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

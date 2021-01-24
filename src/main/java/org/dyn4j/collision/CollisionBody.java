@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents an object that can collide with other objects.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
  * @param <T> the {@link Fixture} type
  * @see AbstractCollisionBody
@@ -318,6 +318,29 @@ public interface CollisionBody<T extends Fixture> extends Transformable, Shiftab
 	 * @since 3.2.0
 	 */
 	public abstract AABB createAABB(Transform transform);
+	
+	/**
+	 * Computes an {@link AABB} from this {@link CollisionBody}'s attached {@link Fixture}s and places
+	 * the result in the given AABB.
+	 * <p>
+	 * If there are no fixtures attached, the result is set to a degenerate AABB, (0.0, 0.0) to (0.0, 0.0).
+	 * @param result the AABB to set
+	 * @throws NullPointerException if the given AABB is null
+	 * @since 4.1.0
+	 */
+	public abstract void computeAABB(AABB result);
+	
+	/**
+	 * Computes an {@link AABB} from this {@link CollisionBody}'s attached {@link Fixture}s using the given 
+	 * world space {@link Transform} and places the result in the given AABB.
+	 * <p>
+	 * If there are no fixtures attached, the result is set to a degenerate AABB, (0.0, 0.0) to (0.0, 0.0).
+	 * @param transform the world space {@link Transform}
+	 * @param result the AABB to set
+	 * @throws NullPointerException if the given transform or AABB is null
+	 * @since 4.1.0
+	 */
+	public abstract void computeAABB(Transform transform, AABB result);
 	
 	/**
 	 * Sets the {@link CollisionBody} enabled or not.

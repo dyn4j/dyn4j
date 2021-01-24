@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -22,27 +22,23 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.world;
+package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.collision.Fixture;
+import org.dyn4j.geometry.AABB;
 
 /**
- * Helper class to avoid having to override all the methods of the {@link BroadphaseFilter} interface.
- * <p>
- * By default all the methods return true to allow all results to be returned.
+ * Exapansion method that does nothing to the given AABB.
  * @author William Bittle
- * @version 4.0.0
- * @since 3.2.0
- * @param <T> the {@link CollisionBody} type
- * @param <E> the {@link Fixture} type
+ * @version 4.1.0
+ * @since 4.1.0
+ * @param <T> the object type
  */
-public class BroadphaseFilterAdapter<T extends CollisionBody<E>, E extends Fixture> implements BroadphaseFilter<T, E>{
+public final class NullAABBExpansionMethod<T> implements AABBExpansionMethod<T> {
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.BroadphaseFilter#isAllowed(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture, org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
+	 * @see org.dyn4j.collision.broadphase.AABBExpansionMethod#expand(java.lang.Object, org.dyn4j.geometry.AABB)
 	 */
 	@Override
-	public boolean isAllowed(T body1, E fixture1, T body2, E fixture2) {
-		return true;
+	public void expand(T object, AABB aabb) {
+		
 	}
 }

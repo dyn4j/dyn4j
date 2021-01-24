@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.world;
 
+import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
@@ -64,7 +65,7 @@ public class World<T extends PhysicsBody> extends AbstractPhysicsWorld<T, WorldC
 	 * @see org.dyn4j.world.AbstractCollisionWorld#createCollisionData(org.dyn4j.collision.CollisionPair)
 	 */
 	@Override
-	protected WorldCollisionData<T> createCollisionData(CollisionPair<T, BodyFixture> pair) {
+	protected WorldCollisionData<T> createCollisionData(CollisionPair<CollisionItem<T, BodyFixture>> pair) {
 		return new WorldCollisionData<T>(pair);
 	}
 }

@@ -22,27 +22,52 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision;
+package org.dyn4j.world;
 
-import org.dyn4j.Copyable;
+import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.PhysicsBody;
 
 /**
- * Represents a collision between two {@link CollisionBody}'s {@link Fixture}s.
+ * Encapsulates logic used to filter the broadphase pairs based on filters, body state, etc.
+ * <p>
+ * Extend this class to add additional filtering capabilities to the broad-phase.
  * @author William Bittle
- * @param <T> the object type
  * @version 4.1.0
- * @since 4.0.0
+ * @since 4.1.0
+ * @param <T> the {@link PhysicsBody} type
  */
-public interface CollisionPair<T> extends Copyable<CollisionPair<T>> {
+public class PhysicsBodyBroadphaseCollisionDataFilter<T extends PhysicsBody> extends CollisionBodyBroadphaseCollisionDataFilter<T, BodyFixture> implements BroadphaseCollisionDataFilter<T, BodyFixture> {
+	/** The world */
+	private final PhysicsWorld<T, ?> world;
+	
 	/**
-	 * Returns the first object.
-	 * @return T
+	 * Minimal constructor.
+	 * @param world the world
 	 */
-	public T getFirst();
-
-	/**
-	 * Returns the second object.
-	 * @return T
+	public PhysicsBodyBroadphaseCollisionDataFilter(PhysicsWorld<T, ?> world) {
+		this.world = world;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture, org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
 	 */
-	public T getSecond();
+	@Override
+	public boolean isAllowed(T body1, BodyFixture fixture1, T body2, BodyFixture fixture2) {
+		// check with the base class first
+		if (!super.isAllowed(body1, fixture1, body2, fixture2)) {
+			return false;
+		}
+		
+		// one body must be dynamic (unless one is a sensor)
+		if (!body1.isDynamic() && !body2.isDynamic() && !fixture1.isSensor() && !fixture2.isSensor()) {
+			return false;
+		}
+		
+		// check for connected pairs who's collision is not allowed
+		if (!this.world.isJointCollisionAllowed(body1, body2)) {
+			return false;
+		}
+		
+		return true;
+	}
 }

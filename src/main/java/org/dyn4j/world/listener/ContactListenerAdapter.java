@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.dyn4j.world.ContactCollisionData;
 /**
  * Convenience class for implementing the {@link ContactListener} interface.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -62,6 +62,12 @@ public class ContactListenerAdapter<T extends PhysicsBody> implements ContactLis
 	public void persist(ContactCollisionData<T> collision, Contact oldContact, Contact newContact) {}
 
 	/* (non-Javadoc)
+	 * @see org.dyn4j.world.listener.ContactListener#collision(org.dyn4j.world.ContactCollisionData)
+	 */
+	@Override
+	public void collision(ContactCollisionData<T> collision) {}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.ContactListener#preSolve(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact)
 	 */
 	@Override
@@ -72,5 +78,4 @@ public class ContactListenerAdapter<T extends PhysicsBody> implements ContactLis
 	 */
 	@Override
 	public void postSolve(ContactCollisionData<T> collision, SolvedContact contact) {}
-
 }

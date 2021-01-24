@@ -22,27 +22,27 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision;
+package org.dyn4j.world;
 
-import org.dyn4j.Copyable;
+import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.collision.Fixture;
 
 /**
- * Represents a collision between two {@link CollisionBody}'s {@link Fixture}s.
+ * Helper class to avoid having to override all the methods of the {@link BroadphaseCollisionDataFilter} interface.
+ * <p>
+ * By default all the methods return true to allow all results to be returned.
  * @author William Bittle
- * @param <T> the object type
  * @version 4.1.0
- * @since 4.0.0
+ * @since 3.2.0
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
  */
-public interface CollisionPair<T> extends Copyable<CollisionPair<T>> {
-	/**
-	 * Returns the first object.
-	 * @return T
+public class BroadphaseCollisionDataFilterAdapter<T extends CollisionBody<E>, E extends Fixture> implements BroadphaseCollisionDataFilter<T, E>{
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.BroadphaseCollisionDataFilter#isAllowed(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture, org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
 	 */
-	public T getFirst();
-
-	/**
-	 * Returns the second object.
-	 * @return T
-	 */
-	public T getSecond();
+	@Override
+	public boolean isAllowed(T body1, E fixture1, T body2, E fixture2) {
+		return true;
+	}
 }

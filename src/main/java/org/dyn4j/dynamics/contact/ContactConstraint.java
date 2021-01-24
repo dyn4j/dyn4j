@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
@@ -50,7 +51,7 @@ import org.dyn4j.resources.Messages;
  */
 public final class ContactConstraint<T extends PhysicsBody> implements Shiftable {
 	/** The collision pair */
-	protected final CollisionPair<T, BodyFixture> pair;
+	protected final CollisionPair<CollisionItem<T, BodyFixture>> pair;
 	
 	/** The {@link Contact}s */
 	protected final List<SolvableContact> contacts;
@@ -92,7 +93,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * Full constructor.
 	 * @param pair the pair
 	 */
-	public ContactConstraint(CollisionPair<T, BodyFixture> pair) {
+	public ContactConstraint(CollisionPair<CollisionItem<T, BodyFixture>> pair) {
 		// set the pair
 		this.pair = pair;
 		// create contact array
@@ -125,10 +126,10 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		double maxWarmStartDistanceSquared = settings.getMaximumWarmStartDistanceSquared();
 		boolean isWarmStartEnabled = settings.isWarmStartingEnabled();
 		
-		T body1 = this.pair.getBody1();
-		T body2 = this.pair.getBody2();
-		BodyFixture fixture1 = this.pair.getFixture1();
-		BodyFixture fixture2 = this.pair.getFixture2();
+		T body1 = this.pair.getFirst().getBody();
+		T body2 = this.pair.getSecond().getBody();
+		BodyFixture fixture1 = this.pair.getFirst().getFixture();
+		BodyFixture fixture2 = this.pair.getSecond().getFixture();
 		
 		// reset all other data
 		// NOTE: we need to do this before any listeners are called because the user
@@ -217,10 +218,10 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("ContactConstraint[").append(super.toString())
-		  .append("|Body1=").append(this.pair.getBody1().hashCode())
-		  .append("|Fixture1=").append(this.pair.getFixture1().hashCode())
-		  .append("|Body2=").append(this.pair.getBody2().hashCode())
-		  .append("|Fixture2=").append(this.pair.getFixture2().hashCode())
+		  .append("|Body1=").append(this.pair.getFirst().getBody().hashCode())
+		  .append("|Fixture1=").append(this.pair.getFirst().getFixture().hashCode())
+		  .append("|Body2=").append(this.pair.getSecond().getBody().hashCode())
+		  .append("|Fixture2=").append(this.pair.getSecond().getFixture().hashCode())
 		  .append("|Normal=").append(this.normal)
 		  .append("|Tangent=").append(this.tangent)
 		  .append("|Friction=").append(this.friction)
@@ -285,7 +286,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * @return {@link CollisionPair}
 	 * @since 4.0.0
 	 */
-	public CollisionPair<T, BodyFixture> getCollisionPair() {
+	public CollisionPair<CollisionItem<T, BodyFixture>> getCollisionPair() {
 		return this.pair;
 	}
 	
@@ -294,7 +295,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * @return {@link PhysicsBody}
 	 */
 	public T getBody1() {
-		return this.pair.getBody1();
+		return this.pair.getFirst().getBody();
 	}
 	
 	/**
@@ -302,7 +303,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * @return {@link PhysicsBody}
 	 */
 	public T getBody2() {
-		return this.pair.getBody2();
+		return this.pair.getSecond().getBody();
 	}
 
 	/**
@@ -310,7 +311,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * @return {@link BodyFixture} the first {@link PhysicsBody}'s {@link BodyFixture}
 	 */
 	public BodyFixture getFixture1() {
-		return this.pair.getFixture1();
+		return this.pair.getFirst().getFixture();
 	}
 	
 	/**
@@ -318,7 +319,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * @return {@link BodyFixture} the second {@link PhysicsBody}'s {@link BodyFixture}
 	 */
 	public BodyFixture getFixture2() {
-		return this.pair.getFixture2();
+		return this.pair.getSecond().getFixture();
 	}
 	
 	/**
@@ -329,7 +330,14 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * @return T
 	 */
 	public T getBody(CollisionBody<?> body) {
-		return this.pair.getBody(body);
+		T body1 = this.pair.getFirst().getBody();
+		T body2 = this.pair.getSecond().getBody();
+		if (body1 == body) {
+			return body1;
+		} else if (body2 == body) {
+			return body2;
+		}
+		return null;
 	}
 	
 	/**
@@ -340,7 +348,14 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * @return E
 	 */
 	public BodyFixture getFixture(CollisionBody<?> body) {
-		return this.pair.getFixture(body);
+		T body1 = this.pair.getFirst().getBody();
+		T body2 = this.pair.getSecond().getBody();
+		if (body1 == body) {
+			return this.pair.getFirst().getFixture();
+		} else if (body2 == body) {
+			return this.pair.getSecond().getFixture();
+		}
+		return null;
 	}
 	
 	/**
@@ -351,7 +366,14 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * @return T
 	 */
 	public T getOtherBody(CollisionBody<?> body) {
-		return this.pair.getOtherBody(body);
+		T body1 = this.pair.getFirst().getBody();
+		T body2 = this.pair.getSecond().getBody();
+		if (body1 == body) {
+			return body2;
+		} else if (body2 == body) {
+			return body1;
+		}
+		return null;
 	}
 	
 	/**
@@ -362,7 +384,14 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * @return E
 	 */
 	public BodyFixture getOtherFixture(CollisionBody<?> body) {
-		return this.pair.getOtherFixture(body);
+		T body1 = this.pair.getFirst().getBody();
+		T body2 = this.pair.getSecond().getBody();
+		if (body1 == body) {
+			return this.pair.getSecond().getFixture();
+		} else if (body2 == body) {
+			return this.pair.getFirst().getFixture();
+		}
+		return null;
 	}
 	
 	/**

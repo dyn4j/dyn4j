@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -39,7 +39,7 @@ import org.dyn4j.geometry.Vector2;
  * Given the way the simplex is expanded, the winding can be computed initially
  * and will never change.
  * @author William Bittle 
- * @version 3.2.0
+ * @version 4.1.0
  * @since 3.2.0
  */
 final class ExpandingSimplex {
@@ -54,11 +54,13 @@ final class ExpandingSimplex {
 	 * @param simplex the starting simplex from GJK
 	 */
 	public ExpandingSimplex(List<Vector2> simplex) {
+		int size = simplex.size();		
+
 		// compute the winding
-		this.winding = this.getWinding(simplex);
+		this.winding = this.getSimplexWinding(simplex);
 		// build the initial edge queue
 		this.queue = new PriorityQueue<ExpandingSimplexEdge>();
-		int size = simplex.size();
+		
 		for (int i = 0; i < size; i++) {
 			// compute j
 			int j = i + 1 == size ? 0 : i + 1;
@@ -85,7 +87,7 @@ final class ExpandingSimplex {
 	 * @param simplex the simplex
 	 * @return int the winding
 	 */
-	protected final int getWinding(List<Vector2> simplex) {
+	private final int getSimplexWinding(List<Vector2> simplex) {
 		int size = simplex.size();
 		for (int i = 0; i < size; i++) {
 			int j = i + 1 == size ? 0 : i + 1;
@@ -101,6 +103,17 @@ final class ExpandingSimplex {
 	}
 	
 	/**
+	 * Returns the winding of the simplex. Returns 0 in the case of a
+	 * degenerate simplex, -1 in the clockwise winding case, 1 in the
+	 * counter clockwise winding case.
+	 * @return int
+	 * @since 4.1.0
+	 */
+	public final int getWinding() {
+		return this.winding;
+	}
+	
+	/**
 	 * Returns the edge on the simplex that is closest to the origin.
 	 * @return {@link ExpandingSimplexEdge} the closest edge to the origin
 	 */
@@ -109,7 +122,7 @@ final class ExpandingSimplex {
 	}
 	
 	/**
-	 * Expands the simplex by the given point.
+	 * Expands the simplex (the closest edge) by the given point.
 	 * <p>
 	 * Removes the closest edge to the origin and adds
 	 * two new edges using the given point and the removed
@@ -124,5 +137,14 @@ final class ExpandingSimplex {
 		ExpandingSimplexEdge edge2 = new ExpandingSimplexEdge(point, edge.point2, this.winding);
 		this.queue.add(edge1); // O(log n)
 		this.queue.add(edge2); // O(log n)
+	}
+	
+	/**
+	 * Returns the number of edges in the simplex.
+	 * @since 4.1.0
+	 * @return int
+	 */
+	public final int size() {
+		return this.queue.size();
 	}
 }

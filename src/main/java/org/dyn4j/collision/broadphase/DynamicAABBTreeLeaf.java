@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,28 +24,24 @@
  */
 package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.collision.Fixture;
-
 /**
  * Represents a leaf node in a {@link DynamicAABBTree}.
  * <p>
- * The leaf nodes in a {@link DynamicAABBTree} are the nodes that contain the {@link Fixture} AABBs.
+ * The leaf nodes in a {@link DynamicAABBTree} are the nodes that contain the object AABBs.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 3.2.0
- * @param <T> the {@link CollisionBody} type
- * @param <E> the {@link Fixture} type
+ * @param <T> the object type
  */
-final class DynamicAABBTreeLeaf<T extends CollisionBody<E>, E extends Fixture> extends DynamicAABBTreeNode {
+final class DynamicAABBTreeLeaf<T> extends DynamicAABBTreeNode {
 	/** The collsion item */
-	final BroadphaseItem<T, E> item;
+	final T item;
 	
 	/**
 	 * Minimal constructor.
 	 * @param item the collision item
 	 */
-	public DynamicAABBTreeLeaf(BroadphaseItem<T, E> item) {
+	public DynamicAABBTreeLeaf(T item) {
 		this.item = item;
 	}
 	
@@ -55,8 +51,7 @@ final class DynamicAABBTreeLeaf<T extends CollisionBody<E>, E extends Fixture> e
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("DynamicAABBTreeLeaf[Body=").append(this.item.body.hashCode())
-		  .append("|Fixture=").append(this.item.fixture.hashCode())
+		sb.append("DynamicAABBTreeLeaf[Item=").append(this.item)
 		  .append("|AABB=").append(this.aabb.toString())
 		  .append("|Height=").append(this.height)
 		  .append("]");

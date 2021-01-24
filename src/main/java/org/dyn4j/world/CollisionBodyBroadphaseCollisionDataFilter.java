@@ -22,27 +22,38 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision;
+package org.dyn4j.world;
 
-import org.dyn4j.Copyable;
+import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.collision.Filter;
+import org.dyn4j.collision.Fixture;
 
 /**
- * Represents a collision between two {@link CollisionBody}'s {@link Fixture}s.
+ * The default filter for {@link CollisionWorld}s that filters {@link Fixture}s by 
+ * their {@link Filter}s and their enable flags.
+ * <p>
+ * It's recommended that this class be extended when creating custom {@link BroadphaseCollisionDataFilter}s to ensure
+ * the default functionality is retained. 
  * @author William Bittle
- * @param <T> the object type
+ * @param <T> the {@link CollisionBody} type
+ * @param <E> the {@link Fixture} type
  * @version 4.1.0
- * @since 4.0.0
+ * @since 4.1.0
  */
-public interface CollisionPair<T> extends Copyable<CollisionPair<T>> {
-	/**
-	 * Returns the first object.
-	 * @return T
+public class CollisionBodyBroadphaseCollisionDataFilter<T extends CollisionBody<E>, E extends Fixture> implements BroadphaseCollisionDataFilter<T, E> {
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture, org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
 	 */
-	public T getFirst();
-
-	/**
-	 * Returns the second object.
-	 * @return T
-	 */
-	public T getSecond();
+	@Override
+	public boolean isAllowed(T body1, E fixture1, T body2, E fixture2) {
+		// inactive objects don't have collision detection/response
+		if (!body1.isEnabled() || !body2.isEnabled()) {
+			return false;
+		}
+		
+		// compare the filters
+		Filter filter1 = fixture1.getFilter();
+		Filter filter2 = fixture2.getFilter();
+		return filter1.isAllowed(filter2);
+	}
 }

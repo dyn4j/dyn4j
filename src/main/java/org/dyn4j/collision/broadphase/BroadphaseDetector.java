@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,7 +30,6 @@ import java.util.List;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
-import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.narrowphase.NarrowphaseDetector;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
@@ -42,213 +41,111 @@ import org.dyn4j.geometry.Transform;
 /**
  * Represents a broad-phase collision detection algorithm.
  * <p>
- * A {@link BroadphaseDetector} should quickly determine the pairs of {@link CollisionBody}s and 
- * {@link Fixture}s that possibly intersect.  These algorithms are used to filter out collision 
- * pairs in the interest of sending less pairs to the {@link NarrowphaseDetector} which is generally
- * much more expensive.
+ * A {@link BroadphaseDetector} should quickly determine the pairs of objects that possibly intersect.  
+ * These algorithms are used to filter out collision pairs in the interest of sending less pairs to 
+ * the {@link NarrowphaseDetector} which is generally much more expensive.
  * <p>
- * {@link BroadphaseDetector}s require that the bodies are updated via the {@link #update(CollisionBody)}
- * or {@link #update(CollisionBody, Fixture)} methods when the bodies move, rotate, or have their shape
- * changed in anyway.
+ * {@link BroadphaseDetector}s require that the objects are updated via the {@link #update(Object)}
+ * method when translated, rotated, or have their shape changed in anyway.
  * <p>
- * <b>
- * NOTE: Special care must be taken when removing fixtures from a body.  Be sure to call the 
- * {@link #remove(CollisionBody, Fixture)} method to make sure its removed from the broad-phase.
- * </b>
+ * A {@link AABBProducer} is used to produce an {@link AABB} from a given object.  AABBs are used by the
+ * {@link BroadphaseDetector}s to accelerate the initial detection of collision pairs.
  * <p>
- * Some {@link BroadphaseDetector}s use a expansion value to expand a body's AABB width and height.  The 
- * {@link #getAABB(CollisionBody)} returns the expanded {@link AABB}.  This expansion is used to reduce the 
- * number of updates to the broad-phase.  See the {@link #setAABBExpansion(double)} for more details on 
- * this value.
+ * Some {@link BroadphaseDetector}s may use a expansion method to expand an object's AABB size.  The 
+ * {@link #getAABB(Object)} method returns the expanded {@link AABB} in this scenario.  This expansion 
+ * is used to reduce the number of updates to the broad-phase acceleration structure.  See also the
+ * {@link AABBExpansionMethod} interface for more detail.
  * <p>
- * The {@link #detect()}, {@link #detect(AABB)}, {@link #raycast(Ray, double)} methods and their Iterator 
- * counterpart methods use the current state of all the bodies and fixtures that have been added.  Make 
- * sure that all changes have been reflected to the broad-phase using the {@link #update(CollisionBody)} and 
- * {@link #update(CollisionBody, Fixture)} methods before calling these.
+ * The {@link #detect()}, {@link #detect(AABB)}, {@link #raycast(Ray, double)} methods, and their Iterator 
+ * counterparts, use the current state of the acceleration structure housed by the {@link BroadphaseDetector}.  
+ * Make sure that all changes have been reflected to the broad-phase (via {@link #update(Object)}, 
+ * {@link #remove(Object)}, etc) before using these methods.
  * <p>
  * The {@link #detect(Convex, Transform, Convex, Transform)} method does not use the current state of the broad-phase,
- * but the {@link #detect(CollisionBody, CollisionBody)} does.
+ * but the {@link #detect(Object, Object)} does.
+ * <p>
+ * There are two main operation modes for {@link BroadphaseDetector}s: Full or Incremental. Full is the classic way
+ * where every call to the {@link #detect()} or {@link #detectIterator()} methods return all overlapping pairs.  This
+ * has the advantage of always getting a fresh list of pairs.  The down side, even with acceleration structures in place,
+ * is that it's a lot of extra work, especially for scenes where most objects don't move between frames.  Incremental is
+ * the new way where every call to the {@link #detect()} or {@link #detectIterator()} methods returns only the pairs where
+ * one of the objects had their AABB updated (see above regarding the expansion method).  In this mode, callers would need
+ * to manage the list of pairs overtime and check for those no longer overlapping.  While this is more work on the caller,
+ * it's far more efficient.
+ * <p>
+ * <b>NOTE:</b> The objects added to a {@link BroadphaseDetector} may be used in data structures that rely on the
+ * {@link Object#hashCode()} and {@link Object#equals(Object)} methods and the == operator.  In general, when using subclasses of
+ * {@link CollisionBody}, avoid overriding these methods.  When using subclasses of {@link CollisionItem}, avoid
+ * reusing those object as the hashcode and equals method depends upon the content.
  * @author William Bittle
  * @version 4.1.0
  * @since 1.0.0
- * @param <T> the {@link CollisionBody} type
- * @param <E> the {@link Fixture} type
+ * @param <T> the object type
  */
-public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixture> extends Shiftable {
-	/** The default {@link AABB} expansion value */
-	public static final double DEFAULT_AABB_EXPANSION = 0.2;
-	
+public interface BroadphaseDetector<T> extends Shiftable {
 	/** The default initial capacity of fixtures */
 	public static final int DEFAULT_INITIAL_CAPACITY = 64;
 	
 	/**
-	 * Adds a new {@link CollisionBody} to the broad-phase.
+	 * Adds a new object to this broad-phase.
 	 * <p>
-	 * This will add all the given {@link CollisionBody}'s {@link Fixture}s to the broad-phase.
-	 * <p>
-	 * If the body has no fixtures, nothing will be added to this broad-phase.
-	 * <p>
-	 * If the {@link CollisionBody}'s {@link Fixture}s have already been added to this broad-phase
-	 * they will instead be updated.
-	 * <p>
-	 * If a {@link Fixture} has been added to the {@link CollisionBody} and the {@link CollisionBody}
-	 * has already been added to this broadphase, any new {@link Fixture}s will be added, and the
-	 * existing ones will be updated.
-	 * <p>
-	 * If a fixture is removed from a {@link CollisionBody}, the calling code must
-	 * call the {@link #remove(CollisionBody, Fixture)} method for that fixture to 
-	 * be removed from the broad-phase.  This method makes no effort to remove
-	 * fixtures no longer attached to the given body.
-	 * @param body the {@link CollisionBody}
+	 * If the given object has already been added, the object is updated ({@link #update(Object)}).
+	 * @param object the object to add
 	 * @since 3.0.0
 	 */
-	public abstract void add(T body);
+	public abstract void add(T object);
 	
 	/**
-	 * Adds a new {@link Fixture} for the given {@link CollisionBody} to
-	 * the broad-phase.
-	 * @param body the body
-	 * @param fixture the fixture to add
-	 * @since 3.2.0
-	 */
-	public abstract void add(T body, E fixture);
-	
-	/**
-	 * Removes the given {@link CollisionBody} from the broad-phase.
-	 * <p>
-	 * This method removes all the {@link Fixture}s attached to the
-	 * given {@link CollisionBody} from the broad-phase.
-	 * <p>
-	 * If a fixture is removed from a {@link CollisionBody}, the calling code must
-	 * call the {@link #remove(CollisionBody, Fixture)} method for that fixture to 
-	 * be removed from the broad-phase.  This method makes no effort to remove
-	 * fixtures no longer attached to the given body.
-	 * @param body the {@link CollisionBody}
+	 * Removes the given object from this broad-phase.
+	 * @param object the object to remove
 	 * @since 3.0.0
+	 * @return boolean true if the object was removed
 	 */
-	public abstract void remove(T body);
+	public abstract boolean remove(T object);
 	
 	/**
-	 * Removes the given {@link Fixture} for the given {@link CollisionBody} from
-	 * the broad-phase and returns true if it was found.
-	 * @param body the body
-	 * @param fixture the fixture to remove
-	 * @return boolean true if the fixture was found and removed
+	 * Updates all the currently stored objects AABBs based on their
+	 * current state, the {@link AABBProducer}, and the {@link AABBExpansionMethod}.
+	 * @since 4.1.0
+	 */
+	public abstract void update();
+	
+	/**
+	 * Updates the broad-phase representation of the given object.
+	 * <p>
+	 * This should be called when the object's location, rotation, or shape has changed.
+	 * @param object the object
 	 * @since 3.2.0
 	 */
-	public abstract boolean remove(T body, E fixture);
+	public abstract void update(T object);
 	
 	/**
-	 * Removes the given {@link Fixture} for the given {@link CollisionBody} from
-	 * the broad-phase and returns true if it was found.
-	 * @param item the collision item
-	 * @return boolean true if the fixture was found and removed
-	 * @since 4.0.0
-	 */
-	public abstract boolean remove(CollisionItem<T, E> item);
-	
-	/**
-	 * Updates all the {@link Fixture}s on the given {@link CollisionBody}.
-	 * <p>
-	 * Used when the body or its fixtures have moved or rotated.
-	 * <p>
-	 * This method updates all the {@link Fixture}s attached to the
-	 * given {@link CollisionBody} from the broad-phase, if they exist. If the 
-	 * fixtures on the given body do not exist in the broad-phase, they are
-	 * added.
-	 * <p>
-	 * If a fixture is removed from a {@link CollisionBody}, the calling code must
-	 * call the {@link #remove(CollisionBody, Fixture)} method for that fixture to 
-	 * be removed from the broad-phase.  This method makes no effort to remove
-	 * fixtures no longer attached to the given body.
-	 * @param body the {@link CollisionBody}
-	 * @since 3.2.0
-	 */
-	public abstract void update(T body);
-	
-	/**
-	 * Updates the given {@link CollisionBody}'s {@link Fixture}.
-	 * <p>
-	 * Used when a fixture on a {@link CollisionBody} has moved or rotated.
-	 * <p>
-	 * This method will add the {@link Fixture} if it doesn't currently exist in
-	 * this broad-phase.
-	 * @param body the {@link CollisionBody}
-	 * @param fixture the {@link Fixture} that has moved
-	 * @since 3.2.0
-	 */
-	public abstract void update(T body, E fixture);
-	
-	/**
-	 * The {@link #update(CollisionBody)} method will only mark a {@link CollisionBody}
-	 * as updated if it's fixtures have moved enough to change the internally
-	 * stored AABB.
-	 * <p>
-	 * This method is intended to force the broadphase to include
-	 * this {@link CollisionBody}'s {@link Fixture}s in the updated list to ensure
+	 * This method forces this broad-phase to include the given object in the updated list to ensure
 	 * they are checked in the updated-only detection routine.
-	 * @param body the {@link CollisionBody}
-	 * @since 4.0.0
-	 */
-	public abstract void setUpdated(T body);
-	
-	/**
-	 * The {@link #update(CollisionBody, Fixture)} method will only mark the 
-	 * {@link Fixture} as updated if the {@link Fixture} has 
-	 * moved enough to change the internally stored AABB.
 	 * <p>
-	 * This method is intended to force the broadphase to include
-	 * the {@link Fixture} in the updated list to ensure
-	 * they are checked in the updated-only detection routine.
-	 * @param body the {@link CollisionBody}
-	 * @param fixture the {@link Fixture}
+	 * The {@link #update(Object)} method will only mark an object as updated if it's fixtures 
+	 * have moved enough to change the internally stored AABB.
+	 * @param object the object
 	 * @since 4.0.0
 	 */
-	public abstract void setUpdated(T body, E fixture);
+	public abstract void setUpdated(T object);
 	
 	/**
-	 * Returns true if any of the {@link Fixture}s on the given {@link CollisionBody}
-	 * are included in the updated list.
+	 * Returns true if the given object is marked as updated in this broad-phase.
 	 * <p>
 	 * If {@link #isUpdateTrackingEnabled()} is false, this method will always return true.
 	 * <p>
-	 * Returns false if the given body is not part of this broadphase.
-	 * @param body the {@link CollisionBody}
+	 * Returns false if the given object is not part of this broad-phase.
+	 * @param object the object
 	 * @return boolean
 	 * @since 4.0.0
 	 */
-	public abstract boolean isUpdated(T body);
+	public abstract boolean isUpdated(T object);
 	
 	/**
-	 * Returns true if the given {@link Fixture} is included in the updated list.
+	 * Clears internal state that tracks what objects have been updated.
 	 * <p>
-	 * If {@link #isUpdateTrackingEnabled()} is false, this method will always return true.
-	 * <p>
-	 * Returns false if the given body-fixture pair is not part of this broadphase.
-	 * @param body the {@link CollisionBody}
-	 * @param fixture the {@link Fixture}
-	 * @return boolean
-	 * @since 4.0.0
-	 */
-	public abstract boolean isUpdated(T body, E fixture);
-	
-	/**
-	 * Returns true if the given {@link Fixture} is included in the updated list.
-	 * <p>
-	 * If {@link #isUpdateTrackingEnabled()} is false, this method will always return true.
-	 * <p>
-	 * Returns false if the given body-fixture pair is not part of this broadphase.
-	 * @param item the collision item
-	 * @return boolean
-	 * @since 4.0.0
-	 */
-	public abstract boolean isUpdated(CollisionItem<T, E> item);
-	
-	/**
-	 * Clears any internal state that tracks what {@link CollisionBody} {@link Fixture}s have
-	 * been updated.
-	 * <p>
-	 * Typically this method would be called from a pipeline after a broadphase collision
+	 * Typically this method would be called from a pipeline after a broad-phase collision
 	 * detection method has been called to clear the state before starting to track new
 	 * updates.
 	 * @since 4.0.0
@@ -256,143 +153,111 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	public abstract void clearUpdates();
 	
 	/**
-	 * Returns the AABB for the given {@link CollisionBody}.
+	 * Returns the AABB for the given object.
 	 * <p>
-	 * The AABB returned is an AABB encompasing all fixtures on the
-	 * given {@link CollisionBody}.  When possible, AABBs from the
-	 * broad-phase will be used to create this, otherwise new AABBs
-	 * will be created and unioned.
-	 * <p>
-	 * In all cases this method returns the <b>expanded</b> AABB in the
-	 * case this detector supports it.
-	 * <p>
-	 * If the body doesn't have any fixtures a degenerate
-	 * AABB is returned.
-	 * @param body the {@link CollisionBody}
-	 * @return {@link AABB}
-	 * @since 3.2.0
-	 */
-	public abstract AABB getAABB(T body);
-	
-	/**
-	 * Returns the AABB for the given {@link CollisionBody} {@link Fixture}.
-	 * <p>
-	 * If the body and its fixture have not been added to this
-	 * broad-phase, a new AABB is created and returned (but not added to
-	 * broad-phase).
-	 * <p>
-	 * In all cases this method returns the <b>expanded</b> AABB in the
-	 * case this detector supports it.
+	 * <b>NOTE</b>: Some {@link BroadphaseDetector}s use modified (expanded for example)
+	 * AABBs rather than tight fitting AABBs as a performance enhancement.  This
+	 * method returns the AABB used by this detector, and therefore, the modified
+	 * AABB.
 	 * <p>
 	 * <b>NOTE</b>: The {@link AABB} returned from this method should not be modified.
 	 * Instead use the {@link AABB#copy()} method to create a new instance to 
 	 * modify.
-	 * @param body the {@link CollisionBody}
-	 * @param fixture the {@link Fixture}
+	 * <p>
+	 * If the given object does not exist in this {@link BroadphaseDetector} a new AABB is 
+	 * created based on the object's shape, the {@link #getAABBProducer()} and
+	 * {@link #getAABBExpansionMethod()}.
+	 * @param object the object
 	 * @return {@link AABB}
 	 * @since 3.2.0
 	 */
-	public abstract AABB getAABB(T body, E fixture);
+	public abstract AABB getAABB(T object);
 	
 	/**
-	 * Returns the AABB for the given {@link CollisionBody} {@link Fixture}.
-	 * <p>
-	 * If the body and its fixture have not been added to this
-	 * broad-phase, a new AABB is created and returned (but not added to
-	 * broad-phase).
-	 * <p>
-	 * In all cases this method returns the <b>expanded</b> AABB in the
-	 * case this detector supports it.
-	 * <p>
-	 * <b>NOTE</b>: The {@link AABB} returned from this method should not be modified.
-	 * Instead use the {@link AABB#copy()} method to create a new instance to 
-	 * modify.
-	 * @param item the collision item
-	 * @return {@link AABB}
-	 * @since 4.0.0
-	 */
-	public abstract AABB getAABB(CollisionItem<T, E> item);
-	
-	/**
-	 * Returns true if all the {@link Fixture}s on the given {@link CollisionBody}
-	 * have been added to this broad-phase.
-	 * <p>
-	 * If a body is added without any fixtures, this method will return
-	 * false, since the fixtures, not the body, are added to the
-	 * broad-phase.
-	 * @param body the {@link CollisionBody}
+	 * Returns true if the given object exists in this broad-phase.
+	 * @param object the object
 	 * @return boolean
 	 * @since 3.2.0
 	 */
-	public abstract boolean contains(T body);
+	public abstract boolean contains(T object);
 	
 	/**
-	 * Returns true if the given {@link Fixture} on the given {@link CollisionBody}
-	 * has been added to this broadphase.
-	 * @param body the {@link CollisionBody}
-	 * @param fixture the {@link Fixture}
-	 * @return boolean
-	 * @since 3.2.0
-	 */
-	public abstract boolean contains(T body, E fixture);
-	
-	/**
-	 * Returns true if the given {@link Fixture} on the given {@link CollisionBody}
-	 * has been added to this broadphase.
-	 * @param item the collision item
-	 * @return boolean
-	 * @since 4.0.0
-	 */
-	public abstract boolean contains(CollisionItem<T, E> item);
-	
-	/**
-	 * Clears all the {@link CollisionBody} {@link Fixture}s from this broad-phase and
-	 * any state held by this broadphase.
+	 * Clear all the internal state of this broad-phase.
 	 * @since 3.0.0
 	 */
 	public abstract void clear();
 	
 	/**
-	 * Returns the number of {@link CollisionBody} {@link Fixture}s that are being managed in this broad-phase.
+	 * Returns the number of objects managed in this broad-phase.
 	 * @return int
 	 */
 	public abstract int size();
 	
 	/**
-	 * Performs collision detection on all {@link CollisionBody} {@link Fixture}s that have 
-	 * been added to this {@link BroadphaseDetector} and returns the list of potential
-	 * pairs.
+	 * Performs collision detection on all objects that have been added to this 
+	 * {@link BroadphaseDetector} and returns the list of potential collision pairs 
+	 * (i.e. those pairs whose AABBs overlap).
+	 * <p>
+	 * The pairs returned from this method will depend on the value of the {@link #isUpdateTrackingEnabled()}
+	 * flag.  When false, the returned list will report all pairs, every invocation.  When true, the 
+	 * returned list will only contain pairs whose objects moved significantly enough to generate new 
+	 * AABBs.  As a result, this mode would not report those pairs who ARE NOT overlapping, nor 
+	 * would it report those pairs who ARE overlapping, but the objects didn't move enough.
 	 * @return List&lt;{@link BroadphasePair}&gt;
-	 * @since 3.0.0 
+	 * @since 3.0.0
 	 */
-	public abstract List<CollisionPair<T, E>> detect();
+	public abstract List<CollisionPair<T>> detect();
 
 	/**
-	 * Performs collision detection on {@link CollisionBody} {@link Fixture}s that have 
-	 * been added to this {@link BroadphaseDetector} and returns the list of potential
-	 * pairs.
+	 * Performs collision detection on all objects that have been added to this 
+	 * {@link BroadphaseDetector} and returns the list of potential collision pairs 
+	 * (i.e. those pairs whose AABBs overlap).
 	 * <p>
-	 * The returned pairs from this method will depend on the {@link #isUpdateTrackingEnabled()}
-	 * flag. If the flag is true, then only updated pairs will be emitted, otherwise all pairs
-	 * are emitted.
+	 * The pairs returned from this method will depend on the value of the {@link #isUpdateTrackingEnabled()}
+	 * flag.  When false, the returned list will report all pairs, every invocation.  When true, the 
+	 * returned list will only contain pairs whose objects moved significantly enough to generate new 
+	 * AABBs.  As a result, this mode would not report those pairs who ARE NOT overlapping, nor 
+	 * would it report those pairs who ARE overlapping, but the objects didn't move enough.
 	 * <p>
-	 * Use the forceFullDetection parameter to override this behavior for this call.
+	 * Use the forceFullDetection parameter to override the {@link #isUpdateTrackingEnabled()} flag for 
+	 * this invocation.
 	 * @param forceFullDetection true if a full detection should be performed
 	 * @return List&lt;{@link BroadphasePair}&gt;
 	 * @since 3.0.0 
 	 */
-	public abstract List<CollisionPair<T, E>> detect(boolean forceFullDetection);
+	public abstract List<CollisionPair<T>> detect(boolean forceFullDetection);
 	
 	/**
-	 * Performs collision detection on all {@link CollisionBody} {@link Fixture}s that have 
-	 * been added to this {@link BroadphaseDetector} and returns the list of potential
-	 * pairs.
+	 * Performs collision detection on all objects that have been added to this 
+	 * {@link BroadphaseDetector} and returns an iterator of potential collision pairs 
+	 * (i.e. those pairs whose AABBs overlap).
 	 * <p>
-	 * The returned pairs from this method will depend on the {@link #isUpdateTrackingEnabled()}
-	 * flag. If the flag is true, then only updated pairs will be emitted, otherwise all pairs
-	 * are emitted.
+	 * The pairs returned from this method will depend on the value of the {@link #isUpdateTrackingEnabled()}
+	 * flag.  When false, the returned iterator will report all pairs, every invocation.  When true, the 
+	 * returned iterator will only contain pairs whose objects moved significantly enough to generate new 
+	 * AABBs.  As a result, this mode would not report those pairs who ARE NOT overlapping, nor 
+	 * would it report those pairs who ARE overlapping, but the objects didn't move enough.
 	 * <p>
-	 * Use the forceFullDetection parameter to override this behavior for this call.
+	 * NOTE: This method returns {@link CollisionPair}s that are mutable internally. If you need
+	 * to store the pairs outside of the iteration, be sure to call the {@link CollisionPair#copy()}
+	 * method to create a copy of the pair data.
+	 * @return Iterator&lt;{@link CollisionPair}&gt;
+	 * @since 4.1.0
+	 */
+	public abstract Iterator<CollisionPair<T>> detectIterator();
+	
+	/**
+	 * Performs collision detection on all objects that have been added to this 
+	 * {@link BroadphaseDetector} and returns an iterator of potential collision pairs 
+	 * (i.e. those pairs whose AABBs overlap).
+	 * <p>
+	 * The pairs returned from this method will depend on the value of the {@link #isUpdateTrackingEnabled()}
+	 * flag.  When false, the returned iterator will report all pairs, every invocation.  When true, the 
+	 * returned iterator will only contain pairs whose objects moved significantly enough to generate new 
+	 * AABBs.  As a result, this mode would not report those pairs who ARE NOT overlapping, nor 
+	 * would it report those pairs who ARE overlapping, but the objects didn't move enough.
+	 * <p>
+	 * Use the forceFullDetection parameter to override this behavior for a single call.
 	 * <p>
 	 * NOTE: This method returns {@link CollisionPair}s that are mutable internally. If you need
 	 * to store the pairs outside of the iteration, be sure to call the {@link CollisionPair#copy()}
@@ -401,50 +266,50 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * @return Iterator&lt;{@link CollisionPair}&gt;
 	 * @since 4.0.0
 	 */
-	public abstract Iterator<CollisionPair<T, E>> detectIterator(boolean forceFullDetection);
+	public abstract Iterator<CollisionPair<T>> detectIterator(boolean forceFullDetection);
 	
 	/**
 	 * Performs a broad-phase collision test using the given {@link AABB} and returns
 	 * the items that overlap.
 	 * @param aabb the {@link AABB} to test
-	 * @return List&lt;{@link CollisionItem}&gt;
+	 * @return List&lt;T&gt;
 	 * @since 3.0.0
 	 */
-	public abstract List<CollisionItem<T, E>> detect(AABB aabb);
+	public abstract List<T> detect(AABB aabb);
 
 	/**
 	 * Performs a broad-phase collision test using the given {@link AABB} and returns
 	 * the items that overlap.
 	 * @param aabb the {@link AABB} to test
-	 * @return Iterator&lt;{@link CollisionItem}&gt;
+	 * @return Iterator&lt;T&gt;
 	 * @since 4.0.0
 	 */
-	public abstract Iterator<CollisionItem<T, E>> detectIterator(AABB aabb);
+	public abstract Iterator<T> detectIterator(AABB aabb);
 	
 	/**
-	 * Performs a raycast over all the bodies in the broad-phase and returns the
+	 * Performs a raycast over all the objects in this broad-phase and returns the
 	 * items that intersect.
 	 * @param ray the {@link Ray}
 	 * @param length the length of the ray; 0.0 for infinite length
-	 * @return List&lt;{@link CollisionItem}&gt;
+	 * @return List&lt;T&gt;
 	 * @since 3.0.0
 	 */
-	public abstract List<CollisionItem<T, E>> raycast(Ray ray, double length);
+	public abstract List<T> raycast(Ray ray, double length);
 	
 	/**
-	 * Performs a raycast over all the bodies in the broad-phase and returns the
+	 * Performs a raycast over all the objects in the broad-phase and returns the
 	 * items that intersect.
 	 * @param ray the {@link Ray}
 	 * @param length the length of the ray; 0.0 for infinite length
-	 * @return Iterator&lt;{@link CollisionItem}&gt;
+	 * @return Iterator&lt;T&gt;
 	 * @since 4.0.0
 	 */
-	public abstract Iterator<CollisionItem<T, E>> raycastIterator(Ray ray, double length);
+	public abstract Iterator<T> raycastIterator(Ray ray, double length);
 	
 	/**
-	 * Returns true if this broad-phase detector considers the given bodies to be in collision.
-	 * @param a the first {@link CollisionBody}
-	 * @param b the second {@link CollisionBody}
+	 * Returns true if this broad-phase detector considers the given objects to be in collision.
+	 * @param a the first object
+	 * @param b the second object
 	 * @return boolean
 	 */
 	public abstract boolean detect(T a, T b);
@@ -460,43 +325,38 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	 * @return boolean
 	 */
 	public abstract boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2);
+
+	/**
+	 * Returns the {@link AABBProducer} used by this broad-phase detector.
+	 * @return {@link AABBProducer}
+	 * @since 4.1.0
+	 */
+	public abstract AABBProducer<T> getAABBProducer();
 	
 	/**
-	 * Returns whether this particular {@link BroadphaseDetector} supports expanding AABBs.
-	 * @return boolean
+	 * Returns the {@link AABBExpansionMethod} used by this broad-phase detector.
+	 * @return {@link AABBExpansionMethod}
+	 * @since 4.1.0
 	 */
-	public abstract boolean isAABBExpansionSupported();
+	public abstract AABBExpansionMethod<T> getAABBExpansionMethod();
+	
+	/**
+	 * Returns the {@link BroadphaseFilter} used by this broad-phase detector.
+	 * @return {@link BroadphaseFilter}
+	 * @since 4.1.0
+	 */
+	public abstract BroadphaseFilter<T> getBroadphaseFilter();
 	
 	/**
 	 * Returns whether this particular {@link BroadphaseDetector} supports update tracking.
 	 * @return boolean
 	 */
 	public abstract boolean isUpdateTrackingSupported();
-	
+
 	/**
-	 * Returns the {@link AABB} expansion value used to improve performance of broad-phase updates.
+	 * Returns true if this broad-phase is tracking updated items.
 	 * <p>
-	 * If supportsAABBExpansion() returns false the value returned is unspecified and should not be taken into account.
-	 * @return double
-	 * @see #setAABBExpansion(double)
-	 */
-	public abstract double getAABBExpansion();
-	
-	/**
-	 * Sets the {@link AABB} expansion value used to improve performance of broad-phase updates.
-	 * <p>
-	 * Increasing this value will cause less updates to the broad-phase but will cause more pairs
-	 * to be sent to the narrow-phase.
-	 * <p>
-	 * Note that a broadphase implementation may ignore this value, if supportsAABBExpansion() returns false.
-	 * @param expansion the expansion
-	 */
-	public abstract void setAABBExpansion(double expansion);
-	
-	/**
-	 * Returns true if this broadphase is tracking updated items.
-	 * <p>
-	 * Tracking updates to the broadphase can have huge performance gains if the majority of objects
+	 * Tracking updates to the broad-phase can have huge performance gains if the majority of objects
 	 * are stationary or moving slowly enough.
 	 * @return boolean
 	 * @since 4.0.0
@@ -506,15 +366,13 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	/**
 	 * Sets the update tracking to the given flag.
 	 * <p>
-	 * Tracking updates to the broadphase can have huge performance gains if the majority of objects
+	 * Tracking updates to the broad-phase can have huge performance gains if the majority of objects
 	 * are stationary or moving slowly enough.
 	 * <p>
 	 * Disabling this feature will clear the set of tracked updates (the updates themselves are not cleared).
 	 * In addition, when enabling this feature (after disabling it), the user is expected to re-update all
-	 * items in the broadphase manually to ensure the updates set is non-empty.  Typically this will self
+	 * items in the broad-phase manually to ensure the updates set is non-empty.  Typically this will self
 	 * heal in the next iteration though.
-	 * <p>
-	 * NOTE: Some broadphase detectors may not support this feature.
 	 * @param flag true to turn on update tracking
 	 * @since 4.0.0
 	 * @see #isUpdateTrackingSupported()
@@ -522,7 +380,7 @@ public interface BroadphaseDetector<T extends CollisionBody<E>, E extends Fixtur
 	public abstract void setUpdateTrackingEnabled(boolean flag);
 	
 	/**
-	 * Attempts to optimize the broadphase based on the current state.
+	 * Attempts to optimize the broad-phase based on the current state.
 	 * <p>
 	 * This method could be very intensive so should only be called if there's a clear benefit.
 	 * @since 4.0.0

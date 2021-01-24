@@ -22,27 +22,32 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision;
+package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.Copyable;
+import org.dyn4j.geometry.AABB;
 
 /**
- * Represents a collision between two {@link CollisionBody}'s {@link Fixture}s.
+ * Represents a way to generate an AABB from a given object.
+ * <p>
+ * Implementations of this interface should return tight fitting
+ * AABBs for the given object.
  * @author William Bittle
- * @param <T> the object type
  * @version 4.1.0
- * @since 4.0.0
+ * @since 4.1.0
+ * @param <T> the object type
  */
-public interface CollisionPair<T> extends Copyable<CollisionPair<T>> {
+public interface AABBProducer<T> {
 	/**
-	 * Returns the first object.
-	 * @return T
+	 * Returns a new AABB for the given object.
+	 * @param object the object
+	 * @return {@link AABB}
 	 */
-	public T getFirst();
-
+	public AABB compute(T object);
+	
 	/**
-	 * Returns the second object.
-	 * @return T
+	 * Updates the given AABB with the AABB for the given object.
+	 * @param object the object
+	 * @param result the AABB to update
 	 */
-	public T getSecond();
+	public void compute(T object, AABB result);
 }

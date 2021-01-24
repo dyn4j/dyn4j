@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -794,7 +794,9 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	 */
 	@Override
 	public AABB createSweptAABB() {
-		return this.createSweptAABB(this.transform0, this.transform);
+		AABB aabb = new AABB(0,0,0,0);
+		this.computeSweptAABB(this.transform0, this.transform, aabb);
+		return aabb;
 	}
 	
 	/* (non-Javadoc)
@@ -802,17 +804,89 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	 */
 	@Override
 	public AABB createSweptAABB(Transform initialTransform, Transform finalTransform) {
+		AABB aabb = new AABB(0,0,0,0);
+		this.computeSweptAABB(initialTransform, finalTransform, aabb);
+		return aabb;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.PhysicsBody#computeSweptAABB(org.dyn4j.geometry.AABB)
+	 */
+	@Override
+	public void computeSweptAABB(AABB result) {
+		this.computeSweptAABB(this.transform0, this.transform, result);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.PhysicsBody#computeSweptAABB(org.dyn4j.geometry.Transform, org.dyn4j.geometry.Transform, org.dyn4j.geometry.AABB)
+	 */
+	@Override
+	public void computeSweptAABB(Transform initialTransform, Transform finalTransform, AABB result) {
+		int size = this.fixtures.size();
+		
+		// check for zero fixtures and return
+		// a degenerate AABB
+		if (size == 0) {
+			result.zero();
+			return;
+		}
+		
 		// get the initial transform's world center
-		Vector2 iCenter = initialTransform.getTransformed(this.mass.getCenter());
+		Vector2 iCenter = initialTransform.getTransformed(this.getLocalCenter());
 		// get the final transform's world center
-		Vector2 fCenter = finalTransform.getTransformed(this.mass.getCenter());
-		// return an AABB containing both points (expanded into circles by the
-		// rotation disc radius)
+		Vector2 fCenter = finalTransform.getTransformed(this.getLocalCenter());
 		
-		AABB sweptAABB = AABB.createAABBFromPoints(iCenter, fCenter);
-		sweptAABB.expand(this.radius * 2);
+		// there are few ways to think about swept AABBs and its all about
+		// trade-offs.  On one hand having the most tight fitting AABB would
+		// be the most ideal, but generating it would be very difficult.  On
+		// the other hand, if the AABB generated is too conservative it'll
+		// produce a lot of false positives in the broadphase
 		
-		return sweptAABB;
+		// so I opted for a hybrid approach based on some common scenarios
+		// if the body isn't rotating and it has only one fixture then use
+		// the fixture's AABB
+		
+		// note that just checking the start/end state of the transforms is not
+		// sufficient for rotation as the body could completely rotate one revolution
+		// in a single timestep
+		
+		// did the body rotate or does it have more than one fixture?
+		if (initialTransform.getCost() != finalTransform.getCost() ||
+			initialTransform.getSint() != finalTransform.getSint() ||
+			this.angularVelocity != 0.0 ||
+			size > 1) {
+			
+			// if the body rotated or has more than one fixture it's probably most
+			// efficient to just create a really conservative AABB by using the center
+			// points for the start and end position and the rotation radius
+
+			AABB.setFromPoints(iCenter, fCenter, result);
+			result.expand(this.radius * 2);
+		} else if (initialTransform.getTranslationX() == finalTransform.getTranslationX() &&
+				   initialTransform.getTranslationY() == finalTransform.getTranslationY()) {
+			// if the body's rotation didn't change, it has only one fixture, and
+			// it didn't translate (i.e. it's at rest)
+			
+			// in this scenario we can just return the AABB of the only fixture at either
+			// the initial or final transform (they're the same)
+			
+			// this scenario is specific to at rest bodies (including static bodies)
+			this.fixtures.get(0).getShape().computeAABB(initialTransform, result);
+		} else {
+			// if we get here, the body didn't rotate, but did translate, and has only
+			// one fixture
+			
+			// for this scenario we can compute the AABB at the initial transform
+			// then translate it to the final transform and then union them
+			this.fixtures.get(0).getShape().computeAABB(initialTransform, result);
+			AABB aabb1 = result.copy();
+			
+			// we can just translate the initial aabb since we know we had no rotation
+			aabb1.translate(fCenter.x - iCenter.x, fCenter.y - iCenter.y);
+			
+			// then just union the two
+			result.union(aabb1);
+		}
 	}
 	
 	/* (non-Javadoc)

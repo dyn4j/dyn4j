@@ -22,27 +22,29 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.collision;
+package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.Copyable;
+import org.dyn4j.geometry.AABB;
 
 /**
- * Represents a collision between two {@link CollisionBody}'s {@link Fixture}s.
+ * Represents a rule used to expand an AABB based on the given type T.
+ * <p>
+ * AABB expansion can be used to tweak the performance trade off between broadphase
+ * acceleration structure update time vs. detection time.  A large expansion value would
+ * cause less updates to the acceleration structure, but would cause more pairs to reach
+ * the narrowphase where detection is generally more expensive.  A small expansion value
+ * (or zero) would cause more updates to the acceleration structure, but would cause less
+ * pairs to reach the narrowphase.
  * @author William Bittle
- * @param <T> the object type
  * @version 4.1.0
- * @since 4.0.0
+ * @since 4.1.0
+ * @param <T> the object type
  */
-public interface CollisionPair<T> extends Copyable<CollisionPair<T>> {
+public interface AABBExpansionMethod<T> {
 	/**
-	 * Returns the first object.
-	 * @return T
+	 * Expands the given AABB.
+	 * @param object the object the AABB was generated from
+	 * @param aabb the AABB to expand
 	 */
-	public T getFirst();
-
-	/**
-	 * Returns the second object.
-	 * @return T
-	 */
-	public T getSecond();
+	public void expand(T object, AABB aabb);
 }
