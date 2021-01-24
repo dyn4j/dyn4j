@@ -34,7 +34,7 @@ import org.junit.Test;
 import junit.framework.TestCase;
 
 /**
- * Test case for the {@link CollisionBodyBroadphaseFilter} class.
+ * Test case for the {@link CollisionBodyBroadphaseCollisionDataFilter} class.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0
@@ -45,7 +45,7 @@ public class CollisionBodyBroadphaseFilterTest {
 	 */
 	@Test
 	public void enabled() {
-		CollisionBodyBroadphaseFilter<Body, BodyFixture> filter = new CollisionBodyBroadphaseFilter<Body, BodyFixture>();
+		CollisionBodyBroadphaseCollisionDataFilter<Body, BodyFixture> filter = new CollisionBodyBroadphaseCollisionDataFilter<Body, BodyFixture>();
 		
 		Body b1 = new Body();
 		Body b2 = new Body();
@@ -70,7 +70,7 @@ public class CollisionBodyBroadphaseFilterTest {
 	 */
 	@Test
 	public void filters() {
-		CollisionBodyBroadphaseFilter<Body, BodyFixture> filter = new CollisionBodyBroadphaseFilter<Body, BodyFixture>();
+		CollisionBodyBroadphaseCollisionDataFilter<Body, BodyFixture> filter = new CollisionBodyBroadphaseCollisionDataFilter<Body, BodyFixture>();
 		
 		Body b1 = new Body();
 		Body b2 = new Body();

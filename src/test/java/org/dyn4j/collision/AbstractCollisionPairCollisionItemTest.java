@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -35,10 +35,10 @@ import junit.framework.TestCase;
 /**
  * Test cases for pair hashcode/equals.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
  */
-public class AbstractCollisionPairTest {
+public class AbstractCollisionPairCollisionItemTest {
 	private TestCollisionBody cb1;
 	private TestCollisionBody cb2;
 	private TestCollisionBody cb3;
@@ -48,12 +48,12 @@ public class AbstractCollisionPairTest {
 	private Fixture f2;
 	private Fixture f3;
 	
-	private CollisionPair<TestCollisionBody, Fixture> pair_1a_to_2;
-	private CollisionPair<TestCollisionBody, Fixture> pair_2_to_1a;
-	private CollisionPair<TestCollisionBody, Fixture> pair_1b_to_2;
-	private CollisionPair<TestCollisionBody, Fixture> pair_2_to_1b;
-	private CollisionPair<TestCollisionBody, Fixture> pair_2_to_3;
-	private CollisionPair<TestCollisionBody, Fixture> pair_3_to_2;
+	private CollisionPair<CollisionItem<TestCollisionBody, Fixture>> pair_1a_to_2;
+	private CollisionPair<CollisionItem<TestCollisionBody, Fixture>> pair_2_to_1a;
+	private CollisionPair<CollisionItem<TestCollisionBody, Fixture>> pair_1b_to_2;
+	private CollisionPair<CollisionItem<TestCollisionBody, Fixture>> pair_2_to_1b;
+	private CollisionPair<CollisionItem<TestCollisionBody, Fixture>> pair_2_to_3;
+	private CollisionPair<CollisionItem<TestCollisionBody, Fixture>> pair_3_to_2;
 	
 	/**
 	 * Sets up the test.
@@ -69,12 +69,24 @@ public class AbstractCollisionPairTest {
 		this.cb2 = new TestCollisionBody(this.f2);
 		this.cb3 = new TestCollisionBody(this.f3);
 		
-		this.pair_1a_to_2 = new BasicCollisionPair<TestCollisionBody, Fixture>(this.cb1, this.f1a, this.cb2, this.f2);
-		this.pair_2_to_1a = new BasicCollisionPair<TestCollisionBody, Fixture>(this.cb2, this.f2, this.cb1, this.f1a);
-		this.pair_1b_to_2 = new BasicCollisionPair<TestCollisionBody, Fixture>(this.cb1, this.f1b, this.cb2, this.f2);
-		this.pair_2_to_1b = new BasicCollisionPair<TestCollisionBody, Fixture>(this.cb2, this.f2, this.cb1, this.f1b);
-		this.pair_2_to_3 = new BasicCollisionPair<TestCollisionBody, Fixture>(this.cb2, this.f2, this.cb3, this.f3);
-		this.pair_3_to_2 = new BasicCollisionPair<TestCollisionBody, Fixture>(this.cb3, this.f3, this.cb2, this.f2);
+		this.pair_1a_to_2 = new BasicCollisionPair<CollisionItem<TestCollisionBody, Fixture>>(
+				new BasicCollisionItem<TestCollisionBody, Fixture>(this.cb1, this.f1a), 
+				new BasicCollisionItem<TestCollisionBody, Fixture>(this.cb2, this.f2));
+		this.pair_2_to_1a = new BasicCollisionPair<CollisionItem<TestCollisionBody, Fixture>>(
+				new BasicCollisionItem<TestCollisionBody, Fixture>(this.cb2, this.f2), 
+				new BasicCollisionItem<TestCollisionBody, Fixture>(this.cb1, this.f1a));
+		this.pair_1b_to_2 = new BasicCollisionPair<CollisionItem<TestCollisionBody, Fixture>>(
+				new BasicCollisionItem<TestCollisionBody, Fixture>(this.cb1, this.f1b), 
+				new BasicCollisionItem<TestCollisionBody, Fixture>(this.cb2, this.f2));
+		this.pair_2_to_1b = new BasicCollisionPair<CollisionItem<TestCollisionBody, Fixture>>(
+				new BasicCollisionItem<TestCollisionBody, Fixture>(this.cb2, this.f2), 
+				new BasicCollisionItem<TestCollisionBody, Fixture>(this.cb1, this.f1b));
+		this.pair_2_to_3 = new BasicCollisionPair<CollisionItem<TestCollisionBody, Fixture>>(
+				new BasicCollisionItem<TestCollisionBody, Fixture>(this.cb2, this.f2), 
+				new BasicCollisionItem<TestCollisionBody, Fixture>(this.cb3, this.f3));
+		this.pair_3_to_2 = new BasicCollisionPair<CollisionItem<TestCollisionBody, Fixture>>(
+				new BasicCollisionItem<TestCollisionBody, Fixture>(this.cb3, this.f3), 
+				new BasicCollisionItem<TestCollisionBody, Fixture>(this.cb2, this.f2));
 	}
 	
 	/**
@@ -129,7 +141,7 @@ public class AbstractCollisionPairTest {
 	 */
 	@Test
 	public void mapTest() {
-		HashMap<CollisionPair<TestCollisionBody, Fixture>, Object> map = new HashMap<CollisionPair<TestCollisionBody, Fixture>, Object>();
+		HashMap<CollisionPair<CollisionItem<TestCollisionBody, Fixture>>, Object> map = new HashMap<CollisionPair<CollisionItem<TestCollisionBody, Fixture>>, Object>();
 		
 		Object o1 = new Object();
 		Object o2 = new Object();

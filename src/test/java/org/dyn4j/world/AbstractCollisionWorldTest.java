@@ -30,9 +30,17 @@ import java.util.NoSuchElementException;
 
 import org.dyn4j.collision.AxisAlignedBounds;
 import org.dyn4j.collision.CategoryFilter;
+import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
-import org.dyn4j.collision.broadphase.BroadphaseDetector;
+import org.dyn4j.collision.broadphase.AABBExpansionMethod;
+import org.dyn4j.collision.broadphase.AABBProducer;
+import org.dyn4j.collision.broadphase.BroadphaseFilter;
+import org.dyn4j.collision.broadphase.CollisionItemBroadphaseDetector;
+import org.dyn4j.collision.broadphase.CollisionItemBroadphaseDetectorAdapter;
+import org.dyn4j.collision.broadphase.CollisionItemBroadphaseFilter;
+import org.dyn4j.collision.broadphase.CollisionItemAABBProducer;
 import org.dyn4j.collision.broadphase.Sap;
+import org.dyn4j.collision.broadphase.StaticValueAABBExpansionMethod;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
 import org.dyn4j.collision.continuous.TimeOfImpactDetector;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
@@ -82,7 +90,7 @@ public class AbstractCollisionWorldTest {
 		}
 
 		@Override
-		protected WorldCollisionData<Body> createCollisionData(CollisionPair<Body, BodyFixture> pair) {
+		protected WorldCollisionData<Body> createCollisionData(CollisionPair<CollisionItem<Body, BodyFixture>> pair) {
 			return new WorldCollisionData<Body>(pair);
 		}
 
@@ -577,10 +585,19 @@ public class AbstractCollisionWorldTest {
 		b.addFixture(Geometry.createCircle(1.0));
 		w.addBody(b);
 		
-		BroadphaseDetector<Body, BodyFixture> original = w.getBroadphaseDetector();
+		CollisionItemBroadphaseDetector<Body, BodyFixture> original = w.getBroadphaseDetector();
 		TestCase.assertNotNull(original);
 		
-		BroadphaseDetector<Body, BodyFixture> bd = new Sap<Body, BodyFixture>();
+		BroadphaseFilter<CollisionItem<Body, BodyFixture>> broadphaseFilter = new CollisionItemBroadphaseFilter<Body, BodyFixture>();
+		AABBProducer<CollisionItem<Body, BodyFixture>> aabbProducer = new CollisionItemAABBProducer<Body, BodyFixture>();
+    	AABBExpansionMethod<CollisionItem<Body, BodyFixture>> aabbExpansionMethod = new StaticValueAABBExpansionMethod<CollisionItem<Body, BodyFixture>>(0.2);
+		CollisionItemBroadphaseDetector<Body, BodyFixture> bd = 
+    			new CollisionItemBroadphaseDetectorAdapter<Body, BodyFixture>(
+    					new Sap<CollisionItem<Body, BodyFixture>>(
+    							broadphaseFilter, 
+    							aabbProducer, 
+    							aabbExpansionMethod)); 
+		
 		w.setBroadphaseDetector(bd);
 		TestCase.assertSame(bd, w.getBroadphaseDetector());
 		TestCase.assertNotSame(original, w.getBroadphaseDetector());
@@ -606,14 +623,14 @@ public class AbstractCollisionWorldTest {
 	public void getAndSetBroadphaseFilter() {
 		TestWorld w = new TestWorld();
 		
-		BroadphaseFilter<Body, BodyFixture> original = w.getBroadphaseFilter();
+		BroadphaseCollisionDataFilter<Body, BodyFixture> original = w.getBroadphaseCollisionDataFilter();
 		TestCase.assertNotNull(original);
 		
-		CollisionBodyBroadphaseFilter<Body, BodyFixture> filter = new CollisionBodyBroadphaseFilter<Body, BodyFixture>();
-		w.setBroadphaseFilter(filter);
+		CollisionBodyBroadphaseCollisionDataFilter<Body, BodyFixture> filter = new CollisionBodyBroadphaseCollisionDataFilter<Body, BodyFixture>();
+		w.setBroadphaseCollisionDataFilter(filter);
 		
-		TestCase.assertSame(filter, w.getBroadphaseFilter());
-		TestCase.assertNotSame(original, w.getBroadphaseFilter());
+		TestCase.assertSame(filter, w.getBroadphaseCollisionDataFilter());
+		TestCase.assertNotSame(original, w.getBroadphaseCollisionDataFilter());
 	}
 	
 	/**
@@ -622,7 +639,7 @@ public class AbstractCollisionWorldTest {
 	@Test(expected = NullPointerException.class)
 	public void setNullBroadphaseFilter() {
 		TestWorld w = new TestWorld();
-		w.setBroadphaseFilter(null);
+		w.setBroadphaseCollisionDataFilter(null);
 	}
 	
 	/**
@@ -1204,7 +1221,7 @@ public class AbstractCollisionWorldTest {
 	@Test
 	public void detectBroadphaseFilterNotAllowed() {
 		TestWorld w = new TestWorld();
-		w.setBroadphaseFilter(new CollisionBodyBroadphaseFilter<Body, BodyFixture>() {
+		w.setBroadphaseCollisionDataFilter(new CollisionBodyBroadphaseCollisionDataFilter<Body, BodyFixture>() {
 			@Override
 			public boolean isAllowed(Body body1, BodyFixture fixture1, Body body2, BodyFixture fixture2) {
 				boolean allowed = super.isAllowed(body1, fixture1, body2, fixture2);

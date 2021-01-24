@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.junit.Test;
 /**
  * Test case for the AABB class.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.1.0
  * @since 3.0.0
  */
 public class AABBTest {
@@ -153,6 +153,12 @@ public class AABBTest {
 		TestCase.assertEquals(-2.0, aabb1.getMinY(), 1.0E-4);
 		TestCase.assertEquals(5.0, aabb1.getMaxX(), 1.0E-4);
 		TestCase.assertEquals(1.0, aabb1.getMaxY(), 1.0E-4);
+		
+		aabb1.union(aabb2, aabb3);
+		TestCase.assertEquals(-4.0, aabb1.getMinX(), 1.0E-4);
+		TestCase.assertEquals(-2.0, aabb1.getMinY(), 1.0E-4);
+		TestCase.assertEquals(5.0, aabb1.getMaxX(), 1.0E-4);
+		TestCase.assertEquals(4.0, aabb1.getMaxY(), 1.0E-4);
 	}
 	
 	/**
@@ -418,5 +424,99 @@ public class AABBTest {
 	public void testToString() {
 		AABB aabb1 = new AABB(-2.0, 0.0, 2.0, 1.0);
 		TestCase.assertNotNull(aabb1.toString());
+	}
+	
+	/**
+	 * Tests the createFromPoints methods.
+	 */
+	@Test
+	public void createFromPoints() {
+		Vector2 p1 = new Vector2(1, 1);
+		Vector2 p2 = new Vector2(3, 3);
+		
+		AABB aabb = AABB.createFromPoints(p1, p2);
+		
+		TestCase.assertEquals(1.0, aabb.getMinX());
+		TestCase.assertEquals(1.0, aabb.getMinY());
+		TestCase.assertEquals(3.0, aabb.getMaxX());
+		TestCase.assertEquals(3.0, aabb.getMaxY());
+		
+		aabb = AABB.createFromPoints(1.0, 4.0, 2.0, 2.0);
+		
+		TestCase.assertEquals(1.0, aabb.getMinX());
+		TestCase.assertEquals(2.0, aabb.getMinY());
+		TestCase.assertEquals(2.0, aabb.getMaxX());
+		TestCase.assertEquals(4.0, aabb.getMaxY());
+	}
+
+	/**
+	 * Tests the setFromPoints methods.
+	 */
+	@Test
+	public void setFromPoints() {
+		Vector2 p1 = new Vector2(1, 1);
+		Vector2 p2 = new Vector2(3, 3);
+		
+		AABB aabb = new AABB(0,0,0,0);
+		AABB.setFromPoints(p1, p2, aabb);
+		
+		TestCase.assertEquals(1.0, aabb.getMinX());
+		TestCase.assertEquals(1.0, aabb.getMinY());
+		TestCase.assertEquals(3.0, aabb.getMaxX());
+		TestCase.assertEquals(3.0, aabb.getMaxY());
+		
+		AABB.setFromPoints(1.0, 4.0, 2.0, 2.0, aabb);
+		
+		TestCase.assertEquals(1.0, aabb.getMinX());
+		TestCase.assertEquals(2.0, aabb.getMinY());
+		TestCase.assertEquals(2.0, aabb.getMaxX());
+		TestCase.assertEquals(4.0, aabb.getMaxY());
+	}
+	
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		AABB aabb = new AABB(1,1,3,3);
+		
+		AABB copy = aabb.copy();
+		
+		TestCase.assertEquals(aabb.getMinX(), copy.getMinX());
+		TestCase.assertEquals(aabb.getMinY(), copy.getMinY());
+		TestCase.assertEquals(aabb.getMaxX(), copy.getMaxX());
+		TestCase.assertEquals(aabb.getMaxY(), copy.getMaxY());
+	}
+	
+	/**
+	 * Tests the center point.
+	 */
+	@Test
+	public void getCenter() {
+		AABB aabb = new AABB(1,1,3,3);
+		Vector2 c = aabb.getCenter();
+		
+		TestCase.assertEquals(2.0, c.x);
+		TestCase.assertEquals(2.0, c.y);
+	}
+	
+	/**
+	 * Tests the zero method.
+	 */
+	@Test
+	public void zero() {
+		AABB aabb = new AABB(1,1,3,3);
+		
+		TestCase.assertEquals(1.0, aabb.getMinX());
+		TestCase.assertEquals(1.0, aabb.getMinY());
+		TestCase.assertEquals(3.0, aabb.getMaxX());
+		TestCase.assertEquals(3.0, aabb.getMaxY());
+		
+		aabb.zero();
+		
+		TestCase.assertEquals(0.0, aabb.getMinX());
+		TestCase.assertEquals(0.0, aabb.getMinY());
+		TestCase.assertEquals(0.0, aabb.getMaxX());
+		TestCase.assertEquals(0.0, aabb.getMaxY());
 	}
 }

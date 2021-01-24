@@ -29,7 +29,6 @@ import java.util.Random;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.RobustGeometryTest;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.geometry.hull.GrahamScan;
 import org.junit.Test;
 
 import junit.framework.TestCase;

@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.dyn4j.collision.AxisAlignedBounds;
+import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
@@ -77,7 +78,7 @@ public class AbstractPhysicsWorldTest {
 		}
 
 		@Override
-		protected WorldCollisionData<Body> createCollisionData(CollisionPair<Body, BodyFixture> pair) {
+		protected WorldCollisionData<Body> createCollisionData(CollisionPair<CollisionItem<Body, BodyFixture>> pair) {
 			return new WorldCollisionData<Body>(pair);
 		}
 	}
@@ -142,6 +143,8 @@ public class AbstractPhysicsWorldTest {
 		public void persist(ContactCollisionData<Body> collision, Contact oldContact, Contact newContact) { }
 		@Override
 		public void postSolve(ContactCollisionData<Body> collision, SolvedContact contact) { }
+		@Override
+		public void collision(ContactCollisionData<Body> collision) { }
 	}
 	
 	/**

@@ -25,7 +25,6 @@
 package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.dynamics.Body;
-import org.dyn4j.dynamics.joint.RevoluteJoint;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 

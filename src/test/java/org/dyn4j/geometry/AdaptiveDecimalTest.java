@@ -69,6 +69,8 @@ public class AdaptiveDecimalTest {
 		
 		AdaptiveDecimal ed6 = AdaptiveDecimal.fromProduct(0.1, 0.2);
 		TestCase.assertEquals(0.1 * 0.2, ed6.getEstimation());
+		
+		TestCase.assertNotNull(ed.toString());
 	}
 	
 	/**

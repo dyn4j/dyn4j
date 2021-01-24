@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.collision.broadphase;
 
+import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.TestCollisionBody;
 import org.dyn4j.geometry.Geometry;
@@ -34,10 +35,10 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link BroadphasePair} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
  */
-public class BroadphasePairTest {
+public class CollisionItemBroadphasePairTest {
 	/**
 	 * Tests the create method.
 	 */
@@ -48,34 +49,14 @@ public class BroadphasePairTest {
 		TestCollisionBody body2 = new TestCollisionBody();
 		Fixture fixture2 = new Fixture(Geometry.createCircle(0.5));
 		
-		BroadphasePair<TestCollisionBody, Fixture> pair = new BroadphasePair<TestCollisionBody, Fixture>(body1, fixture1, body2, fixture2);
+		BroadphasePair<CollisionItem<TestCollisionBody, Fixture>> pair = new BroadphasePair<CollisionItem<TestCollisionBody, Fixture>>(
+				new BroadphaseItem<TestCollisionBody, Fixture>(body1, fixture1), 
+				new BroadphaseItem<TestCollisionBody, Fixture>(body2, fixture2));
 		
-		TestCase.assertEquals(body1, pair.getBody1());
-		TestCase.assertEquals(fixture1, pair.getFixture1());
-		TestCase.assertEquals(body2, pair.getBody2());
-		TestCase.assertEquals(fixture2, pair.getFixture2());
-		
-		TestCase.assertEquals(body1, pair.getBody(body1));
-		TestCase.assertEquals(body2, pair.getBody(body2));
-		TestCase.assertEquals(fixture1, pair.getFixture(body1));
-		TestCase.assertEquals(fixture2, pair.getFixture(body2));
-		
-		TestCase.assertEquals(body2, pair.getOtherBody(body1));
-		TestCase.assertEquals(body1, pair.getOtherBody(body2));
-		TestCase.assertEquals(fixture2, pair.getOtherFixture(body1));
-		TestCase.assertEquals(fixture1, pair.getOtherFixture(body2));
-		
-		TestCollisionBody body3 = new TestCollisionBody();
-		
-		TestCase.assertEquals(null, pair.getBody(body3));
-		TestCase.assertEquals(null, pair.getFixture(body3));
-		TestCase.assertEquals(null, pair.getOtherBody(body3));
-		TestCase.assertEquals(null, pair.getOtherFixture(body3));
-		
-		TestCase.assertEquals(null, pair.getBody(null));
-		TestCase.assertEquals(null, pair.getFixture(null));
-		TestCase.assertEquals(null, pair.getOtherBody(null));
-		TestCase.assertEquals(null, pair.getOtherFixture(null));
+		TestCase.assertEquals(body1, pair.getFirst().getBody());
+		TestCase.assertEquals(fixture1, pair.getFirst().getFixture());
+		TestCase.assertEquals(body2, pair.getSecond().getBody());
+		TestCase.assertEquals(fixture2, pair.getSecond().getFixture());
 		
 		TestCase.assertFalse(0 == pair.hashCode());
 	}
@@ -90,9 +71,17 @@ public class BroadphasePairTest {
 		TestCollisionBody body2 = new TestCollisionBody();
 		Fixture fixture2 = new Fixture(Geometry.createCircle(0.5));
 		
-		BroadphasePair<TestCollisionBody, Fixture> pair1 = new BroadphasePair<TestCollisionBody, Fixture>(body1, fixture1, body2, fixture2);
-		BroadphasePair<TestCollisionBody, Fixture> pair2 = new BroadphasePair<TestCollisionBody, Fixture>(body2, fixture2, body1, fixture1);
-		BroadphasePair<TestCollisionBody, Fixture> pair3 = new BroadphasePair<TestCollisionBody, Fixture>(body1, fixture1, body1, fixture1);
+		BroadphasePair<CollisionItem<TestCollisionBody, Fixture>> pair1 = new BroadphasePair<CollisionItem<TestCollisionBody, Fixture>>(
+				new BroadphaseItem<TestCollisionBody, Fixture>(body1, fixture1), 
+				new BroadphaseItem<TestCollisionBody, Fixture>(body2, fixture2));
+		
+		BroadphasePair<CollisionItem<TestCollisionBody, Fixture>> pair2 = new BroadphasePair<CollisionItem<TestCollisionBody, Fixture>>(
+				new BroadphaseItem<TestCollisionBody, Fixture>(body2, fixture2), 
+				new BroadphaseItem<TestCollisionBody, Fixture>(body1, fixture1));
+		
+		BroadphasePair<CollisionItem<TestCollisionBody, Fixture>> pair3 = new BroadphasePair<CollisionItem<TestCollisionBody, Fixture>>(
+				new BroadphaseItem<TestCollisionBody, Fixture>(body1, fixture1), 
+				new BroadphaseItem<TestCollisionBody, Fixture>(body1, fixture1));
 		
 		TestCase.assertEquals(pair1.hashCode(), pair2.hashCode());
 		TestCase.assertTrue(pair1.equals(pair1));
@@ -111,13 +100,21 @@ public class BroadphasePairTest {
 		TestCollisionBody body2 = new TestCollisionBody();
 		Fixture fixture2 = new Fixture(Geometry.createCircle(0.5));
 		
-		BroadphasePair<TestCollisionBody, Fixture> pair = new BroadphasePair<TestCollisionBody, Fixture>(body1, fixture1, body2, fixture2);
-		BroadphasePair<TestCollisionBody, Fixture> copy = pair.copy();
+		BroadphasePair<CollisionItem<TestCollisionBody, Fixture>> pair = new BroadphasePair<CollisionItem<TestCollisionBody, Fixture>>(
+				new BroadphaseItem<TestCollisionBody, Fixture>(body1, fixture1), 
+				new BroadphaseItem<TestCollisionBody, Fixture>(body2, fixture2));
 		
-		TestCase.assertEquals(pair.getBody1(), copy.getBody1());
-		TestCase.assertEquals(pair.getFixture1(), copy.getFixture1());
-		TestCase.assertEquals(pair.getBody2(), copy.getBody2());
-		TestCase.assertEquals(pair.getFixture2(), copy.getFixture2());
+		BroadphasePair<CollisionItem<TestCollisionBody, Fixture>> copy = pair.copy();
+		
+		TestCase.assertEquals(body1, pair.getFirst().getBody());
+		TestCase.assertEquals(fixture1, pair.getFirst().getFixture());
+		TestCase.assertEquals(body2, pair.getSecond().getBody());
+		TestCase.assertEquals(fixture2, pair.getSecond().getFixture());
+		
+		TestCase.assertEquals(pair.getFirst().getBody(), copy.getFirst().getBody());
+		TestCase.assertEquals(pair.getFirst().getFixture(), copy.getFirst().getFixture());
+		TestCase.assertEquals(pair.getSecond().getBody(), copy.getSecond().getBody());
+		TestCase.assertEquals(pair.getSecond().getFixture(), copy.getSecond().getFixture());
 		TestCase.assertEquals(pair.hashCode(), copy.hashCode());
 		TestCase.assertFalse(pair == copy);
 		TestCase.assertTrue(pair.equals(copy));
@@ -133,7 +130,9 @@ public class BroadphasePairTest {
 		TestCollisionBody body2 = new TestCollisionBody();
 		Fixture fixture2 = new Fixture(Geometry.createCircle(0.5));
 		
-		BroadphasePair<TestCollisionBody, Fixture> pair = new BroadphasePair<TestCollisionBody, Fixture>(body1, fixture1, body2, fixture2);
+		BroadphasePair<CollisionItem<TestCollisionBody, Fixture>> pair = new BroadphasePair<CollisionItem<TestCollisionBody, Fixture>>(
+				new BroadphaseItem<TestCollisionBody, Fixture>(body1, fixture1), 
+				new BroadphaseItem<TestCollisionBody, Fixture>(body2, fixture2));
 		
 		TestCase.assertNotNull(pair.toString());
 	}

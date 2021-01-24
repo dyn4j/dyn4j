@@ -26,13 +26,12 @@ package org.dyn4j.geometry.decompose;
 
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.geometry.decompose.SweepLine;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Test case for the {@link SweepLine} class.

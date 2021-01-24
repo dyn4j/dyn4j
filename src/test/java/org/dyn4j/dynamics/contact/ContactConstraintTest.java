@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,7 +24,9 @@
  */
 package org.dyn4j.dynamics.contact;
 
+import org.dyn4j.collision.BasicCollisionItem;
 import org.dyn4j.collision.BasicCollisionPair;
+import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.manifold.IndexedManifoldPointId;
 import org.dyn4j.collision.manifold.Manifold;
@@ -44,7 +46,7 @@ import junit.framework.TestCase;
 /**
  * Tests the methods of the {@link ContactConstraint} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
  */
 public class ContactConstraintTest {
@@ -52,7 +54,7 @@ public class ContactConstraintTest {
 	private Body b2;
 	private BodyFixture f1;
 	private BodyFixture f2;
-	private CollisionPair<Body, BodyFixture> cp;
+	private CollisionPair<CollisionItem<Body, BodyFixture>> cp;
 	private CountingContactUpdateHandler cuh;
 	
 	private class CountingContactUpdateHandler implements ContactUpdateHandler {
@@ -83,7 +85,9 @@ public class ContactConstraintTest {
 		this.b2 = new Body();
 		this.f1 = b1.addFixture(Geometry.createCircle(0.5));
 		this.f2 = b2.addFixture(Geometry.createCircle(0.5));
-		this.cp = new BasicCollisionPair<Body, BodyFixture>(this.b1, this.f1, this.b2, this.f2);
+		this.cp = new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(
+				new BasicCollisionItem<Body, BodyFixture>(this.b1, this.f1), 
+				new BasicCollisionItem<Body, BodyFixture>(this.b2, this.f2));
 
 		this.cuh = new CountingContactUpdateHandler();
 	}
@@ -130,15 +134,20 @@ public class ContactConstraintTest {
 		TestCase.assertEquals(0.0, cc.tangent.y);
 		TestCase.assertEquals(0.0, cc.tangentSpeed);
 		TestCase.assertEquals(0.0, cc.getTangentSpeed());
-		
-		TestCase.assertEquals(this.cp.getBody(this.b1), cc.getBody(this.b1));
-		TestCase.assertEquals(this.cp.getBody(this.b1), cc.getBody(this.b1));
-		TestCase.assertEquals(this.cp.getFixture(this.b1), cc.getFixture(this.b1));
-		TestCase.assertEquals(this.cp.getFixture(this.b1), cc.getFixture(this.b1));
-		TestCase.assertEquals(this.cp.getOtherBody(this.b1), cc.getOtherBody(this.b1));
-		TestCase.assertEquals(this.cp.getOtherBody(this.b2), cc.getOtherBody(this.b2));
-		TestCase.assertEquals(this.cp.getOtherFixture(this.b1), cc.getOtherFixture(this.b1));
-		TestCase.assertEquals(this.cp.getOtherFixture(this.b2), cc.getOtherFixture(this.b2));
+	
+		TestCase.assertEquals(this.cp, cc.getCollisionPair());
+		TestCase.assertEquals(this.cp.getFirst().getBody(), cc.getBody(this.b1));
+		TestCase.assertEquals(this.cp.getSecond().getBody(), cc.getBody(this.b2));
+		TestCase.assertEquals(null, cc.getBody(new Body()));
+		TestCase.assertEquals(this.cp.getFirst().getFixture(), cc.getFixture(this.b1));
+		TestCase.assertEquals(this.cp.getSecond().getFixture(), cc.getFixture(this.b2));
+		TestCase.assertEquals(null, cc.getFixture(new Body()));
+		TestCase.assertEquals(this.cp.getSecond().getBody(), cc.getOtherBody(this.b1));
+		TestCase.assertEquals(this.cp.getFirst().getBody(), cc.getOtherBody(this.b2));
+		TestCase.assertEquals(null, cc.getOtherBody(new Body()));
+		TestCase.assertEquals(this.cp.getSecond().getFixture(), cc.getOtherFixture(this.b1));
+		TestCase.assertEquals(this.cp.getFirst().getFixture(), cc.getOtherFixture(this.b2));
+		TestCase.assertEquals(null, cc.getOtherFixture(new Body()));
 	}
 
 	/**
@@ -201,14 +210,19 @@ public class ContactConstraintTest {
 		TestCase.assertEquals(0.0, cc.tangentSpeed);
 		TestCase.assertEquals(0.0, cc.getTangentSpeed());
 		
-		TestCase.assertEquals(this.cp.getBody(this.b1), cc.getBody(this.b1));
-		TestCase.assertEquals(this.cp.getBody(this.b1), cc.getBody(this.b1));
-		TestCase.assertEquals(this.cp.getFixture(this.b1), cc.getFixture(this.b1));
-		TestCase.assertEquals(this.cp.getFixture(this.b1), cc.getFixture(this.b1));
-		TestCase.assertEquals(this.cp.getOtherBody(this.b1), cc.getOtherBody(this.b1));
-		TestCase.assertEquals(this.cp.getOtherBody(this.b2), cc.getOtherBody(this.b2));
-		TestCase.assertEquals(this.cp.getOtherFixture(this.b1), cc.getOtherFixture(this.b1));
-		TestCase.assertEquals(this.cp.getOtherFixture(this.b2), cc.getOtherFixture(this.b2));
+		TestCase.assertEquals(this.cp, cc.getCollisionPair());
+		TestCase.assertEquals(this.cp.getFirst().getBody(), cc.getBody(this.b1));
+		TestCase.assertEquals(this.cp.getSecond().getBody(), cc.getBody(this.b2));
+		TestCase.assertEquals(null, cc.getBody(new Body()));
+		TestCase.assertEquals(this.cp.getFirst().getFixture(), cc.getFixture(this.b1));
+		TestCase.assertEquals(this.cp.getSecond().getFixture(), cc.getFixture(this.b2));
+		TestCase.assertEquals(null, cc.getFixture(new Body()));
+		TestCase.assertEquals(this.cp.getSecond().getBody(), cc.getOtherBody(this.b1));
+		TestCase.assertEquals(this.cp.getFirst().getBody(), cc.getOtherBody(this.b2));
+		TestCase.assertEquals(null, cc.getOtherBody(new Body()));
+		TestCase.assertEquals(this.cp.getSecond().getFixture(), cc.getOtherFixture(this.b1));
+		TestCase.assertEquals(this.cp.getFirst().getFixture(), cc.getOtherFixture(this.b2));
+		TestCase.assertEquals(null, cc.getOtherFixture(new Body()));
 		
 		TestCase.assertEquals(2, this.cuh.begin);
 		
@@ -264,14 +278,19 @@ public class ContactConstraintTest {
 		TestCase.assertEquals(0.0, cc.tangentSpeed);
 		TestCase.assertEquals(0.0, cc.getTangentSpeed());
 		
-		TestCase.assertEquals(this.cp.getBody(this.b1), cc.getBody(this.b1));
-		TestCase.assertEquals(this.cp.getBody(this.b1), cc.getBody(this.b1));
-		TestCase.assertEquals(this.cp.getFixture(this.b1), cc.getFixture(this.b1));
-		TestCase.assertEquals(this.cp.getFixture(this.b1), cc.getFixture(this.b1));
-		TestCase.assertEquals(this.cp.getOtherBody(this.b1), cc.getOtherBody(this.b1));
-		TestCase.assertEquals(this.cp.getOtherBody(this.b2), cc.getOtherBody(this.b2));
-		TestCase.assertEquals(this.cp.getOtherFixture(this.b1), cc.getOtherFixture(this.b1));
-		TestCase.assertEquals(this.cp.getOtherFixture(this.b2), cc.getOtherFixture(this.b2));
+		TestCase.assertEquals(this.cp, cc.getCollisionPair());
+		TestCase.assertEquals(this.cp.getFirst().getBody(), cc.getBody(this.b1));
+		TestCase.assertEquals(this.cp.getSecond().getBody(), cc.getBody(this.b2));
+		TestCase.assertEquals(null, cc.getBody(new Body()));
+		TestCase.assertEquals(this.cp.getFirst().getFixture(), cc.getFixture(this.b1));
+		TestCase.assertEquals(this.cp.getSecond().getFixture(), cc.getFixture(this.b2));
+		TestCase.assertEquals(null, cc.getFixture(new Body()));
+		TestCase.assertEquals(this.cp.getSecond().getBody(), cc.getOtherBody(this.b1));
+		TestCase.assertEquals(this.cp.getFirst().getBody(), cc.getOtherBody(this.b2));
+		TestCase.assertEquals(null, cc.getOtherBody(new Body()));
+		TestCase.assertEquals(this.cp.getSecond().getFixture(), cc.getOtherFixture(this.b1));
+		TestCase.assertEquals(this.cp.getFirst().getFixture(), cc.getOtherFixture(this.b2));
+		TestCase.assertEquals(null, cc.getOtherFixture(new Body()));
 		
 		TestCase.assertEquals(1, this.cuh.begin);
 		TestCase.assertEquals(2, this.cuh.persist);
@@ -319,14 +338,19 @@ public class ContactConstraintTest {
 		TestCase.assertEquals(0.0, cc.tangentSpeed);
 		TestCase.assertEquals(0.0, cc.getTangentSpeed());
 		
-		TestCase.assertEquals(this.cp.getBody(this.b1), cc.getBody(this.b1));
-		TestCase.assertEquals(this.cp.getBody(this.b1), cc.getBody(this.b1));
-		TestCase.assertEquals(this.cp.getFixture(this.b1), cc.getFixture(this.b1));
-		TestCase.assertEquals(this.cp.getFixture(this.b1), cc.getFixture(this.b1));
-		TestCase.assertEquals(this.cp.getOtherBody(this.b1), cc.getOtherBody(this.b1));
-		TestCase.assertEquals(this.cp.getOtherBody(this.b2), cc.getOtherBody(this.b2));
-		TestCase.assertEquals(this.cp.getOtherFixture(this.b1), cc.getOtherFixture(this.b1));
-		TestCase.assertEquals(this.cp.getOtherFixture(this.b2), cc.getOtherFixture(this.b2));
+		TestCase.assertEquals(this.cp, cc.getCollisionPair());
+		TestCase.assertEquals(this.cp.getFirst().getBody(), cc.getBody(this.b1));
+		TestCase.assertEquals(this.cp.getSecond().getBody(), cc.getBody(this.b2));
+		TestCase.assertEquals(null, cc.getBody(new Body()));
+		TestCase.assertEquals(this.cp.getFirst().getFixture(), cc.getFixture(this.b1));
+		TestCase.assertEquals(this.cp.getSecond().getFixture(), cc.getFixture(this.b2));
+		TestCase.assertEquals(null, cc.getFixture(new Body()));
+		TestCase.assertEquals(this.cp.getSecond().getBody(), cc.getOtherBody(this.b1));
+		TestCase.assertEquals(this.cp.getFirst().getBody(), cc.getOtherBody(this.b2));
+		TestCase.assertEquals(null, cc.getOtherBody(new Body()));
+		TestCase.assertEquals(this.cp.getSecond().getFixture(), cc.getOtherFixture(this.b1));
+		TestCase.assertEquals(this.cp.getFirst().getFixture(), cc.getOtherFixture(this.b2));
+		TestCase.assertEquals(null, cc.getOtherFixture(new Body()));
 		
 		TestCase.assertEquals(0, this.cuh.begin);
 		TestCase.assertEquals(2, this.cuh.persist);

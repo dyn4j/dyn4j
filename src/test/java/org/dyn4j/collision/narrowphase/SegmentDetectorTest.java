@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,8 +24,6 @@
  */
 package org.dyn4j.collision.narrowphase;
 
-import org.dyn4j.collision.narrowphase.Raycast;
-import org.dyn4j.collision.narrowphase.SegmentDetector;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Transform;
@@ -37,7 +35,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link SegmentDetector} class
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.1.0
  * @since 3.4.0
  */
 public class SegmentDetectorTest {	

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,26 +24,26 @@
  */
 package org.dyn4j.collision.narrowphase;
 
-import junit.framework.TestCase;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.dyn4j.collision.narrowphase.FallbackCondition;
-import org.dyn4j.collision.narrowphase.FallbackNarrowphaseDetector;
-import org.dyn4j.collision.narrowphase.Gjk;
-import org.dyn4j.collision.narrowphase.PairwiseTypedFallbackCondition;
-import org.dyn4j.collision.narrowphase.Sat;
-import org.dyn4j.collision.narrowphase.SingleTypedFallbackCondition;
 import org.dyn4j.geometry.Capsule;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Ellipse;
 import org.dyn4j.geometry.Geometry;
+import org.dyn4j.geometry.HalfEllipse;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Rectangle;
+import org.dyn4j.geometry.Transform;
+import org.dyn4j.geometry.Triangle;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Test case for the {@link FallbackNarrowphaseDetector} class.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.1.0
  * @since 3.1.5
  */
 public class FallbackNarrowphaseDetectorTest {
@@ -74,7 +74,14 @@ public class FallbackNarrowphaseDetectorTest {
 	 */
 	@Test
 	public void createSuccess() {
-		new FallbackNarrowphaseDetector(new Sat(), new Gjk());
+		NarrowphaseDetector np1 = new Sat();
+		NarrowphaseDetector np2 = new Gjk();
+		List<FallbackCondition> conditions = new ArrayList<FallbackCondition>();
+		FallbackNarrowphaseDetector nd = new FallbackNarrowphaseDetector(np1, np2, conditions);
+		
+		TestCase.assertEquals(np1, nd.getPrimaryNarrowphaseDetector());
+		TestCase.assertEquals(np2, nd.getFallbackNarrowphaseDetector());
+		TestCase.assertSame(conditions, nd.fallbackConditions);
 	}
 	
 	/**
@@ -105,6 +112,8 @@ public class FallbackNarrowphaseDetectorTest {
 				TestCase.assertFalse(detector.isFallbackRequired(TYPES[i], TYPES[j]));
 			}
 		}
+		
+		TestCase.assertEquals(0, detector.getConditionCount());
 	}
 	
 	/**
@@ -120,7 +129,7 @@ public class FallbackNarrowphaseDetectorTest {
 		TestCase.assertSame(condition, detector.getCondition(0));
 		
 		// verify the equals is working as expected
-		TestCase.assertEquals(condition, new SingleTypedFallbackCondition(Capsule.class));
+		TestCase.assertFalse(condition.equals(new SingleTypedFallbackCondition(Capsule.class)));
 		TestCase.assertFalse(condition.equals(new SingleTypedFallbackCondition(Capsule.class, false)));
 		TestCase.assertFalse(condition.equals(new SingleTypedFallbackCondition(Capsule.class, 1)));
 		
@@ -274,5 +283,42 @@ public class FallbackNarrowphaseDetectorTest {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Test the detect method with conditions.
+	 */
+	@Test
+	public void detect() {
+		FallbackNarrowphaseDetector detector = new FallbackNarrowphaseDetector(new Sat(), new Gjk());
+		detector.addCondition(new SingleTypedFallbackCondition(Ellipse.class));
+		detector.addCondition(new SingleTypedFallbackCondition(HalfEllipse.class));
+		
+		Ellipse e = Geometry.createEllipse(1, 0.4);
+		HalfEllipse he = Geometry.createHalfEllipse(1, 0.5);
+		Rectangle r = Geometry.createSquare(1);
+		Transform tx = new Transform();
+		
+		// the detect method should throw an exception if the fallback condition doesn't
+		// execute appropriately because SAT doesn't support Ellipse or HalfEllipse
+		TestCase.assertTrue(detector.detect(e, tx, r, tx));
+		TestCase.assertTrue(detector.detect(r, tx, e, tx));
+		TestCase.assertTrue(detector.detect(he, tx, r, tx));
+		TestCase.assertTrue(detector.detect(r, tx, he, tx));
+		
+		Penetration p = new Penetration();
+		TestCase.assertTrue(detector.detect(e, tx, r, tx, p));
+		TestCase.assertTrue(detector.detect(r, tx, e, tx, p));
+		TestCase.assertTrue(detector.detect(he, tx, r, tx, p));
+		TestCase.assertTrue(detector.detect(r, tx, he, tx, p));
+		
+		// test no fallback needed
+		Triangle t = Geometry.createEquilateralTriangle(0.5);
+		
+		TestCase.assertTrue(detector.detect(t, tx, r, tx));
+		TestCase.assertTrue(detector.detect(r, tx, t, tx));
+		
+		TestCase.assertTrue(detector.detect(t, tx, r, tx, p));
+		TestCase.assertTrue(detector.detect(r, tx, t, tx, p));
 	}
 }

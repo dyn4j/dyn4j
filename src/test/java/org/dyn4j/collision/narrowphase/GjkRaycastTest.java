@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,10 +24,6 @@
  */
 package org.dyn4j.collision.narrowphase;
 
-import junit.framework.TestCase;
-
-import org.dyn4j.collision.narrowphase.Gjk;
-import org.dyn4j.collision.narrowphase.Raycast;
 import org.dyn4j.geometry.Capsule;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
@@ -44,11 +40,13 @@ import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
+import junit.framework.TestCase;
+
 /**
  * Test cases for the {@link Gjk#raycast(Ray, double, Convex, Transform, Raycast)}
  * method.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.1.0
  * @since 2.0.0
  */
 public class GjkRaycastTest {

@@ -24,7 +24,9 @@
  */
 package org.dyn4j.world;
 
+import org.dyn4j.collision.BasicCollisionItem;
 import org.dyn4j.collision.BasicCollisionPair;
+import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Geometry;
@@ -50,7 +52,9 @@ public class WorldTest {
 		BodyFixture f2 = b2.addFixture(Geometry.createCircle(0.5));
 		
 		World<Body> w = new World<Body>();
-		WorldCollisionData<Body> data = w.createCollisionData(new BasicCollisionPair<Body, BodyFixture>(b1, f1, b2, f2));
+		WorldCollisionData<Body> data = w.createCollisionData(new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(
+				new BasicCollisionItem<Body, BodyFixture>(b1, f1),
+				new BasicCollisionItem<Body, BodyFixture>(b2, f2)));
 		
 		TestCase.assertEquals(b1, data.getBody1());
 		TestCase.assertEquals(b2, data.getBody2());
