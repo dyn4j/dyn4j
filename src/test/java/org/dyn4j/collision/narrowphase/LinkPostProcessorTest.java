@@ -42,7 +42,6 @@ import junit.framework.TestCase;
  * @version 4.1.0
  * @since 4.1.0
  */
-// TODO need to revise how link shapes are working - or rather not working. They have to be one sided...
 public class LinkPostProcessorTest {
 	/**
 	 * Tests the constructor

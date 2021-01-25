@@ -47,7 +47,6 @@ public class AbstractFallbackConditionTest {
 	private class TestTypedFallbackCondition extends TypedFallbackCondition {
 		@Override
 		public boolean isMatch(Class<? extends Convex> type1, Class<? extends Convex> type2) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 	}
