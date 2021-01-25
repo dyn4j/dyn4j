@@ -617,8 +617,12 @@ public class Transform implements Transformable, Copyable<Transform> {
 	 */
 	public void lerp(Transform end, double alpha) {
 		// interpolate the position
-		double x = this.x + alpha * (end.x - this.x);
-		double y = this.y + alpha * (end.y - this.y);
+		
+		// https://fgiesen.wordpress.com/2012/08/15/linear-interpolation-past-present-and-future/
+		// this, in comparison to p0 + alpha * (p1 - p0), is more numerically stable even
+		// though there's one extra multiply
+		double x = (1.0 - alpha) * this.x + alpha * end.x;
+		double y = (1.0 - alpha) * this.y + alpha * end.y;
 		
 		// compute the angle
 		// get the start and end rotations
@@ -669,8 +673,12 @@ public class Transform implements Transformable, Copyable<Transform> {
 	 */
 	public void lerp(Transform end, double alpha, Transform result) {
 		// interpolate the position
-		double x = this.x + alpha * (end.x - this.x);
-		double y = this.y + alpha * (end.y - this.y);
+		
+		// https://fgiesen.wordpress.com/2012/08/15/linear-interpolation-past-present-and-future/
+		// this, in comparison to p0 + alpha * (p1 - p0), is more numerically stable even
+		// though there's one extra multiply
+		double x = (1.0 - alpha) * this.x + alpha * end.x;
+		double y = (1.0 - alpha) * this.y + alpha * end.y;
 		
 		// compute the angle
 		// get the start and end rotations
@@ -782,8 +790,12 @@ public class Transform implements Transformable, Copyable<Transform> {
 	 */
 	public Transform lerped(Transform end, double alpha) {
 		// interpolate the position
-		double x = this.x + alpha * (end.x - this.x);
-		double y = this.y + alpha * (end.y - this.y);
+		
+		// https://fgiesen.wordpress.com/2012/08/15/linear-interpolation-past-present-and-future/
+		// this, in comparison to p0 + alpha * (p1 - p0), is more numerically stable even
+		// though there's one extra multiply
+		double x = (1.0 - alpha) * this.x + alpha * end.x;
+		double y = (1.0 - alpha) * this.y + alpha * end.y;
 		
 		// compute the angle
 		// get the start and end rotations

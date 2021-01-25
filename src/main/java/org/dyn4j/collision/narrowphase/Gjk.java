@@ -455,10 +455,9 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 				// then the new point we just made is not far enough
 				// in the direction of n so we can stop now and
 				// get the closest points
-				
-				// if the projection of c is negative that means we got
-				// worse and need to go back and use b
-				this.findClosestPoints(a, projection < 0 ? b : c, separation);
+
+				// get the closest points
+				this.findClosestPoints(a, b, separation);
 				
 				// return true to indicate separation
 				return true;
