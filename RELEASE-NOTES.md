@@ -9,10 +9,10 @@ is slightly different).
 - [#63](https://github.com/dyn4j/dyn4j/issues/63) Enhanced the broadphase API to allow for additional use-cases (like CCD)
 
 **Bug Fixes:**
-- FallbackConditions are no longer equal based on content/hashcode
+- FallbackConditions no longer implement equals/hashcode methods
 - Gjk now returns better separating points, normal and depth in some cases
 - ConservativeAdvancement now returns false if the bodies are near collision in their previous transform
-- ConservativeAdvancement now exits immediately if it advances to where collision occurs to improve resolution
+- ConservativeAdvancement now exits immediately if it advances to a collision to improve resolution
 - ForceCollisionTimeOfImpactSolver now only translates the bodies being resolved
 
 **Deprecated:**
@@ -31,6 +31,7 @@ is slightly different).
 - [#125](https://github.com/dyn4j/dyn4j/issues/125) All deprecated API as of 4.0.0 has been removed.
 - [#124](https://github.com/dyn4j/dyn4j/issues/124) Continued improvement and coverage of JUnit test cases (up 4%).
 - [#156](https://github.com/dyn4j/dyn4j/issues/156) Javadoc includes protected methods again.
+- Small numerical improvement to the Transform.lerp method and variants.
 
 ## v4.0.0 - August 29th, 2020
 This version sees massive performance improvements for large worlds, on the order of 30%-40% improvement. In addition, this version sees a big
