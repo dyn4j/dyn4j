@@ -476,6 +476,12 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			
 			// remove the joint from the world
 			this.joints.remove(joint);
+			
+			// remove the joint from the constraint list of the other node
+			ConstraintGraphNode<T> otherNode = this.constraintGraph.getNode(other);
+			if (otherNode != null) {
+				otherNode.joints.remove(joint);
+			}
 		}
 		
 		// clear the node's joints
@@ -544,6 +550,12 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// all cleared at the end of the iteration
 			if (fixture != null) {
 				it.remove();
+			}
+			
+			// remove it from the other node
+			ConstraintGraphNode<T> otherNode = this.constraintGraph.getNode(other);
+			if (otherNode != null) {
+				otherNode.contactConstraints.remove(contactConstraint);
 			}
 		}
 		
