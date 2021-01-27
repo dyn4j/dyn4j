@@ -80,6 +80,7 @@ public class EllipseTest {
 		TestCase.assertEquals(0.5, e.getHalfWidth());
 		TestCase.assertEquals(1.0, e.getWidth());
 		TestCase.assertEquals(2.0, e.getHeight());
+		TestCase.assertNotNull(e.toString());
 	}
 	
 	/**
@@ -281,5 +282,79 @@ public class EllipseTest {
 		TestCase.assertEquals(1.669, aabb.getMinY(), 1.0e-3);
 		TestCase.assertEquals(1.450, aabb.getMaxX(), 1.0e-3);
 		TestCase.assertEquals(2.330, aabb.getMaxY(), 1.0e-3);
+	}
+	
+	/**
+	 * Tests the radius method
+	 */
+	@Test
+	public void getRadius() {
+		Ellipse e = new Ellipse(1.0, 0.5);
+		
+		// using an identity transform
+		double r = e.getRadius();
+		TestCase.assertEquals(0.5, r, 1.0e-3);
+		
+		r = e.getRadius(new Vector2(1.0, 0.0));
+		TestCase.assertEquals(1.5, r, 1.0e-3);
+		
+		e.rotate(Math.toRadians(30));
+		r = e.getRadius(new Vector2(1.0, 0.0));
+		TestCase.assertEquals(1.463, r, 1.0e-3);
+	}
+
+	/**
+	 * Tests the createMass method
+	 */
+	@Test
+	public void createMass() {
+		Ellipse e = new Ellipse(1.0, 0.5);
+		Mass mass = e.createMass(1.0);
+		
+		TestCase.assertEquals(0.392, mass.getMass(), 1e-3);
+		TestCase.assertEquals(0.030, mass.getInertia(), 1e-3);
+		TestCase.assertEquals(2.546, mass.getInverseMass(), 1e-3);
+		TestCase.assertEquals(32.594, mass.getInverseInertia(), 1e-3);
+		TestCase.assertEquals(0.0, mass.getCenter().x, 1e-3);
+		TestCase.assertEquals(0.0, mass.getCenter().y, 1e-3);
+		TestCase.assertEquals(MassType.NORMAL, mass.getType());
+		
+		e = new Ellipse(0.5, 1.0);
+		mass = e.createMass(1.0);
+		
+		TestCase.assertEquals(0.392, mass.getMass(), 1e-3);
+		TestCase.assertEquals(0.030, mass.getInertia(), 1e-3);
+		TestCase.assertEquals(2.546, mass.getInverseMass(), 1e-3);
+		TestCase.assertEquals(32.594, mass.getInverseInertia(), 1e-3);
+		TestCase.assertEquals(0.0, mass.getCenter().x, 1e-3);
+		TestCase.assertEquals(0.0, mass.getCenter().y, 1e-3);
+		TestCase.assertEquals(MassType.NORMAL, mass.getType());
+	}
+
+	/**
+	 * Tests the get rotation.
+	 */
+	@Test
+	public void getRotation() {
+		// the rotation intially is zero
+		Ellipse e = new Ellipse(1.0, 0.5);
+		TestCase.assertEquals(0.0, e.getRotationAngle());
+		TestCase.assertEquals(1.0, e.getRotation().getCost());
+		TestCase.assertEquals(0.0, e.getRotation().getSint());
+		
+		e = new Ellipse(1.0, 1.1);
+		TestCase.assertEquals(0.0, e.getRotationAngle());
+		TestCase.assertEquals(1.0, e.getRotation().getCost());
+		TestCase.assertEquals(0.0, e.getRotation().getSint());
+		
+		e.rotate(Math.toRadians(30));
+		TestCase.assertEquals(Math.toRadians(30), e.getRotationAngle(), 1e-8);
+		TestCase.assertEquals(Math.cos(Math.toRadians(30)), e.getRotation().getCost(), 1e-8);
+		TestCase.assertEquals(Math.sin(Math.toRadians(30)), e.getRotation().getSint(), 1e-8);
+		
+		e.rotate(Math.toRadians(-60));
+		TestCase.assertEquals(Math.toRadians(-30), e.getRotationAngle(), 1e-8);
+		TestCase.assertEquals(Math.cos(Math.toRadians(-30)), e.getRotation().getCost(), 1e-8);
+		TestCase.assertEquals(Math.sin(Math.toRadians(-30)), e.getRotation().getSint(), 1e-8);
 	}
 }

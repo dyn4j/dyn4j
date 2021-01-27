@@ -48,7 +48,8 @@ public class IntervalTest {
 	 */
 	@Test
 	public void create() {
-		new Interval(0.0, 2.0);
+		Interval i = new Interval(0.0, 2.0);
+		TestCase.assertNotNull(i.toString());
 	}
 	
 	/**
@@ -151,6 +152,9 @@ public class IntervalTest {
 		
 		TestCase.assertEquals(3.0, ov1);
 		TestCase.assertEquals(3.0, ov2);
+		
+		double ov0 = i1.getOverlap(new Interval(-10.0, -6.0));
+		TestCase.assertEquals(0.0, ov0);
 	}
 	
 	/**
@@ -181,6 +185,7 @@ public class IntervalTest {
 		TestCase.assertEquals(2.0000005, i.max);
 		
 		TestCase.assertTrue(!i.isDegenerate());
+		TestCase.assertTrue(!i.isDegenerate(0.0));
 		TestCase.assertTrue(i.isDegenerate(0.01));
 	}
 	
@@ -206,6 +211,16 @@ public class IntervalTest {
 		u = i1.getUnion(i3);
 		TestCase.assertEquals(-3.0, u.min);
 		TestCase.assertEquals(3.0, u.max);
+		
+		i1.union(i2);
+		TestCase.assertEquals(-2.0, i1.min);
+		TestCase.assertEquals(4.0, i1.max);
+		
+		i1.setMin(-2.0);
+		i1.setMax(3.0);
+		i1.union(i3);
+		TestCase.assertEquals(-3.0, i1.min);
+		TestCase.assertEquals(3.0, i1.max);
 	}
 	
 	/**
@@ -230,6 +245,16 @@ public class IntervalTest {
 		u = i1.getIntersection(i3);
 		TestCase.assertEquals(0.0, u.min);
 		TestCase.assertEquals(0.0, u.max);
+		
+		i1.intersection(i2);
+		TestCase.assertEquals(-1.0, i1.min);
+		TestCase.assertEquals(3.0, i1.max);
+		
+		i1.setMin(-2.0);
+		i1.setMax(3.0);
+		i1.intersection(i3);
+		TestCase.assertEquals(0.0, i1.min);
+		TestCase.assertEquals(0.0, i1.max);
 	}
 	
 	/**

@@ -332,6 +332,17 @@ public class CapsuleTest {
 		TestCase.assertEquals(0.0, mass.getCenter().x, 1e-3);
 		TestCase.assertEquals(0.0, mass.getCenter().y, 1e-3);
 		TestCase.assertEquals(MassType.NORMAL, mass.getType());
+		
+		e = new Capsule(0.5, 1.0);
+		mass = e.createMass(1.0);
+		
+		TestCase.assertEquals(0.446, mass.getMass(), 1e-3);
+		TestCase.assertEquals(0.028, mass.getInertia(), 1e-3);
+		TestCase.assertEquals(2.240, mass.getInverseMass(), 1e-3);
+		TestCase.assertEquals(34.692, mass.getInverseInertia(), 1e-3);
+		TestCase.assertEquals(0.0, mass.getCenter().x, 1e-3);
+		TestCase.assertEquals(0.0, mass.getCenter().y, 1e-3);
+		TestCase.assertEquals(MassType.NORMAL, mass.getType());
 	}
 
 	/**
