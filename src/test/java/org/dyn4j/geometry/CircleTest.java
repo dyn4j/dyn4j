@@ -59,7 +59,8 @@ public class CircleTest {
 	 */
 	@Test
 	public void createSuccess() {
-		new Circle(1.0);
+		Circle c = new Circle(1.0);
+		TestCase.assertNotNull(c.toString());
 	}
 	
 	/**
@@ -237,5 +238,33 @@ public class CircleTest {
 		TestCase.assertEquals( 0.8, aabb.getMinY(), 1.0e-3);
 		TestCase.assertEquals( 2.2, aabb.getMaxX(), 1.0e-3);
 		TestCase.assertEquals( 3.2, aabb.getMaxY(), 1.0e-3);
+	}
+
+	/**
+	 * Tests the getRadius method.
+	 */
+	@Test
+	public void getRadius() {
+		Circle c = new Circle(3.0);
+		TestCase.assertEquals(3.0, c.getRadius());
+		TestCase.assertEquals(4.0, c.getRadius(new Vector2(-1.0, 0.0)));
+		TestCase.assertEquals(8.0, c.getRadius(new Vector2(-3.0, 4.0)), 1e-3);
+	}
+
+	/**
+	 * Tests the createMass method.
+	 */
+	@Test
+	public void createMass() {
+		Circle c = new Circle(3.0);
+		Mass mass = c.createMass(2.0);
+		
+		TestCase.assertEquals(56.548, mass.getMass(), 1e-3);
+		TestCase.assertEquals(254.469, mass.getInertia(), 1e-3);
+		TestCase.assertEquals(0.017, mass.getInverseMass(), 1e-3);
+		TestCase.assertEquals(0.003, mass.getInverseInertia(), 1e-3);
+		TestCase.assertEquals(0.0, mass.getCenter().x, 1e-3);
+		TestCase.assertEquals(0.0, mass.getCenter().y, 1e-3);
+		TestCase.assertEquals(MassType.NORMAL, mass.getType());
 	}
 }

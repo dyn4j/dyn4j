@@ -45,6 +45,9 @@ import org.dyn4j.resources.Messages;
  * @param <T> the object type
  */
 public abstract class AbstractBroadphaseDetector<T> implements BroadphaseDetector<T> {
+	/** A multiplier used when determining if we should update an AABB regardless if it fits within the existing AABB */
+	protected static final double AABB_REDUCTION_RATIO = 2.0;
+	
 	/** The AABB producer */
 	protected final AABBProducer<T> aabbProducer;
 	

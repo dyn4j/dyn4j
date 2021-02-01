@@ -187,13 +187,39 @@ public final class Sap<T> extends AbstractBroadphaseDetector<T> implements Broad
 	 */
 	void update(AABBBroadphaseProxy<T> proxy, T object) {
 		this.aabbProducer.compute(object, this.updatedAABB);
-		// see if the old aabb contains the new one
-		if (proxy.aabb.contains(this.updatedAABB)) {
-			// if so, don't do anything
-			return;
-		}
-		// otherwise expand the new aabb
+		
+		// see if the old AABB contains the new one
+		// NOTE: the old AABB is the expanded AABB and this is how
+		// we handle what's been updated vs. not
+		boolean isNonExpanedNewContainedInExpandedOld = proxy.aabb.contains(this.updatedAABB);
+
+		// now expand the AABB so that we can do some additional
+		// checking on it and so we can use it later if we find
+		// we need to update it
 		this.aabbExpansionMethod.expand(object, this.updatedAABB);
+		
+		// now we check if the new non-expanded AABB fits within the
+		// current expanded AABB
+		if (isNonExpanedNewContainedInExpandedOld) {
+			// we could stop here and conclude that there's nothing to do, but
+			// there's an edge case where the current AABB is MUCH larger than
+			// the new AABB and it never gets sized down.  This has the effect
+			// of sending a lot more pairs to the narrow phase until the object
+			// moves out of the current AABB.  If this doesn't happen, for example,
+			// object stops, then the broadphase retains the large AABB forever.
+			
+			// so the goal here is to understand and adapt the larger AABBs to 
+			// smaller ones based on their perimeter ratio
+			double p0 = proxy.aabb.getPerimeter();
+			double p1 = this.updatedAABB.getPerimeter();
+			double ratio = p0 / p1;
+			if (ratio <= AABB_REDUCTION_RATIO) {
+				// if the old AABB is 2x (or less) the size (in perimeter) to the new
+				// then we'll accept it and not update
+				return;
+			}
+		}
+
 		// remove the current proxy from the tree
 		this.tree.remove(proxy);
 		// set the new aabb

@@ -1366,7 +1366,6 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 
 		// check the CCD mode
 		boolean bulletsOnly = (mode == ContinuousDetectionMode.BULLETS_ONLY);
-		boolean all = (mode == ContinuousDetectionMode.ALL);
 		
 		Iterator<CollisionPair<T>> pairIterator = this.ccdBroadphase.detectIterator();
 		while(pairIterator.hasNext()) {
@@ -1412,7 +1411,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			if (!body1.isEnabled() || !body2.isEnabled()) continue;
 			
 			// we don't allow dynamic vs. dynamic unless one (or both) is a bullet
-			if (!all && body1.isDynamic() && body2.isDynamic()) {
+			if (body1.isDynamic() && body2.isDynamic()) {
 				// one of them has to be a bullet
 				if (!body1.isBullet() && !body2.isBullet()) {
 					continue;

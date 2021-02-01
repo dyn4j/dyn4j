@@ -151,19 +151,6 @@ public class MassTest {
 	}
 	
 	/**
-	 * Test case for the circle create method.
-	 */
-	@Test
-	public void createCircle() {
-		Circle c = new Circle(3.0);
-		Mass m = c.createMass(2.0);
-		// the mass should be pi * r * r * d
-		TestCase.assertEquals(56.548, m.getMass(), 1.0e-3);
-		// I should be m * r * r / 2
-		TestCase.assertEquals(254.469, m.getInertia(), 1.0e-3);
-	}
-	
-	/**
 	 * Test case for the polygon create method.
 	 */
 	@Test

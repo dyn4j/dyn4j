@@ -25,6 +25,7 @@
 package org.dyn4j.geometry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -1051,7 +1052,7 @@ public class GeometryTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void cleanseNullArray() {
-		Geometry.cleanse((List<Vector2>)null);
+		Geometry.cleanse((Vector2[])null);
 	}
 	
 	/**
@@ -1082,6 +1083,20 @@ public class GeometryTest {
 	}
 	
 	/**
+	 * Tests the cleanse empty.
+	 */
+	@Test
+	public void cleanseEmpty() {
+		List<Vector2> points = new ArrayList<Vector2>();
+		List<Vector2> result1 = Geometry.cleanse(points);
+		
+		Vector2[] result2 = Geometry.cleanse(new Vector2[] {});
+		
+		TestCase.assertEquals(0, result1.size());
+		TestCase.assertEquals(0, result2.length);
+	}
+	
+	/**
 	 * Tests the cleanse list method.
 	 */
 	@Test
@@ -1097,6 +1112,14 @@ public class GeometryTest {
 		points.add(new Vector2(1.0, 0.0));
 		
 		List<Vector2> result = Geometry.cleanse(points);
+		
+		TestCase.assertTrue(Geometry.getWinding(result) > 0.0);
+		TestCase.assertEquals(4, result.size());
+		
+		// test the reverse winding
+	    Collections.reverse(points);
+		
+		result = Geometry.cleanse(points);
 		
 		TestCase.assertTrue(Geometry.getWinding(result) > 0.0);
 		TestCase.assertEquals(4, result.size());
@@ -1118,6 +1141,15 @@ public class GeometryTest {
 		points[7] = new Vector2(1.0, 0.0);
 		
 		Vector2[] result = Geometry.cleanse(points);
+		
+		TestCase.assertTrue(Geometry.getWinding(result) > 0.0);
+		TestCase.assertEquals(4, result.length);
+		
+		List<Vector2> pts = Arrays.asList(points);
+		Collections.reverse(pts);
+		points = pts.toArray(new Vector2[] {});
+		
+		result = Geometry.cleanse(points);
 		
 		TestCase.assertTrue(Geometry.getWinding(result) > 0.0);
 		TestCase.assertEquals(4, result.length);

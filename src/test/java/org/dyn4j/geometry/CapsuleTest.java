@@ -88,6 +88,9 @@ public class CapsuleTest {
 		TestCase.assertEquals(1.000, x.x, 1.0e-3);
 		TestCase.assertEquals(0.000, x.y, 1.0e-3);
 		
+		TestCase.assertEquals(2.0, cap.getLength());
+		TestCase.assertEquals(0.5, cap.getCapRadius());
+		
 		TestCase.assertNotNull(cap.toString());
 	}
 	
@@ -100,6 +103,9 @@ public class CapsuleTest {
 		Vector2 x = cap.localXAxis;
 		TestCase.assertEquals(0.000, x.x, 1.0e-3);
 		TestCase.assertEquals(1.000, x.y, 1.0e-3);
+		
+		TestCase.assertEquals(2.0, cap.getLength());
+		TestCase.assertEquals(0.5, cap.getCapRadius());
 		
 		TestCase.assertNotNull(cap.toString());
 	}
