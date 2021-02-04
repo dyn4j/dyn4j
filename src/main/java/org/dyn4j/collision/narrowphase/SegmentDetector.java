@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Class devoted to improving performance of {@link Segment} detection queries.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.1.0
  * @since 2.0.0
  */
 public final class SegmentDetector {
@@ -59,6 +59,16 @@ public final class SegmentDetector {
 		Vector2 p1 = transform.getTransformed(segment.getPoint1());
 		Vector2 p2 = transform.getTransformed(segment.getPoint2());
 		Vector2 d1 = p1.to(p2);
+		
+		// is the segment vertical or horizontal?
+		boolean isVertical = Math.abs(d1.x) <= Epsilon.E;
+		boolean isHorizontal = Math.abs(d1.y) <= Epsilon.E;
+		
+		// if it's both, then it's degenerate
+		if (isVertical && isHorizontal) {
+			// it's a degenerate line segment
+			return false;
+		} 
 		
 		// make sure the start of the ray is not on the segment
 		if (segment.contains(p0, transform)) return false;
@@ -107,13 +117,18 @@ public final class SegmentDetector {
 				// if their projections are close enough then they are
 				// on the same line
 				
-				// project the points onto the common direction
+				// project the ray start point onto the ray direction
 				double d0DotP0 = d0.dot(p0);
 				
-				// these projections must be positive
-				double d0DotP1 = d0.dot(p1);
-				double d0DotP2 = d0.dot(p2);
+				// project the segment points onto the ray direction
+				// and subtract the ray start point to receive their
+				// location on the ray direction relative to the ray
+				// start
+				double d0DotP1 = d0.dot(p1) - d0DotP0;
+				double d0DotP2 = d0.dot(p2) - d0DotP0;
 				
+				// if one or both are behind the ray, then
+				// we consider this a non-intersection
 				if (d0DotP1 < 0.0 || d0DotP2 < 0.0) {
 					// if either point is behind the ray
 					return false;
@@ -124,10 +139,10 @@ public final class SegmentDetector {
 				double d = 0.0;
 				Vector2 p = null;
 				if (d0DotP1 < d0DotP2) {
-					d = d0DotP1 - d0DotP0;
+					d = d0DotP1;
 					p = p1.copy();
 				} else {
-					d = d0DotP2 - d0DotP0;
+					d = d0DotP2;
 					p = p2.copy();
 				}
 				
@@ -163,12 +178,7 @@ public final class SegmentDetector {
 		}
 		
 		double s = 0;
-		boolean isVertical = Math.abs(d1.x) <= Epsilon.E;
-		boolean isHorizontal = Math.abs(d1.y) <= Epsilon.E;
-		if (isVertical && isHorizontal) {
-			// it's a degenerate line segment
-			return false;
-		} if (isVertical) {
+		if (isVertical) {
 			// use the y values to compute s
 			s = (t * d0.y + p0.y - p1.y) / d1.y;
 		} else {
