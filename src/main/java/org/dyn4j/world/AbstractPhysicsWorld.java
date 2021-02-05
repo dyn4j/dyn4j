@@ -1651,11 +1651,6 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// get the time of impact info
 			double t = minToi.getTime();
 			
-//			// skip it if the time of impact is at the beginning
-//			if (t == 0.0) {
-//				return false;
-//			}
-//			
 			// move the dynamic body to the time of impact
 			body1.getPreviousTransform().lerp(body1.getTransform(), t, body1.getTransform());
 			// check if the other body is dynamic

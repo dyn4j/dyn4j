@@ -43,13 +43,205 @@ import org.junit.Test;
 import junit.framework.TestCase;
 
 /**
- * Test cases for the {@link Gjk#raycast(Ray, double, Convex, Transform, Raycast)}
- * method.
+ * Test cases for the {@link Gjk} class (primarily raycast and getter/setters).
+ * <p>
+ * NOTE: Testing of the distance and detect methods are in the shape vs. shape
+ * test case classes.
  * @author William Bittle
  * @version 4.1.0
  * @since 2.0.0
  */
-public class GjkRaycastTest {
+public class GjkTest {
+	/**
+	 * Tests creating the class and setting/getting values.
+	 */
+	@Test
+	public void createGetSet() {
+		Gjk gjk = new Gjk();
+		
+		TestCase.assertEquals(Epa.class, gjk.getMinkowskiPenetrationSolver().getClass());
+		TestCase.assertEquals(Gjk.DEFAULT_DETECT_EPSILON, gjk.getDetectEpsilon());
+		TestCase.assertEquals(Gjk.DEFAULT_DISTANCE_EPSILON, gjk.getDistanceEpsilon());
+		TestCase.assertEquals(Gjk.DEFAULT_RAYCAST_EPSILON, gjk.getRaycastEpsilon());
+		TestCase.assertEquals(Gjk.DEFAULT_MAX_ITERATIONS, gjk.getMaxDetectIterations());
+		TestCase.assertEquals(Gjk.DEFAULT_MAX_ITERATIONS, gjk.getMaxDistanceIterations());
+		TestCase.assertEquals(Gjk.DEFAULT_MAX_ITERATIONS, gjk.getMaxRaycastIterations());
+		
+		Epa epa = new Epa();
+		gjk.setMinkowskiPenetrationSolver(epa);
+		gjk.setDetectEpsilon(0.1);
+		gjk.setDistanceEpsilon(0.2);
+		gjk.setRaycastEpsilon(0.3);
+		gjk.setMaxDetectIterations(6);
+		gjk.setMaxDistanceIterations(7);
+		gjk.setMaxRaycastIterations(8);
+		
+		TestCase.assertEquals(epa, gjk.getMinkowskiPenetrationSolver());
+		TestCase.assertEquals(0.1, gjk.getDetectEpsilon());
+		TestCase.assertEquals(0.2, gjk.getDistanceEpsilon());
+		TestCase.assertEquals(0.3, gjk.getRaycastEpsilon());
+		TestCase.assertEquals(6, gjk.getMaxDetectIterations());
+		TestCase.assertEquals(7, gjk.getMaxDistanceIterations());
+		TestCase.assertEquals(8, gjk.getMaxRaycastIterations());
+		
+		// test creation with epa
+		gjk = new Gjk(epa);
+		
+		TestCase.assertEquals(epa, gjk.getMinkowskiPenetrationSolver());
+	}
+	
+	/**
+	 * Tests the creation of Gjk with a null penetration solver.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createWithNullMinkowskiPenetrationSolver() {
+		new Gjk(null);
+	}
+	
+	/**
+	 * Tests the creation of Gjk and setting a null penetration solver.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void nullMinkowskiPenetrationSolver() {
+		Gjk gjk = new Gjk();
+		gjk.setMinkowskiPenetrationSolver(null);
+	}
+	
+	/**
+	 * Tests setting the detect epsilon to zero.
+	 */
+	@Test
+	public void setZeroDetectEpsilon() {
+		Gjk gjk = new Gjk();
+		gjk.setDetectEpsilon(0.0);
+	}
+	
+	/**
+	 * Tests setting the detect epsilon to a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeDetectEpsilon() {
+		Gjk gjk = new Gjk();
+		gjk.setDetectEpsilon(-0.1);
+	}
+	
+	/**
+	 * Tests setting the distance epsilon to zero.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setZeroDistanceEpsilon() {
+		Gjk gjk = new Gjk();
+		gjk.setDistanceEpsilon(0.0);
+	}
+	
+	/**
+	 * Tests setting the distance epsilon to a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeDistanceEpsilon() {
+		Gjk gjk = new Gjk();
+		gjk.setDistanceEpsilon(-0.1);
+	}
+	
+	/**
+	 * Tests setting the raycast epsilon to zero.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setZeroRaycastEpsilon() {
+		Gjk gjk = new Gjk();
+		gjk.setRaycastEpsilon(0.0);
+	}
+	
+	/**
+	 * Tests setting the raycast epsilon to a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeRaycastEpsilon() {
+		Gjk gjk = new Gjk();
+		gjk.setRaycastEpsilon(-0.1);
+	}
+	
+	/**
+	 * Tests setting the detect max iterations to a too low value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setTooLowDetectMaxIterations() {
+		Gjk gjk = new Gjk();
+		gjk.setMaxDetectIterations(4);
+	}
+	
+	/**
+	 * Tests setting the detect max iterations to zero.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setZeroDetectMaxIterations() {
+		Gjk gjk = new Gjk();
+		gjk.setMaxDetectIterations(0);
+	}
+	
+	/**
+	 * Tests setting the detect max iterations to a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeDetectMaxIterations() {
+		Gjk gjk = new Gjk();
+		gjk.setMaxDetectIterations(-5);
+	}
+	
+	/**
+	 * Tests setting the distance max iterations to a too low value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setTooLowDistanceMaxIterations() {
+		Gjk gjk = new Gjk();
+		gjk.setMaxDistanceIterations(4);
+	}
+	
+	/**
+	 * Tests setting the distance max iterations to zero.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setZeroDistanceMaxIterations() {
+		Gjk gjk = new Gjk();
+		gjk.setMaxDistanceIterations(0);
+	}
+	
+	/**
+	 * Tests setting the distance max iterations to a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeDistanceMaxIterations() {
+		Gjk gjk = new Gjk();
+		gjk.setMaxDistanceIterations(-5);
+	}
+	
+	/**
+	 * Tests setting the raycast max iterations to a too low value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setTooLowRaycastMaxIterations() {
+		Gjk gjk = new Gjk();
+		gjk.setMaxRaycastIterations(4);
+	}
+	
+	/**
+	 * Tests setting the raycast max iterations to zero.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setZeroRaycastMaxIterations() {
+		Gjk gjk = new Gjk();
+		gjk.setMaxRaycastIterations(0);
+	}
+	
+	/**
+	 * Tests setting the raycast max iterations to a negative value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeRaycastMaxIterations() {
+		Gjk gjk = new Gjk();
+		gjk.setMaxRaycastIterations(-5);
+	}
+	
 	/**
 	 * Tests a successful raycast against a {@link Rectangle}.
 	 */
@@ -223,12 +415,32 @@ public class GjkRaycastTest {
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// non-intersection case
-		ray.getDirectionVector().set(new Vector2(1.0, 2.0));
+		ray.setDirection(new Vector2(1.0, 2.0));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
 		
 		// start at center case (or any point within the convex shape)
-		ray.getStart().set(t.getTransformed(c.getCenter()));
+		ray.setStart(t.getTransformed(c.getCenter()));
 		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
+		
+		// towards the ray, but missing the circle
+		ray.setStart(new Vector2(0.0, 0.0));
+		ray.setDirection(new Vector2(1.0, 1.0));
+		TestCase.assertFalse(gjk.raycast(ray, 0.0, c, t, raycast));
+		
+		// towards the ray, but missing the circle because of length
+		ray.setStart(new Vector2(0.0, 0.0));
+		ray.setDirection(new Vector2(1.0, 0.5));
+		TestCase.assertFalse(gjk.raycast(ray, 1.0, c, t, raycast));
+		
+		// towards the ray, but missing the circle because of length
+		ray.setStart(new Vector2(0.0, 0.0));
+		ray.setDirection(new Vector2(1.0, 0.5));
+		TestCase.assertTrue(gjk.raycast(ray, 0.0, c, t, raycast));
+		
+		// vertical ray
+		ray.setStart(new Vector2(2.0, -1.0));
+		ray.setDirection(new Vector2(0.0, 1.0));
+		TestCase.assertTrue(gjk.raycast(ray, 0.0, c, t, raycast));
 	}
 	
 	/**

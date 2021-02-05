@@ -853,7 +853,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @since 3.3.0
 	 */
 	public double getRaycastEpsilon() {
-		return this.detectEpsilon;
+		return this.raycastEpsilon;
 	}
 	
 	/**
@@ -865,7 +865,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @since 3.3.0
 	 */
 	public void setRaycastEpsilon(double raycastEpsilon) {
-		if (raycastEpsilon <= 0) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidDistanceEpsilon"));
+		if (raycastEpsilon <= 0) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidRaycastEpsilon"));
 		this.raycastEpsilon = raycastEpsilon;
 	}
 	

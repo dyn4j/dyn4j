@@ -516,4 +516,49 @@ public class ConservativeAdvancementTest {
 		boolean collision = this.detector.getTimeOfImpact(c1, t1, dp1, da1, c2, t2, dp2, da2, toi);
 		TestCase.assertFalse(collision);
 	}
+
+	/**
+	 * Tests two bodies that are separated and moving, but moving 
+	 * in the same direction at the same speed.
+	 */
+	@Test
+	public void equidistantSameVelocityTest() {
+		Convex c1 = Geometry.createSquare(1.0);
+		Transform t1 = new Transform();
+		Vector2 dp1 = new Vector2(1.0, 0.0);
+		double da1 = 0.0;
+		
+		Convex c2 = Geometry.createSquare(1.0);
+		Transform t2 = new Transform();
+		t2.translate(3.0, 0.0);
+		Vector2 dp2 = new Vector2(1.0, 0.0);
+		double da2 = 0.0;
+		
+		// detect the time of impact
+		TimeOfImpact toi = new TimeOfImpact();
+		boolean collision = this.detector.getTimeOfImpact(c1, t1, dp1, da1, c2, t2, dp2, da2, toi);
+		TestCase.assertFalse(collision);
+	}
+
+	/**
+	 * Tests two bodies that are not initially separated.
+	 */
+	@Test
+	public void separationTooSmall() {
+		Convex c1 = Geometry.createSquare(1.0);
+		Transform t1 = new Transform();
+		Vector2 dp1 = new Vector2(1.0, 0.0);
+		double da1 = 0.0;
+		
+		Convex c2 = Geometry.createSquare(1.0);
+		Transform t2 = new Transform();
+		t2.translate(1.000001, 0.0);
+		Vector2 dp2 = new Vector2(1.0, 0.0);
+		double da2 = 0.0;
+		
+		// detect the time of impact
+		TimeOfImpact toi = new TimeOfImpact();
+		boolean collision = this.detector.getTimeOfImpact(c1, t1, dp1, da1, c2, t2, dp2, da2, toi);
+		TestCase.assertFalse(collision);
+	}
 }

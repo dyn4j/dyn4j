@@ -1156,6 +1156,48 @@ public class GeometryTest {
 	}
 	
 	/**
+	 * Tests the createEllipse method(s)
+	 * @since 4.1.0
+	 */
+	@Test
+	public void createEllipse() {
+		Ellipse e = Geometry.createEllipse(1.0, 0.5);
+		
+		TestCase.assertEquals(1.0, e.getWidth());
+		TestCase.assertEquals(0.5, e.getHeight());
+		TestCase.assertEquals(0.000, e.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.000, e.getCenter().y, 1.0e-3);
+	}
+
+	/**
+	 * Tests the createEllipse method(s)
+	 * @since 4.1.0
+	 */
+	@Test
+	public void createHalfEllipse() {
+		HalfEllipse e = Geometry.createHalfEllipse(1.0, 0.5);
+		
+		TestCase.assertEquals(1.0, e.getWidth());
+		TestCase.assertEquals(0.5, e.getHeight());
+		TestCase.assertEquals(0.000, e.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.212, e.getCenter().y, 1.0e-3);
+	}
+
+	/**
+	 * Tests the createEllipse method(s)
+	 * @since 4.1.0
+	 */
+	@Test
+	public void createHalfEllipseAtOrigin() {
+		HalfEllipse e = Geometry.createHalfEllipseAtOrigin(1.0, 0.5);
+		
+		TestCase.assertEquals(1.0, e.getWidth());
+		TestCase.assertEquals(0.5, e.getHeight());
+		TestCase.assertEquals(0.000, e.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.000, e.getCenter().y, 1.0e-3);
+	}
+	
+	/**
 	 * Tests the createPolygonalEllipse method.
 	 * @since 3.1.5
 	 */
@@ -1806,5 +1848,48 @@ public class GeometryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void scaleSegmentInvalid() {
 		Geometry.scale(Geometry.createSegment(new Vector2(1.0, 1.0)), 0);
+	}
+	
+	/**
+	 * Tests the creation of a link chain.
+	 */
+	@Test
+	public void createLinks() {
+		List<Vector2> verts = new ArrayList<Vector2>();
+		verts.add(new Vector2(2.0, 1.5));
+		verts.add(new Vector2(1.0, 1.0));
+		verts.add(new Vector2(1.0, 0.0));
+		verts.add(new Vector2(0.0, 0.0));
+		
+		List<Link> links = Geometry.createLinks(verts, true);
+		TestCase.assertEquals(4, links.size());
+		
+		// test link1
+		TestCase.assertEquals(links.get(3), links.get(0).getPrevious());
+		TestCase.assertEquals(links.get(1), links.get(0).getNext());
+//		TestCase.assertEquals(verts.get(3).x, links.get(0).getPoint0().x);
+//		TestCase.assertEquals(verts.get(3).y, links.get(0).getPoint0().y);
+//		TestCase.assertEquals(verts.get(0).x, links.get(0).getPoint1().x);
+//		TestCase.assertEquals(verts.get(0).y, links.get(0).getPoint1().y);
+//		TestCase.assertEquals(verts.get(1).x, links.get(0).getPoint2().x);
+//		TestCase.assertEquals(verts.get(1).y, links.get(0).getPoint2().y);
+//		TestCase.assertEquals(verts.get(1).x, links.get(0).getPoint3().x);
+//		TestCase.assertEquals(verts.get(1).y, links.get(0).getPoint3().y);
+//		
+//		// test link2
+//		TestCase.assertEquals(links.get(0), links.get(1).getPrevious());
+//		TestCase.assertEquals(links.get(2), links.get(1).getNext());
+//		TestCase.assertEquals(verts.get(0).x, links.get(1).getPoint0().x);
+//		TestCase.assertEquals(verts.get(0).y, links.get(1).getPoint0().y);
+//		TestCase.assertEquals(verts.get(1).x, links.get(1).getPoint1().x);
+//		TestCase.assertEquals(verts.get(1).y, links.get(1).getPoint1().y);
+//		TestCase.assertEquals(verts.get(2).x, links.get(1).getPoint2().x);
+//		TestCase.assertEquals(verts.get(2).y, links.get(1).getPoint2().y);
+//		TestCase.assertEquals(verts.get(3).x, links.get(1).getPoint3().x);
+//		TestCase.assertEquals(verts.get(3).y, links.get(1).getPoint3().y);
+		
+		
+		links = Geometry.createLinks(verts, false);
+		TestCase.assertEquals(3, links.size());
 	}
 }

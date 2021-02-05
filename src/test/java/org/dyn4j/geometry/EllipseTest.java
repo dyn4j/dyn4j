@@ -196,6 +196,47 @@ public class EllipseTest {
 	}
 	
 	/**
+	 * Tests the getFarthestPointOnEllipse method.
+	 */
+	@Test
+	public void getFarthestPointOnEllipse() {
+		// the assumptions are that a is the semi-major axis
+		// and b is the semi-minor axis and that the ellipse
+		// is centered at the origin and the semi-major axis
+		// aligns with the x-axis
+		
+		// quadrant 1
+		Vector2 p = Ellipse.getFarthestPointOnEllipse(1.0, 0.5, new Vector2(2.0, 0.1));		
+		TestCase.assertEquals(-1.000, p.x, 1e-3);
+		TestCase.assertEquals(-0.009, p.y, 1e-3);
+		
+		// quadrant 2
+		p = Ellipse.getFarthestPointOnEllipse(1.0, 0.5, new Vector2(0.1, 2.0));
+		TestCase.assertEquals(-0.325, p.x, 1e-3);
+		TestCase.assertEquals(-0.472, p.y, 1e-3);
+
+		// quadrant 3
+		p = Ellipse.getFarthestPointOnEllipse(1.0, 0.5, new Vector2(-2.0, -0.1));
+		TestCase.assertEquals( 1.000, p.x, 1e-3);
+		TestCase.assertEquals( 0.009, p.y, 1e-3);
+		
+		// quadrant 4
+		p = Ellipse.getFarthestPointOnEllipse(1.0, 0.5, new Vector2(0.1, -2.0));
+		TestCase.assertEquals(-0.325, p.x, 1e-3);
+		TestCase.assertEquals( 0.472, p.y, 1e-3);
+	
+		// on axis
+		p = Ellipse.getFarthestPointOnEllipse(1.0, 0.5, new Vector2(2.0, 0.0));		
+		TestCase.assertEquals(-1.000, p.x, 1e-3);
+		TestCase.assertEquals( 0.000, p.y, 1e-3);
+		
+		// test y-axis aligned ellipse
+		p = Ellipse.getFarthestPointOnEllipse(0.5, 1.0, new Vector2(0.0, 2.0));		
+		TestCase.assertEquals( 0.000, p.x, 1e-3);
+		TestCase.assertEquals(-1.000, p.y, 1e-3);
+	}
+	
+	/**
 	 * Tests the getAxes method.
 	 */
 	@Test(expected = UnsupportedOperationException.class)

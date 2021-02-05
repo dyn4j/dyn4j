@@ -51,10 +51,7 @@ public class ForceCollisionTimeOfImpactSolver<T extends PhysicsBody> implements 
 	public void solve(T body1, T body2, TimeOfImpact timeOfImpact, Settings settings) {
 		double linearTolerance = settings.getLinearTolerance();
 		double maxLinearCorrection = settings.getMaximumLinearCorrection();
-		
-		Vector2 c1 = body1.getWorldCenter();
-		Vector2 c2 = body2.getWorldCenter();
-		
+
 		Mass m1 = body1.getMass();
 		Mass m2 = body2.getMass();
 		
@@ -62,32 +59,33 @@ public class ForceCollisionTimeOfImpactSolver<T extends PhysicsBody> implements 
 		double mass2 = m2.getMass();
 		
 		double invMass1 = mass1 * m1.getInverseMass();
-		double invI1 = mass1 * m1.getInverseInertia();
 		double invMass2 = mass2 * m2.getInverseMass();
-		double invI2 = mass2 * m2.getInverseInertia();
 		
 		Separation separation = timeOfImpact.getSeparation();
-		
-		// solve the constraint
-		Vector2 p1w = separation.getPoint1();
-		Vector2 p2w = separation.getPoint2();
-		
-		Vector2 r1 = c1.to(p1w);
-		Vector2 r2 = c2.to(p2w);
 		
 		Vector2 n = separation.getNormal();
 		double d = separation.getDistance();
 		
-		double C = Interval.clamp(d - linearTolerance, -maxLinearCorrection, 0.0);
+		// setup a simple, linear only, position based, distance constraint to move the 
+		// bodies into collision
+		// C = d - l = 0
 		
-		double rn1 = r1.cross(n);
-		double rn2 = r2.cross(n);
+		// the distance should be greater than zero (indicating they are separated) and
+		// should not exceed maxLinearCorrection (in other words don't move them half way
+		// across the screen - but should never happen - the distance should always be
+		// very small)
 		
-		double K = invMass1 + invMass2 + invI1 * rn1 * rn1 + invI2 * rn2 * rn2;
+		// in addition, we add linearTolerance to the computed distance to ensure that
+		// the distance between the bodies is zero and they are in collision.
+		double C = Interval.clamp(d + linearTolerance, 0.0, maxLinearCorrection);
 		
+		// compute the effective mass
+		double K = invMass1 + invMass2;
+		
+		// compute the impulse
 		double impulse = 0.0;
 		if (K > 0.0) {
-			impulse = -C / K;
+			impulse = C / K;
 		}
 		
 		Vector2 J = n.product(impulse);
@@ -99,10 +97,8 @@ public class ForceCollisionTimeOfImpactSolver<T extends PhysicsBody> implements 
 		// translate and rotate the objects
 		Vector2 tx1 = J.product(invMass1);
 		body1.translate(tx1);
-//		body1.rotate(invI1 * r1.cross(J), c1.x, c1.y);
 		
 		Vector2 tx2 = J.product(-invMass2);
 		body2.translate(tx2);
-//		body2.rotate(-invI2 * r2.cross(J), c2.x, c2.y);
 	}
 }
