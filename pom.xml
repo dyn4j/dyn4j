@@ -263,7 +263,7 @@
                 </sourceFileExcludes>
                 <overview>${basedir}/overview.html</overview>
                 <doctitle>dyn4j v${project.version}</doctitle>
-                <show>public</show>
+                <show>protected</show>
                 <doclint>all</doclint>
                 <noqualifier>all</noqualifier>
                 <excludePackageNames>org.dyn4j.resources</excludePackageNames>

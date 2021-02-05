@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Need help, have an idea, or not sure?
+    url: https://github.com/dyn4j/dyn4j/discussions/new
+    about: Start a discussion
