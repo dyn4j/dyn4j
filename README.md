@@ -1,4 +1,4 @@
-![alt tag](https://raw.githubusercontent.com/wnbittle/dyn4j/master/dyn4j.png)
+![alt tag](https://github.com/dyn4j/dyn4j/blob/master/dyn4j.png)
 
 ![Actions Status](https://github.com/dyn4j/dyn4j/workflows/Maven%20CI/badge.svg)
 ![License](https://img.shields.io/github/license/dyn4j/dyn4j)
