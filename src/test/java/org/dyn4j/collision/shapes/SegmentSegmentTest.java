@@ -24,24 +24,17 @@
  */
 package org.dyn4j.collision.shapes;
 
-import java.util.List;
-
-import junit.framework.TestCase;
-
-import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.collision.CollisionPair;
-import org.dyn4j.collision.Fixture;
-import org.dyn4j.collision.TestCollisionBody;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.collision.narrowphase.Sat;
 import org.dyn4j.collision.narrowphase.Separation;
 import org.dyn4j.geometry.Segment;
-import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Test case for {@link Segment} - {@link Segment} collision detection.
@@ -63,96 +56,6 @@ public class SegmentSegmentTest extends AbstractNarrowphaseShapeTest {
 	public void setup() {
 		this.seg1 = new Segment(new Vector2(-0.3, -0.3), new Vector2(0.2, 0.3));
 		this.seg2 = new Segment(new Vector2(-0.5, 0.0), new Vector2(0.5, 0.0));
-	}
-	
-	/**
-	 * Tests {@link Shape} AABB.
-	 */
-	@Test
-	public void detectShapeAABB() {
-		Transform t1 = new Transform();
-		Transform t2 = new Transform();
-		
-		// test overlap
-		TestCase.assertTrue(this.sap.detect(seg1, t1, seg2, t2));
-		TestCase.assertTrue(this.sap.detect(seg2, t2, seg1, t1));
-		
-		// test only AABB overlap
-		t2.translate(0.5, 0.0);
-		TestCase.assertTrue(this.sap.detect(seg1, t1, seg2, t2));
-		TestCase.assertTrue(this.sap.detect(seg2, t2, seg1, t1));
-		
-		// test no overlap
-		t1.translate(-1.0, 0.0);
-		TestCase.assertFalse(this.sap.detect(seg1, t1, seg2, t2));
-		TestCase.assertFalse(this.sap.detect(seg2, t2, seg1, t1));
-	}
-	
-	/**
-	 * Tests {@link CollisionBody} AABB.
-	 */
-	@Test	
-	public void detectCollidableAABB() {
-		// create some collidables
-		TestCollisionBody ct1 = new TestCollisionBody(seg1);
-		TestCollisionBody ct2 = new TestCollisionBody(seg2);
-		
-		// test overlap
-		TestCase.assertTrue(this.sap.detect(ct1, ct2));
-		TestCase.assertTrue(this.sap.detect(ct2, ct1));
-		
-		// test only AABB overlap
-		ct2.translate(0.5, 0.0);
-		TestCase.assertTrue(this.sap.detect(ct1, ct2));
-		TestCase.assertTrue(this.sap.detect(ct2, ct1));
-		
-		// test no overlap
-		ct1.translate(-1.0, 0.0);
-		TestCase.assertFalse(this.sap.detect(ct1, ct2));
-		TestCase.assertFalse(this.sap.detect(ct2, ct1));
-	}
-	
-	/**
-	 * Tests the broadphase detectors.
-	 */
-	@Test
-	public void detectBroadphase() {
-		List<CollisionPair<TestCollisionBody, Fixture>> pairs;
-		
-		// create some collidables
-		TestCollisionBody ct1 = new TestCollisionBody(seg1);
-		TestCollisionBody ct2 = new TestCollisionBody(seg2);
-		
-		this.sap.add(ct1);
-		this.sap.add(ct2);
-		this.dyn.add(ct1);
-		this.dyn.add(ct2);
-		
-		// test overlap
-		this.sap.update(ct1);
-		this.dyn.update(ct1);
-		pairs = this.sap.detect();
-		TestCase.assertEquals(1, pairs.size());
-		pairs = this.dyn.detect();
-		TestCase.assertEquals(1, pairs.size());
-		
-		// test only AABB overlap
-		ct2.translate(0.5, 0.0);
-		this.sap.update(ct2);
-		this.dyn.update(ct2);
-		pairs = this.sap.detect();
-		TestCase.assertEquals(1, pairs.size());
-		pairs = this.dyn.detect();
-		TestCase.assertEquals(1, pairs.size());
-		
-		// test no overlap
-		ct1.translate(-1.0, 0.0);
-		this.sap.update(ct1);
-		this.dyn.update(ct1);
-		pairs = this.sap.detect();
-		TestCase.assertEquals(0, pairs.size());
-		pairs = this.dyn.detect();
-		TestCase.assertEquals(0, pairs.size());
 	}
 	
 	/**

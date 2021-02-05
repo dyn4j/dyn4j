@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -72,7 +72,7 @@ import org.dyn4j.geometry.Vector2;
  * tunneling depending on the CCD setting in the world's {@link Settings}.  Use this if the body 
  * is a fast moving body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
  */
 public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, Shiftable, DataContainer, Ownable {
@@ -126,20 +126,6 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @since 3.1.1
 	 */
 	public BodyFixture addFixture(Convex convex, double density, double friction, double restitution);
-	
-	/**
-	 * This method should be called after fixture modification
-	 * is complete.
-	 * <p>
-	 * This method will calculate a total mass for the body 
-	 * given the masses of the fixtures.
-	 * <p>
-	 * This method will always set this body's mass type to Normal.
-	 * @return {@link PhysicsBody} this body
-	 * @deprecated removed in 3.2.0 use {@link #setMass(MassType)} instead
-	 */
-	@Deprecated
-	public PhysicsBody setMass();
 	
 	/**
 	 * This is a shortcut method for the {@link #setMass(org.dyn4j.geometry.MassType)}
@@ -433,41 +419,6 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	public boolean isDynamic();
 	
 	/**
-	 * Sets whether this {@link PhysicsBody} is active or not.
-	 * @param flag true if this {@link PhysicsBody} should be active
-	 * @deprecated Deprecated in 4.0.0. Use {@link #setEnabled(boolean)} instead.
-	 */
-	@Deprecated
-	public void setActive(boolean flag);
-	
-	/**
-	 * Returns true if this {@link PhysicsBody} is active.
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. Use {@link #isEnabled()} instead.
-	 */
-	@Deprecated
-	public boolean isActive();
-
-	/**
-	 * Sets the {@link PhysicsBody} to allow or disallow automatic sleeping.
-	 * @param flag true if the {@link PhysicsBody} is allowed to sleep
-	 * @since 1.2.0
-	 * @deprecated Deprecated in 4.0.0. Use {@link #setAtRestDetectionEnabled(boolean)} instead.
-	 */
-	@Deprecated
-	public void setAutoSleepingEnabled(boolean flag);
-
-	/**
-	 * Returns true if this {@link PhysicsBody} is allowed to be 
-	 * put to sleep automatically.
-	 * @return boolean
-	 * @since 1.2.0
-	 * @deprecated Deprecated in 4.0.0. Use {@link #isAtRestDetectionEnabled()} instead.
-	 */
-	@Deprecated
-	public boolean isAutoSleepingEnabled();
-	
-	/**
 	 * Determines whether this {@link PhysicsBody} can participate in automatic
 	 * at-rest detection.
 	 * @param flag true if it should
@@ -483,25 +434,6 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 */
 	public boolean isAtRestDetectionEnabled();
 
-	/**
-	 * Sets whether this {@link PhysicsBody} is awake or not.
-	 * <p>
-	 * If flag is true, this body's velocity, angular velocity,
-	 * force, torque, and accumulators are cleared.
-	 * @param flag true if the body should be put to sleep
-	 * @deprecated Deprecated in 4.0.0. Use {@link #setAtRest(boolean)} instead.
-	 */
-	@Deprecated
-	public void setAsleep(boolean flag);
-
-	/**
-	 * Returns true if this {@link PhysicsBody} is sleeping.
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. Use {@link #isAtRest()} instead.
-	 */
-	@Deprecated
-	public boolean isAsleep();
-	
 	/**
 	 * Sets whether this {@link PhysicsBody} is at-rest or not.
 	 * <p>
@@ -537,49 +469,6 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @since 1.2.0
 	 */
 	public boolean isBullet();
-	
-	/**
-	 * Returns an AABB that contains the maximal space in which
-	 * the {@link CollisionBody} exists from the initial transform
-	 * to the final transform.
-	 * <p>
-	 * This method takes the bounding circle, using the world center
-	 * and rotation disc radius, at the initial and final transforms
-	 * and creates an AABB containing both.
-	 * <p>
-	 * This method will return a degenerate AABB if the body has zero 
-	 * fixtures.  If this body has one or more fixtures, but didn't move, an AABB 
-	 * with a width and height equal to the rotation disc radius is returned.
-	 * <p>
-	 * <b>NOTE</b>: To get an accurate result from this method, one of the 
-	 * <code>setMass</code> methods should be called to set the 
-	 * rotation disc radius before calling this method.
-	 * @return {@link AABB}
-	 * @since 3.1.1
-	 */
-	public AABB createSweptAABB();
-	
-	/**
-	 * Creates a swept {@link AABB} from the given start and end {@link Transform}s
-	 * using the fixtures on this {@link PhysicsBody}.
-	 * <p>
-	 * This method takes the bounding circle, using the world center
-	 * and rotation disc radius, at the initial and final transforms
-	 * and creates an AABB containing both.
-	 * <p>
-	 * This method will return a degenerate AABB if the body has zero 
-	 * fixtures.  If this body has one or more fixtures, but didn't move, an AABB 
-	 * with a width and height equal to the rotation disc radius is returned.
-	 * <p>
-	 * <b>NOTE</b>: To get an accurate result from this method, one of the 
-	 * <code>setMass</code> methods should be called to set the 
-	 * rotation disc radius before calling this method.
-	 * @param initialTransform the initial {@link Transform}
-	 * @param finalTransform the final {@link Transform}
-	 * @return {@link AABB}
-	 * @since 3.1.1
-	 */
-	public AABB createSweptAABB(Transform initialTransform, Transform finalTransform);
 	
 	/**
 	 * Returns the change in position computed from last frame's transform
@@ -622,7 +511,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	/**
 	 * Sets the linear velocity.
 	 * <p>
-	 * Call the {@link #setAsleep(boolean)} method to wake up the {@link PhysicsBody}
+	 * Call the {@link #setAtRest(boolean)} method to wake up the {@link PhysicsBody}
 	 * if the {@link PhysicsBody} is asleep and the velocity is not zero.
 	 * @param velocity the desired velocity
 	 * @throws NullPointerException if velocity is null
@@ -633,7 +522,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	/**
 	 * Sets the linear velocity.
 	 * <p>
-	 * Call the {@link #setAsleep(boolean)} method to wake up the {@link PhysicsBody}
+	 * Call the {@link #setAtRest(boolean)} method to wake up the {@link PhysicsBody}
 	 * if the {@link PhysicsBody} is asleep and the velocity is not zero.
 	 * @param x the linear velocity along the x-axis
 	 * @param y the linear velocity along the y-axis
@@ -650,7 +539,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	/**
 	 * Sets the angular velocity in radians per second
 	 * <p>
-	 * Call the {@link #setAsleep(boolean)} method to wake up the {@link PhysicsBody}
+	 * Call the {@link #setAtRest(boolean)} method to wake up the {@link PhysicsBody}
 	 * if the {@link PhysicsBody} is asleep and the velocity is not zero.
 	 * @param angularVelocity the angular velocity in radians per second
 	 */
@@ -742,4 +631,68 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @since 3.0.0
 	 */
 	public void setGravityScale(double scale);
+	
+	/**
+	 * Returns a swept {@link AABB} that contains the maximal space in which the {@link PhysicsBody} exists from the 
+	 * initial transform to the final transform.
+	 * <p>
+	 * The AABB returned from this method can vary based on the state of the body, the number of fixtures,
+	 * whether the body was rotating or not, and so on. This method attempts to return the tightest fitting
+	 * AABB possible, but it should not be relied on.
+	 * <p>
+	 * <b>NOTE</b>: This method is dependent upon the {@link #getRotationDiscRadius()} and {@link #getWorldCenter()}
+	 * methods in some scenarios, please ensure these are properly setup before calling this method.
+	 * @return {@link AABB}
+	 * @since 3.1.1
+	 */
+	public abstract AABB createSweptAABB();
+	
+	/**
+	 * Creates a swept {@link AABB} from the given start and end {@link Transform}s
+	 * using the fixtures on this {@link PhysicsBody}.
+	 * <p>
+	 * The AABB returned from this method can vary based on the state of the body, the number of fixtures,
+	 * whether the body was rotating or not, and so on. This method attempts to return the tightest fitting
+	 * AABB possible, but it should not be relied on.
+	 * <p>
+	 * <b>NOTE</b>: This method is dependent upon the {@link #getRotationDiscRadius()} and {@link #getWorldCenter()}
+	 * methods in some scenarios, please ensure these are properly setup before calling this method.
+	 * @param initialTransform the initial {@link Transform}
+	 * @param finalTransform the final {@link Transform}
+	 * @return {@link AABB}
+	 * @since 3.1.1
+	 */
+	public abstract AABB createSweptAABB(Transform initialTransform, Transform finalTransform);
+	
+	/**
+	 * Computes a swept {@link AABB} that contains the maximal space in which the {@link PhysicsBody} 
+	 * exists from the initial transform to the final transform and places the result in the given AABB.
+	 * <p>
+	 * The AABB returned from this method can vary based on the state of the body, the number of fixtures,
+	 * whether the body was rotating or not, and so on. This method attempts to return the tightest fitting
+	 * AABB possible, but it should not be relied on.
+	 * <p>
+	 * <b>NOTE</b>: This method is dependent upon the {@link #getRotationDiscRadius()} and {@link #getWorldCenter()}
+	 * methods in some scenarios, please ensure these are properly setup before calling this method.
+	 * @param result the AABB to set
+	 * @since 4.1.0
+	 */
+	public abstract void computeSweptAABB(AABB result);
+	
+	/**
+	 * Computes a swept {@link AABB} from the given start and end {@link Transform}s
+	 * using the fixtures on this {@link PhysicsBody} and places the result in the given AABB.
+	 * <p>
+	 * The AABB returned from this method can vary based on the state of the body, the number of fixtures,
+	 * whether the body was rotating or not, and so on. This method attempts to return the tightest fitting
+	 * AABB possible, but it should not be relied on.
+	 * <p>
+	 * <b>NOTE</b>: This method is dependent upon the {@link #getRotationDiscRadius()} and {@link #getWorldCenter()}
+	 * methods in some scenarios, please ensure these are properly setup before calling this method.
+	 * @param initialTransform the initial {@link Transform}
+	 * @param finalTransform the final {@link Transform}
+	 * @param result the AABB to set
+	 * @since 4.1.0
+	 */
+	public abstract void computeSweptAABB(Transform initialTransform, Transform finalTransform, AABB result);
 }

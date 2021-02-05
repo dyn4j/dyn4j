@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -35,7 +35,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link SegmentDetector} class
  * @author William Bittle
- * @version 4.0.1
+ * @version 4.1.0
  * @since 3.4.0
  */
 public class SegmentDetectorTest {	
@@ -133,5 +133,146 @@ public class SegmentDetectorTest {
 		TestCase.assertEquals(-1.000, normal.x, 1.0e-3);
 		TestCase.assertEquals(0.000, normal.y, 1.0e-3);
 		TestCase.assertEquals(0.381, raycast.getDistance(), 1.0e-3);
+	}
+	
+	/**
+	 * Tests the non-intersection case where ray is in front of the segment.
+	 */
+	@Test
+	public void raycastParallelSegmentBehindRay() {
+		Ray ray = new Ray(new Vector2(3.0, 0.0), new Vector2(1.0, 0.0));
+		Segment c = new Segment(new Vector2(0.0, 0.0), new Vector2(2.0, 0.0));
+		Transform t = new Transform();
+		Raycast raycast = new Raycast();
+		
+		boolean collision = SegmentDetector.raycast(ray, 0.0, c, t, raycast);
+		TestCase.assertFalse(collision);
+		
+		// try the other way
+		ray = new Ray(new Vector2(-3.0, 0.0), new Vector2(-1.0, 0.0));
+		c = new Segment(new Vector2(0.0, 0.0), new Vector2(-2.0, 0.0));
+		
+		collision = SegmentDetector.raycast(ray, 0.0, c, t, raycast);
+		TestCase.assertFalse(collision);
+		
+		// try reversed winding
+		c = new Segment(new Vector2(-2.0, 0.0), new Vector2(0.0, 0.0));
+		
+		collision = SegmentDetector.raycast(ray, 0.0, c, t, raycast);
+		TestCase.assertFalse(collision);
+	}
+
+	/**
+	 * Tests the intersection case where ray is in front of (and parallel to) the segment.
+	 */
+	@Test
+	public void raycastParallelSegmentInFrontOfRay() {
+		Ray ray = new Ray(new Vector2(-1.0, 0.0), new Vector2(1.0, 0.0));
+		Segment c = new Segment(new Vector2(0.0, 0.0), new Vector2(2.0, 0.0));
+		Transform t = new Transform();
+		Raycast raycast = new Raycast();
+		
+		boolean collision = SegmentDetector.raycast(ray, 0.0, c, t, raycast);
+		TestCase.assertTrue(collision);
+		
+		Vector2 point = raycast.getPoint();
+		Vector2 normal = raycast.getNormal();
+		TestCase.assertEquals(0.0, point.x, 1.0e-3);
+		TestCase.assertEquals(0.0, point.y, 1.0e-3);
+		TestCase.assertEquals(-1.000, normal.x, 1.0e-3);
+		TestCase.assertEquals(0.000, normal.y, 1.0e-3);
+		TestCase.assertEquals(1.000, raycast.getDistance(), 1.0e-3);
+		
+		// try the other way
+		ray = new Ray(new Vector2(3.0, 0.0), new Vector2(-1.0, 0.0));
+		c = new Segment(new Vector2(0.0, 0.0), new Vector2(2.0, 0.0));
+		
+		collision = SegmentDetector.raycast(ray, 0.0, c, t, raycast);
+		TestCase.assertTrue(collision);
+		
+		point = raycast.getPoint();
+		normal = raycast.getNormal();
+		TestCase.assertEquals(2.0, point.x, 1.0e-3);
+		TestCase.assertEquals(0.0, point.y, 1.0e-3);
+		TestCase.assertEquals(1.000, normal.x, 1.0e-3);
+		TestCase.assertEquals(0.000, normal.y, 1.0e-3);
+		TestCase.assertEquals(1.000, raycast.getDistance(), 1.0e-3);
+		
+		// try reversed winding
+		c = new Segment(new Vector2(2.0, 0.0), new Vector2(0.0, 0.0));
+		
+		collision = SegmentDetector.raycast(ray, 0.0, c, t, raycast);
+		TestCase.assertTrue(collision);
+		
+		point = raycast.getPoint();
+		normal = raycast.getNormal();
+		TestCase.assertEquals(2.0, point.x, 1.0e-3);
+		TestCase.assertEquals(0.0, point.y, 1.0e-3);
+		TestCase.assertEquals(1.000, normal.x, 1.0e-3);
+		TestCase.assertEquals(0.000, normal.y, 1.0e-3);
+		TestCase.assertEquals(1.000, raycast.getDistance(), 1.0e-3);
+	}
+	
+	/**
+	 * Tests the non-intersection case where ray is starting in the middle of the segment.
+	 */
+	@Test
+	public void raycastWithRayStartingInsideParallelSegment() {
+		Ray ray = new Ray(new Vector2(1.0, 0.0), new Vector2(1.0, 0.0));
+		Segment c = new Segment(new Vector2(0.0, 0.0), new Vector2(2.0, 0.0));
+		Transform t = new Transform();
+		Raycast raycast = new Raycast();
+		
+		boolean collision = SegmentDetector.raycast(ray, 0.0, c, t, raycast);
+		TestCase.assertFalse(collision);
+		
+		// reverse the ray
+		ray = new Ray(new Vector2(1.0, 0.0), new Vector2(-1.0, 0.0));
+		
+		collision = SegmentDetector.raycast(ray, 0.0, c, t, raycast);
+		TestCase.assertFalse(collision);
+		
+		// try the other way
+		ray = new Ray(new Vector2(-1.0, 0.0), new Vector2(-1.0, 0.0));
+		c = new Segment(new Vector2(0.0, 0.0), new Vector2(-2.0, 0.0));
+		
+		collision = SegmentDetector.raycast(ray, 0.0, c, t, raycast);
+		TestCase.assertFalse(collision);
+		
+		// reverse the ray
+		ray = new Ray(new Vector2(-1.0, 0.0), new Vector2(1.0, 0.0));
+		
+		collision = SegmentDetector.raycast(ray, 0.0, c, t, raycast);
+		TestCase.assertFalse(collision);
+		
+		// try reversed winding
+		c = new Segment(new Vector2(-2.0, 0.0), new Vector2(0.0, 0.0));
+		
+		collision = SegmentDetector.raycast(ray, 0.0, c, t, raycast);
+		TestCase.assertFalse(collision);
+		
+		// reverse the ray
+		ray = new Ray(new Vector2(-1.0, 0.0), new Vector2(-1.0, 0.0));
+		
+		collision = SegmentDetector.raycast(ray, 0.0, c, t, raycast);
+		TestCase.assertFalse(collision);
+		
+	}
+	
+	/**
+	 * Tests a degenerate line segment.
+	 */
+	@Test
+	public void raycastDegenerateSegment() {
+		Ray ray = new Ray(new Vector2(1.0, 0.0), new Vector2(1.0, 0.0));
+		Segment c = new Segment(new Vector2(1.0, 0.0), new Vector2(0.0, 0.0));
+		// NOTE: shouldn't be possible to create a degenerate line segement
+		c.getPoint1().set(0.0, 0.0);
+		
+		Transform t = new Transform();
+		Raycast raycast = new Raycast();
+		
+		boolean collision = SegmentDetector.raycast(ray, 0.0, c, t, raycast);
+		TestCase.assertFalse(collision);
 	}
 }

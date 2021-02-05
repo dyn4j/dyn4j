@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,23 +24,20 @@
  */
 package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.AABB;
 
 /**
- * Represents a sortable proxy for a {@link CollisionBody} {@link Fixture} in the {@link Sap} {@link BroadphaseDetector}.
+ * Represents a sortable proxy for an object in the {@link Sap} / {@link BruteForceBroadphase} {@link BroadphaseDetector}s.
  * <p>
  * Note: This class has a natural ordering that is inconsistent with equals.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
- * @param <T> the {@link CollisionBody} type
- * @param <E> the {@link Fixture} type
+ * @param <T> the object type
  */
-final class AABBBroadphaseProxy<T extends CollisionBody<E>, E extends Fixture> implements Comparable<AABBBroadphaseProxy<T, E>> {
+final class AABBBroadphaseProxy<T> implements Comparable<AABBBroadphaseProxy<T>> {
 	/** The collision item */
-	final BroadphaseItem<T, E> item;
+	final T item;
 	
 	/** The body's aabb */
 	final AABB aabb;
@@ -48,17 +45,16 @@ final class AABBBroadphaseProxy<T extends CollisionBody<E>, E extends Fixture> i
 	/**
 	 * Full constructor.
 	 * @param item the collision item
-	 * @param aabb the {@link AABB}
 	 */
-	public AABBBroadphaseProxy(BroadphaseItem<T, E> item, AABB aabb) {
+	public AABBBroadphaseProxy(T item) {
 		this.item = item;
-		this.aabb = aabb;
+		this.aabb = new AABB(0,0,0,0);
 	}
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
-	public int compareTo(AABBBroadphaseProxy<T, E> o) {
+	public int compareTo(AABBBroadphaseProxy<T> o) {
 		// check if the objects are the same instance
 		if (this == o) return 0;
 		// compute the difference in the minimum x values of the aabbs
@@ -78,8 +74,7 @@ final class AABBBroadphaseProxy<T extends CollisionBody<E>, E extends Fixture> i
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("SapProxy[Body=").append(this.item.body.hashCode())
-		  .append("|Fixture=").append(this.item.fixture.hashCode())
+		sb.append("SapProxy[Item=").append(this.item)
 		  .append("|AABB=").append(this.aabb.toString())
 		  .append("]");
 		return sb.toString();

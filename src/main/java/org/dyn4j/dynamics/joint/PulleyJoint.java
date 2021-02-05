@@ -63,7 +63,7 @@ import org.dyn4j.resources.Messages;
  * behave as if connected by flexible rope pass in <code>true</code> to the 
  * {@link #setSlackEnabled(boolean)} method.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 2.1.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Pulley_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/12/pulley-constraint/" target="_blank">Pulley Constraint</a>
@@ -550,16 +550,5 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 	 */
 	public void setSlackEnabled(boolean flag) {
 		this.slackEnabled = flag;
-	}
-
-	/**
-	 * Returns the current state of the limit.
-	 * @return {@link LimitState}
-	 * @since 3.2.0
-	 * @deprecated Deprecated in 4.0.0.
-	 */
-	@Deprecated
-	public LimitState getLimitState() {
-		return LimitState.INACTIVE;
 	}
 }

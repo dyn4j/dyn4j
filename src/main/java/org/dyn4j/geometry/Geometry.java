@@ -1830,13 +1830,13 @@ public final class Geometry {
 		// generate the links
 		List<Link> links = new ArrayList<Link>();
 		for (int i = 0; i < size - 1; i++) {
-			Vector2 p1 = vertices[i].copy();
-			Vector2 p2 = vertices[i + 1].copy();
+			Vector2 p1 = vertices[i];
+			Vector2 p2 = vertices[i + 1];
 			// check for null segment vertices
 			if (p1 == null || p2 == null)  {
 				throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
 			}
-			Link link = new Link(p1, p2);
+			Link link = new Link(p1.copy(), p2.copy());
 			// link up the previous and this link
 			if (i > 0) {
 				Link prev = links.get(i - 1);

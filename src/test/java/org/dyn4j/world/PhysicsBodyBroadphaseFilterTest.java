@@ -37,7 +37,7 @@ import org.junit.Test;
 import junit.framework.TestCase;
 
 /**
- * Test case for the {@link PhysicsBodyBroadphaseFilter} class.
+ * Test case for the {@link PhysicsBodyBroadphaseCollisionDataFilter} class.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0
@@ -49,7 +49,7 @@ public class PhysicsBodyBroadphaseFilterTest {
 	@Test
 	public void enabled() {
 		World<Body> world = new World<Body>();
-		PhysicsBodyBroadphaseFilter<Body> filter = new PhysicsBodyBroadphaseFilter<Body>(world);
+		PhysicsBodyBroadphaseCollisionDataFilter<Body> filter = new PhysicsBodyBroadphaseCollisionDataFilter<Body>(world);
 		
 		Body b1 = new Body();
 		Body b2 = new Body();
@@ -81,7 +81,7 @@ public class PhysicsBodyBroadphaseFilterTest {
 	@Test
 	public void filters() {
 		World<Body> world = new World<Body>();
-		PhysicsBodyBroadphaseFilter<Body> filter = new PhysicsBodyBroadphaseFilter<Body>(world);
+		PhysicsBodyBroadphaseCollisionDataFilter<Body> filter = new PhysicsBodyBroadphaseCollisionDataFilter<Body>(world);
 		
 		Body b1 = new Body();
 		Body b2 = new Body();
@@ -129,7 +129,7 @@ public class PhysicsBodyBroadphaseFilterTest {
 	@Test
 	public void dynamicSensor() {
 		World<Body> world = new World<Body>();
-		PhysicsBodyBroadphaseFilter<Body> filter = new PhysicsBodyBroadphaseFilter<Body>(world);
+		PhysicsBodyBroadphaseCollisionDataFilter<Body> filter = new PhysicsBodyBroadphaseCollisionDataFilter<Body>(world);
 		
 		Body b1 = new Body();
 		Body b2 = new Body();
@@ -169,7 +169,7 @@ public class PhysicsBodyBroadphaseFilterTest {
 	@Test
 	public void jointCollisionAllowed() {
 		World<Body> world = new World<Body>();
-		PhysicsBodyBroadphaseFilter<Body> filter = new PhysicsBodyBroadphaseFilter<Body>(world);
+		PhysicsBodyBroadphaseCollisionDataFilter<Body> filter = new PhysicsBodyBroadphaseCollisionDataFilter<Body>(world);
 		
 		Body b1 = new Body();
 		Body b2 = new Body();

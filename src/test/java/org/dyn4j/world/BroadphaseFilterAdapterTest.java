@@ -32,7 +32,7 @@ import org.junit.Test;
 import junit.framework.TestCase;
 
 /**
- * Test case for the {@link BroadphaseFilterAdapter} class.
+ * Test case for the {@link BroadphaseCollisionDataFilterAdapter} class.
  * @author William Bittle
  * @version 4.0.0
  * @since 4.0.0
@@ -43,7 +43,7 @@ public class BroadphaseFilterAdapterTest {
 	 */
 	@Test
 	public void alwaysAllowed() {
-		BroadphaseFilterAdapter<Body, BodyFixture> filter = new BroadphaseFilterAdapter<Body, BodyFixture>();
+		BroadphaseCollisionDataFilterAdapter<Body, BodyFixture> filter = new BroadphaseCollisionDataFilterAdapter<Body, BodyFixture>();
 		
 		Body b1 = new Body();
 		Body b2 = new Body();

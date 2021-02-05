@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -43,7 +43,7 @@ import org.dyn4j.resources.Messages;
 /**
  * A base implementation of the {@link CollisionBody} interface.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
  * @param <T> the {@link Fixture} type
  */
@@ -437,30 +437,49 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	 */
 	@Override
 	public AABB createAABB() {
-		return this.createAABB(this.transform);
+		AABB aabb = new AABB(0,0,0,0);
+		this.computeAABB(this.transform, aabb);
+		return aabb;
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#createAABB(org.dyn4j.geometry.Transform)
 	 */
 	public AABB createAABB(Transform transform) {
+		AABB aabb = new AABB(0,0,0,0);
+		this.computeAABB(transform, aabb);
+		return aabb;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionBody#computeAABB(org.dyn4j.geometry.AABB)
+	 */
+	@Override
+	public void computeAABB(AABB result) {
+		this.computeAABB(this.transform, result);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionBody#computeAABB(org.dyn4j.geometry.Transform, org.dyn4j.geometry.AABB)
+	 */
+	public void computeAABB(Transform transform, AABB result) {
 		// get the number of fixtures
 		int size = this.fixtures.size();
 		// make sure there is at least one
 		if (size > 0) {
 			// create the aabb for the first fixture
-			AABB aabb = this.fixtures.get(0).getShape().createAABB(transform);
+			this.fixtures.get(0).getShape().computeAABB(transform, result);
 			// loop over the remaining fixtures, unioning the aabbs
+			AABB temp = new AABB(0,0,0,0);
 			for (int i = 1; i < size; i++) {
 				// create the aabb for the current fixture
-				AABB faabb = this.fixtures.get(i).getShape().createAABB(transform);
+				this.fixtures.get(i).getShape().computeAABB(transform, temp);
 				// union the aabbs
-				aabb.union(faabb);
+				result.union(temp);
 			}
-			// return the aabb
-			return aabb;
+		} else {
+			result.zero();
 		}
-		return new AABB(0.0, 0.0, 0.0, 0.0);
 	}
 
 	/* (non-Javadoc)

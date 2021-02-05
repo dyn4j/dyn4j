@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.junit.Test;
 /**
  * Tests the methods of the {@link Settings} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
  */
 public class SettingsTest {
@@ -393,5 +393,95 @@ public class SettingsTest {
 	@Test
 	public void tostring() {
 		TestCase.assertNotNull(settings.toString());
+	}
+	
+	/**
+	 * Tests the getter/setter methods.
+	 */
+	@Test
+	public void getSet() {
+		settings.setAngularTolerance(Settings.DEFAULT_ANGULAR_TOLERANCE * 2);
+		settings.setAtRestDetectionEnabled(false);
+		settings.setBaumgarte(Settings.DEFAULT_BAUMGARTE * 2);
+		settings.setContinuousDetectionMode(ContinuousDetectionMode.NONE);
+		settings.setLinearTolerance(Settings.DEFAULT_LINEAR_TOLERANCE * 2);
+		settings.setMaximumAngularCorrection(Settings.DEFAULT_MAXIMUM_ANGULAR_CORRECTION * 2);
+		settings.setMaximumAtRestAngularVelocity(Settings.DEFAULT_MAXIMUM_AT_REST_ANGULAR_VELOCITY * 2);
+		settings.setMaximumAtRestLinearVelocity(Settings.DEFAULT_MAXIMUM_AT_REST_LINEAR_VELOCITY * 2);
+		settings.setMaximumLinearCorrection(Settings.DEFAULT_MAXIMUM_LINEAR_CORRECTION * 2);
+		settings.setMaximumRotation(Settings.DEFAULT_MAXIMUM_ROTATION * 2);
+		settings.setMaximumTranslation(Settings.DEFAULT_MAXIMUM_TRANSLATION * 2);
+		settings.setMaximumWarmStartDistance(Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE * 2);
+		settings.setMinimumAtRestTime(Settings.DEFAULT_MINIMUM_AT_REST_TIME * 2);
+		settings.setPositionConstraintSolverIterations(Settings.DEFAULT_SOLVER_ITERATIONS * 2);
+		settings.setRestitutionVelocity(Settings.DEFAULT_RESTITUTION_VELOCITY * 2);
+		settings.setStepFrequency(Settings.DEFAULT_STEP_FREQUENCY * 2);
+		settings.setVelocityConstraintSolverIterations(Settings.DEFAULT_SOLVER_ITERATIONS * 2);
+		settings.setWarmStartingEnabled(false);
+		
+		TestCase.assertEquals(Settings.DEFAULT_ANGULAR_TOLERANCE * 2, settings.getAngularTolerance());
+		TestCase.assertEquals(false, settings.isAtRestDetectionEnabled());
+		TestCase.assertEquals(Settings.DEFAULT_BAUMGARTE * 2, settings.getBaumgarte());
+		TestCase.assertEquals(ContinuousDetectionMode.NONE, settings.getContinuousDetectionMode());
+		TestCase.assertEquals(Settings.DEFAULT_LINEAR_TOLERANCE * 2, settings.getLinearTolerance());
+		TestCase.assertEquals(Settings.DEFAULT_MAXIMUM_ANGULAR_CORRECTION * 2, settings.getMaximumAngularCorrection());
+		TestCase.assertEquals(Settings.DEFAULT_MAXIMUM_AT_REST_ANGULAR_VELOCITY * 2, settings.getMaximumAtRestAngularVelocity());
+		TestCase.assertEquals(Settings.DEFAULT_MAXIMUM_AT_REST_LINEAR_VELOCITY * 2, settings.getMaximumAtRestLinearVelocity());
+		TestCase.assertEquals(Settings.DEFAULT_MAXIMUM_LINEAR_CORRECTION * 2, settings.getMaximumLinearCorrection());
+		TestCase.assertEquals(Settings.DEFAULT_MAXIMUM_ROTATION * 2, settings.getMaximumRotation());
+		TestCase.assertEquals(Settings.DEFAULT_MAXIMUM_TRANSLATION * 2, settings.getMaximumTranslation());
+		TestCase.assertEquals(Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE * 2, settings.getMaximumWarmStartDistance());
+		TestCase.assertEquals(Settings.DEFAULT_MINIMUM_AT_REST_TIME * 2, settings.getMinimumAtRestTime());
+		TestCase.assertEquals(Settings.DEFAULT_SOLVER_ITERATIONS * 2, settings.getPositionConstraintSolverIterations());
+		TestCase.assertEquals(Settings.DEFAULT_RESTITUTION_VELOCITY * 2, settings.getRestitutionVelocity());
+		TestCase.assertEquals(Settings.DEFAULT_STEP_FREQUENCY * 2, settings.getStepFrequency());
+		TestCase.assertEquals(Settings.DEFAULT_SOLVER_ITERATIONS * 2, settings.getVelocityConstraintSolverIterations());
+		TestCase.assertEquals(false, settings.isWarmStartingEnabled());
+	}
+	
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		settings.setAngularTolerance(Settings.DEFAULT_ANGULAR_TOLERANCE * 2);
+		settings.setAtRestDetectionEnabled(false);
+		settings.setBaumgarte(Settings.DEFAULT_BAUMGARTE * 2);
+		settings.setContinuousDetectionMode(ContinuousDetectionMode.NONE);
+		settings.setLinearTolerance(Settings.DEFAULT_LINEAR_TOLERANCE * 2);
+		settings.setMaximumAngularCorrection(Settings.DEFAULT_MAXIMUM_ANGULAR_CORRECTION * 2);
+		settings.setMaximumAtRestAngularVelocity(Settings.DEFAULT_MAXIMUM_AT_REST_ANGULAR_VELOCITY * 2);
+		settings.setMaximumAtRestLinearVelocity(Settings.DEFAULT_MAXIMUM_AT_REST_LINEAR_VELOCITY * 2);
+		settings.setMaximumLinearCorrection(Settings.DEFAULT_MAXIMUM_LINEAR_CORRECTION * 2);
+		settings.setMaximumRotation(Settings.DEFAULT_MAXIMUM_ROTATION * 2);
+		settings.setMaximumTranslation(Settings.DEFAULT_MAXIMUM_TRANSLATION * 2);
+		settings.setMaximumWarmStartDistance(Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE * 2);
+		settings.setMinimumAtRestTime(Settings.DEFAULT_MINIMUM_AT_REST_TIME * 2);
+		settings.setPositionConstraintSolverIterations(Settings.DEFAULT_SOLVER_ITERATIONS * 2);
+		settings.setRestitutionVelocity(Settings.DEFAULT_RESTITUTION_VELOCITY * 2);
+		settings.setStepFrequency(Settings.DEFAULT_STEP_FREQUENCY * 2);
+		settings.setVelocityConstraintSolverIterations(Settings.DEFAULT_SOLVER_ITERATIONS * 2);
+		settings.setWarmStartingEnabled(false);
+		
+		Settings copy = settings.copy();
+		
+		TestCase.assertEquals(settings.getAngularTolerance(), copy.getAngularTolerance());
+		TestCase.assertEquals(settings.isAtRestDetectionEnabled(), copy.isAtRestDetectionEnabled());
+		TestCase.assertEquals(settings.getBaumgarte(), copy.getBaumgarte());
+		TestCase.assertEquals(settings.getContinuousDetectionMode(), copy.getContinuousDetectionMode());
+		TestCase.assertEquals(settings.getLinearTolerance(), copy.getLinearTolerance());
+		TestCase.assertEquals(settings.getMaximumAngularCorrection(), copy.getMaximumAngularCorrection());
+		TestCase.assertEquals(settings.getMaximumAtRestAngularVelocity(), copy.getMaximumAtRestAngularVelocity());
+		TestCase.assertEquals(settings.getMaximumAtRestLinearVelocity(), copy.getMaximumAtRestLinearVelocity());
+		TestCase.assertEquals(settings.getMaximumLinearCorrection(), copy.getMaximumLinearCorrection());
+		TestCase.assertEquals(settings.getMaximumRotation(), copy.getMaximumRotation());
+		TestCase.assertEquals(settings.getMaximumTranslation(), copy.getMaximumTranslation());
+		TestCase.assertEquals(settings.getMaximumWarmStartDistance(), copy.getMaximumWarmStartDistance());
+		TestCase.assertEquals(settings.getMinimumAtRestTime(), copy.getMinimumAtRestTime());
+		TestCase.assertEquals(settings.getPositionConstraintSolverIterations(), copy.getPositionConstraintSolverIterations());
+		TestCase.assertEquals(settings.getRestitutionVelocity(), copy.getRestitutionVelocity());
+		TestCase.assertEquals(settings.getStepFrequency(), copy.getStepFrequency());
+		TestCase.assertEquals(settings.getVelocityConstraintSolverIterations(), copy.getVelocityConstraintSolverIterations());
+		TestCase.assertEquals(settings.isWarmStartingEnabled(), copy.isWarmStartingEnabled());
 	}
 }

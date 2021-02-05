@@ -24,7 +24,9 @@
  */
 package org.dyn4j.world;
 
+import org.dyn4j.collision.BasicCollisionItem;
 import org.dyn4j.collision.BasicCollisionPair;
+import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.contact.ContactConstraint;
@@ -73,11 +75,14 @@ public class IslandTest {
 		Body b1 = new Body();
 		Body b2 = new Body();
 		AngleJoint<Body> j1 = new AngleJoint<Body>(b1, b2);
-		ContactConstraint<Body> c1 = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(
-				new Body(), 
-				new BodyFixture(Geometry.createCircle(1.0)), 
-				new Body(), 
-				new BodyFixture(Geometry.createCircle(1.0))));
+		ContactConstraint<Body> c1 = new ContactConstraint<Body>(
+				new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(
+						new BasicCollisionItem<Body, BodyFixture>(
+							new Body(), 
+							new BodyFixture(Geometry.createCircle(1.0))),
+						new BasicCollisionItem<Body, BodyFixture>(
+							new Body(), 
+							new BodyFixture(Geometry.createCircle(1.0)))));
 		
 		i.add(b1);
 		i.add(b2);
@@ -109,11 +114,14 @@ public class IslandTest {
 		
 		i.add(new Body());
 		i.add(new AngleJoint<Body>(new Body(), new Body()));
-		i.add(new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(
-				new Body(), 
-				new BodyFixture(Geometry.createCircle(1.0)), 
-				new Body(), 
-				new BodyFixture(Geometry.createCircle(1.0)))));
+		i.add(new ContactConstraint<Body>(
+				new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(
+						new BasicCollisionItem<Body, BodyFixture>(
+							new Body(), 
+							new BodyFixture(Geometry.createCircle(1.0))),
+						new BasicCollisionItem<Body, BodyFixture>(
+							new Body(), 
+							new BodyFixture(Geometry.createCircle(1.0))))));
 		
 		TestCase.assertEquals(1, i.bodies.size());
 		TestCase.assertEquals(1, i.joints.size());

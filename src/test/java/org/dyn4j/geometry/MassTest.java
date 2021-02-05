@@ -142,25 +142,21 @@ public class MassTest {
 		Mass m2 = new Mass(m);
 		
 		TestCase.assertNotSame(m, m2);
-		TestCase.assertNotSame(m.center, m2.center);
-		TestCase.assertEquals(m.center.x, m2.center.x);
-		TestCase.assertEquals(m.center.y, m2.center.y);
+		TestCase.assertNotSame(m.getCenter(), m2.getCenter());
+		TestCase.assertEquals(m.getCenter().x, m2.getCenter().x);
+		TestCase.assertEquals(m.getCenter().y, m2.getCenter().y);
 		TestCase.assertEquals(m.getMass(), m2.getMass());
 		TestCase.assertEquals(m.getInertia(), m2.getInertia());
 		TestCase.assertEquals(m.getType(), m2.getType());
-	}
-	
-	/**
-	 * Test case for the circle create method.
-	 */
-	@Test
-	public void createCircle() {
-		Circle c = new Circle(3.0);
-		Mass m = c.createMass(2.0);
-		// the mass should be pi * r * r * d
-		TestCase.assertEquals(56.548, m.getMass(), 1.0e-3);
-		// I should be m * r * r / 2
-		TestCase.assertEquals(254.469, m.getInertia(), 1.0e-3);
+		
+		Mass m3 = m2.copy();
+		TestCase.assertNotSame(m2, m3);
+		TestCase.assertNotSame(m2.getCenter(), m3.getCenter());
+		TestCase.assertEquals(m2.getCenter().x, m3.getCenter().x);
+		TestCase.assertEquals(m2.getCenter().y, m3.getCenter().y);
+		TestCase.assertEquals(m2.getMass(), m3.getMass());
+		TestCase.assertEquals(m2.getInertia(), m3.getInertia());
+		TestCase.assertEquals(m2.getType(), m3.getType());
 	}
 	
 	/**

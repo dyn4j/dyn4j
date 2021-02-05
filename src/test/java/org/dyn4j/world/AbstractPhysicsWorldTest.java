@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,7 +28,16 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.dyn4j.collision.AxisAlignedBounds;
+import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
+import org.dyn4j.collision.broadphase.AABBExpansionMethod;
+import org.dyn4j.collision.broadphase.AABBProducer;
+import org.dyn4j.collision.broadphase.BroadphaseDetector;
+import org.dyn4j.collision.broadphase.BroadphaseFilter;
+import org.dyn4j.collision.broadphase.CollisionBodyAABBProducer;
+import org.dyn4j.collision.broadphase.CollisionBodyBroadphaseFilter;
+import org.dyn4j.collision.broadphase.Sap;
+import org.dyn4j.collision.broadphase.StaticValueAABBExpansionMethod;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.Settings;
@@ -36,9 +45,9 @@ import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactConstraintSolver;
+import org.dyn4j.dynamics.contact.ForceCollisionTimeOfImpactSolver;
 import org.dyn4j.dynamics.contact.SequentialImpulses;
 import org.dyn4j.dynamics.contact.SolvedContact;
-import org.dyn4j.dynamics.contact.ForceCollisionTimeOfImpactSolver;
 import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -63,7 +72,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link AbstractPhysicsWorld} class.
  * @author William Bittle
- * @version 4.0.1
+ * @version 4.1.0
  * @since 4.0.0
  */
 public class AbstractPhysicsWorldTest {
@@ -77,7 +86,7 @@ public class AbstractPhysicsWorldTest {
 		}
 
 		@Override
-		protected WorldCollisionData<Body> createCollisionData(CollisionPair<Body, BodyFixture> pair) {
+		protected WorldCollisionData<Body> createCollisionData(CollisionPair<CollisionItem<Body, BodyFixture>> pair) {
 			return new WorldCollisionData<Body>(pair);
 		}
 	}
@@ -137,13 +146,13 @@ public class AbstractPhysicsWorldTest {
 		@Override
 		public void end(ContactCollisionData<Body> collision, Contact contact) { this.end++; }
 		@Override
-		public void collision(ContactCollisionData<Body> collision, ContactConstraint<Body> contactConstraint) {}
-		@Override
 		public void destroyed(ContactCollisionData<Body> collision, Contact contact) { this.destroyed++; }
 		@Override
 		public void persist(ContactCollisionData<Body> collision, Contact oldContact, Contact newContact) { }
 		@Override
 		public void postSolve(ContactCollisionData<Body> collision, SolvedContact contact) { }
+		@Override
+		public void collision(ContactCollisionData<Body> collision) { }
 	}
 	
 	/**
@@ -658,6 +667,98 @@ public class AbstractPhysicsWorldTest {
 		TestCase.assertNotNull(n2);
 		TestCase.assertEquals(0, n2.joints.size());
 	}
+
+	/**
+	 * Test the fixture modification handler.
+	 */
+	@Test
+	public void fixtureModification() {
+		TestWorld w = new TestWorld();
+		
+		// setup the bodies
+		Convex c1 = Geometry.createCircle(1.0);
+		Convex c2 = Geometry.createEquilateralTriangle(0.5);
+
+		Body b1 = new Body(); BodyFixture f1 = b1.addFixture(c1); b1.setMass(MassType.NORMAL);
+		Body b2 = new Body(); BodyFixture f2 = b2.addFixture(c2); b2.setMass(MassType.NORMAL);
+		
+		// add them to the world
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		w.detect();
+		
+		// sanity checks
+		TestCase.assertTrue(w.broadphaseDetector.contains(b1, f1));
+		TestCase.assertEquals(1, w.collisionData.size());
+		WorldCollisionData<Body> data = w.getCollisionData(b1, f1, b2, f2);
+		TestCase.assertNotNull(data);
+		TestCase.assertTrue(data.isBroadphaseCollision());
+		TestCase.assertTrue(data.isNarrowphaseCollision());
+		TestCase.assertTrue(data.isManifoldCollision());
+		TestCase.assertTrue(data.isContactConstraintCollision());
+		TestCase.assertEquals(1, w.constraintGraph.getNode(b1).getContactConstraints().size());
+		TestCase.assertEquals(1, w.constraintGraph.getNode(b2).getContactConstraints().size());
+		
+		// test adding a new fixture
+		BodyFixture f3 = b1.addFixture(c2);
+		w.detect();
+		
+		TestCase.assertTrue(w.broadphaseDetector.contains(b1, f3));
+		TestCase.assertEquals(2, w.collisionData.size());
+		data = w.getCollisionData(b1, f3, b2, f2);
+		TestCase.assertNotNull(data);
+		TestCase.assertTrue(data.isBroadphaseCollision());
+		TestCase.assertTrue(data.isNarrowphaseCollision());
+		TestCase.assertTrue(data.isManifoldCollision());
+		TestCase.assertTrue(data.isContactConstraintCollision());
+		TestCase.assertEquals(2, w.constraintGraph.getNode(b1).getContactConstraints().size());
+		TestCase.assertEquals(2, w.constraintGraph.getNode(b2).getContactConstraints().size());
+		
+		// test removing a fixture
+		b1.removeFixture(f1);
+		TestCase.assertFalse(w.broadphaseDetector.contains(b1, f1));
+		TestCase.assertTrue(w.broadphaseDetector.contains(b1, f3));
+		TestCase.assertEquals(1, w.collisionData.size());
+		data = w.getCollisionData(b1, f1, b2, f2);
+		TestCase.assertNull(data);
+		data = w.getCollisionData(b1, f3, b2, f2);
+		TestCase.assertNotNull(data);
+		TestCase.assertTrue(data.isBroadphaseCollision());
+		TestCase.assertTrue(data.isNarrowphaseCollision());
+		TestCase.assertTrue(data.isManifoldCollision());
+		TestCase.assertTrue(data.isContactConstraintCollision());
+		TestCase.assertEquals(1, w.constraintGraph.getNode(b1).getContactConstraints().size());
+		TestCase.assertEquals(1, w.constraintGraph.getNode(b2).getContactConstraints().size());
+		
+		// add f1 back
+		b1.addFixture(f1);
+		w.detect();
+		
+		TestCase.assertTrue(w.broadphaseDetector.contains(b1, f1));
+		TestCase.assertEquals(2, w.collisionData.size());
+		data = w.getCollisionData(b1, f1, b2, f2);
+		TestCase.assertNotNull(data);
+		TestCase.assertTrue(data.isBroadphaseCollision());
+		TestCase.assertTrue(data.isNarrowphaseCollision());
+		TestCase.assertTrue(data.isManifoldCollision());
+		TestCase.assertTrue(data.isContactConstraintCollision());
+		TestCase.assertEquals(2, w.constraintGraph.getNode(b1).getContactConstraints().size());
+		TestCase.assertEquals(2, w.constraintGraph.getNode(b2).getContactConstraints().size());
+		
+		// test removing all fixtures
+		b1.removeAllFixtures();
+		
+		TestCase.assertFalse(w.broadphaseDetector.contains(b1, f1));
+		TestCase.assertFalse(w.broadphaseDetector.contains(b1, f3));
+		TestCase.assertEquals(0, w.collisionData.size());
+		data = w.getCollisionData(b1, f1, b2, f2);
+		TestCase.assertNull(data);
+		data = w.getCollisionData(b1, f3, b2, f2);
+		TestCase.assertNull(data);
+		TestCase.assertEquals(0, w.constraintGraph.getNode(b1).getContactConstraints().size());
+		TestCase.assertEquals(0, w.constraintGraph.getNode(b2).getContactConstraints().size());
+	}
 	
 	/**
 	 * Test the various listener methods (add, remove, remove all, get).
@@ -924,6 +1025,42 @@ public class AbstractPhysicsWorldTest {
 		TestCase.assertNotNull(w.getGravity());
 		TestCase.assertEquals(0.0, w.getGravity().x);
 		TestCase.assertEquals(-4.0, w.getGravity().y);
+	}
+	
+	/**
+	 * Tests the set CCD broadphase detector method.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullCCDBroadphaseDetector() {
+		TestWorld w = new TestWorld();
+		w.setContinuousCollisionDetectionBroadphaseDetector(null);
+	}
+	
+	/**
+	 * Tests the set CCD broadphase detector method.
+	 */
+	@Test
+	public void getAndSetCCDBroadphaseDetector() {
+		TestWorld w = new TestWorld();
+		
+		Body b = new Body();
+		b.addFixture(Geometry.createCircle(1.0));
+		w.addBody(b);
+		
+		BroadphaseDetector<Body> original = w.getContinuousCollisionDetectionBroadphaseDetector();
+		TestCase.assertNotNull(original);
+		
+		BroadphaseFilter<Body> broadphaseFilter = new CollisionBodyBroadphaseFilter<Body>();
+		AABBProducer<Body> aabbProducer = new CollisionBodyAABBProducer<Body>();
+    	AABBExpansionMethod<Body> aabbExpansionMethod = new StaticValueAABBExpansionMethod<Body>(0.2);
+    	BroadphaseDetector<Body> bd = new Sap<Body>(broadphaseFilter, aabbProducer, aabbExpansionMethod); 
+		
+		w.setContinuousCollisionDetectionBroadphaseDetector(bd);
+		TestCase.assertSame(bd, w.getContinuousCollisionDetectionBroadphaseDetector());
+		TestCase.assertNotSame(original, w.getContinuousCollisionDetectionBroadphaseDetector());
+		
+		// test bodies are re-added
+		TestCase.assertTrue(w.ccdBroadphase.contains(b));
 	}
 	
 	/**

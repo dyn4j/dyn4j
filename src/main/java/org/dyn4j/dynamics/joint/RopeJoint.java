@@ -56,7 +56,7 @@ import org.dyn4j.resources.Messages;
  * separate, but it's recommended that they start separated instead. If the lower
  * limit is not being used, then the initial state doesn't matter.
  * @author William Bittle
- * @version 4.0.1
+ * @version 4.1.0
  * @since 2.2.1
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Rope_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>
@@ -603,16 +603,5 @@ public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shifta
 		this.setLimitsEnabled(true);
 		// set the values
 		this.setLimits(limit);
-	}
-
-	/**
-	 * Returns the current state of the limit.
-	 * @return {@link LimitState}
-	 * @since 3.2.0
-	 * @deprecated Deprecated in 4.0.0.
-	 */
-	@Deprecated
-	public LimitState getLimitState() {
-		return LimitState.INACTIVE;
 	}
 }

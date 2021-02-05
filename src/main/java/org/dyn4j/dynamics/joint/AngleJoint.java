@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -78,7 +78,7 @@ import org.dyn4j.resources.Messages;
  * the world space center points for the joined bodies.  This constraint 
  * doesn't need anchor points.
  * @author William Bittle
- * @version 4.0.1
+ * @version 4.1.0
  * @since 2.2.2
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Angle_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/12/angle-constraint/" target="_blank">Angle Constraint</a>
@@ -586,16 +586,5 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	 */
 	public void setReferenceAngle(double angle) {
 		this.referenceAngle = angle;
-	}
-
-	/**
-	 * Returns the current state of the limit.
-	 * @return {@link LimitState}
-	 * @since 3.2.0
-	 * @deprecated Deprecated in 4.0.0.
-	 */
-	@Deprecated
-	public LimitState getLimitState() {
-		return LimitState.INACTIVE;
 	}
 }

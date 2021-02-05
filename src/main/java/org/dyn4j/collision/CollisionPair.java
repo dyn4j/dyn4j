@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,70 +28,21 @@ import org.dyn4j.Copyable;
 
 /**
  * Represents a collision between two {@link CollisionBody}'s {@link Fixture}s.
- * @author WBittle
- * @param <T> the {@link CollisionBody} type
- * @param <E> the {@link Fixture} type
- * @version 4.0.0
+ * @author William Bittle
+ * @param <T> the object type
+ * @version 4.1.0
  * @since 4.0.0
  */
-public interface CollisionPair<T extends CollisionBody<E>, E extends Fixture> extends Copyable<CollisionPair<T, E>> {
+public interface CollisionPair<T> extends Copyable<CollisionPair<T>> {
 	/**
-	 * Returns the first {@link CollisionBody}.
-	 * @return E
+	 * Returns the first object.
+	 * @return T
 	 */
-	public T getBody1();
+	public T getFirst();
 
 	/**
-	 * Returns the first {@link Fixture}.
+	 * Returns the second object.
 	 * @return T
 	 */
-	public E getFixture1();
-	
-	/**
-	 * Returns the second {@link CollisionBody}.
-	 * @return E
-	 */
-	public T getBody2();
-
-	/**
-	 * Returns the second {@link Fixture}.
-	 * @return T
-	 */
-	public E getFixture2();
-	
-	/**
-	 * Returns the body that matches the given body.
-	 * <p>
-	 * If the given body is neither body1 or body2, null is returned.
-	 * @param body the body
-	 * @return T
-	 */
-	public T getBody(CollisionBody<?> body);
-	
-	/**
-	 * Returns the fixture for the body that matches the given body.
-	 * <p>
-	 * If the given body is neither body1 or body2, null is returned.
-	 * @param body the body
-	 * @return E
-	 */
-	public E getFixture(CollisionBody<?> body);
-	
-	/**
-	 * Returns the body that does not match the given body.
-	 * <p>
-	 * If the given body is neither body1 or body2, null is returned.
-	 * @param body the body
-	 * @return T
-	 */
-	public T getOtherBody(CollisionBody<?> body);
-	
-	/**
-	 * Returns the fixture for the body that does not match the given body.
-	 * <p>
-	 * If the given body is neither body1 or body2, null is returned.
-	 * @param body the body
-	 * @return E
-	 */
-	public E getOtherFixture(CollisionBody<?> body);
+	public T getSecond();
 }

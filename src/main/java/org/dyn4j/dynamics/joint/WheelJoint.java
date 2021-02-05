@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -57,7 +57,7 @@ import org.dyn4j.resources.Messages;
  * The joint also supports upper and lower limits. The limits represent the
  * maximum displacement from the anchor point along the given axis.
  * @author William Bittle
- * @version 4.0.1
+ * @version 4.1.0
  * @since 3.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Wheel_Joint" target="_blank">Documentation</a>
  * @param <T> the {@link PhysicsBody} type
@@ -684,16 +684,6 @@ public class WheelJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	}
 	
 	/**
-	 * Returns the current joint speed.
-	 * @return double
-	 * @deprecated Replaced by {@link #getAngularSpeed()} in 3.2.1
-	 */
-	@Deprecated
-	public double getJointSpeed() {
-		return this.getAngularSpeed();
-	}
-	
-	/**
 	 * Returns the linear speed along the axis between the two joined bodies
 	 * @return double
 	 * @since 3.2.1
@@ -728,16 +718,6 @@ public class WheelJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	}
 	
 	/**
-	 * Returns the current joint translation.
-	 * @return double
-	 * @deprecated Replaced by {@link #getLinearTranslation()} in 3.2.1
-	 */
-	@Deprecated
-	public double getJointTranslation() {
-		return this.getLinearTranslation();
-	}
-	
-	/**
 	 * Returns the current linear translation along the joint axis.
 	 * @return double
 	 * @since 3.2.1
@@ -759,30 +739,6 @@ public class WheelJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		double a1 = this.body1.getTransform().getRotationAngle();
 		double a2 = this.body2.getTransform().getRotationAngle();
 		return a2 - a1;
-	}
-
-	/**
-	 * Returns true if this wheel joint is a spring wheel joint.
-	 * <p>
-	 * Since the frequency cannot be less than or equal to zero, this should
-	 * always returne true.
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. Use the {@link #isSpringEnabled()} method instead.
-	 */
-	@Deprecated
-	public boolean isSpring() {
-		return this.frequency > 0.0;
-	}
-	
-	/**
-	 * Returns true if this wheel joint is a spring wheel joint
-	 * with damping.
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. Use the {@link #isSpringDamperEnabled()} method instead.
-	 */
-	@Deprecated
-	public boolean isSpringDamper() {
-		return this.frequency > 0.0 && this.dampingRatio > 0.0;
 	}
 
 	/**

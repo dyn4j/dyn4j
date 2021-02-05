@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,6 +31,7 @@ import org.dyn4j.DataContainer;
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.Fixture;
+import org.dyn4j.collision.broadphase.CollisionItemBroadphaseDetector;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
 import org.dyn4j.collision.continuous.TimeOfImpactDetector;
 import org.dyn4j.collision.manifold.ManifoldSolver;
@@ -63,7 +64,7 @@ import org.dyn4j.world.result.RaycastResult;
  * NOTE: This interface does not define a collision detection pipeline or process. Instead it defines the
  * necessary components to build one.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
@@ -243,30 +244,30 @@ public interface CollisionWorld<T extends CollisionBody<E>, E extends Fixture, V
 	 * @param broadphaseDetector the broad-phase collision detection algorithm
 	 * @throws NullPointerException if broadphaseDetector is null
 	 */
-	public void setBroadphaseDetector(BroadphaseDetector<T, E> broadphaseDetector);
+	public void setBroadphaseDetector(CollisionItemBroadphaseDetector<T, E> broadphaseDetector);
 	
 	/**
 	 * Returns the broad-phase collision detection algorithm.
 	 * @return {@link BroadphaseDetector} the broad-phase collision detection algorithm
 	 */
-	public BroadphaseDetector<T, E> getBroadphaseDetector();
+	public CollisionItemBroadphaseDetector<T, E> getBroadphaseDetector();
 	
 	/**
-	 * Sets the {@link BroadphaseFilter} used when detecting collisions for each time step.
+	 * Sets the {@link BroadphaseCollisionDataFilter} used when detecting collisions for each time step.
 	 * <p>
-	 * This should always be an instance of a class that extends the {@link PhysicsBodyBroadphaseFilter}
+	 * This should always be an instance of a class that extends the {@link PhysicsBodyBroadphaseCollisionDataFilter}
 	 * so that the standard filters are retained.
 	 * @param filter the filter
 	 * @since 3.2.2
 	 */
-	public void setBroadphaseFilter(BroadphaseFilter<T, E> filter);
+	public void setBroadphaseCollisionDataFilter(BroadphaseCollisionDataFilter<T, E> filter);
 	
 	/**
-	 * Returns the {@link BroadphaseFilter} used when detecting collisions for each time step.
-	 * @return {@link BroadphaseFilter}
+	 * Returns the {@link BroadphaseCollisionDataFilter} used when detecting collisions for each time step.
+	 * @return {@link BroadphaseCollisionDataFilter}
 	 * @since 3.2.2
 	 */
-	public BroadphaseFilter<T, E> getBroadphaseFilter();
+	public BroadphaseCollisionDataFilter<T, E> getBroadphaseCollisionDataFilter();
 	
 	// narrowphase
 	

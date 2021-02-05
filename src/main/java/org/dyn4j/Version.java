@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,7 +27,7 @@ package org.dyn4j;
 /**
  * The version of the engine.
  * @author William Bittle
- * @version 4.0.2
+ * @version 4.1.0
  * @since 1.0.0
  */
 public final class Version {
@@ -35,10 +35,10 @@ public final class Version {
 	private static final int MAJOR = 4;
 	
 	/** The minor version number; medium impact changes; minor API changes, minor enhancements, major bug fixes, etc. */
-	private static final int MINOR = 0;
+	private static final int MINOR = 1;
 	
 	/** The revision number; low impact changes; deprecating API changes, minor bug fixes, etc. */
-	private static final int REVISION = 2;
+	private static final int REVISION = 0;
 	
 	/**
 	 * Hide the constructor.

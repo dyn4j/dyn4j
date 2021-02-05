@@ -1,4 +1,4 @@
-Copyright (c) 2010-2020, William Bittle
+Copyright (c) 2010-2021, William Bittle
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

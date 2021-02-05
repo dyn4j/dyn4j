@@ -38,7 +38,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents constrained motion between two {@link PhysicsBody}s.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -57,13 +57,6 @@ public abstract class Joint<T extends PhysicsBody> implements Shiftable, DataCon
 	
 	/** The joint owner */
 	protected Object owner;
-	
-	/**
-	 * True if this joint is on an island.
-	 * @deprecated Deprecated in 4.0.0. No replacement needed.
-	 */
-	@Deprecated
-	boolean onIsland;
 	
 	/**
 	 * Optional constructor.
@@ -89,7 +82,6 @@ public abstract class Joint<T extends PhysicsBody> implements Shiftable, DataCon
 		this.body1 = body1;
 		this.body2 = body2;
 		this.collisionAllowed = collisionAllowed;
-		this.onIsland = false;
 	}
 	
 	/* (non-Javadoc)
@@ -352,18 +344,6 @@ public abstract class Joint<T extends PhysicsBody> implements Shiftable, DataCon
 	public abstract double getReactionTorque(double invdt);
 	
 	/**
-	 * Returns true if this {@link Joint} is active.
-	 * <p>
-	 * A joint is only active if both joined {@link PhysicsBody}s are active.
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. Use the isEnabled method instead
-	 */
-	@Deprecated
-	public boolean isActive() {
-		return this.body1.isActive() && this.body2.isActive();
-	}
-	
-	/**
 	 * Returns true if this {@link Joint} is enabled.
 	 * <p>
 	 * A joint is only enabled if both joined {@link PhysicsBody}s are enabled.
@@ -410,26 +390,6 @@ public abstract class Joint<T extends PhysicsBody> implements Shiftable, DataCon
 		this.userData = userData;
 	}
 	
-	/**
-	 * Returns true if this joint is on an island.
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. No replacement needed.
-	 */
-	@Deprecated
-	public boolean isOnIsland() {
-		return this.onIsland;
-	}
-	
-	/**
-	 * Flags this joint as being on an island.
-	 * @param flag true if this joint is on an island
-	 * @deprecated Deprecated in 4.0.0. No replacement needed.
-	 */
-	@Deprecated
-	public void setOnIsland(boolean flag) {
-		this.onIsland = flag;
-	}
-
 	/* (non-Javadoc)
 	 * @see org.dyn4j.Ownable#getOwner()
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.dyn4j.DataContainer;
+import org.dyn4j.collision.BasicCollisionItem;
 import org.dyn4j.collision.BasicCollisionPair;
 import org.dyn4j.collision.Bounds;
 import org.dyn4j.collision.CollisionBody;
@@ -42,8 +43,16 @@ import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.Collisions;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.FixtureModificationHandler;
+import org.dyn4j.collision.broadphase.AABBExpansionMethod;
+import org.dyn4j.collision.broadphase.AABBProducer;
+import org.dyn4j.collision.broadphase.CollisionItemBroadphaseDetector;
+import org.dyn4j.collision.broadphase.CollisionItemBroadphaseDetectorAdapter;
+import org.dyn4j.collision.broadphase.CollisionItemBroadphaseFilter;
 import org.dyn4j.collision.broadphase.BroadphaseDetector;
+import org.dyn4j.collision.broadphase.BroadphaseFilter;
+import org.dyn4j.collision.broadphase.CollisionItemAABBProducer;
 import org.dyn4j.collision.broadphase.DynamicAABBTree;
+import org.dyn4j.collision.broadphase.StaticValueAABBExpansionMethod;
 import org.dyn4j.collision.continuous.ConservativeAdvancement;
 import org.dyn4j.collision.continuous.TimeOfImpact;
 import org.dyn4j.collision.continuous.TimeOfImpactDetector;
@@ -99,7 +108,7 @@ import org.dyn4j.world.result.RaycastResult;
  * methods to handle certain scenarios like fixture removal on a body or bodies added to
  * more than one world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 4.0.0
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
@@ -117,10 +126,10 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	protected Bounds bounds;
 	
 	/** The {@link BroadphaseDetector} */
-	protected BroadphaseDetector<T, E> broadphaseDetector;
+	protected CollisionItemBroadphaseDetector<T, E> broadphaseDetector;
 	
-	/** The {@link BroadphaseFilter} for detection */
-	protected BroadphaseFilter<T, E> broadphaseFilter;
+	/** The {@link BroadphaseCollisionDataFilter} for detection */
+	protected BroadphaseCollisionDataFilter<T, E> broadphaseFilter;
 	
 	/** The {@link NarrowphaseDetector} */
 	protected NarrowphaseDetector narrowphaseDetector;
@@ -154,7 +163,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 * exist in the world. Using the {@link #getCollisionDataIterator()} filters those out
 	 * automatically if reading the collision is needed. 
 	 */
-	protected final Map<CollisionPair<T, E>, V> collisionData;
+	protected final Map<CollisionPair<CollisionItem<T, E>>, V> collisionData;
 	
 	// listeners
 	
@@ -189,8 +198,20 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		}
 		
 		this.bounds = null;
-		this.broadphaseDetector = new DynamicAABBTree<T, E>(initialBodyCapacity);
-		this.broadphaseFilter = new CollisionBodyBroadphaseFilter<T, E>();
+		
+		// build the broadphase detector
+		final BroadphaseFilter<CollisionItem<T, E>> broadphaseFilter = new CollisionItemBroadphaseFilter<T, E>();
+		final AABBProducer<CollisionItem<T, E>> aabbProducer = new CollisionItemAABBProducer<T, E>();
+		final AABBExpansionMethod<CollisionItem<T, E>> expansionMethod = new StaticValueAABBExpansionMethod<CollisionItem<T, E>>(0.2);
+		final BroadphaseDetector<CollisionItem<T, E>> broadphase = new DynamicAABBTree<CollisionItem<T,E>>(
+				broadphaseFilter,
+				aabbProducer, 
+				expansionMethod, 
+				initialBodyCapacity);
+		this.broadphaseDetector = new CollisionItemBroadphaseDetectorAdapter<T, E>(broadphase);
+		this.broadphaseDetector.setUpdateTrackingEnabled(true);
+		
+		this.broadphaseFilter = new CollisionBodyBroadphaseCollisionDataFilter<T, E>();
 		this.narrowphaseDetector = new Gjk();
 		this.narrowphasePostProcessor = new LinkPostProcessor();
 		this.manifoldSolver = new ClippingManifoldSolver();
@@ -200,7 +221,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		this.bodies = new ArrayList<T>(initialBodyCapacity);
 		this.bodiesUnmodifiable = Collections.unmodifiableList(this.bodies);
 		
-		this.collisionData = new LinkedHashMap<CollisionPair<T, E>, V>(Collisions.getEstimatedCollisionPairs(initialBodyCapacity));
+		this.collisionData = new LinkedHashMap<CollisionPair<CollisionItem<T, E>>, V>(Collisions.getEstimatedCollisionPairs(initialBodyCapacity));
 		
 		this.collisionListeners = new ArrayList<CollisionListener<T,E>>(10);
 		this.boundsListeners = new ArrayList<BoundsListener<T,E>>(10);
@@ -224,6 +245,8 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		// set the world property on the body
 		body.setFixtureModificationHandler(new BodyModificationHandler(body));
 		body.setOwner(this);
+		// set the previous transform to the current transform
+		body.getPreviousTransform().set(body.getTransform());
 		// add it to the broadphase
 		this.broadphaseDetector.add(body);
 	}
@@ -349,7 +372,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 * @see org.dyn4j.world.CollisionWorld#setBroadphaseDetector(org.dyn4j.collision.broadphase.BroadphaseDetector)
 	 */
 	@Override
-	public void setBroadphaseDetector(BroadphaseDetector<T, E> broadphaseDetector) {
+	public void setBroadphaseDetector(CollisionItemBroadphaseDetector<T, E> broadphaseDetector) {
 		if (broadphaseDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBroadphaseDetector"));
 		// set the new broadphase
 		this.broadphaseDetector = broadphaseDetector;
@@ -357,7 +380,8 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		// re-add all bodies to the broadphase
 		int size = this.bodies.size();
 		for (int i = 0; i < size; i++) {
-			this.broadphaseDetector.add(this.bodies.get(i));
+			T body = this.bodies.get(i);
+			this.broadphaseDetector.add(body);
 		}
 	}
 
@@ -365,25 +389,25 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 * @see org.dyn4j.world.CollisionWorld#getBroadphaseDetector()
 	 */
 	@Override
-	public BroadphaseDetector<T, E> getBroadphaseDetector() {
+	public CollisionItemBroadphaseDetector<T, E> getBroadphaseDetector() {
 		return this.broadphaseDetector;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.CollisionWorld#setBroadphaseFilter(org.dyn4j.world.BroadphaseFilter)
+	 * @see org.dyn4j.world.CollisionWorld#getBroadphaseCollisionDataFilter()
 	 */
 	@Override
-	public void setBroadphaseFilter(BroadphaseFilter<T, E> filter) {
-		if (filter == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBroadphaseFilter"));
-		this.broadphaseFilter = filter;
+	public BroadphaseCollisionDataFilter<T, E> getBroadphaseCollisionDataFilter() {
+		return this.broadphaseFilter;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.CollisionWorld#getBroadphaseFilter()
+	 * @see org.dyn4j.world.CollisionWorld#setBroadphaseCollisionDataFilter(org.dyn4j.world.BroadphaseCollisionDataFilter)
 	 */
 	@Override
-	public BroadphaseFilter<T, E> getBroadphaseFilter() {
-		return this.broadphaseFilter;
+	public void setBroadphaseCollisionDataFilter(BroadphaseCollisionDataFilter<T, E> filter) {
+		if (filter == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBroadphaseFilter"));
+		this.broadphaseFilter = filter;
 	}
 	
 	/* (non-Javadoc)
@@ -518,17 +542,20 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		
 		// makes sure the body and fixture are still part of this world
 		item.set(body1, fixture1);
-		if (!this.broadphaseDetector.contains(item)) {
+		if (!this.broadphaseDetector.contains(body1, fixture1)) {
 			return null;
 		}
 
 		// makes sure the body and fixture are still part of this world
 		item.set(body2, fixture2);
-		if (!this.broadphaseDetector.contains(item)) {
+		if (!this.broadphaseDetector.contains(body2, fixture2)) {
 			return null;
 		}
 		
-		CollisionPair<T, E> pair = new BasicCollisionPair<T, E>(body1, fixture1, body2, fixture2);
+		CollisionPair<CollisionItem<T, E>> pair = new BasicCollisionPair<CollisionItem<T, E>>(
+				new BasicCollisionItem<T, E>(body1, fixture1),
+				new BasicCollisionItem<T, E>(body2, fixture2));
+		
 		return this.collisionData.get(pair);
 	}
 	
@@ -634,6 +661,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		int blSize = boundsListeners.size();
 		int bSize = this.bodies.size();
 		
+		// update all fixtures in the broadphase
+		this.broadphaseDetector.update();
+		
 		// update all AABBs in the broadphase
 		CollisionItemAdapter<T, E> bAdapter = new CollisionItemAdapter<T, E>();
 		for (int i = 0; i < bSize; i++) {
@@ -641,11 +671,6 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			
 			// skip if already not active
 			if (!body.isEnabled()) continue;
-			
-			// update the broadphase with the new position/orientation
-			// depending on the broadphase implementation this may or
-			// may not update it for this body.
-			this.broadphaseDetector.update(body);
 			
 			// instead of building an AABB for the whole body, let's check
 			// each fixture AABB so that we can exit early (in most cases
@@ -676,26 +701,26 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		}
 		
 		// detect broadphase pairs
-		Iterator<CollisionPair<T, E>> broadphasePairIterator = this.broadphaseDetector.detectIterator(false);
+		Iterator<CollisionPair<CollisionItem<T, E>>> broadphasePairIterator = this.broadphaseDetector.detectIterator();
 		while(broadphasePairIterator.hasNext()) {
 			// NOTE: since the broadphase reuses the pair object, make sure to make a copy of it
-			CollisionPair<T, E> pair = broadphasePairIterator.next().copy();
+			CollisionPair<CollisionItem<T, E>> pair = broadphasePairIterator.next().copy();
 			if (!this.collisionData.containsKey(pair)) {
 				this.collisionData.put(pair, this.createCollisionData(pair));
 			}
 		}
 		
-		this.processCollisions(new DetectIterator());
+		this.processCollisions(new DetectIterator(this.collisionData.values().iterator()));
 		
 		this.broadphaseDetector.clearUpdates();
 	}
-
+	
 	/**
 	 * Creates a new {@link CollisionData} instance for the given pair.
 	 * @param pair the pair
 	 * @return V
 	 */
-	protected abstract V createCollisionData(CollisionPair<T, E> pair);
+	protected abstract V createCollisionData(CollisionPair<CollisionItem<T, E>> pair);
 	
 	/**
 	 * This method should process the collisions returned by the given iterator.
@@ -1130,8 +1155,8 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		private final CollisionItemAdapter<T, E> adapter1 = new CollisionItemAdapter<T, E>();
 		private final CollisionItemAdapter<T, E> adapter2 = new CollisionItemAdapter<T, E>();
 		
-		public DetectIterator() {
-			this.iterator = AbstractCollisionWorld.this.collisionData.values().iterator();
+		public DetectIterator(Iterator<V> iterator) {
+			this.iterator = iterator;
 			this.listeners = AbstractCollisionWorld.this.collisionListeners;
 			this.clSize = this.listeners.size();
 		}
@@ -1211,9 +1236,8 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 			
 			if (AbstractCollisionWorld.this.broadphaseDetector.isUpdated(this.adapter1) || AbstractCollisionWorld.this.broadphaseDetector.isUpdated(this.adapter2)) {
 				// then we need to verify the pair is still valid
-				AABB aabb1 = AbstractCollisionWorld.this.broadphaseDetector.getAABB(this.adapter1);
-				AABB aabb2 = AbstractCollisionWorld.this.broadphaseDetector.getAABB(this.adapter2);
-				if (!aabb1.overlaps(aabb2)) {
+				boolean overlaps = AbstractCollisionWorld.this.broadphaseDetector.detect(this.adapter1, this.adapter2);
+				if (!overlaps) {
 					// remove the collision from the set of collisions
 					this.iterator.remove();
 					// always report back the collision because we may need to send

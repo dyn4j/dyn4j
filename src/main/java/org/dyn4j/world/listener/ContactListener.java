@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.dyn4j.world.PhysicsWorld;
  * to be notified when contact events occur.  Contact events occur after all 
  * {@link CollisionListener} events have been raised.
  * @author William Bittle
- * @version 4.0.1
+ * @version 4.1.0
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -52,7 +52,7 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	 * NOTE: The {@link ContactConstraint} stored in the <code>collision</code> parameter
 	 * is being updated when this method is called. As a result, the data stored in the 
 	 * contact constraint may not be accurate. If you need to access the final state of the 
-	 * contact constraint, use the {@link #collision(ContactCollisionData, ContactConstraint)} 
+	 * contact constraint, use the {@link #collision(ContactCollisionData)} 
 	 * method.
 	 * @param collision the collision data
 	 * @param contact the contact
@@ -72,7 +72,7 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	 * NOTE: The {@link ContactConstraint} stored in the <code>collision</code> parameter
 	 * is being updated when this method is called. As a result, the data stored in the 
 	 * contact constraint may not be accurate. If you need to access the final state of the 
-	 * contact constraint, use the {@link #collision(ContactCollisionData, ContactConstraint)} 
+	 * contact constraint, use the {@link #collision(ContactCollisionData)} 
 	 * method.
 	 * @param collision the collision data
 	 * @param oldContact the old contact
@@ -90,7 +90,7 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	 * NOTE: The {@link ContactConstraint} stored in the <code>collision</code> parameter
 	 * is being updated when this method is called. As a result, the data stored in the 
 	 * contact constraint may not be accurate. If you need to access the final state of the 
-	 * contact constraint, use the {@link #collision(ContactCollisionData, ContactConstraint)} 
+	 * contact constraint, use the {@link #collision(ContactCollisionData)} 
 	 * method.
 	 * @param collision the collision data
 	 * @param contact the contact
@@ -98,22 +98,36 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	public abstract void end(ContactCollisionData<T> collision, Contact contact);
 
 	/**
-	 * Called when two {@link BodyFixture}s generating a contact constraint.
+	 * Called when a body or fixture is removed from the world that had existing contacts.
 	 * <p>
-	 * This method is called after the {@link #begin(ContactCollisionData, Contact)}, 
-	 * {@link #persist(ContactCollisionData, Contact, Contact)}, and {@link #end(ContactCollisionData, Contact)} 
-	 * methods. When this method is called the state of the ContactConstraint will represent
-	 * what will be solved.
+	 * This is different than the {@link #end(ContactCollisionData, Contact)} event. This will only be
+	 * called when a user removes a fixture or body that's currently in collision.  The 
+	 * {@link #end(ContactCollisionData, Contact)} applies when the fixtures separate and are no longer
+	 * in collision.
 	 * <p>
-	 * This method will be called for all collisions where there was a manifold collision. This applies to
-	 * sensor collisions as well.
-	 * <p>
-	 * Use this method to modify the information in the given {@link ContactConstraint} before it's further
-	 * processed by the pipeline.
+	 * This is called before the {@link DestructionListener#destroyed(org.dyn4j.dynamics.contact.ContactConstraint)}
+	 * method in the event processing needed to occur by both listeners. There's no requirement that it must be
+	 * processed in both (or at all) though.
 	 * @param collision the collision data
-	 * @param contactConstraint the contact constraint
+	 * @param contact the contact
 	 */
-	public abstract void collision(ContactCollisionData<T> collision, ContactConstraint<T> contactConstraint);
+	public abstract void destroyed(ContactCollisionData<T> collision, Contact contact);
+	
+	/**
+	 * Called after the {@link ContactConstraint} has been updated after collision detection, but before
+	 * it's added to the solver to be solved.
+	 * <p>
+	 * This method is only called if {@link ContactCollisionData#isManifoldCollision()} returns true.
+	 * <p>
+	 * This listener is the place to use the {@link ContactConstraint#setEnabled(boolean)}, 
+	 * {@link ContactConstraint#setFriction(double)}, {@link ContactConstraint#setRestitution(double)},
+	 * {@link ContactConstraint#setSensor(boolean)}, and {@link ContactConstraint#setTangentSpeed(double)}
+	 * methods. You can get access to the {@link ContactConstraint} via the 
+	 * {@link ContactCollisionData#getContactConstraint()} method.
+	 * @param collision the collision data
+	 * @since 4.1.0
+	 */
+	public abstract void collision(ContactCollisionData<T> collision);
 	
 	/**
 	 * Called before contact constraints are solved.
@@ -132,20 +146,4 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	 * @param contact the contact
 	 */
 	public abstract void postSolve(ContactCollisionData<T> collision, SolvedContact contact);
-
-	/**
-	 * Called when a body or fixture is removed from the world that had existing contacts.
-	 * <p>
-	 * This is different than the {@link #end(ContactCollisionData, Contact)} event. This will only be
-	 * called when a user removes a fixture or body that's currently in collision.  The 
-	 * {@link #end(ContactCollisionData, Contact)} applies when the fixtures separate and are no longer
-	 * in collision.
-	 * <p>
-	 * This is called before the {@link DestructionListener#destroyed(org.dyn4j.dynamics.contact.ContactConstraint)}
-	 * method in the event processing needed to occur by both listeners. There's no requirement that it must be
-	 * processed in both (or at all) though.
-	 * @param collision the collision data
-	 * @param contact the contact
-	 */
-	public abstract void destroyed(ContactCollisionData<T> collision, Contact contact);
 }

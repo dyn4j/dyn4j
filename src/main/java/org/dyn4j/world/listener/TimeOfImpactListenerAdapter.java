@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,11 +31,27 @@ import org.dyn4j.dynamics.PhysicsBody;
 /**
  * Convenience class for implementing the {@link TimeOfImpactListener} interface.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.2.0
  * @param <T> the {@link PhysicsBody} type
  */
 public class TimeOfImpactListenerAdapter<T extends PhysicsBody> implements TimeOfImpactListener<T> {
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.listener.TimeOfImpactListener#collision(org.dyn4j.dynamics.PhysicsBody, org.dyn4j.dynamics.PhysicsBody)
+	 */
+	@Override
+	public boolean collision(T body1, T body2) {
+		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.listener.TimeOfImpactListener#collision(org.dyn4j.dynamics.PhysicsBody, org.dyn4j.dynamics.BodyFixture, org.dyn4j.dynamics.PhysicsBody, org.dyn4j.dynamics.BodyFixture)
+	 */
+	@Override
+	public boolean collision(T body1, BodyFixture fixture1, T body2, BodyFixture fixture2) {
+		return true;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.TimeOfImpactListener#collision(org.dyn4j.dynamics.PhysicsBody, org.dyn4j.dynamics.BodyFixture, org.dyn4j.dynamics.PhysicsBody, org.dyn4j.dynamics.BodyFixture, org.dyn4j.collision.continuous.TimeOfImpact)
 	 */

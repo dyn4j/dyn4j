@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,19 +31,19 @@ import org.junit.Test;
 /**
  * Test case for the AbstractShape class.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.1.0
  * @since 3.1.1
  */
 public class AbstractShapeTest {
 	/**
 	 * Test shape class.
 	 * @author William Bittle
-	 * @version 3.1.1
+	 * @version 4.1.0
 	 * @since 3.1.1
 	 */
 	private class TestShape extends AbstractShape {
-		public TestShape() {
-			super(new Vector2(), 0);
+		public TestShape(Vector2 c, double r) {
+			super(c, r);
 		}
 		@Override
 		public boolean contains(Vector2 point, Transform transform) { return false; }	
@@ -58,11 +58,25 @@ public class AbstractShapeTest {
 	}
 	
 	/**
+	 * Tests the create and radius/center getters.
+	 */
+	@Test
+	public void create() {
+		Vector2 c = new Vector2(1.0, 2.0);
+		double r = 2.0;
+		Shape s = new TestShape(c, r);
+		
+		TestCase.assertEquals(r, s.getRadius());
+		TestCase.assertEquals(c.x, s.getCenter().x);
+		TestCase.assertEquals(c.y, s.getCenter().y);
+	}
+	
+	/**
 	 * Make sure storage of user data is working.
 	 */
 	@Test
 	public void setUserData() {
-		Shape s = new TestShape();
+		Shape s = new TestShape(null, 0.0);
 		// should be initial null
 		TestCase.assertNull(s.getUserData());
 		

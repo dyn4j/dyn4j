@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,17 +31,10 @@ import org.dyn4j.Copyable;
  * <p>
  * Supported operations are rotation and translation.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
  */
 public class Transform implements Transformable, Copyable<Transform> {
-	/**
-	 * NOTE: as of being deprecated this instance is no longer immutable.
-	 * @deprecated create your own instances of {@link Transform} instead; since 3.4.0
-	 */
-	@Deprecated
-	public static final Transform IDENTITY = new Transform();
-	
 	/** the cosine of the rotation angle */
 	protected double cost = 1.0;
 	
@@ -515,6 +508,24 @@ public class Transform implements Transformable, Copyable<Transform> {
 	}
 	
 	/**
+	 * Returns the cosine of the angle of rotation of this transform.
+	 * @return double
+	 * @since 4.1.0
+	 */
+	public double getCost() {
+		return this.cost;
+	}
+	
+	/**
+	 * Returns the sine of the angle of rotation of this transform.
+	 * @return double
+	 * @since 4.1.0
+	 */
+	public double getSint() {
+		return this.sint;
+	}
+	
+	/**
 	 * Returns the rotation.
 	 * @return double angle in the range [-&pi;, &pi;]
 	 */
@@ -606,8 +617,12 @@ public class Transform implements Transformable, Copyable<Transform> {
 	 */
 	public void lerp(Transform end, double alpha) {
 		// interpolate the position
-		double x = this.x + alpha * (end.x - this.x);
-		double y = this.y + alpha * (end.y - this.y);
+		
+		// https://fgiesen.wordpress.com/2012/08/15/linear-interpolation-past-present-and-future/
+		// this, in comparison to p0 + alpha * (p1 - p0), is more numerically stable even
+		// though there's one extra multiply
+		double x = (1.0 - alpha) * this.x + alpha * end.x;
+		double y = (1.0 - alpha) * this.y + alpha * end.y;
 		
 		// compute the angle
 		// get the start and end rotations
@@ -658,8 +673,12 @@ public class Transform implements Transformable, Copyable<Transform> {
 	 */
 	public void lerp(Transform end, double alpha, Transform result) {
 		// interpolate the position
-		double x = this.x + alpha * (end.x - this.x);
-		double y = this.y + alpha * (end.y - this.y);
+		
+		// https://fgiesen.wordpress.com/2012/08/15/linear-interpolation-past-present-and-future/
+		// this, in comparison to p0 + alpha * (p1 - p0), is more numerically stable even
+		// though there's one extra multiply
+		double x = (1.0 - alpha) * this.x + alpha * end.x;
+		double y = (1.0 - alpha) * this.y + alpha * end.y;
 		
 		// compute the angle
 		// get the start and end rotations
@@ -771,8 +790,12 @@ public class Transform implements Transformable, Copyable<Transform> {
 	 */
 	public Transform lerped(Transform end, double alpha) {
 		// interpolate the position
-		double x = this.x + alpha * (end.x - this.x);
-		double y = this.y + alpha * (end.y - this.y);
+		
+		// https://fgiesen.wordpress.com/2012/08/15/linear-interpolation-past-present-and-future/
+		// this, in comparison to p0 + alpha * (p1 - p0), is more numerically stable even
+		// though there's one extra multiply
+		double x = (1.0 - alpha) * this.x + alpha * end.x;
+		double y = (1.0 - alpha) * this.y + alpha * end.y;
 		
 		// compute the angle
 		// get the start and end rotations

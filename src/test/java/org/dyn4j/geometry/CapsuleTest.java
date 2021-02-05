@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Capsule} class.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.1.0
  * @since 3.1.5
  */
 public class CapsuleTest {
@@ -71,6 +71,14 @@ public class CapsuleTest {
 	}
 	
 	/**
+	 * Tests a capsule that should be a circle.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createCircle() {
+		new Capsule(1.0, 1.0);
+	}
+	
+	/**
 	 * Tests the constructor.
 	 */
 	@Test
@@ -79,6 +87,11 @@ public class CapsuleTest {
 		Vector2 x = cap.localXAxis;
 		TestCase.assertEquals(1.000, x.x, 1.0e-3);
 		TestCase.assertEquals(0.000, x.y, 1.0e-3);
+		
+		TestCase.assertEquals(2.0, cap.getLength());
+		TestCase.assertEquals(0.5, cap.getCapRadius());
+		
+		TestCase.assertNotNull(cap.toString());
 	}
 	
 	/**
@@ -90,6 +103,11 @@ public class CapsuleTest {
 		Vector2 x = cap.localXAxis;
 		TestCase.assertEquals(0.000, x.x, 1.0e-3);
 		TestCase.assertEquals(1.000, x.y, 1.0e-3);
+		
+		TestCase.assertEquals(2.0, cap.getLength());
+		TestCase.assertEquals(0.5, cap.getCapRadius());
+		
+		TestCase.assertNotNull(cap.toString());
 	}
 	
 	/**
@@ -303,5 +321,78 @@ public class CapsuleTest {
 		TestCase.assertEquals(1.625, aabb.getMinY(), 1.0e-3);
 		TestCase.assertEquals(1.466, aabb.getMaxX(), 1.0e-3);
 		TestCase.assertEquals(2.375, aabb.getMaxY(), 1.0e-3);
+	}
+	
+	/**
+	 * Tests the mass calculation.
+	 */
+	@Test
+	public void createMass() {
+		Capsule e = new Capsule(1.0, 0.5);
+		Mass mass = e.createMass(1.0);
+		
+		TestCase.assertEquals(0.446, mass.getMass(), 1e-3);
+		TestCase.assertEquals(0.028, mass.getInertia(), 1e-3);
+		TestCase.assertEquals(2.240, mass.getInverseMass(), 1e-3);
+		TestCase.assertEquals(34.692, mass.getInverseInertia(), 1e-3);
+		TestCase.assertEquals(0.0, mass.getCenter().x, 1e-3);
+		TestCase.assertEquals(0.0, mass.getCenter().y, 1e-3);
+		TestCase.assertEquals(MassType.NORMAL, mass.getType());
+		
+		e = new Capsule(0.5, 1.0);
+		mass = e.createMass(1.0);
+		
+		TestCase.assertEquals(0.446, mass.getMass(), 1e-3);
+		TestCase.assertEquals(0.028, mass.getInertia(), 1e-3);
+		TestCase.assertEquals(2.240, mass.getInverseMass(), 1e-3);
+		TestCase.assertEquals(34.692, mass.getInverseInertia(), 1e-3);
+		TestCase.assertEquals(0.0, mass.getCenter().x, 1e-3);
+		TestCase.assertEquals(0.0, mass.getCenter().y, 1e-3);
+		TestCase.assertEquals(MassType.NORMAL, mass.getType());
+	}
+
+	/**
+	 * Tests the get radius.
+	 */
+	@Test
+	public void getRadius() {
+		// the radius for a capsule is half the largest dimension
+		Capsule e = new Capsule(1.0, 0.5);
+		TestCase.assertEquals(0.5, e.getRadius());
+		TestCase.assertEquals(1.5, e.getRadius(new Vector2(-1.0, 0.0)));
+		TestCase.assertEquals(5.403, e.getRadius(new Vector2(-3.0, 4.0)), 1e-3);
+		
+		e = new Capsule(1.0, 1.1);
+		TestCase.assertEquals(0.55, e.getRadius());
+		TestCase.assertEquals(1.55, e.getRadius(new Vector2(0.0, -1.0)), 1e-3);
+		TestCase.assertEquals(1.501, e.getRadius(new Vector2(-1.0, 0.0)), 1e-3);
+	}
+
+	/**
+	 * Tests the get rotation.
+	 */
+	@Test
+	public void getRotation() {
+		// the rotation intially is zero
+		Capsule e = new Capsule(1.0, 0.5);
+		TestCase.assertEquals(0.0, e.getRotationAngle());
+		TestCase.assertEquals(1.0, e.getRotation().getCost());
+		TestCase.assertEquals(0.0, e.getRotation().getSint());
+		
+		// for a horizontal it's 90 degrees
+		e = new Capsule(1.0, 1.1);
+		TestCase.assertEquals(Math.PI * 0.5, e.getRotationAngle());
+		TestCase.assertEquals(0.0, e.getRotation().getCost());
+		TestCase.assertEquals(1.0, e.getRotation().getSint());
+		
+		e.rotate(Math.toRadians(30));
+		TestCase.assertEquals(Math.PI * 0.5 + Math.toRadians(30), e.getRotationAngle(), 1e-8);
+		TestCase.assertEquals(Math.cos(Math.toRadians(120)), e.getRotation().getCost(), 1e-8);
+		TestCase.assertEquals(Math.sin(Math.toRadians(120)), e.getRotation().getSint(), 1e-8);
+		
+		e.rotate(Math.toRadians(-60));
+		TestCase.assertEquals(Math.PI * 0.5 - Math.toRadians(30), e.getRotationAngle(), 1e-8);
+		TestCase.assertEquals(Math.cos(Math.toRadians(60)), e.getRotation().getCost(), 1e-8);
+		TestCase.assertEquals(Math.sin(Math.toRadians(60)), e.getRotation().getSint(), 1e-8);
 	}
 }

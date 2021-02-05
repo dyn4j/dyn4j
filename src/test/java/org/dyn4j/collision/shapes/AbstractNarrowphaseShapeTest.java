@@ -24,10 +24,6 @@
  */
 package org.dyn4j.collision.shapes;
 
-import org.dyn4j.collision.Fixture;
-import org.dyn4j.collision.TestCollisionBody;
-import org.dyn4j.collision.broadphase.DynamicAABBTree;
-import org.dyn4j.collision.broadphase.Sap;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Sat;
@@ -44,12 +40,6 @@ public abstract class AbstractNarrowphaseShapeTest {
 	
 	/** The GJK/EPA algorithm */
 	protected Gjk gjk = new Gjk();
-	
-	/** The sap algorithm */
-	protected Sap<TestCollisionBody, Fixture> sap = new Sap<TestCollisionBody, Fixture>();
-	
-	/** The dynamic aabb algorithm */
-	protected DynamicAABBTree<TestCollisionBody, Fixture> dyn = new DynamicAABBTree<TestCollisionBody, Fixture>();
 	
 	/** The clipping manifold algorithm */
 	protected ClippingManifoldSolver cmfs = new ClippingManifoldSolver();

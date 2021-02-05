@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -42,7 +42,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * The {@link #expand(double)} method can be used to expand the bounds of the {@link AABB} by some amount.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 3.0.0
  */
 public class AABB implements Translatable, Copyable<AABB> {
@@ -60,25 +60,51 @@ public class AABB implements Translatable, Copyable<AABB> {
 	
 	/**
 	 * Method to create the valid AABB defined by the two points point1 and point2.
-	 * 
 	 * @param point1 the first point
 	 * @param point2 the second point
 	 * @return The one and only one valid AABB formed by point1 and point2
 	 */
-	public static AABB createAABBFromPoints(Vector2 point1, Vector2 point2) {
-		return createAABBFromPoints(point1.x, point1.y, point2.x, point2.y);
+	public static AABB createFromPoints(Vector2 point1, Vector2 point2) {
+		return createFromPoints(point1.x, point1.y, point2.x, point2.y);
 	}
 	
 	/**
 	 * Method to create the valid AABB defined by the two points A(point1x, point1y) and B(point2x, point2y).
-	 * 
 	 * @param point1x The x coordinate of point A
 	 * @param point1y The y coordinate of point A
 	 * @param point2x The x coordinate of point B
 	 * @param point2y The y coordinate of point B
 	 * @return The one and only one valid AABB formed by A and B
 	 */
-	public static AABB createAABBFromPoints(double point1x, double point1y, double point2x, double point2y) {
+	public static AABB createFromPoints(double point1x, double point1y, double point2x, double point2y) {
+		AABB aabb = new AABB(0,0,0,0);
+		setFromPoints(point1x, point1y, point2x, point2y, aabb);
+		return aabb;
+	}
+	
+	/**
+	 * Method to create the valid AABB defined by the two points point1 and point2 and places the result
+	 * in the given AABB.
+	 * @param point1 the first point
+	 * @param point2 the second point
+	 * @param result the AABB to set
+	 * @since 4.1.0
+	 */
+	public static void setFromPoints(Vector2 point1, Vector2 point2, AABB result) {
+		setFromPoints(point1.x, point1.y, point2.x, point2.y, result);
+	}
+	
+	/**
+	 * Method to create the valid AABB defined by the two points A(point1x, point1y) and B(point2x, point2y) and places
+	 * the result in the given AABB.
+	 * @param point1x The x coordinate of point A
+	 * @param point1y The y coordinate of point A
+	 * @param point2x The x coordinate of point B
+	 * @param point2y The y coordinate of point B
+	 * @param result the AABB to set
+	 * @since 4.1.0
+	 */
+	public static void setFromPoints(double point1x, double point1y, double point2x, double point2y, AABB result) {
 		if (point2x < point1x) {
 			double temp = point1x;
 			point1x = point2x;
@@ -91,7 +117,10 @@ public class AABB implements Translatable, Copyable<AABB> {
 			point2y = temp;
 		}
 		
-		return new AABB(point1x, point1y, point2x, point2y);
+		result.minX = point1x;
+		result.minY = point1y;
+		result.maxX = point2x;
+		result.maxY = point2y;
 	}
 	
 	/**
@@ -172,6 +201,17 @@ public class AABB implements Translatable, Copyable<AABB> {
 	 */
 	public AABB copy() {
 		return new AABB(this);
+	}
+	
+	/**
+	 * Sets this AABB to a degenerate zero AABB.
+	 * @since 4.1.0
+	 */
+	public void zero() {
+		this.minX = 0;
+		this.maxX = 0;
+		this.minY = 0;
+		this.maxY = 0;
 	}
 	
 	/**

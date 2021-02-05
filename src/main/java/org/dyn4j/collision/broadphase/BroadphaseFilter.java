@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,57 +24,19 @@
  */
 package org.dyn4j.collision.broadphase;
 
-import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.collision.CollisionItem;
-import org.dyn4j.collision.CollisionPair;
-import org.dyn4j.collision.Fixture;
-import org.dyn4j.geometry.AABB;
-import org.dyn4j.geometry.Ray;
-
 /**
- * Represents a class that defines rules to exclude results from a {@link BroadphaseDetector}'s query methods.
- * <p>
- * The intent is that instances of this class would be used to help filter {@link CollisionPair}s and 
- * {@link CollisionItem}s emitted from the {@link BroadphaseDetector}s.
+ * Represents a filter used during a {@link BroadphaseDetector}'s pair detection process.
  * @author William Bittle
- * @version 4.0.0
- * @since 3.2.0
- * @param <T> the {@link CollisionBody} type
- * @param <E> the {@link Fixture} type
- * @deprecated Deprecated in 4.0.0. Use the BroadphaseFilter in the world package instead.
+ * @version 4.1.0
+ * @since 4.1.0
+ * @param <T> the object type
  */
-@Deprecated
-public interface BroadphaseFilter<T extends CollisionBody<E>, E extends Fixture> {
+public interface BroadphaseFilter<T> {
 	/**
-	 * Returns true if this result should be added to the results list.
-	 * @param body1 the first {@link CollisionBody}
-	 * @param fixture1 the first {@link CollisionBody}s {@link Fixture}
-	 * @param body2 the second {@link CollisionBody}
-	 * @param fixture2 the second {@link CollisionBody}s {@link Fixture}
+	 * Returns true if the detection of the objects should proceed.
+	 * @param object1 the first object
+	 * @param object2 the second object
 	 * @return boolean
 	 */
-	public abstract boolean isAllowed(T body1, E fixture1, T body2, E fixture2);
-	
-	/**
-	 * Returns true if this result should be added to the results list.
-	 * @param aabb the AABB using to test
-	 * @param body the {@link CollisionBody}
-	 * @param fixture the {@link CollisionBody}s {@link Fixture}
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. This was replaced with a specific AABB filter interface.
-	 */
-	@Deprecated
-	public abstract boolean isAllowed(AABB aabb, T body, E fixture);
-	
-	/**
-	 * Returns true if this result should be added to the results list.
-	 * @param ray the ray
-	 * @param length the length of the ray
-	 * @param body the {@link CollisionBody}
-	 * @param fixture the {@link CollisionBody}s {@link Fixture}
-	 * @return boolean
-	 * @deprecated Deprecated in 4.0.0. This was replaced with a specific Ray filter interface.
-	 */
-	@Deprecated
-	public abstract boolean isAllowed(Ray ray, double length, T body, E fixture);
+	public boolean isAllowed(T object1, T object2);
 }

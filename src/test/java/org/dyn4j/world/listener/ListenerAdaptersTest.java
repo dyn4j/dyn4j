@@ -25,6 +25,7 @@
 package org.dyn4j.world.listener;
 
 import org.dyn4j.collision.BasicCollisionPair;
+import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.continuous.TimeOfImpact;
 import org.dyn4j.collision.manifold.ManifoldPointId;
 import org.dyn4j.dynamics.Body;
@@ -71,7 +72,7 @@ public class ListenerAdaptersTest {
 	public void collisionListenerAdapter() {
 		// test that nothing happens, even with null
 		CollisionListenerAdapter<Body, BodyFixture> cla = new CollisionListenerAdapter<Body, BodyFixture>();
-		WorldCollisionData<Body> data = new WorldCollisionData<Body>(new BasicCollisionPair<Body, BodyFixture>(null, null, null, null));
+		WorldCollisionData<Body> data = new WorldCollisionData<Body>(new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(null, null));
 		
 		TestCase.assertTrue(cla.collision((BroadphaseCollisionData<Body, BodyFixture>)null));
 		TestCase.assertTrue(cla.collision((BroadphaseCollisionData<Body, BodyFixture>)data));
@@ -90,7 +91,7 @@ public class ListenerAdaptersTest {
 	public void contactListenerAdapter() {
 		// test that nothing happens, even with null
 		ContactListenerAdapter<Body> cla = new ContactListenerAdapter<Body>();
-		WorldCollisionData<Body> data = new WorldCollisionData<Body>(new BasicCollisionPair<Body, BodyFixture>(null, null, null, null));
+		WorldCollisionData<Body> data = new WorldCollisionData<Body>(new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(null, null));
 		SolvedContact c = new SolvedContact() {
 			@Override
 			public Vector2 getPoint() { return null; }
@@ -113,6 +114,9 @@ public class ListenerAdaptersTest {
 		cla.end(data, null);
 		cla.end(data, c);
 		
+		cla.destroyed(data, null);
+		cla.destroyed(data, c);
+		
 		cla.persist(data, null, c);
 		cla.persist(data, c, null);
 		cla.persist(data, null, null);
@@ -123,6 +127,8 @@ public class ListenerAdaptersTest {
 		
 		cla.preSolve(data, null);
 		cla.preSolve(data, c);
+		
+		cla.collision(data);
 	}
 
 	/**
@@ -132,7 +138,7 @@ public class ListenerAdaptersTest {
 	public void destructionListenerAdapter() {
 		// test that nothing happens, even with null
 		DestructionListenerAdapter<Body> dla = new DestructionListenerAdapter<Body>();
-		ContactConstraint<Body> cc = new ContactConstraint<Body>(new BasicCollisionPair<Body, BodyFixture>(null, null, null, null));
+		ContactConstraint<Body> cc = new ContactConstraint<Body>(new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(null, null));
 		Joint<Body> j = new AngleJoint<Body>(new Body(), new Body());
 		
 		// nothing to assert since they are no-ops with no effect any where
@@ -188,6 +194,8 @@ public class ListenerAdaptersTest {
 		Body b = new Body();
 		BodyFixture f = new BodyFixture(Geometry.createCircle(0.5));
 		
+		TestCase.assertTrue(sla.collision(null, null));
+		TestCase.assertTrue(sla.collision(null, null, null, null));
 		TestCase.assertTrue(sla.collision(null, null, null, null, null));
 		TestCase.assertTrue(sla.collision(b, f, b, f, new TimeOfImpact()));
 	}

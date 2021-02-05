@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -118,7 +118,7 @@ import org.dyn4j.resources.Messages;
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
  * @see Epa
  * @see <a href="http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/" target="_blank">GJK (Gilbert-Johnson-Keerthi)</a>
@@ -453,15 +453,12 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			double projection = c.point.dot(d);
 			if ((projection - a.point.dot(d)) < this.distanceEpsilon) {
 				// then the new point we just made is not far enough
-				// in the direction of n so we can stop now
-				// normalize d
-				d.normalize();
-				separation.normal.x = d.x;
-				separation.normal.y = d.y;
-				// compute the real distance
-				separation.distance = -c.point.dot(d);
+				// in the direction of n so we can stop now and
+				// get the closest points
+
 				// get the closest points
 				this.findClosestPoints(a, b, separation);
+				
 				// return true to indicate separation
 				return true;
 			}
@@ -478,19 +475,11 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 			if (p1Mag <= Epsilon.E) {
 				// if so then we have a separation (although its
 				// nearly zero separation)
-				d.normalize();
-				separation.distance = p1.normalize();
-				separation.normal.x = d.x;
-				separation.normal.y = d.y;
 				this.findClosestPoints(a, c, separation);
 				return true;
 			} else if (p2Mag <= Epsilon.E) {
 				// if so then we have a separation (although its
 				// nearly zero separation)
-				d.normalize();
-				separation.distance = p2.normalize();
-				separation.normal.x = d.x;
-				separation.normal.y = d.y;
 				this.findClosestPoints(c, b, separation);
 				return true;
 			}
@@ -507,12 +496,10 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 				d = p2;
 			}
 		}
+		
 		// if we made it here then we know that we hit the maximum number of iterations
 		// this is really a catch all termination case
-		d.normalize();
-		separation.normal.x = d.x;
-		separation.normal.y = d.y;
-		separation.distance = -c.point.dot(d);
+		
 		// get the closest points
 		this.findClosestPoints(a, b, separation);
 		// return true to indicate separation
@@ -572,11 +559,19 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 				p2.y = a.supportPoint2.y + l2 * (b.supportPoint2.y - a.supportPoint2.y);
 			}
 		}
+		
 		// set the new points in the separation object
 		separation.point1.x = p1.x;
 		separation.point1.y = p1.y;
 		separation.point2.x = p2.x;
 		separation.point2.y = p2.y;
+		
+		// compute the normal and distance from the closest points
+		Vector2 n = p1.to(p2);
+		double d = n.normalize();
+		separation.normal.x = n.x;
+		separation.normal.y = n.y;
+		separation.distance = d;
 	}
 	
 	/**
@@ -858,7 +853,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @since 3.3.0
 	 */
 	public double getRaycastEpsilon() {
-		return this.detectEpsilon;
+		return this.raycastEpsilon;
 	}
 	
 	/**
@@ -870,7 +865,7 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @since 3.3.0
 	 */
 	public void setRaycastEpsilon(double raycastEpsilon) {
-		if (raycastEpsilon <= 0) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidDistanceEpsilon"));
+		if (raycastEpsilon <= 0) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidRaycastEpsilon"));
 		this.raycastEpsilon = raycastEpsilon;
 	}
 	
@@ -913,32 +908,5 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	public void setMinkowskiPenetrationSolver(MinkowskiPenetrationSolver minkowskiPenetrationSolver) {
 		if (minkowskiPenetrationSolver == null) throw new NullPointerException(Messages.getString("collision.narrowphase.gjk.nullMinkowskiPenetrationSolver"));
 		this.minkowskiPenetrationSolver = minkowskiPenetrationSolver;
-	}
-
-	/**
-	 * Returns the maximum number of iterations the {@link Gjk} algorithm will perform when
-	 * computing the distance between two separated bodies.
-	 * @return int the number of {@link Gjk} distance iterations
-	 * @see #setMaxIterations(int)
-	 * @deprecated replaced with {@link #getMaxDistanceIterations()} since 3.3.0
-	 */
-	@Deprecated
-	public int getMaxIterations() {
-		return this.maxDistanceIterations;
-	}
-
-	/**
-	 * Sets the maximum number of iterations the {@link Gjk} algorithm will perform when
-	 * computing the distance between two separated bodies.
-	 * <p>
-	 * Valid values are in the range [5, &infin;].
-	 * @param maxIterations the maximum number of {@link Gjk} iterations
-	 * @throws IllegalArgumentException if maxIterations is less than 5
-	 * @deprecated replaced with {@link #setMaxDistanceIterations(int)} since 3.3.0
-	 */
-	@Deprecated
-	public void setMaxIterations(int maxIterations) {
-		if (maxIterations < 5) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidMaximumIterations"));
-		this.maxDistanceIterations = maxIterations;
 	}
 }

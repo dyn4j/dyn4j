@@ -24,14 +24,6 @@
  */
 package org.dyn4j.collision.shapes;
 
-import java.util.List;
-
-import junit.framework.TestCase;
-
-import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.collision.CollisionPair;
-import org.dyn4j.collision.Fixture;
-import org.dyn4j.collision.TestCollisionBody;
 import org.dyn4j.collision.manifold.ClippingManifoldSolver;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.manifold.ManifoldPoint;
@@ -40,12 +32,13 @@ import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.collision.narrowphase.Sat;
 import org.dyn4j.collision.narrowphase.Separation;
 import org.dyn4j.geometry.Rectangle;
-import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Before;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Test case for {@link Rectangle} - {@link Triangle} collision detection.
@@ -70,113 +63,6 @@ public class RectangleTriangleTest extends AbstractNarrowphaseShapeTest {
 				new Vector2(0.45, -0.12),
 				new Vector2(-0.45, 0.38),
 				new Vector2(-0.15, -0.22));
-	}
-	
-	/**
-	 * Tests {@link Shape} AABB.
-	 */
-	@Test
-	public void detectShapeAABB() {
-		Transform t1 = new Transform();
-		Transform t2 = new Transform();
-		
-		// test containment
-		TestCase.assertTrue(this.sap.detect(rect, t1, tri, t2));
-		TestCase.assertTrue(this.sap.detect(tri, t2, rect, t1));
-		
-		// test overlap
-		t1.translate(-0.5, 0.0);
-		TestCase.assertTrue(this.sap.detect(rect, t1, tri, t2));
-		TestCase.assertTrue(this.sap.detect(tri, t2, rect, t1));
-		
-		// test AABB overlap
-		t2.translate(0.34, 0.42);
-		TestCase.assertTrue(this.sap.detect(rect, t1, tri, t2));
-		TestCase.assertTrue(this.sap.detect(tri, t2, rect, t1));
-		
-		// test no overlap
-		t2.translate(0.0, 0.58);
-		TestCase.assertFalse(this.sap.detect(rect, t1, tri, t2));
-		TestCase.assertFalse(this.sap.detect(tri, t2, rect, t1));
-	}
-	
-	/**
-	 * Tests {@link CollisionBody} AABB.
-	 */
-	@Test	
-	public void detectCollidableAABB() {
-		// create some collidables
-		TestCollisionBody ct1 = new TestCollisionBody(rect);
-		TestCollisionBody ct2 = new TestCollisionBody(tri);
-		
-		// test containment
-		TestCase.assertTrue(this.sap.detect(ct1, ct2));
-		TestCase.assertTrue(this.sap.detect(ct2, ct1));
-		
-		// test overlap
-		ct1.translate(-0.5, 0.0);
-		TestCase.assertTrue(this.sap.detect(ct1, ct2));
-		TestCase.assertTrue(this.sap.detect(ct2, ct1));
-		
-		// test AABB overlap
-		ct2.translate(0.34, 0.42);
-		TestCase.assertTrue(this.sap.detect(ct1, ct2));
-		TestCase.assertTrue(this.sap.detect(ct1, ct2));
-		
-		// test no overlap
-		ct2.translate(0.0, 0.58);
-		TestCase.assertFalse(this.sap.detect(ct1, ct2));
-		TestCase.assertFalse(this.sap.detect(ct2, ct1));
-	}
-	
-	/**
-	 * Tests the broadphase detectors.
-	 */
-	@Test
-	public void detectBroadphase() {
-		List<CollisionPair<TestCollisionBody, Fixture>> pairs;
-		
-		// create some collidables
-		TestCollisionBody ct1 = new TestCollisionBody(rect);
-		TestCollisionBody ct2 = new TestCollisionBody(tri);
-		
-		this.sap.add(ct1);
-		this.sap.add(ct2);
-		this.dyn.add(ct1);
-		this.dyn.add(ct2);
-		
-		// test containment
-		pairs = this.sap.detect();
-		TestCase.assertEquals(1, pairs.size());
-		pairs = this.dyn.detect();
-		TestCase.assertEquals(1, pairs.size());
-		
-		// test overlap
-		ct1.translate(-0.5, 0.0);
-		this.sap.update(ct1);
-		this.dyn.update(ct1);
-		pairs = this.sap.detect();
-		TestCase.assertEquals(1, pairs.size());
-		pairs = this.dyn.detect();
-		TestCase.assertEquals(1, pairs.size());
-		
-		// test only AABB overlap
-		ct2.translate(0.34, 0.42);
-		this.sap.update(ct2);
-		this.dyn.update(ct2);
-		pairs = this.sap.detect();
-		TestCase.assertEquals(1, pairs.size());
-		pairs = this.dyn.detect();
-		TestCase.assertEquals(1, pairs.size());
-		
-		// test no overlap
-		ct1.translate(0.0, 1.6);
-		this.sap.update(ct1);
-		this.dyn.update(ct1);
-		pairs = this.sap.detect();
-		TestCase.assertEquals(0, pairs.size());
-		pairs = this.dyn.detect();
-		TestCase.assertEquals(0, pairs.size());
 	}
 	
 	/**
