@@ -60,6 +60,11 @@ public class GeometryTest {
 		
 		TestCase.assertEquals(0.150, c.x, 1.0e-3);
 		TestCase.assertEquals(0.500, c.y, 1.0e-3);
+		
+		c = Geometry.getAverageCenter(vertices[0]);
+		
+		TestCase.assertEquals(-2.000, c.x, 1.0e-3);
+		TestCase.assertEquals( 1.000, c.y, 1.0e-3);
 	}
 	
 	/**
@@ -83,6 +88,11 @@ public class GeometryTest {
 		
 		TestCase.assertEquals(0.150, c.x, 1.0e-3);
 		TestCase.assertEquals(0.500, c.y, 1.0e-3);
+		
+		c = Geometry.getAverageCenter(vertices.subList(0, 1));
+		
+		TestCase.assertEquals(-2.000, c.x, 1.0e-3);
+		TestCase.assertEquals( 1.000, c.y, 1.0e-3);
 	}
 	
 	/**
@@ -119,6 +129,17 @@ public class GeometryTest {
 	}
 	
 	/**
+	 * Tests the getAverageCenter method passing an array with null elements.
+	 * @since 4.1.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void getAverageCenterArrayNullOnlyElement() {
+		Geometry.getAverageCenter(new Vector2[] {
+			null
+		});
+	}
+	
+	/**
 	 * Tests the getAverageCenter method passing a null list.
 	 * @since 2.0.0
 	 */
@@ -150,6 +171,17 @@ public class GeometryTest {
 		vertices.add(null);
 		Geometry.getAverageCenter(vertices);
 	}
+
+	/**
+	 * Tests the getAverageCenter method passing an array with null elements.
+	 * @since 4.1.0
+	 */
+	@Test(expected = NullPointerException.class)
+	public void getAverageCenterListNullOnlyElement() {
+		List<Vector2> vertices = new ArrayList<Vector2>();
+		vertices.add(null);
+		Geometry.getAverageCenter(vertices);
+	}
 	
 	/**
 	 * Tests the getAreaWeightedCenter method.
@@ -166,6 +198,12 @@ public class GeometryTest {
 		vertices[5] = new Vector2(0.0, -1.0);
 		
 		Vector2 c = Geometry.getAreaWeightedCenter(vertices);
+		
+		// note the x is closer to the "real" center of the object
+		TestCase.assertEquals(-0.318, c.x, 1.0e-3);
+		TestCase.assertEquals( 0.527, c.y, 1.0e-3);
+		
+		c = Geometry.getAreaWeightedCenter(Arrays.asList(vertices));
 		
 		// note the x is closer to the "real" center of the object
 		TestCase.assertEquals(-0.318, c.x, 1.0e-3);
@@ -189,6 +227,12 @@ public class GeometryTest {
 		vertices[5] = new Vector2(1.0, 0.0);
 		
 		Vector2 c = Geometry.getAreaWeightedCenter(vertices);
+		
+		// note the x is closer to the "real" center of the object
+		TestCase.assertEquals(0.682, c.x, 1.0e-3);
+		TestCase.assertEquals(1.527, c.y, 1.0e-3);
+		
+		c = Geometry.getAreaWeightedCenter(Arrays.asList(vertices));
 		
 		// note the x is closer to the "real" center of the object
 		TestCase.assertEquals(0.682, c.x, 1.0e-3);
@@ -1424,6 +1468,75 @@ public class GeometryTest {
 	}
 
 	/**
+	 * Tests the createPolygonalCircle method.
+	 * @since 4.1.0
+	 */
+	@Test
+	public void createPolygonalCircle() {
+		// this method should succeed
+		Polygon p = Geometry.createPolygonalCircle(5, 1.0);
+		// the center should be at the origin
+		TestCase.assertEquals(0.000, p.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.000, p.getCenter().y, 1.0e-3);
+		TestCase.assertEquals(1.000, p.getVertices()[0].x, 1.0e-3);
+		TestCase.assertEquals(0.000, p.getVertices()[0].y, 1.0e-3);
+		TestCase.assertEquals(5, p.getVertices().length);
+		
+		p = Geometry.createPolygonalCircle(5, 1.0, Math.toRadians(30));
+		// the center should be at the origin
+		TestCase.assertEquals(0.000, p.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.000, p.getCenter().y, 1.0e-3);
+		TestCase.assertEquals(Math.cos(Math.toRadians(30)), p.getVertices()[0].x, 1.0e-3);
+		TestCase.assertEquals(Math.sin(Math.toRadians(30)), p.getVertices()[0].y, 1.0e-3);
+		TestCase.assertEquals(5, p.getVertices().length);
+	}
+	
+	/**
+	 * Tests the createPolygonalCircle method.
+	 * @since 4.1.0
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalCircleInvalidCount() {
+		Geometry.createPolygonalCircle(2, 1.0);
+	}
+	
+	/**
+	 * Tests the createPolygonalCircle method.
+	 * @since 4.1.0
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalCircleZeroCount() {
+		Geometry.createPolygonalCircle(0, 1.0);
+	}
+	
+	/**
+	 * Tests the createPolygonalCircle method.
+	 * @since 4.1.0
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalCircleNegativeCount() {
+		Geometry.createPolygonalCircle(-1, 1.0);
+	}
+
+	/**
+	 * Tests the createPolygonalCircle method.
+	 * @since 4.1.0
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalCircleZeroRadius() {
+		Geometry.createPolygonalCircle(6, 0);
+	}
+	
+	/**
+	 * Tests the createPolygonalCircle method.
+	 * @since 4.1.0
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createPolygonalCircleNegativeRadius() {
+		Geometry.createPolygonalCircle(6, -1.0);
+	}
+	
+	/**
 	 * Tests the createPolygonalCapsule method.
 	 * @since 3.1.5
 	 */
@@ -1431,6 +1544,16 @@ public class GeometryTest {
 	public void createPolygonalCapsule() {
 		// this method should succeed
 		Polygon p = Geometry.createPolygonalCapsule(5, 1.0, 0.5);
+		// the center should be at the origin
+		TestCase.assertEquals(0.000, p.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.000, p.getCenter().y, 1.0e-3);
+		
+		p = Geometry.createPolygonalCapsule(5, 1.0, 1.0);
+		// the center should be at the origin
+		TestCase.assertEquals(0.000, p.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.000, p.getCenter().y, 1.0e-3);
+		
+		p = Geometry.createPolygonalCapsule(5, 0.5, 1.0);
 		// the center should be at the origin
 		TestCase.assertEquals(0.000, p.getCenter().x, 1.0e-3);
 		TestCase.assertEquals(0.000, p.getCenter().y, 1.0e-3);
@@ -1503,6 +1626,76 @@ public class GeometryTest {
 		TestCase.assertEquals( 2.309, vertices[3].y, 1.0e-3);
 		TestCase.assertEquals(-2.000, vertices[4].x, 1.0e-3);
 		TestCase.assertEquals( 3.000, vertices[4].y, 1.0e-3);
+		
+		// flip about X
+		flipped = Geometry.flipAlongTheXAxis(p);
+		vertices = flipped.getVertices();
+		TestCase.assertEquals( 0.309, vertices[0].x, 1.0e-3);
+		TestCase.assertEquals( 0.951, vertices[0].y, 1.0e-3);
+		TestCase.assertEquals(-0.809, vertices[1].x, 1.0e-3);
+		TestCase.assertEquals( 0.587, vertices[1].y, 1.0e-3);
+		TestCase.assertEquals(-0.809, vertices[2].x, 1.0e-3);
+		TestCase.assertEquals(-0.587, vertices[2].y, 1.0e-3);
+		TestCase.assertEquals( 0.309, vertices[3].x, 1.0e-3);
+		TestCase.assertEquals(-0.951, vertices[3].y, 1.0e-3);
+		TestCase.assertEquals( 1.000, vertices[4].x, 1.0e-3);
+		TestCase.assertEquals( 0.000, vertices[4].y, 1.0e-3);
+		
+		// flip about X at point
+		flipped = Geometry.flipAlongTheXAxis(p, new Vector2(0.0, 1.0));
+		vertices = flipped.getVertices();
+		TestCase.assertEquals( 0.309, vertices[0].x, 1.0e-3);
+		TestCase.assertEquals( 2.951, vertices[0].y, 1.0e-3);
+		TestCase.assertEquals(-0.809, vertices[1].x, 1.0e-3);
+		TestCase.assertEquals( 2.587, vertices[1].y, 1.0e-3);
+		TestCase.assertEquals(-0.809, vertices[2].x, 1.0e-3);
+		TestCase.assertEquals( 1.412, vertices[2].y, 1.0e-3);
+		TestCase.assertEquals( 0.309, vertices[3].x, 1.0e-3);
+		TestCase.assertEquals( 1.048, vertices[3].y, 1.0e-3);
+		TestCase.assertEquals( 1.000, vertices[4].x, 1.0e-3);
+		TestCase.assertEquals( 2.000, vertices[4].y, 1.0e-3);
+		
+		// flip about Y
+		flipped = Geometry.flipAlongTheYAxis(p);
+		vertices = flipped.getVertices();
+		TestCase.assertEquals(-0.309, vertices[0].x, 1.0e-3);
+		TestCase.assertEquals(-0.951, vertices[0].y, 1.0e-3);
+		TestCase.assertEquals( 0.809, vertices[1].x, 1.0e-3);
+		TestCase.assertEquals(-0.587, vertices[1].y, 1.0e-3);
+		TestCase.assertEquals( 0.809, vertices[2].x, 1.0e-3);
+		TestCase.assertEquals( 0.587, vertices[2].y, 1.0e-3);
+		TestCase.assertEquals(-0.309, vertices[3].x, 1.0e-3);
+		TestCase.assertEquals( 0.951, vertices[3].y, 1.0e-3);
+		TestCase.assertEquals(-1.000, vertices[4].x, 1.0e-3);
+		TestCase.assertEquals(-0.000, vertices[4].y, 1.0e-3);
+		
+		// flip about Y at point
+		flipped = Geometry.flipAlongTheYAxis(p, new Vector2(1.0, 0.0));
+		vertices = flipped.getVertices();
+		TestCase.assertEquals( 1.690, vertices[0].x, 1.0e-3);
+		TestCase.assertEquals(-0.951, vertices[0].y, 1.0e-3);
+		TestCase.assertEquals( 2.809, vertices[1].x, 1.0e-3);
+		TestCase.assertEquals(-0.587, vertices[1].y, 1.0e-3);
+		TestCase.assertEquals( 2.809, vertices[2].x, 1.0e-3);
+		TestCase.assertEquals( 0.587, vertices[2].y, 1.0e-3);
+		TestCase.assertEquals( 1.690, vertices[3].x, 1.0e-3);
+		TestCase.assertEquals( 0.951, vertices[3].y, 1.0e-3);
+		TestCase.assertEquals( 1.000, vertices[4].x, 1.0e-3);
+		TestCase.assertEquals(-0.000, vertices[4].y, 1.0e-3);
+		
+		// flip about a vector originating from the origin
+		flipped = Geometry.flip(p, new Vector2(1.0, 0.0));
+		vertices = flipped.getVertices();
+		TestCase.assertEquals( 0.309, vertices[0].x, 1.0e-3);
+		TestCase.assertEquals( 0.951, vertices[0].y, 1.0e-3);
+		TestCase.assertEquals(-0.809, vertices[1].x, 1.0e-3);
+		TestCase.assertEquals( 0.587, vertices[1].y, 1.0e-3);
+		TestCase.assertEquals(-0.809, vertices[2].x, 1.0e-3);
+		TestCase.assertEquals(-0.587, vertices[2].y, 1.0e-3);
+		TestCase.assertEquals( 0.309, vertices[3].x, 1.0e-3);
+		TestCase.assertEquals(-0.951, vertices[3].y, 1.0e-3);
+		TestCase.assertEquals( 1.000, vertices[4].x, 1.0e-3);
+		TestCase.assertEquals( 0.000, vertices[4].y, 1.0e-3);
 	}
 	
 	/**
@@ -1884,35 +2077,153 @@ public class GeometryTest {
 		verts.add(new Vector2(1.0, 0.0));
 		verts.add(new Vector2(0.0, 0.0));
 		
+		// test closed loop
 		List<Link> links = Geometry.createLinks(verts, true);
 		TestCase.assertEquals(4, links.size());
 		
 		// test link1
 		TestCase.assertEquals(links.get(3), links.get(0).getPrevious());
 		TestCase.assertEquals(links.get(1), links.get(0).getNext());
-//		TestCase.assertEquals(verts.get(3).x, links.get(0).getPoint0().x);
-//		TestCase.assertEquals(verts.get(3).y, links.get(0).getPoint0().y);
-//		TestCase.assertEquals(verts.get(0).x, links.get(0).getPoint1().x);
-//		TestCase.assertEquals(verts.get(0).y, links.get(0).getPoint1().y);
-//		TestCase.assertEquals(verts.get(1).x, links.get(0).getPoint2().x);
-//		TestCase.assertEquals(verts.get(1).y, links.get(0).getPoint2().y);
-//		TestCase.assertEquals(verts.get(1).x, links.get(0).getPoint3().x);
-//		TestCase.assertEquals(verts.get(1).y, links.get(0).getPoint3().y);
-//		
-//		// test link2
-//		TestCase.assertEquals(links.get(0), links.get(1).getPrevious());
-//		TestCase.assertEquals(links.get(2), links.get(1).getNext());
-//		TestCase.assertEquals(verts.get(0).x, links.get(1).getPoint0().x);
-//		TestCase.assertEquals(verts.get(0).y, links.get(1).getPoint0().y);
-//		TestCase.assertEquals(verts.get(1).x, links.get(1).getPoint1().x);
-//		TestCase.assertEquals(verts.get(1).y, links.get(1).getPoint1().y);
-//		TestCase.assertEquals(verts.get(2).x, links.get(1).getPoint2().x);
-//		TestCase.assertEquals(verts.get(2).y, links.get(1).getPoint2().y);
-//		TestCase.assertEquals(verts.get(3).x, links.get(1).getPoint3().x);
-//		TestCase.assertEquals(verts.get(3).y, links.get(1).getPoint3().y);
+		TestCase.assertEquals(verts.get(3).x, links.get(0).getPoint0().x);
+		TestCase.assertEquals(verts.get(3).y, links.get(0).getPoint0().y);
+		TestCase.assertEquals(verts.get(0).x, links.get(0).getPoint1().x);
+		TestCase.assertEquals(verts.get(0).y, links.get(0).getPoint1().y);
+		TestCase.assertEquals(verts.get(1).x, links.get(0).getPoint2().x);
+		TestCase.assertEquals(verts.get(1).y, links.get(0).getPoint2().y);
+		TestCase.assertEquals(verts.get(2).x, links.get(0).getPoint3().x);
+		TestCase.assertEquals(verts.get(2).y, links.get(0).getPoint3().y);
 		
+		// test link2
+		TestCase.assertEquals(links.get(0), links.get(1).getPrevious());
+		TestCase.assertEquals(links.get(2), links.get(1).getNext());
+		TestCase.assertEquals(verts.get(0).x, links.get(1).getPoint0().x);
+		TestCase.assertEquals(verts.get(0).y, links.get(1).getPoint0().y);
+		TestCase.assertEquals(verts.get(1).x, links.get(1).getPoint1().x);
+		TestCase.assertEquals(verts.get(1).y, links.get(1).getPoint1().y);
+		TestCase.assertEquals(verts.get(2).x, links.get(1).getPoint2().x);
+		TestCase.assertEquals(verts.get(2).y, links.get(1).getPoint2().y);
+		TestCase.assertEquals(verts.get(3).x, links.get(1).getPoint3().x);
+		TestCase.assertEquals(verts.get(3).y, links.get(1).getPoint3().y);
 		
+		// test link3
+		TestCase.assertEquals(links.get(1), links.get(2).getPrevious());
+		TestCase.assertEquals(links.get(3), links.get(2).getNext());
+		TestCase.assertEquals(verts.get(1).x, links.get(2).getPoint0().x);
+		TestCase.assertEquals(verts.get(1).y, links.get(2).getPoint0().y);
+		TestCase.assertEquals(verts.get(2).x, links.get(2).getPoint1().x);
+		TestCase.assertEquals(verts.get(2).y, links.get(2).getPoint1().y);
+		TestCase.assertEquals(verts.get(3).x, links.get(2).getPoint2().x);
+		TestCase.assertEquals(verts.get(3).y, links.get(2).getPoint2().y);
+		TestCase.assertEquals(verts.get(0).x, links.get(2).getPoint3().x);
+		TestCase.assertEquals(verts.get(0).y, links.get(2).getPoint3().y);
+		
+		// test link4
+		TestCase.assertEquals(links.get(2), links.get(3).getPrevious());
+		TestCase.assertEquals(links.get(0), links.get(3).getNext());
+		TestCase.assertEquals(verts.get(2).x, links.get(3).getPoint0().x);
+		TestCase.assertEquals(verts.get(2).y, links.get(3).getPoint0().y);
+		TestCase.assertEquals(verts.get(3).x, links.get(3).getPoint1().x);
+		TestCase.assertEquals(verts.get(3).y, links.get(3).getPoint1().y);
+		TestCase.assertEquals(verts.get(0).x, links.get(3).getPoint2().x);
+		TestCase.assertEquals(verts.get(0).y, links.get(3).getPoint2().y);
+		TestCase.assertEquals(verts.get(1).x, links.get(3).getPoint3().x);
+		TestCase.assertEquals(verts.get(1).y, links.get(3).getPoint3().y);
+		
+		// test non-closed loop
 		links = Geometry.createLinks(verts, false);
 		TestCase.assertEquals(3, links.size());
+		
+		// test link1
+		TestCase.assertEquals(null, links.get(0).getPrevious());
+		TestCase.assertEquals(links.get(1), links.get(0).getNext());
+		TestCase.assertEquals(null, links.get(0).getPoint0());
+		TestCase.assertEquals(verts.get(0).x, links.get(0).getPoint1().x);
+		TestCase.assertEquals(verts.get(0).y, links.get(0).getPoint1().y);
+		TestCase.assertEquals(verts.get(1).x, links.get(0).getPoint2().x);
+		TestCase.assertEquals(verts.get(1).y, links.get(0).getPoint2().y);
+		TestCase.assertEquals(verts.get(2).x, links.get(0).getPoint3().x);
+		TestCase.assertEquals(verts.get(2).y, links.get(0).getPoint3().y);
+		
+		// test link2
+		TestCase.assertEquals(links.get(0), links.get(1).getPrevious());
+		TestCase.assertEquals(links.get(2), links.get(1).getNext());
+		TestCase.assertEquals(verts.get(0).x, links.get(1).getPoint0().x);
+		TestCase.assertEquals(verts.get(0).y, links.get(1).getPoint0().y);
+		TestCase.assertEquals(verts.get(1).x, links.get(1).getPoint1().x);
+		TestCase.assertEquals(verts.get(1).y, links.get(1).getPoint1().y);
+		TestCase.assertEquals(verts.get(2).x, links.get(1).getPoint2().x);
+		TestCase.assertEquals(verts.get(2).y, links.get(1).getPoint2().y);
+		TestCase.assertEquals(verts.get(3).x, links.get(1).getPoint3().x);
+		TestCase.assertEquals(verts.get(3).y, links.get(1).getPoint3().y);
+		
+		// test link3
+		TestCase.assertEquals(links.get(1), links.get(2).getPrevious());
+		TestCase.assertEquals(null, links.get(2).getNext());
+		TestCase.assertEquals(verts.get(1).x, links.get(2).getPoint0().x);
+		TestCase.assertEquals(verts.get(1).y, links.get(2).getPoint0().y);
+		TestCase.assertEquals(verts.get(2).x, links.get(2).getPoint1().x);
+		TestCase.assertEquals(verts.get(2).y, links.get(2).getPoint1().y);
+		TestCase.assertEquals(verts.get(3).x, links.get(2).getPoint2().x);
+		TestCase.assertEquals(verts.get(3).y, links.get(2).getPoint2().y);
+		TestCase.assertEquals(null, links.get(2).getPoint3());
+	}
+	
+	/**
+	 * Tests the creation of a link chain.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createLinksNull() {
+		Geometry.createLinks((Vector2[])null, false);
+	}
+
+	/**
+	 * Tests the creation of a link chain.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createLinksOneVertex() {
+		List<Vector2> verts = new ArrayList<Vector2>();
+		verts.add(new Vector2(2.0, 1.5));
+		Geometry.createLinks(verts, false);
+	}
+
+	/**
+	 * Tests the creation of a link chain.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createLinksNullVertex() {
+		List<Vector2> verts = new ArrayList<Vector2>();
+		verts.add(new Vector2(2.0, 1.5));
+		verts.add(new Vector2(1.0, 1.0));
+		verts.add(null);
+		verts.add(new Vector2(3.0, 1.5));
+		Geometry.createLinks(verts, false);
+	}
+
+	/**
+	 * Test the creation of a slice.
+	 * @since 4.1.0
+	 */
+	@Test
+	public void createSlice() {
+		Slice s = Geometry.createSlice(1.0, Math.toRadians(30));
+		
+		TestCase.assertEquals(1.0, s.getSliceRadius());
+		TestCase.assertEquals(Math.toRadians(30), s.getTheta());
+		TestCase.assertEquals(0.000, s.getCircleCenter().x);
+		TestCase.assertEquals(0.000, s.getCircleCenter().y);
+	}
+
+	/**
+	 * Test the creation of a slice at the origin.
+	 * @since 4.1.0
+	 */
+	@Test
+	public void createSliceAtOrigin() {
+		Slice s = Geometry.createSliceAtOrigin(1.0, Math.toRadians(30));
+		
+		TestCase.assertEquals(1.0, s.getSliceRadius());
+		TestCase.assertEquals(Math.toRadians(30), s.getTheta());
+		TestCase.assertEquals(0.000, s.getCenter().x);
+		TestCase.assertEquals(0.000, s.getCenter().y);
 	}
 }

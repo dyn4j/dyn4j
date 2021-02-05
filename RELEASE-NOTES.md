@@ -15,8 +15,7 @@ directly, then you'll see minimal changes (a few listeners have updated and the 
 - Gjk now returns better separating points, normal and depth in some cases
 - Fixed issue where Gjk would return the detect epsilon in the getRaycastEpsilon method
 - Fixed an issue where CCD would re-test & re-solve the same pair in some cases
-- ForceCollisionTimeOfImpactSolver now only translates the bodies being resolved
-- FallbackConditions no longer implement equals/hashcode methods
+- Fixed an issue with Geometry.createLinks when the list/array includes a null element
 
 **Deprecated:**
 
@@ -29,6 +28,8 @@ directly, then you'll see minimal changes (a few listeners have updated and the 
 - BruteForceDetector, DynamicAABBTree, and SAP broadphase detector constructors were changed to accept BroadphaseFilter, AABProducer, and AABBExpansionMethod arguments
 - AABB.createAABBFromPoints was renamed to AABB.createFromPoints
 - The org.dyn4j.world.BroadphaseFilter was renamed to org.dyn4j.world.BroadphaseCollisionDataFilter to differentiate it with the org.dyn4j.broadphase.BroadphaseFilter
+- ForceCollisionTimeOfImpactSolver now only translates the bodies being resolved
+- FallbackConditions no longer implements equals/hashcode methods
   
 **Other:**
 - [#125](https://github.com/dyn4j/dyn4j/issues/125) All deprecated API as of 4.0.2 has been removed.

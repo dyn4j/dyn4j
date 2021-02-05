@@ -91,7 +91,7 @@ public class ConservativeAdvancementTest {
 		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, this.c2, IDENTITY, new Vector2(), 0.0, 0.0, 1.0, toi);
+		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, this.c2, IDENTITY, new Vector2(), 0.0, toi);
 		TestCase.assertTrue(collision);
 		
 		// test the TOI
@@ -123,7 +123,7 @@ public class ConservativeAdvancementTest {
 		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, this.c2, IDENTITY, new Vector2(), 0.0, 0.0, 1.0, toi);
+		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, this.c2, IDENTITY, new Vector2(), 0.0, toi);
 		TestCase.assertTrue(collision);
 		
 		// test the TOI
@@ -156,7 +156,7 @@ public class ConservativeAdvancementTest {
 		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, c2, t2, dp2, 0.0, 0.0, 1.0, toi);
+		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, c2, t2, dp2, 0.0, toi);
 		TestCase.assertTrue(collision);
 		
 		// test the TOI
@@ -188,7 +188,7 @@ public class ConservativeAdvancementTest {
 		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, c2, t2, dp2, 0.0, 0.0, 1.0, toi);
+		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, c2, t2, dp2, 0.0, toi);
 		TestCase.assertTrue(collision);
 		
 		// test the TOI
@@ -227,7 +227,7 @@ public class ConservativeAdvancementTest {
 		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, c2, t2, dp2, 0.0, 0.0, 1.0, toi);
+		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, c2, t2, dp2, 0.0, toi);
 		TestCase.assertTrue(collision);
 		
 		// test the TOI
@@ -263,7 +263,7 @@ public class ConservativeAdvancementTest {
 		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, c2, t2, dp2, 0.0, 0.0, 1.0, toi);
+		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, c2, t2, dp2, 0.0, toi);
 		TestCase.assertFalse(collision);
 	}
 	
@@ -288,7 +288,7 @@ public class ConservativeAdvancementTest {
 		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, c2, t2, dp2, 0.0, 0.0, 1.0, toi);
+		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, c2, t2, dp2, 0.0, toi);
 		TestCase.assertFalse(collision);
 	}
 	
@@ -317,7 +317,7 @@ public class ConservativeAdvancementTest {
 		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, c2, t2, dp2, 0.0, 0.0, 1.0, toi);
+		boolean collision = this.detector.getTimeOfImpact(this.c1, t1, dp1, 0.0, c2, t2, dp2, 0.0, toi);
 		TestCase.assertFalse(collision);
 	}
 	
@@ -445,7 +445,7 @@ public class ConservativeAdvancementTest {
 		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		boolean collision = this.detector.getTimeOfImpact(c1, t1, dp1, da1, c2, t2, dp2, 0.0, 0.0, 1.0, toi);
+		boolean collision = this.detector.getTimeOfImpact(c1, t1, dp1, da1, c2, t2, dp2, 0.0, toi);
 		TestCase.assertTrue(collision);
 		
 		// get the final transform given the time of impact
@@ -479,7 +479,7 @@ public class ConservativeAdvancementTest {
 		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		boolean collision = this.detector.getTimeOfImpact(c1, t1, dp1, da1, c2, t2, dp2, da2, 0.0, 1.0, toi);
+		boolean collision = this.detector.getTimeOfImpact(c1, t1, dp1, da1, c2, t2, dp2, da2, toi);
 		TestCase.assertTrue(collision);
 		
 		// get the final transform given the time of impact
@@ -516,7 +516,7 @@ public class ConservativeAdvancementTest {
 		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		boolean collision = this.detector.getTimeOfImpact(c1, t1, dp1, da1, c2, t2, dp2, da2, 0.0, 1.0, toi);
+		boolean collision = this.detector.getTimeOfImpact(c1, t1, dp1, da1, c2, t2, dp2, da2, toi);
 		TestCase.assertFalse(collision);
 	}
 
@@ -539,7 +539,7 @@ public class ConservativeAdvancementTest {
 		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		boolean collision = this.detector.getTimeOfImpact(c1, t1, dp1, da1, c2, t2, dp2, da2, 0.0, 1.0, toi);
+		boolean collision = this.detector.getTimeOfImpact(c1, t1, dp1, da1, c2, t2, dp2, da2, toi);
 		TestCase.assertFalse(collision);
 	}
 
@@ -561,7 +561,7 @@ public class ConservativeAdvancementTest {
 		
 		// detect the time of impact
 		TimeOfImpact toi = new TimeOfImpact();
-		boolean collision = this.detector.getTimeOfImpact(c1, t1, dp1, da1, c2, t2, dp2, da2, 0.0, 1.0, toi);
+		boolean collision = this.detector.getTimeOfImpact(c1, t1, dp1, da1, c2, t2, dp2, da2, toi);
 		TestCase.assertFalse(collision);
 	}
 }
