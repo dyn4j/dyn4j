@@ -48,17 +48,50 @@ import org.dyn4j.world.PhysicsWorld;
 public interface ContactListener<T extends PhysicsBody> extends WorldEventListener {
 	/**
 	 * Called when two {@link BodyFixture}s begin to overlap, generating a contact point.
+	 * <p>
+	 * NOTE: The {@link ContactConstraint} stored in the <code>collision</code> parameter
+	 * is being updated when this method is called. As a result, the data stored in the 
+	 * contact constraint may not be accurate. If you need to access the final state of the 
+	 * contact constraint, use the {@link #collision(ContactCollisionData)} 
+	 * method.
 	 * @param collision the collision data
 	 * @param contact the contact
 	 */
 	public abstract void begin(ContactCollisionData<T> collision, Contact contact);
-	
+
+	/**
+	 * Called when two {@link BodyFixture}s remain in contact.
+	 * <p>
+	 * For a {@link Contact} to persist, the {@link Settings#isWarmStartingEnabled()} must be true and the
+	 * {@link ManifoldPointId}s must match.
+	 * <p>
+	 * For shapes with vertices only, the manifold ids will be identical when the features of the colliding
+	 * fixtures are the same.  For rounded shapes, the manifold points must be within a specified tolerance
+	 * defined in {@link Settings#getMaximumWarmStartDistance()}.
+	 * <p>
+	 * NOTE: The {@link ContactConstraint} stored in the <code>collision</code> parameter
+	 * is being updated when this method is called. As a result, the data stored in the 
+	 * contact constraint may not be accurate. If you need to access the final state of the 
+	 * contact constraint, use the {@link #collision(ContactCollisionData)} 
+	 * method.
+	 * @param collision the collision data
+	 * @param oldContact the old contact
+	 * @param newContact the new contact
+	 */
+	public abstract void persist(ContactCollisionData<T> collision, Contact oldContact, Contact newContact);
+
 	/**
 	 * Called when two {@link BodyFixture}s begin to separate and the contact point is no longer valid.
 	 * <p>
 	 * This can happen in one of two ways. First, the fixtures in question have separated such that there's
 	 * no longer any collision between them. Second, the fixtures could still be in collision, but the features
 	 * that are in collision on those fixtures have changed.
+	 * <p>
+	 * NOTE: The {@link ContactConstraint} stored in the <code>collision</code> parameter
+	 * is being updated when this method is called. As a result, the data stored in the 
+	 * contact constraint may not be accurate. If you need to access the final state of the 
+	 * contact constraint, use the {@link #collision(ContactCollisionData)} 
+	 * method.
 	 * @param collision the collision data
 	 * @param contact the contact
 	 */
@@ -79,21 +112,6 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	 * @param contact the contact
 	 */
 	public abstract void destroyed(ContactCollisionData<T> collision, Contact contact);
-	
-	/**
-	 * Called when two {@link BodyFixture}s remain in contact.
-	 * <p>
-	 * For a {@link Contact} to persist, the {@link Settings#isWarmStartingEnabled()} must be true and the
-	 * {@link ManifoldPointId}s must match.
-	 * <p>
-	 * For shapes with vertices only, the manifold ids will be identical when the features of the colliding
-	 * fixtures are the same.  For rounded shapes, the manifold points must be within a specified tolerance
-	 * defined in {@link Settings#getMaximumWarmStartDistance()}.
-	 * @param collision the collision data
-	 * @param oldContact the old contact
-	 * @param newContact the new contact
-	 */
-	public abstract void persist(ContactCollisionData<T> collision, Contact oldContact, Contact newContact);
 	
 	/**
 	 * Called after the {@link ContactConstraint} has been updated after collision detection, but before

@@ -38,7 +38,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link CoefficientMixer} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 4.0.0
  */
 public class DetectResultTest {

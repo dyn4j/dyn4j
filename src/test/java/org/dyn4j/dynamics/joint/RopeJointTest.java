@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link RopeJoint} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 2.2.2
  */
 public class RopeJointTest extends AbstractJointTest {

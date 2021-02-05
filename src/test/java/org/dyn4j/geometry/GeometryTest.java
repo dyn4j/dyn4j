@@ -29,14 +29,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 /**
  * Test case for the {@link Geometry} class.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.0.1
  * @since 1.0.0
  */
 public class GeometryTest {
@@ -1848,6 +1848,29 @@ public class GeometryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void scaleSegmentInvalid() {
 		Geometry.scale(Geometry.createSegment(new Vector2(1.0, 1.0)), 0);
+	}
+
+	/**
+	 * Tests the createLinks method.
+	 * @since 4.0.1
+	 */
+	@Test
+	public void createLinksWrap() {
+		Vector2 a = new Vector2(0.0, 0.0);
+		Vector2 b = new Vector2(2.4, 0.0);
+		Vector2 c = new Vector2(2.4, 1.6);
+		Vector2 d = new Vector2(0.0, 1.6);
+		List<Link> links = Geometry.createLinks(List.of(a, b, c, d), true);
+		
+		TestCase.assertEquals(4, links.size());
+		TestCase.assertEquals(links.get(0).getPoint1(), a);
+		TestCase.assertEquals(links.get(0).getPoint2(), b);
+		TestCase.assertEquals(links.get(1).getPoint1(), b);
+		TestCase.assertEquals(links.get(1).getPoint2(), c);
+		TestCase.assertEquals(links.get(2).getPoint1(), c);
+		TestCase.assertEquals(links.get(2).getPoint2(), d);
+		TestCase.assertEquals(links.get(3).getPoint1(), d);
+		TestCase.assertEquals(links.get(3).getPoint2(), a);
 	}
 	
 	/**

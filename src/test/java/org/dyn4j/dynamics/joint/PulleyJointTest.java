@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link PulleyJoint} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 2.1.0
  */
 public class PulleyJointTest extends AbstractJointTest {

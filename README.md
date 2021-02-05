@@ -3,6 +3,7 @@
 ![Actions Status](https://github.com/dyn4j/dyn4j/workflows/Maven%20CI/badge.svg)
 ![License](https://img.shields.io/github/license/dyn4j/dyn4j)
 ![Language](https://img.shields.io/github/languages/top/dyn4j/dyn4j)
+[![javadoc](https://javadoc.io/badge2/org.dyn4j/dyn4j/javadoc.svg)](https://javadoc.io/doc/org.dyn4j/dyn4j)
 ![Code Coverage](https://img.shields.io/badge/coverage-78.3%25-brightgreen)
 
 ## Java Collision Detection and Physics Engine
@@ -73,7 +74,7 @@ From here you should take a look at the [dyn4j-samples](https://github.com/dyn4j
 ### Links
 * [www.dyn4j.org](http://www.dyn4j.org)
 * [Latest Release Notes](https://github.com/dyn4j/dyn4j/blob/master/RELEASE-NOTES.md)
-* [Latest Javadocs](http://docs.dyn4j.org)
+* [Latest Javadocs](https://www.javadoc.io/doc/org.dyn4j/dyn4j/latest/index.html)
 * [Forum](http://forum.dyn4j.org) - disabled but still a good resource
 * [Blog](http://www.dyn4j.org/category/blog/)
 

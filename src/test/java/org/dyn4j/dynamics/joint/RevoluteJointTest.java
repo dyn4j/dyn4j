@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link RevoluteJoint} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 1.0.2
  */
 public class RevoluteJointTest extends AbstractJointTest {

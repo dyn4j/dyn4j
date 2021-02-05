@@ -36,7 +36,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link SweepLine} class.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.0.1
  * @since 3.0.0
  */
 public class SweepLineTest extends AbstractDecomposeTest {

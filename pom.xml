@@ -424,7 +424,7 @@
                 <configuration>
                 	<serverId>ossrh</serverId>
                 	<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                	<autoReleaseAfterClose>false</autoReleaseAfterClose>
+                	<autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
               </execution>
             </executions>
@@ -460,7 +460,7 @@
   	<dependency>
   		<groupId>junit</groupId>
   		<artifactId>junit</artifactId>
-  		<version>4.12</version>
+  		<version>4.13.1</version>
   		<scope>test</scope>
   	</dependency>
   </dependencies>
