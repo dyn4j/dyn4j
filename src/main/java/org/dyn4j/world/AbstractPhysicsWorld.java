@@ -89,7 +89,7 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * more than one world. Likewise, the {@link Joint#setOwner(Object)} method is used to handle
  * joints being added to the world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.1.1
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
@@ -1390,6 +1390,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			if (!this.ccdBroadphase.contains(body1) ||
 				!this.ccdBroadphase.contains(body2)) {
 				iterator.remove();
+				continue;
 			}
 			
 			if (this.ccdBroadphase.isUpdated(body1) || this.ccdBroadphase.isUpdated(body2)) {
@@ -1398,6 +1399,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 				if (!overlaps) {
 					// remove the collision from the set of collisions
 					iterator.remove();
+					continue;
 				}
 			}
 			

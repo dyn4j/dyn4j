@@ -1,4 +1,14 @@
-## v4.1.0 - _IN DEVELOPMENT_
+## v4.1.1 - February 8th, 2021
+
+[Milestone](https://github.com/dyn4j/dyn4j/milestone/9?closed=1) |
+[Tag](https://github.com/dyn4j/dyn4j/tree/4.1.1) |
+[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/4.1.1/bundle) |
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=4.1.1)
+
+**Bug Fixes:**
+- [#177](https://github.com/dyn4j/dyn4j/issues/177) Fixed a bug introduced in 4.1.0 that would throw an IllegalStateException when removing a body from a world
+
+## v4.1.0 - February 4th, 2021
 
 [Milestone](https://github.com/dyn4j/dyn4j/milestone/5?closed=1) |
 [Tag](https://github.com/dyn4j/dyn4j/tree/4.1.0) |
