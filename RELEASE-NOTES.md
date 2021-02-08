@@ -1,4 +1,4 @@
-## v4.1.0 - February 4th, 2021
+## v4.1.1 - February 8th, 2021
 
 [Milestone](https://github.com/dyn4j/dyn4j/milestone/9?closed=1) |
 [Tag](https://github.com/dyn4j/dyn4j/tree/4.1.1) |
