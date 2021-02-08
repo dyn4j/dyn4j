@@ -56,6 +56,7 @@ import org.dyn4j.dynamics.joint.RevoluteJoint;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.listener.ContactListener;
 import org.dyn4j.world.listener.ContactListenerAdapter;
@@ -72,7 +73,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link AbstractPhysicsWorld} class.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.1.1
  * @since 4.0.0
  */
 public class AbstractPhysicsWorldTest {
@@ -2037,6 +2038,49 @@ public class AbstractPhysicsWorldTest {
 		TestCase.assertEquals(0, dl.called);
 		TestCase.assertEquals(0, cl.destroyed);
 		TestCase.assertEquals(0, cl.end);
+	}
+
+	/**
+	 * Tests a bug introduced in 4.1.0 where the world would try to do a remove twice
+	 * on an iterator and throw an IllegalStateException.
+	 * @since 4.1.1
+	 */
+	@Test
+	public void removeBodyIllegalStateException() {
+		// NOTE: this method will throw an IllegalStateException in the following condition:
+		// 1. Two bodies are overlapping wrt. CCD AABBs
+		// 2. One of those bodies is removed
+		// 3. Either of the removed bodies is moved to where they're AABBs are no longer overlapping
+		// This causes the iterator.remove() method to be called twice, thus producing the
+		// IllegalStateException.
+		
+		// This method sets up the above scenario and is successful if it DOES NOT throw
+		// an IllegalStateException
+		
+		TestWorld w = new TestWorld();
+		
+		Body b1 = new Body();
+		b1.addFixture(Geometry.createCircle(1.0));
+		b1.setMass(MassType.NORMAL);
+		w.addBody(b1);
+		
+		Body b2 = new Body();
+		b2.addFixture(Geometry.createCircle(1.0));
+		b2.setMass(MassType.NORMAL);
+		w.addBody(b2);
+		
+		w.step(1);
+		
+		w.removeBody(b2);
+		
+		// force the problem case
+		w.getContinuousCollisionDetectionBroadphaseDetector().setUpdated(b1);
+		Transform tx = new Transform();
+		tx.translate(10, 10);
+		b2.setTransform(tx);
+		b2.getPreviousTransform().set(b2.getTransform());
+		
+		w.step(1);
 	}
 	
 	/**
