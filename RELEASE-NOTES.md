@@ -1,3 +1,13 @@
+## v4.1.2 - February 9th, 2021
+
+[Milestone](https://github.com/dyn4j/dyn4j/milestone/10?closed=1) |
+[Tag](https://github.com/dyn4j/dyn4j/tree/4.1.2) |
+[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/4.1.2/bundle) |
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=4.1.2)
+
+**Bug Fixes:**
+- [#179](https://github.com/dyn4j/dyn4j/issues/179) Fixed a bug introduced in 4.0.0 that would cause a body to be added to Islands more than once
+
 ## v4.1.1 - February 8th, 2021
 
 [Milestone](https://github.com/dyn4j/dyn4j/milestone/9?closed=1) |

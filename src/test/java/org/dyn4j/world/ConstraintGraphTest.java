@@ -31,7 +31,11 @@ import org.dyn4j.collision.BasicCollisionPair;
 import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.Settings;
+import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.dynamics.contact.ContactConstraint;
+import org.dyn4j.dynamics.contact.ContactConstraintSolver;
+import org.dyn4j.dynamics.contact.SequentialImpulses;
 import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -1014,5 +1018,84 @@ public class ConstraintGraphTest {
 		
 		List<Body> cbs = g.getInContactBodies(b1, false);
 		TestCase.assertEquals(1, cbs.size());
+	}
+	
+	private final class TestBody extends Body {
+		boolean integrated = false;
+		@Override
+		public void integrateVelocity(Vector2 gravity, TimeStep timestep, Settings settings) {
+			if (this.integrated) throw new IllegalStateException();
+			super.integrateVelocity(gravity, timestep, settings);
+			this.integrated = true;
+		}
+	}
+	
+	/**
+	 * Test for issue 179 where bodies were being added to the Island
+	 * more than one time (and therefore being integrated more than once
+	 * per frame)
+	 */
+	@Test
+	public void multiCollision() {
+		ConstraintGraph<Body> g = new ConstraintGraph<Body>();
+		
+		Body b1 = new TestBody();
+		Body b2 = new TestBody();
+		Body b3 = new TestBody();
+		Body b4 = new TestBody();
+		
+		BodyFixture f1 = b1.addFixture(Geometry.createRectangle(15.0, 1.0));
+		b1.setMass(MassType.NORMAL);
+		
+		BodyFixture f2 = b2.addFixture(Geometry.createSquare(1.0));
+		Convex c = Geometry.createSquare(1.0);
+		c.translate(-0.5, 0.0);
+		BodyFixture f3 = b2.addFixture(c);
+		b2.setMass(MassType.NORMAL);
+		b2.translate(0.0, 0.75);
+		
+		BodyFixture f4 = b3.addFixture(Geometry.createCircle(1.0));
+		b3.setMass(MassType.NORMAL);
+		
+		BodyFixture f5 = b4.addFixture(Geometry.createCircle(0.5));
+		b4.setMass(MassType.NORMAL);
+		
+		g.addBody(b1);
+		g.addBody(b2);
+		g.addBody(b3);
+		g.addBody(b4);
+		
+		ContactConstraint<Body> cc1 = new ContactConstraint<Body>(new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(
+				new BasicCollisionItem<Body, BodyFixture>(b1, f1),
+				new BasicCollisionItem<Body, BodyFixture>(b2, f2)));
+		ContactConstraint<Body> cc2 = new ContactConstraint<Body>(new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(
+				new BasicCollisionItem<Body, BodyFixture>(b1, f1),
+				new BasicCollisionItem<Body, BodyFixture>(b2, f3)));
+		ContactConstraint<Body> cc3 = new ContactConstraint<Body>(new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(
+				new BasicCollisionItem<Body, BodyFixture>(b1, f1),
+				new BasicCollisionItem<Body, BodyFixture>(b3, f4)));
+		ContactConstraint<Body> cc4 = new ContactConstraint<Body>(new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(
+				new BasicCollisionItem<Body, BodyFixture>(b3, f4),
+				new BasicCollisionItem<Body, BodyFixture>(b4, f5)));
+		ContactConstraint<Body> cc5 = new ContactConstraint<Body>(new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(
+				new BasicCollisionItem<Body, BodyFixture>(b2, f2),
+				new BasicCollisionItem<Body, BodyFixture>(b3, f4)));
+		ContactConstraint<Body> cc6 = new ContactConstraint<Body>(new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(
+				new BasicCollisionItem<Body, BodyFixture>(b2, f2),
+				new BasicCollisionItem<Body, BodyFixture>(b4, f5)));
+		
+		g.addContactConstraint(cc1);
+		g.addContactConstraint(cc2);
+		g.addContactConstraint(cc3);
+		g.addContactConstraint(cc4);
+		g.addContactConstraint(cc5);
+		g.addContactConstraint(cc6);
+		
+		Settings settings = new Settings();
+		TimeStep step = new TimeStep(settings.getStepFrequency());
+		Vector2 gravity = new Vector2();
+		ContactConstraintSolver<Body> solver = new SequentialImpulses<Body>();
+		
+		g.solve(solver, gravity, step, settings);
 	}
 }
