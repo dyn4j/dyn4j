@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,10 +27,11 @@ package org.dyn4j.world;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.dyn4j.collision.Collisions;
 import org.dyn4j.dynamics.PhysicsBody;
@@ -52,7 +53,7 @@ import org.dyn4j.geometry.Vector2;
  * Solving of the graph happens internally by performing depth-first traversal and 
  * the building of {@link Island}s separated by static {@link PhysicsBody}s.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.2
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -66,10 +67,10 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	private final Deque<ConstraintGraphNode<T>> stack;
 
 	/** Fast lookup of the objects (Body, Joint, ContactConstraint) that have been added to an island */
-	private final Map<Object, Boolean> onIsland;
+	private final Set<Object> onIsland;
 	
 	/** Fast lookup of static bodies that have been added to the current island */
-	private final Map<T, Boolean> staticOnIsland;
+	private final Set<Object> staticOnIsland;
 	
 	/** A reusable island instance for solving */
 	private final Island<T> island;
@@ -96,8 +97,8 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 		
 		this.graph = new LinkedHashMap<T, ConstraintGraphNode<T>>(initialBodyCount);
 		this.stack = new ArrayDeque<ConstraintGraphNode<T>>(stackSize);
-		this.onIsland = new HashMap<Object, Boolean>(totalSize);
-		this.staticOnIsland = new HashMap<T, Boolean>(totalSize / 2);
+		this.onIsland = new HashSet<Object>(totalSize);
+		this.staticOnIsland = new HashSet<Object>(totalSize / 2);
 		this.island = new Island<T>(initialBodyCount, initialJointCount);
 	}
 	
@@ -583,7 +584,7 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 			T seedBody = seed.body;
 			
 			// skip if asleep, in active, static, or already on an island
-			if (this.onIsland.containsKey(seedBody) || seedBody.isAtRest() || !seedBody.isEnabled() || seedBody.isStatic()) {
+			if (this.onIsland.contains(seedBody) || seedBody.isAtRest() || !seedBody.isEnabled() || seedBody.isStatic()) {
 				continue;
 			}
 			
@@ -594,6 +595,13 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 			while (this.stack.size() > 0) {
 				ConstraintGraphNode<T> node = this.stack.pop();
 				T body = node.body;
+				
+				// a body may be added to the stack many times in the case
+				// of more than one/two contacts per body
+				if (this.onIsland.contains(body) || this.staticOnIsland.contains(body)) {
+					continue;
+				}
+				
 				// add it to the island
 				this.island.add(body);
 				// make sure the body is awake
@@ -603,10 +611,10 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 				// island to span more than one static object
 				// this keeps the size of the islands small
 				if (body.isStatic()) {
-					this.staticOnIsland.put(body, Boolean.TRUE);
+					this.staticOnIsland.add(body);
 					continue;
 				} else {
-					this.onIsland.put(body, Boolean.TRUE);
+					this.onIsland.add(body);
 				}
 				
 				// loop over the contact edges of this body
@@ -615,7 +623,7 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 					ContactConstraint<T> contactConstraint = node.contactConstraints.get(j);
 					
 					// skip disabled or sensor contacts or contacts already on the island
-					if (!contactConstraint.isEnabled() || contactConstraint.isSensor() || this.onIsland.containsKey(contactConstraint)) {
+					if (!contactConstraint.isEnabled() || contactConstraint.isSensor() || this.onIsland.contains(contactConstraint)) {
 						continue;
 					}
 					
@@ -623,10 +631,10 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 					T other = contactConstraint.getOtherBody(body);
 					// add the contact constraint to the island list
 					this.island.add(contactConstraint);
-					this.onIsland.put(contactConstraint, Boolean.TRUE);
+					this.onIsland.add(contactConstraint);
 					
 					// has the other body been added to an island yet?
-					if (!this.onIsland.containsKey(other) && !this.staticOnIsland.containsKey(other)) {
+					if (!this.onIsland.contains(other) && !this.staticOnIsland.contains(other)) {
 						// if not then add this body to the stack
 						this.stack.push(this.graph.get(other));
 					}
@@ -638,7 +646,7 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 					Joint<T> joint = node.joints.get(j);
 					
 					// check if the joint is inactive
-					if (!joint.isEnabled() || this.onIsland.containsKey(joint)) {
+					if (!joint.isEnabled() || this.onIsland.contains(joint)) {
 						continue;
 					}
 					
@@ -653,10 +661,10 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 					
 					// add the joint to the island
 					this.island.add(joint);
-					this.onIsland.put(joint, Boolean.TRUE);
+					this.onIsland.add(joint);
 					
 					// check if the other body has been added to an island
-					if (!this.onIsland.containsKey(other) && !this.staticOnIsland.containsKey(other)) {
+					if (!this.onIsland.contains(other) && !this.staticOnIsland.contains(other)) {
 						// if not then add the body to the stack
 						this.stack.push(this.graph.get(other));
 					}
