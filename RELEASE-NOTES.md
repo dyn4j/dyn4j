@@ -1,3 +1,13 @@
+## v4.1.3 - February 13th, 2021
+
+[Milestone](https://github.com/dyn4j/dyn4j/milestone/11?closed=1) |
+[Tag](https://github.com/dyn4j/dyn4j/tree/4.1.3) |
+[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/4.1.3/bundle) |
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=4.1.3)
+
+**Bug Fixes:**
+- [#181](https://github.com/dyn4j/dyn4j/issues/181) Fixed an issue when using the PinJoint and removing a body.
+
 ## v4.1.2 - February 9th, 2021
 
 [Milestone](https://github.com/dyn4j/dyn4j/milestone/10?closed=1) |
