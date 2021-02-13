@@ -53,7 +53,7 @@ import org.dyn4j.geometry.Vector2;
  * Solving of the graph happens internally by performing depth-first traversal and 
  * the building of {@link Island}s separated by static {@link PhysicsBody}s.
  * @author William Bittle
- * @version 4.1.2
+ * @version 4.1.3
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -202,7 +202,11 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 			T other = joint.getOtherBody(body);
 			// remove the joint edge from the other body
 			ConstraintGraphNode<T> otherNode = this.graph.get(other);
-			otherNode.joints.remove(joint);
+			// NOTE: some joints are unary and body1 == body2, and
+			// at this point, the body node has already been removed
+			if (otherNode != null) {
+				otherNode.joints.remove(joint);
+			}
 		}
 		
 		// remove any contact constraint edges

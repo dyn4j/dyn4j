@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -39,6 +39,7 @@ import org.dyn4j.dynamics.contact.SequentialImpulses;
 import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
+import org.dyn4j.dynamics.joint.PinJoint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
@@ -51,7 +52,7 @@ import junit.framework.TestCase;
 /**
  * Tests the {@link ConstraintGraph} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.1.3
  * @since 4.0.0
  */
 public class ConstraintGraphTest {
@@ -1098,4 +1099,29 @@ public class ConstraintGraphTest {
 		
 		g.solve(solver, gravity, step, settings);
 	}
+
+	/**
+	 * Tests removing a body that's linked to a unary joint. In versions
+	 * 4.0.0 through 4.1.2 this would throw a NullPointerException.
+	 * @since 4.1.3
+	 */
+	@Test
+	public void testRemoveBodyWithUnaryJoint() {
+		ConstraintGraph<Body> g = new ConstraintGraph<Body>();
+		
+		Body b1 = new Body();
+		g.addBody(b1);
+		
+		Joint<Body> j1 = new PinJoint<Body>(b1, b1.getWorldCenter(), 8.0, 0.1, 1000);
+		g.addJoint(j1);
+		
+		TestCase.assertTrue(g.containsBody(b1));
+		TestCase.assertTrue(g.containsJoint(j1));
+		
+		g.removeBody(b1);
+		
+		TestCase.assertFalse(g.containsBody(b1));
+		TestCase.assertFalse(g.containsJoint(j1));
+	}
+	
 }
