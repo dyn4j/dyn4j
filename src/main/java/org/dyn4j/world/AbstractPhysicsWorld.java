@@ -89,7 +89,7 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * more than one world. Likewise, the {@link Joint#setOwner(Object)} method is used to handle
  * joints being added to the world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
- * @version 4.1.1
+ * @version 4.1.4
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
@@ -520,9 +520,13 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			}
 			
 			// get the other body involved
-			T other = contactConstraint.getOtherBody(body);				
-			// wake the other body
-			other.setAtRest(false);
+			T other = contactConstraint.getOtherBody(body);
+			
+			// clear the at-rest state of the connected body if the constraint
+			// is NOT a sensor and is enabled
+			if (!contactConstraint.isSensor() && contactConstraint.isEnabled()) {
+				other.setAtRest(false);
+			}
 			
 			// remove the stored collision data
 			V data = this.collisionData.remove(contactConstraint.getCollisionPair());

@@ -1,3 +1,13 @@
+## v4.1.4 - February 26th, 2021
+
+[Milestone](https://github.com/dyn4j/dyn4j/milestone/12?closed=1) |
+[Tag](https://github.com/dyn4j/dyn4j/tree/4.1.4) |
+[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/4.1.4/bundle) |
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=4.1.4)
+
+**Bug Fixes:**
+- [#186](https://github.com/dyn4j/dyn4j/issues/186) Fixed the removal of sensor fixtures so the atRest state of colliding bodies is unchanged
+
 ## v4.1.3 - February 13th, 2021
 
 [Milestone](https://github.com/dyn4j/dyn4j/milestone/11?closed=1) |
