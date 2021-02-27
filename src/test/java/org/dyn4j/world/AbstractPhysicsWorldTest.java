@@ -2148,4 +2148,65 @@ public class AbstractPhysicsWorldTest {
 		
 		world.step(1);
 	}
+	
+	/**
+	 * Tests the scenario where a sensor fixture is removed and as such
+	 * triggers any sensor contact bodies to have their atRest flag reset.
+	 * @since 4.1.4
+	 */
+	@Test
+	public void sensorRemovalShouldNotClearAtRestState() {
+		TestWorld w = new TestWorld();
+		w.setGravity(0.0, 0.0);
+		
+		Body b1 = new Body();
+		BodyFixture bf = b1.addFixture(Geometry.createCircle(1.0));
+		bf.setSensor(true);
+		b1.translate(-0.5, 0.0);
+		b1.setMass(MassType.INFINITE);
+		w.addBody(b1);
+		
+		Body b2 = new Body();
+		b2.addFixture(Geometry.createCircle(1.0));
+		b2.translate(0.4, 0.0);
+		b2.setMass(MassType.NORMAL);
+		w.addBody(b2);
+		
+		w.step(10);
+		
+		b2.setAtRest(true);
+		TestCase.assertTrue(b2.isAtRest());
+		
+		b1.removeFixture(bf);
+		TestCase.assertTrue(b2.isAtRest());
+		
+		// now try the remove all method
+		
+		b1.addFixture(bf);
+		w.step(1);
+		b2.setAtRest(true);
+		TestCase.assertTrue(b2.isAtRest());
+		
+		b1.removeAllFixtures();
+		TestCase.assertTrue(b2.isAtRest());
+		
+		// try removal when the state of the contact is disabled
+		
+		bf.setSensor(false);
+		b1.addFixture(bf);
+		
+		w.addContactListener(new ContactListenerAdapter<Body>() {
+			@Override
+			public void collision(ContactCollisionData<Body> collision) {
+				collision.getContactConstraint().setEnabled(false);
+			}
+		});
+		
+		w.step(1);
+		b2.setAtRest(true);
+		TestCase.assertTrue(b2.isAtRest());
+		
+		b1.removeFixture(bf);
+		TestCase.assertTrue(b2.isAtRest());
+	}
 }
