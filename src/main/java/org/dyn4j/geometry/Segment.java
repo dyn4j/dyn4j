@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -35,7 +35,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This class represents a line segment that is infinitely thin.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.2.0
  * @since 1.0.0
  */
 public class Segment extends AbstractShape implements Convex, Wound, Shape, Transformable, DataContainer {
@@ -788,5 +788,17 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 		aabb.maxX = maxX;
 		aabb.minY = minY;
 		aabb.maxY = maxY;
+	}
+	
+	/**
+	 * Returns a normalized edge vector for this segment pointing
+	 * from the first vertex to the second.
+	 * @return Vector2
+	 * @since 4.2.0
+	 */
+	public Vector2 getEdgeVector() {
+		Vector2 edge = this.vertices[0].to(this.vertices[1]);
+		edge.normalize();
+		return edge;
 	}
 }

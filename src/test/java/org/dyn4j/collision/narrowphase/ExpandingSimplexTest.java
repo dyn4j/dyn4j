@@ -64,6 +64,7 @@ public class ExpandingSimplexTest {
 		TestCase.assertEquals(0.632, edge.distance, 1e-3);
 		TestCase.assertEquals(-0.948, edge.normal.x, 1e-3);
 		TestCase.assertEquals(0.316, edge.normal.y, 1e-3);
+		TestCase.assertNotNull(es.toString());
 	}
 	
 	/**
