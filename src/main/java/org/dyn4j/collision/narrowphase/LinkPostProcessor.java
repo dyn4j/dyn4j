@@ -78,8 +78,6 @@ public final class LinkPostProcessor implements NarrowphasePostProcessor {
 		Vector2 edge = link.getEdgeVector();
 		Vector2 edgeNormal = edge.getLeftHandOrthogonalVector();
 		
-		double sinTol = 0.0;
-		
 		// what "side" is the normal pointing towards?
 		double side = normal.dot(edge);
 		
@@ -94,7 +92,7 @@ public final class LinkPostProcessor implements NarrowphasePostProcessor {
 				return;
 			}
 			
-			Vector2 prevEdge = prev != null ? prev.getEdgeVector() : null;
+			Vector2 prevEdge = prev.getEdgeVector();
 			prevEdge.normalize();
 			
 			// does the previous edge and this edge form a convex feature?
@@ -102,7 +100,7 @@ public final class LinkPostProcessor implements NarrowphasePostProcessor {
 			if (isConvex) {
 				// check if the normal is outside the allowable range
 				double region = normal.cross(prevEdge.getLeftHandOrthogonalVector());
-				if (region > sinTol) {
+				if (region > 0.0) {
 					// else skip
 					penetration.clear();
 				}
@@ -126,7 +124,7 @@ public final class LinkPostProcessor implements NarrowphasePostProcessor {
 				return;
 			}
 			
-			Vector2 nextEdge = next != null ? next.getEdgeVector() : null;
+			Vector2 nextEdge = next.getEdgeVector();
 			nextEdge.normalize();
 			
 			// does this edge and the next edge form a convex feature?
@@ -134,7 +132,7 @@ public final class LinkPostProcessor implements NarrowphasePostProcessor {
 			if (isConvex) {
 				// check if the normal is outside the allowable range
 				double region = nextEdge.getLeftHandOrthogonalVector().cross(normal);
-				if (region > sinTol) {
+				if (region > 0.0) {
 					// else skip
 					penetration.clear();
 				}

@@ -225,15 +225,127 @@ public class LinkPostProcessorTest {
 		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
 		TestCase.assertEquals(-1.000, p.getNormal().y, 1e-3);
 	}
-	
+
 	/**
-	 * Tests case A2.
+	 * Collision with middle segment convex-convex.
 	 */
 	@Test
-	public void caseA2() {
+	public void caseMiddleConvexConvex() {
+		Gjk gjk = new Gjk();
+		LinkPostProcessor lpp = new LinkPostProcessor();
+
+		// middle segment convex-convex
+		//   0----0
+		//  /++++++\
+		// 0++++++++0
+		// ++++++++++
+		
+		List<Vector2> vertices = new ArrayList<Vector2>();
+		vertices.add(new Vector2( 1.0, -0.5));
+		vertices.add(new Vector2( 0.5, 0.0));
+		vertices.add(new Vector2(-0.5, 0.0));
+		vertices.add(new Vector2(-1.0, -0.5));
+		List<Link> links = Geometry.createLinks(vertices, false);
+		
+		Convex link = links.get(1);
+		Convex square = Geometry.createSquare(0.5);
+		
+		Transform tx1 = new Transform();
+		Transform tx2 = new Transform();
+		Penetration p = new Penetration();
+		
+ 		tx2.translate(0.749, 0.0);
+		
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 1.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		// reverse the shape order
+		
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		// try the other side
+		
+		tx2.identity();
+		tx2.translate(-0.749, 0.0);
+		
+		p.clear();
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+
+		// reverse the shape order
+		
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		// try it lower to get a different normal
+		
+		tx2.identity();
+		tx2.translate(0.73, -0.24);
+		
+		p.clear();
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		// should be skipped
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+
+		// reverse the shape order
+		
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		// should be skipped
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+	}
+	
+	/**
+	 * Collision with middle segment concave-concave.
+	 */
+	@Test
+	public void caseMiddleConcaveConcave() {
 		Gjk gjk = new Gjk();
 		LinkPostProcessor lpp = new LinkPostProcessor();
 		
+		// middle segment concave-concave
 		// 0        0
 		// +\      /+
 		// ++0----0++
@@ -246,11 +358,6 @@ public class LinkPostProcessorTest {
 		vertices.add(new Vector2(-1.0, 0.5));
 		List<Link> links = Geometry.createLinks(vertices, false);
 		
-		// Test case A2
-		// 0        0
-		// +\      /+
-		// ++0----0++
-		// ++++++++++
 		Convex link = links.get(1);
 		Convex square = Geometry.createSquare(0.5);
 		
@@ -274,6 +381,7 @@ public class LinkPostProcessorTest {
 
 		// reverse the shape order
 		
+		p.clear();
 		gjk.detect(square, tx2, link, tx1, p);
 		lpp.process(square, tx2, link, tx1, p);
 		
@@ -286,6 +394,7 @@ public class LinkPostProcessorTest {
 		tx2.identity();
 		tx2.translate(0.749, 0.0);
 		
+		p.clear();
 		gjk.detect(link, tx1, square, tx2, p);
 		
 		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
@@ -300,6 +409,122 @@ public class LinkPostProcessorTest {
 
 		// reverse the shape order
 		
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().y, 1e-3);
+
+		// try it lower to get a different normal
+		
+		tx2.identity();
+		tx2.translate(0.73, -0.24);
+		
+		p.clear();
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		// should be skipped
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+
+		// reverse the shape order
+		
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		// should be skipped
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+
+		// try the other side
+		
+		tx2.identity();
+		tx2.rotate(Math.toRadians(45));
+		tx2.translate(-0.60, -0.20);
+		
+		p.clear();
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.037, p.getDepth(), 1e-3);
+		TestCase.assertEquals(-0.707, p.getNormal().x, 1e-3);
+		TestCase.assertEquals(-0.707, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		// should be skipped
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+
+		// reverse the shape order
+		
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		// should be skipped
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+	}
+	
+	/**
+	 * Collision with middle segment convex-concave.
+	 */
+	@Test
+	public void caseMiddleConvexConcave() {
+		Gjk gjk = new Gjk();
+		LinkPostProcessor lpp = new LinkPostProcessor();
+		
+		// middle segment convex-concave
+		// 0
+		// +\
+		// ++0----0
+		// ++++++++\
+		// +++++++++0
+		
+		List<Vector2> vertices = new ArrayList<Vector2>();
+		vertices.add(new Vector2( 1.0, -0.5));
+		vertices.add(new Vector2( 0.5, 0.0));
+		vertices.add(new Vector2(-0.5, 0.0));
+		vertices.add(new Vector2(-1.0, 0.5));
+		List<Link> links = Geometry.createLinks(vertices, false);
+		
+		Convex link = links.get(1);
+		Convex square = Geometry.createSquare(0.5);
+		
+		Transform tx1 = new Transform();
+		Transform tx2 = new Transform();
+		Penetration p = new Penetration();
+		
+ 		tx2.translate(-0.749, 0.0);
+		
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 1.000, p.getNormal().y, 1e-3);
+
+		// reverse the shape order
+		
+		p.clear();
 		gjk.detect(square, tx2, link, tx1, p);
 		lpp.process(square, tx2, link, tx1, p);
 		
@@ -307,13 +532,186 @@ public class LinkPostProcessorTest {
 		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
 		TestCase.assertEquals(-1.000, p.getNormal().y, 1e-3);
 		
+		// try the other side
+		
+		tx2.identity();
+		tx2.translate(0.749, 0.0);
+		
+		p.clear();
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 1.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		// should be skipped
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+
+		// reverse the shape order
+		
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		// should be skipped
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		// try it lower to get a different normal
+		
+		tx2.identity();
+		tx2.translate(0.73, -0.24);
+		
+		p.clear();
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		// should be skipped
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+
+		// reverse the shape order
+		
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		// should be skipped
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+	}
+
+	/**
+	 * Collision with middle segment concave-convex.
+	 */
+	@Test
+	public void caseMiddleConcaveConvex() {
+		Gjk gjk = new Gjk();
+		LinkPostProcessor lpp = new LinkPostProcessor();
+		
+		// middle segment concave-convex
+		//          0
+		//         /+
+		//   0----0++
+		//  /++++++++
+		// 0+++++++++
+		
+		List<Vector2> vertices = new ArrayList<Vector2>();
+		vertices.add(new Vector2( 1.0, 0.5));
+		vertices.add(new Vector2( 0.5, 0.0));
+		vertices.add(new Vector2(-0.5, 0.0));
+		vertices.add(new Vector2(-1.0, -0.5));
+		List<Link> links = Geometry.createLinks(vertices, false);
+		
+		Convex link = links.get(1);
+		Convex square = Geometry.createSquare(0.5);
+		
+		Transform tx1 = new Transform();
+		Transform tx2 = new Transform();
+		Penetration p = new Penetration();
+		
+ 		tx2.translate(-0.749, 0.0);
+		
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+
+		// reverse the shape order
+		
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		// try the other side
+		
+		tx2.identity();
+		tx2.translate(0.749, 0.0);
+		
+		p.clear();
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 1.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		// should be skipped
+		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 1.000, p.getNormal().y, 1e-3);
+
+		// reverse the shape order
+		
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		// should be skipped
+		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().y, 1e-3);
+		
+		// try it lower to get a different normal
+		
+		tx2.identity();
+		tx2.translate(-0.73, -0.24);
+		
+		p.clear();
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		// should be skipped
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+
+		// reverse the shape order
+		
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		// should be skipped
+		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
 	}
 	
 	/**
-	 * Tests case B2.
+	 * Collision with right concave.
 	 */
 	@Test
-	public void caseB2() {
+	public void caseRightConcave() {
 		Gjk gjk = new Gjk();
 		LinkPostProcessor lpp = new LinkPostProcessor();
 		
@@ -329,11 +727,6 @@ public class LinkPostProcessorTest {
 		vertices.add(new Vector2(-1.0, 0.5));
 		List<Link> links = Geometry.createLinks(vertices, false);
 		
-		// Test case B2
-		//   0
-		//  /+
-		// 0++
-		// +++
 		Convex link = links.get(0);
 		Convex square = Geometry.createSquare(0.5);
 		
@@ -365,13 +758,43 @@ public class LinkPostProcessorTest {
 		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
 		TestCase.assertEquals( 0.707, p.getNormal().x, 1e-3);
 		TestCase.assertEquals(-0.707, p.getNormal().y, 1e-3);
+		
+		// try to get a different normal
+		
+		tx2.identity();
+		tx2.translate(1.24, 0.5);
+		
+		p.clear();
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 1.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		// confirm that it was left alone since there's no
+		// previous segment
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 1.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		// reverse the shape order
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
 	}
 
 	/**
-	 * Tests case C2.
+	 * Collision with left concave.
 	 */
 	@Test
-	public void caseC2() {
+	public void caseLeftConcave() {
 		Gjk gjk = new Gjk();
 		LinkPostProcessor lpp = new LinkPostProcessor();
 		
@@ -387,11 +810,6 @@ public class LinkPostProcessorTest {
 		vertices.add(new Vector2(-1.0, 0.5));
 		List<Link> links = Geometry.createLinks(vertices, false);
 		
-		// Test case C2
-		// 0
-		// +\
-		// ++0----0
-		// ++++++++
 		Convex link = links.get(2);
 		Convex square = Geometry.createSquare(0.5);
 		
@@ -423,13 +841,43 @@ public class LinkPostProcessorTest {
 		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
 		TestCase.assertEquals(-0.707, p.getNormal().x, 1e-3);
 		TestCase.assertEquals(-0.707, p.getNormal().y, 1e-3);
+		
+		// try to get a different normal
+		
+		tx2.identity();
+		tx2.translate(-1.24, 0.5);
+		
+		p.clear();
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		// confirm that it was left alone since there's no
+		// previous segment
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		// reverse the shape order
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 1.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
 	}
 	
 	/**
-	 * Tests case A1.
+	 * Collision with right convex.
 	 */
 	@Test
-	public void caseA1() {
+	public void caseRightConvex() {
 		Gjk gjk = new Gjk();
 		LinkPostProcessor lpp = new LinkPostProcessor();
 
@@ -444,13 +892,8 @@ public class LinkPostProcessorTest {
 		vertices.add(new Vector2(-0.5, 0.0));
 		vertices.add(new Vector2(-1.0, -0.5));
 		List<Link> links = Geometry.createLinks(vertices, false);
-		
-		// Test case A1
-		//   0----0
-		//  /++++++\
-		// 0++++++++0
-		// ++++++++++
-		Convex link = links.get(1);
+
+		Convex link = links.get(0);
 		Convex square = Geometry.createSquare(0.5);
 		
 		Transform tx1 = new Transform();
@@ -461,58 +904,91 @@ public class LinkPostProcessorTest {
 		
 		gjk.detect(link, tx1, square, tx2, p);
 		
-		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
-		TestCase.assertEquals( 1.000, p.getNormal().x, 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		TestCase.assertEquals( 0.177, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.707, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.707, p.getNormal().y, 1e-3);
 		
 		lpp.process(link, tx1, square, tx2, p);
 		
-		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
-		
+		TestCase.assertEquals( 0.177, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.707, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.707, p.getNormal().y, 1e-3);
+
 		// reverse the shape order
-		
+		p.clear();
 		gjk.detect(square, tx2, link, tx1, p);
 		lpp.process(square, tx2, link, tx1, p);
 		
-		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		TestCase.assertEquals( 0.177, p.getDepth(), 1e-3);
+		TestCase.assertEquals(-0.707, p.getNormal().x, 1e-3);
+		TestCase.assertEquals(-0.707, p.getNormal().y, 1e-3);
 		
-		// try the other side
+		// try at the bottom
 		
 		tx2.identity();
-		tx2.translate(-0.749, 0.0);
+ 		tx2.translate(1.23, -0.74);
 		
+ 		p.clear();
 		gjk.detect(link, tx1, square, tx2, p);
 		
-		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
-		TestCase.assertEquals(-1.000, p.getNormal().x, 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().y, 1e-3);
 		
 		lpp.process(link, tx1, square, tx2, p);
 		
-		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		// nothing should change because the previous segment
+		// doesn't exist
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
 		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().y, 1e-3);
 
 		// reverse the shape order
-		
 		p.clear();
 		gjk.detect(square, tx2, link, tx1, p);
 		lpp.process(square, tx2, link, tx1, p);
 		
-		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
 		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		TestCase.assertEquals( 1.000, p.getNormal().y, 1e-3);
+		
+		// try at the top
+		
+		tx2.identity();
+ 		tx2.translate(0.73, 0.24);
+		
+ 		p.clear();
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 1.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		// nothing should change because the previous segment
+		// doesn't exist
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 1.000, p.getNormal().y, 1e-3);
+
+		// reverse the shape order
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().y, 1e-3);
 	}
-	
+
 	/**
-	 * Tests case B1.
+	 * Collision with left convex.
 	 */
 	@Test
-	public void caseB1() {
+	public void caseLeftConvex() {
 		Gjk gjk = new Gjk();
 		LinkPostProcessor lpp = new LinkPostProcessor();
 
@@ -528,67 +1004,6 @@ public class LinkPostProcessorTest {
 		vertices.add(new Vector2(-1.0, -0.5));
 		List<Link> links = Geometry.createLinks(vertices, false);
 		
-		// Test case B1
-		// 0
-		// +\
-		// ++0
-		// +++
-		Convex link = links.get(0);
-		Convex square = Geometry.createSquare(0.5);
-		
-		Transform tx1 = new Transform();
-		Transform tx2 = new Transform();
-		Penetration p = new Penetration();
-		
- 		tx2.translate(0.251, 0.0);
-		
-		gjk.detect(link, tx1, square, tx2, p);
-		
-		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
-		TestCase.assertEquals(-1.000, p.getNormal().x, 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
-		
-		lpp.process(link, tx1, square, tx2, p);
-		
-		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
-
-		// reverse the shape order
-		p.clear();
-		gjk.detect(square, tx2, link, tx1, p);
-		lpp.process(square, tx2, link, tx1, p);
-		
-		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
-	}
-
-	/**
-	 * Tests case C1.
-	 */
-	@Test
-	public void caseC1() {
-		Gjk gjk = new Gjk();
-		LinkPostProcessor lpp = new LinkPostProcessor();
-
-		//   0----0
-		//  /++++++\
-		// 0++++++++0
-		// ++++++++++
-		
-		List<Vector2> vertices = new ArrayList<Vector2>();
-		vertices.add(new Vector2( 1.0, -0.5));
-		vertices.add(new Vector2( 0.5, 0.0));
-		vertices.add(new Vector2(-0.5, 0.0));
-		vertices.add(new Vector2(-1.0, -0.5));
-		List<Link> links = Geometry.createLinks(vertices, false);
-		
-		// Test case C1
-		//   0
-		//  /+
-		// 0++
-		// +++
 		Convex link = links.get(2);
 		Convex square = Geometry.createSquare(0.5);
 		
@@ -596,28 +1011,129 @@ public class LinkPostProcessorTest {
 		Transform tx2 = new Transform();
 		Penetration p = new Penetration();
 		
- 		tx2.translate(-0.251, 0.0);
+ 		tx2.translate(-0.749, 0.0);
 		
 		gjk.detect(link, tx1, square, tx2, p);
 		
-		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
-		TestCase.assertEquals( 1.000, p.getNormal().x, 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		TestCase.assertEquals( 0.177, p.getDepth(), 1e-3);
+		TestCase.assertEquals(-0.707, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.707, p.getNormal().y, 1e-3);
 		
 		lpp.process(link, tx1, square, tx2, p);
 		
-		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
-		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		TestCase.assertEquals( 0.177, p.getDepth(), 1e-3);
+		TestCase.assertEquals(-0.707, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.707, p.getNormal().y, 1e-3);
 		
 		// reverse the shape order
 		p.clear();
 		gjk.detect(square, tx2, link, tx1, p);
 		lpp.process(square, tx2, link, tx1, p);
 		
-		TestCase.assertEquals( 0.000, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.177, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.707, p.getNormal().x, 1e-3);
+		TestCase.assertEquals(-0.707, p.getNormal().y, 1e-3);
+
+		// try at the bottom
+		
+		tx2.identity();
+ 		tx2.translate(-1.23, -0.74);
+		
+ 		p.clear();
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
 		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		// nothing should change because the previous segment
+		// doesn't exist
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().y, 1e-3);
+
+		// reverse the shape order
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 1.000, p.getNormal().y, 1e-3);
+		
+		// try at the top
+		
+		tx2.identity();
+ 		tx2.translate(-0.73, 0.24);
+		
+ 		p.clear();
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 1.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		// nothing should change because the previous segment
+		// doesn't exist
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 1.000, p.getNormal().y, 1e-3);
+
+		// reverse the shape order
+		p.clear();
+		gjk.detect(square, tx2, link, tx1, p);
+		lpp.process(square, tx2, link, tx1, p);
+		
+		TestCase.assertEquals( 0.010, p.getDepth(), 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().y, 1e-3);
+	}
+	
+	/**
+	 * Tests with a link with no previous or next segments.
+	 */
+	@Test
+	public void noPreviousOrNext() {
+		Gjk gjk = new Gjk();
+		LinkPostProcessor lpp = new LinkPostProcessor();
+
+		//   0----0
+		//  /++++++\
+		// 0++++++++0
+		// ++++++++++
+		
+		List<Vector2> vertices = new ArrayList<Vector2>();
+		vertices.add(new Vector2( 0.5, 0.0));
+		vertices.add(new Vector2(-0.5, 0.0));
+		List<Link> links = Geometry.createLinks(vertices, false);
+		
+		Convex link = links.get(0);
+		Convex square = Geometry.createSquare(0.5);
+		
+		Transform tx1 = new Transform();
+		Transform tx2 = new Transform();
+		Penetration p = new Penetration();
+		
+ 		tx2.translate(-0.749, 0.0);
+		
+		gjk.detect(link, tx1, square, tx2, p);
+		
+		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().x, 1e-3);
+		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
+		
+		lpp.process(link, tx1, square, tx2, p);
+		
+		// should be left unchanged
+		
+		TestCase.assertEquals( 0.001, p.getDepth(), 1e-3);
+		TestCase.assertEquals(-1.000, p.getNormal().x, 1e-3);
 		TestCase.assertEquals( 0.000, p.getNormal().y, 1e-3);
 	}
-
 }
