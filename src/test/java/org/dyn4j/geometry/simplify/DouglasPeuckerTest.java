@@ -211,9 +211,26 @@ public class DouglasPeuckerTest extends AbstractDecomposeTest {
 		// 1204 vertices
 		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/nazca_monkey.dat"));
 		
+		vertices = new Vector2[] {
+				new Vector2(-2.058,-3.576),
+				new Vector2(1.066,-3.422),
+				new Vector2(0.626,-1.816),
+				new Vector2(0.758,-1.09),
+				new Vector2(1.946,-0.87),
+				new Vector2(3.134,-1.992),
+				new Vector2(0.802,-1.838),
+				new Vector2(1.11,-2.674),
+				new Vector2(3.442,-3.246),
+				new Vector2(2.364,-6.81),
+				new Vector2(-3.092,-5.05),
+		};
+		
+		Simplifier dp = new DouglasPeucker(0.001, 1.0);
+		Simplifier vv = new Visvalingam(0.0001, 0.5);
+		
 		// decompose the poly
 		// 305 vertices
-		List<Vector2> result = this.algo.simplify(Arrays.asList(vertices));
+		List<Vector2> result = dp.simplify(Arrays.asList(vertices));
 		// TODO add a List<Vector2> overload to the decomposer interface
 		Vector2[] simplified = result.toArray(new Vector2[0]);
 		

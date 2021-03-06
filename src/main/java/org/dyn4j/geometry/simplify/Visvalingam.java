@@ -3,25 +3,31 @@ package org.dyn4j.geometry.simplify;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 import org.dyn4j.Epsilon;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Vector2;
 
-// TODO this is the simple Douglas-Peucker algorithm that doesn't handle self-intersection
-public final class DouglasPeucker extends AbstractSimplifier implements Simplifier {
-	// TODO this should be an input
+// TODO this is the simple Visvalingam algorithm that doesn't handle self-intersection
+public final class Visvalingam extends AbstractSimplifier implements Simplifier {
 	private final double clusterTolerance;
-	private final double e;
+	private final double minimumTriangleArea;
 	private final boolean avoidSelfIntersection;
 	
 	private final RTree tree;
 	
-	public DouglasPeucker(double clusterTolerance, double epsilon) {
+	public Visvalingam(double clusterTolerance, double minimumTriangleArea) {
+		this(clusterTolerance, minimumTriangleArea, true);
+	}
+	
+	public Visvalingam(double clusterTolerance, double minimumTriangleArea, boolean avoidSelfIntersection) {
 		this.clusterTolerance = clusterTolerance;
-		this.e = epsilon;
-		this.avoidSelfIntersection = true;
+		this.minimumTriangleArea = minimumTriangleArea;
+		this.avoidSelfIntersection = avoidSelfIntersection;
+		
 		this.tree = new RTree();
 	}
 	
@@ -34,20 +40,52 @@ public final class DouglasPeucker extends AbstractSimplifier implements Simplifi
 			return vertices;
 		}
 		
-		List<Vector2> result = new ArrayList<Vector2>();
-		
 		// 0. first reduce any clustered vertices in the polygon
 		vertices = this.simplifyClusteredVertices(vertices, this.clusterTolerance);
 		
-		int size = vertices.size();
-		List<Vertex> verts = new ArrayList<Vertex>();
+		// 2. split into two polylines to simplify
+		List<Vector2> aReduced = this.visvalingam(vertices);
 		
-		Vector2 v1 = vertices.get(0);
-		Vector2 v2 = vertices.get(1);
+		this.tree.clear();
+		
+		return aReduced;
+	}
+	
+	/**
+	 * Recursively sub-divide the given polyline performing the douglas Peucker algorithm.
+	 * <p>
+	 * O(mn) in worst case, O(n log m) in best case, where n is the number of vertices in the
+	 * original polyline and m is the number of vertices in the reduced polyline.
+	 * @param polyline
+	 * @return
+	 */
+	private List<Vector2> visvalingam(List<Vector2> polyline) {
+		int size = polyline.size();
+		
+		// 1. compute the triangle area of each triplet of vertices
+		// 2. put all of them into a priority queue sorted by least area
+		// 3. iterate through all triangles
+		//		a. Pop triangle from queue
+		//		b. if triangle area > epsilon then skip
+		//		c. if triangle area <= epsilon
+		//			i. remove the middle point
+		//			ii. recompute the areas of the two adjacent triangles
+		//			
+		// maintain a link from the vertices to a result list
+		// when a vertex is removed, remove it from the result
+		// maintain a doubly link list to update adjacent triangles?
+		// maintain a priority queue to order the triangles by least area
+
+		Queue<Vertex> queue = new PriorityQueue<Vertex>();
+		
+		Vector2 v0 = polyline.get(size - 1);
+		Vector2 v1 = polyline.get(0);
+		Vector2 v2 = polyline.get(1);
 		
 		Vertex vertex = new Vertex();
 		vertex.point = v1;
 		vertex.index = 0;
+		vertex.area = getTriangleArea(v0, v1, v2);
 		vertex.next = null;
 		vertex.prev = null;
 		vertex.prevSegment = null;
@@ -64,16 +102,18 @@ public final class DouglasPeucker extends AbstractSimplifier implements Simplifi
 		
 		Vertex first = vertex;
 		Vertex prev = vertex;
-		for (int i = 0; i < size; i++) {
+		for (int i = 1; i < size; i++) {
 			int i0 = i - 1;
 			int i2 = i + 1 == size ? 0 : i + 1;
 			
-			v1 = vertices.get(i);
-			v2 = vertices.get(i2);
+			v0 = polyline.get(i0);
+			v1 = polyline.get(i);
+			v2 = polyline.get(i2);
 			
 			vertex = new Vertex();
 			vertex.point = v1;
 			vertex.index = i;
+			vertex.area = getTriangleArea(v0, v1, v2);
 			vertex.next = null;
 			vertex.prev = prev;
 
@@ -85,7 +125,7 @@ public final class DouglasPeucker extends AbstractSimplifier implements Simplifi
 			
 			prev.next = vertex;
 			prev = vertex;
-			verts.add(vertex);	
+			queue.add(vertex);			
 		}
 		
 		first.prev = prev;
@@ -95,163 +135,84 @@ public final class DouglasPeucker extends AbstractSimplifier implements Simplifi
 			first.prevSegment = prev.nextSegment;
 		}
 		
-		
-		// 1. find two points to split the poly into two halves
-		// for example:
-		// 0-------------0        A-------------0  |                0
-		// |              \       |                |                 \
-		// |               \  =>  |                &                  \
-		// |                \     |                |                   \
-		// 0-----------------0    0                |  0-----------------B
-		int startIndex = 0;
-		int endIndex = this.getFartherestVertexFromVertex(startIndex, vertices);
-		
-		// 2. split into two polylines to simplify
-		List<Vector2> aReduced = this.douglasPeucker(verts.subList(startIndex, endIndex + 1));
-		List<Vector2> bReduced = this.douglasPeucker(verts.subList(endIndex, vertices.size()));
-		
-		// 3. merge the two polylines back together
-		result.addAll(aReduced.subList(0, aReduced.size() - 1));
-		result.addAll(bReduced);
-		
-		this.tree.clear();
-		
-		return result;
-	}
-	
-	/**
-	 * Recursively sub-divide the given polyline performing the douglas Peucker algorithm.
-	 * <p>
-	 * O(mn) in worst case, O(n log m) in best case, where n is the number of vertices in the
-	 * original polyline and m is the number of vertices in the reduced polyline.
-	 * @param polyline
-	 * @return
-	 */
-	private List<Vector2> douglasPeucker(List<Vertex> polyline) {
-		int size = polyline.size();
-
-		// get the start/end vertices of the polyline
-		Vector2 start = polyline.get(0).point;
-		Vector2 end = polyline.get(size - 1).point;
-		
-		// get the farthest vertex from the line created from the start to the end
-		// vertex on the polyline
-		FarthestVertex fv = this.getFarthestVertexFromLine(start, end, polyline);
-		
-		// check the farthest point's distance - if it's higher than the minimum
-		// distance epsilon, then we need to subdivide the polyline since we can't
-		// reduce here (we might be able to reduce elsewhere)
 		List<Vector2> result = new ArrayList<Vector2>();
-		if (fv.distance > e) {
-			// sub-divide and run the algo on each half
-			List<Vector2> aReduced = this.douglasPeucker(polyline.subList(0, fv.index + 1));
-			List<Vector2> bReduced = this.douglasPeucker(polyline.subList(fv.index, size));
+		do {
+			Vertex v = queue.poll();
 			
-			// recombine the reduced polylines
-			result.addAll(aReduced.subList(0, aReduced.size() - 1));
-			result.addAll(bReduced);
-		} else {
-			if (this.avoidSelfIntersection && this.intersects(polyline.get(0), polyline.get(size - 1))) {
-				for (int i = 0; i < size; i++) {
-					result.add(polyline.get(i).point);
-				}
-				return result;
-			}
-			
-			if (this.avoidSelfIntersection && size >= 3) {
-				// remove all segments from the r-tree in between these vertices
-				Vertex s = polyline.get(0);
-				Vertex e = polyline.get(size - 1);
-				
-				Vertex b = s;
-				while (b != e) {
-					this.tree.remove(b.nextSegment);
-					b = b.next;
+			if (v.area < this.minimumTriangleArea) {
+				if (this.avoidSelfIntersection && intersects(v)) {
+					// keep the vertex
+					continue;
 				}
 				
-				s.next = e;
-				e.prev = s;
-				s.nextSegment = new RTreeLeaf(start, end, s.index, e.index);
-				e.prevSegment = s.nextSegment;
+				// skip this triangle, and update the others
+				Vertex tprev = v.prev;
+				Vertex tnext = v.next;
+				tprev.next = tnext;
+				tnext.prev = tprev;
 				
-				this.tree.add(s.nextSegment);
+				v0 = tprev.prev.point;
+				v1 = tprev.point;
+				v2 = tnext.point;
+				v.prev.area = getTriangleArea(v0, v1, v2);
+				
+				v0 = tprev.point;
+				v1 = tnext.point;
+				v2 = tnext.next.point;
+				v.next.area = getTriangleArea(v0, v1, v2);
+				
+				if (this.avoidSelfIntersection) {
+					v.prev.nextSegment = new RTreeLeaf(v1, v2, tprev.index, tnext.index);
+					v.next.prevSegment = v.prev.nextSegment;
+					tree.remove(v.prevSegment);
+					tree.remove(v.nextSegment);
+					tree.add(v.prev.nextSegment);
+				}
+				
+				queue.remove(tprev);
+				queue.remove(tnext);
+				
+				queue.add(tprev);
+				queue.add(tnext);
+			} else {
+				result.add(v.point);
+				Vertex n = v.next;
+				while (n != v) {
+					result.add(n.point);
+					n = n.next;
+				}
+				break;
 			}
-			
-			// just use the start/end vertices
-			// as the new polyline
-			result.add(start);
-			result.add(end);
-		}
+		} while (!queue.isEmpty());
 		
 		return result;
 	}
 	
-	/**
-	 * Returns the vertex farthest from the given vertex.
-	 * <p>
-	 * O(n)
-	 * @param index
-	 * @param polygon
-	 * @return
-	 */
-	private int getFartherestVertexFromVertex(int index, List<Vector2> polygon) {
-		double dist2 = 0.0;
-		int max = -1;
-		int size = polygon.size();
-		Vector2 vertex = polygon.get(index);
-		for (int i = 0; i < size; i++) {
-			Vector2 vert = polygon.get(i);
-			double test = vertex.distanceSquared(vert);
-			if (test > dist2) {
-				dist2 = test;
-				max = i;
-			}
-		}
-		
-		return max;
-	}
-	
-	/**
-	 * Returns the farthest vertex in the polyline from the line created by lineVertex1 and lineVertex2.
-	 * <p>
-	 * O(n)
-	 * @param lineVertex1
-	 * @param lineVertex2
-	 * @param polyline
-	 * @return
-	 */
-	private FarthestVertex getFarthestVertexFromLine(Vector2 lineVertex1, Vector2 lineVertex2, List<Vertex> polyline) {
-		FarthestVertex max = new FarthestVertex();
-		int size = polyline.size();
-		Vector2 line = lineVertex1.to(lineVertex2);
-		Vector2 lineNormal = line.getLeftHandOrthogonalVector();
-		lineNormal.normalize();
-		for (int i = 0; i < size; i++) {
-			Vector2 vert = polyline.get(i).point;
-			double test = Math.abs(lineVertex1.to(vert).dot(lineNormal));
-			if (test > max.distance) {
-				max.distance = test;
-				max.index = i;
-			}
-		}
-		return max;
+	private double getTriangleArea(Vector2 v0, Vector2 v1, Vector2 v2) {
+		double area = v0.x * (v1.y - v2.y) + v1.x * (v2.y - v0.y) + v2.x * (v0.y - v1.y);
+		area *= 0.5;
+		return Math.abs(area);
 	}
 	
 
-	public boolean intersects(Vertex ve1, Vertex ve2) {
-		Vector2 v1 = ve1.point;
-		Vector2 v2 = ve2.point;
-
-		int min = ve1.index < ve2.index ? ve1.index : ve2.index;
-		int max = ve1.index > ve2.index ? ve1.index : ve2.index;
+	public boolean intersects(Vertex vertex) {
+		Vector2 v1 = vertex.prev.point;
+		Vector2 v2 = vertex.next.point;
 		
 		AABB aabb = AABB.createFromPoints(v1, v2);
 		Iterator<RTreeLeaf> bp = tree.getAABBDetectIterator(aabb);
 		while (bp.hasNext()) {
 			RTreeLeaf leaf = bp.next();
-
-			if (leaf.index1 >= min && leaf.index2 <= max ||
-				leaf.index1 <= max && leaf.index2 >= min) {
+			
+			if (vertex.index == leaf.index1 || vertex.index == leaf.index2) {
+				continue;
+			}
+			
+			if (vertex.prev.index == leaf.index1 || vertex.prev.index == leaf.index2) {
+				continue;
+			}
+			
+			if (vertex.next.index == leaf.index1 || vertex.next.index == leaf.index2) {
 				continue;
 			}
 			
@@ -436,12 +397,7 @@ public final class DouglasPeucker extends AbstractSimplifier implements Simplifi
 		
 	}
 	
-	private class FarthestVertex {
-		int index;
-		double distance;
-	}
-	
-	private class Vertex {
+	private class Vertex implements Comparable<Vertex> {
 		/** The index of the vertex in the original simple polygon */
 		public int index;
 		
@@ -454,11 +410,26 @@ public final class DouglasPeucker extends AbstractSimplifier implements Simplifi
 		/** The vertex point */
 		public Vector2 point;
 		
+		/** The triangle area */
+		public double area;
+		
 		// only used if avoiding self intersection
 		
 		public RTreeLeaf prevSegment;
 		public RTreeLeaf nextSegment;
-
+		
+		@Override
+		public int compareTo(Vertex o) {
+			// order based on triangle area
+			double diff = this.area - o.area;
+			if (diff < 0) {
+				return -1;
+			} else if (diff > 0) {
+				return 1;
+			}
+			return 0;
+		}
+		
 		@Override
 		public String toString() {
 			return this.point.toString();

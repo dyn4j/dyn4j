@@ -19,6 +19,9 @@ public abstract class AbstractSimplifier implements Simplifier {
 	 * <p>
 	 * This method does not require the polygon to have any defined winding, but does assume
 	 * that it does not have holes and is not self-intersecting.
+	 * <p>
+	 * This method handles null/empty lists, null elements, and all null elements.  In these
+	 * cases it's possible the returned list will be empty or have less than 3 vertices. 
 	 * @param vertices the vertices of the simple polygon
 	 * @param tolerance the minimum distance between vertices
 	 * @return List&lt;{@link Vector2}&gt;
@@ -41,7 +44,7 @@ public abstract class AbstractSimplifier implements Simplifier {
 		Vector2 start = null;
 		int startIndex = 0;
 		for (int i = 0; i < size; i++) {
-			Vector2 v = vertices.get(0);
+			Vector2 v = vertices.get(i);
 			if (v != null) {
 				start = v;
 				startIndex = i;
