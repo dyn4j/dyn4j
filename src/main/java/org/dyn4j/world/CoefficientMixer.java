@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,8 +24,6 @@
  */
 package org.dyn4j.world;
 
-import org.dyn4j.dynamics.BodyFixture;
-
 /**
  * Interface used to customize the way friction and restitution coefficients are mixed.
  * <p>
@@ -34,42 +32,11 @@ import org.dyn4j.dynamics.BodyFixture;
  * <pre> sqrt(friction1 * friction2)
  * max(restitution1, restitution2)</pre>
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.0
  * @since 1.0.0
+ * @deprecated Deprecated in 4.2.0. Use the {@link ValueMixer} interface instead.
  */
-public interface CoefficientMixer {
-	/** The default dynamics mixer */
-	public static final CoefficientMixer DEFAULT_MIXER = new CoefficientMixer() {
-		/* (non-Javadoc)
-		 * @see org.dyn4j.dynamics.DynamicsMixer#mixFriction(double, double)
-		 */
-		@Override
-		public double mixFriction(double friction1, double friction2) {
-			return Math.sqrt(friction1 * friction2);
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.dyn4j.dynamics.DynamicsMixer#mixRestitution(double, double)
-		 */
-		@Override
-		public double mixRestitution(double restitution1, double restitution2) {
-			return Math.max(restitution1, restitution2);
-		}
-	};
-	
-	/**
-	 * Method used to mix the coefficients of friction of two {@link BodyFixture}s.
-	 * @param friction1 the coefficient of friction for the first {@link BodyFixture}
-	 * @param friction2 the coefficient of friction for the second {@link BodyFixture}
-	 * @return double
-	 */
-	public abstract double mixFriction(double friction1, double friction2);
-	
-	/**
-	 * Method used to mix the coefficients of restitution of two {@link BodyFixture}s.
-	 * @param restitution1 the coefficient of restitution for the first {@link BodyFixture}
-	 * @param restitution2 the coefficient of restitution for the second {@link BodyFixture}
-	 * @return double
-	 */
-	public abstract double mixRestitution(double restitution1, double restitution2);
+@Deprecated
+public interface CoefficientMixer extends ValueMixer {
+
 }

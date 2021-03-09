@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -37,7 +37,7 @@ import org.dyn4j.resources.Messages;
  * {@link BodyFixture} extends the {@link Fixture} class, adding physical features
  * like density and friction.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.0
  * @since 2.0.0
  * @see Fixture
  */
@@ -51,6 +51,12 @@ public class BodyFixture extends Fixture implements DataContainer {
 	/** The default density in kg/m<sup>2</sup>; value = {@link #DEFAULT_DENSITY} */
 	public static final double DEFAULT_DENSITY = 1.0;
 	
+	/** 
+	 * The default restitution velocity; in meters/second 
+	 * @since 4.2.0
+	 */
+	public static final double DEFAULT_RESTITUTION_VELOCITY = 1.0;
+	
 	/** The density in kg/m<sup>2</sup> */
 	protected double density;
 	
@@ -59,6 +65,12 @@ public class BodyFixture extends Fixture implements DataContainer {
 	
 	/** The coefficient of restitution */
 	protected double restitution;
+	
+	/** 
+	 * The minimum velocity to apply restitution
+	 * @since 4.2.0
+	 */
+	protected double restitutionVelocity;
 	
 	/**
 	 * Minimal constructor.
@@ -69,6 +81,7 @@ public class BodyFixture extends Fixture implements DataContainer {
 		this.density = BodyFixture.DEFAULT_DENSITY;
 		this.friction = BodyFixture.DEFAULT_FRICTION;
 		this.restitution = BodyFixture.DEFAULT_RESTITUTION;
+		this.restitutionVelocity = DEFAULT_RESTITUTION_VELOCITY;
 	}
 	
 	/* (non-Javadoc)
@@ -84,6 +97,7 @@ public class BodyFixture extends Fixture implements DataContainer {
 		.append("|Density=").append(this.density)
 		.append("|Friction=").append(this.friction)
 		.append("|Restitution=").append(this.restitution)
+		.append("|RestitutionVelocity=").append(this.restitutionVelocity)
 		.append("]");
 		return sb.toString();
 	}
@@ -162,6 +176,24 @@ public class BodyFixture extends Fixture implements DataContainer {
 	public void setRestitution(double restitution) {
 		if (restitution < 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidRestitution"));
 		this.restitution = restitution;
+	}
+	
+	/**
+	 * Returns the minimum velocity required to apply restitution.
+	 * @return double
+	 * @since 4.2.0
+	 */
+	public double getRestitutionVelocity() {
+		return this.restitutionVelocity;
+	}
+	
+	/**
+	 * Sets the minimum velocity required to apply restitution.
+	 * @param restitutionVelocity the velocity
+	 * @since 4.2.0
+	 */
+	public void setRestitutionVelocity(double restitutionVelocity) {
+		this.restitutionVelocity = restitutionVelocity;
 	}
 	
 	/**

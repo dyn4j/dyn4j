@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,15 +30,14 @@ import org.dyn4j.collision.narrowphase.Raycast;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Geometry;
-import org.dyn4j.world.CoefficientMixer;
 import org.junit.Test;
 
 import junit.framework.TestCase;
 
 /**
- * Test case for the {@link CoefficientMixer} class.
+ * Test cases for the static detection result classes.
  * @author William Bittle
- * @version 4.0.1
+ * @version 4.2.0
  * @since 4.0.0
  */
 public class DetectResultTest {

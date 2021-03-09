@@ -50,7 +50,7 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * This interface also expands on the {@link CollisionWorld} adding other features like joints, gravity,
  * etc.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.2.0
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
@@ -468,8 +468,18 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * Returns the {@link CoefficientMixer}.
 	 * @return {@link CoefficientMixer}
 	 * @see #setCoefficientMixer(CoefficientMixer)
+	 * @deprecated Deprecated in 4.2.0. Replaced by {@link #getValueMixer()}
 	 */
+	@Deprecated
 	public CoefficientMixer getCoefficientMixer();
+	
+	/**
+	 * Returns the {@link ValueMixer}.
+	 * @return {@link ValueMixer}
+	 * @see #setValueMixer(ValueMixer) 
+	 * @since 4.2.0
+	 */
+	public ValueMixer getValueMixer();
 	
 	/**
 	 * Sets the {@link CoefficientMixer}.
@@ -484,9 +494,28 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * @param coefficientMixer the coefficient mixer
 	 * @throws NullPointerException if coefficientMixer is null
 	 * @see CoefficientMixer
+	 * @deprecated Deprecated in 4.2.0. Use {@link #setValueMixer(ValueMixer)} instead.
 	 */
+	@Deprecated
 	public void setCoefficientMixer(CoefficientMixer coefficientMixer);
 
+	/**
+	 * Sets the {@link ValueMixer}.
+	 * <p>
+	 * A {@link ValueMixer} is an implementation of mixing functions for various
+	 * values used in contact solving.  Common mixed values are restitution and 
+	 * friction.  Since each {@link BodyFixture} can have it's own value for these 
+	 * metrics, the {@link ValueMixer} is used to mathematically combine them
+	 * into one value to be used in contact resolution.
+	 * <p>
+	 * {@link ValueMixer#DEFAULT_MIXER} is the default.
+	 * @param valueMixer the value mixer
+	 * @throws NullPointerException if valueMixer is null
+	 * @see ValueMixer
+	 * @since 4.2.0
+	 */
+	public void setValueMixer(ValueMixer valueMixer);
+	
 	/**
 	 * Sets the {@link ContactConstraintSolver} for this world.
 	 * @param constraintSolver the contact constraint solver

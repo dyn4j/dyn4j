@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,7 +30,7 @@ import org.dyn4j.dynamics.BodyFixture;
  * This interface defines the mechanism to report begin, persist, and end events
  * and the method of mixing the friction and restitution coefficients.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.0
  * @since 4.0.0
  */
 public interface ContactUpdateHandler {
@@ -49,6 +49,15 @@ public interface ContactUpdateHandler {
 	 * @return double
 	 */
 	public double getRestitution(BodyFixture fixture1, BodyFixture fixture2);
+	
+	/**
+	 * Returns the minimum velocity to apply restitution given the two {@link BodyFixture}s in contact.
+	 * @param fixture1 the first fixture
+	 * @param fixture2 the second fixture
+	 * @return double
+	 * @since 4.2.0
+	 */
+	public double getRestitutionVelocity(BodyFixture fixture1, BodyFixture fixture2);
 	
 	/**
 	 * Called when the given contact is a new contact.

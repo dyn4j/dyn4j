@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,12 +29,12 @@ import org.junit.Test;
 import junit.framework.TestCase;
 
 /**
- * Test case for the {@link CoefficientMixer} class.
+ * Test case for the {@link ValueMixer} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.0
  * @since 4.0.0
  */
-public class CoefficientMixerTest {
+public class ValueMixerTest {
 	/**
 	 * Tests the mixing of the friction.
 	 */
@@ -42,7 +42,7 @@ public class CoefficientMixerTest {
 	public void mixFriction() {
 		double f1 = 0.5;
 		double f2 = 0.7;
-		double result = CoefficientMixer.DEFAULT_MIXER.mixFriction(f1, f2);
+		double result = ValueMixer.DEFAULT_MIXER.mixFriction(f1, f2);
 		TestCase.assertEquals(Math.sqrt(f1*f2), result);
 	}
 	
@@ -53,7 +53,18 @@ public class CoefficientMixerTest {
 	public void mixRestitution() {
 		double r1 = 0.5;
 		double r2 = 0.7;
-		double result = CoefficientMixer.DEFAULT_MIXER.mixRestitution(r1, r2);
+		double result = ValueMixer.DEFAULT_MIXER.mixRestitution(r1, r2);
 		TestCase.assertEquals(Math.max(r1, r2), result);
+	}
+
+	/**
+	 * Tests the mixing of the restitution velocity.
+	 */
+	@Test
+	public void mixRestitutionVelocity() {
+		double r1 = 0.5;
+		double r2 = 0.7;
+		double result = ValueMixer.DEFAULT_MIXER.mixRestitutionVelocity(r1, r2);
+		TestCase.assertEquals(Math.min(r1, r2), result);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Responsible for housing all of the dynamics engine's settings.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.2.0
  * @since 1.0.0
  */
 public class Settings {
@@ -69,7 +69,11 @@ public class Settings {
 	 */
 	public static final double DEFAULT_MAXIMUM_WARM_START_DISTANCE = 1.0e-2;
 	
-	/** The default restitution velocity; in meters/second */
+	/** 
+	 * The default restitution velocity; in meters/second
+	 * @deprecated Deprecated in 4.2.0. Use the BodyFixture.restitutionVelocity instead. 
+	 */
+	@Deprecated
 	public static final double DEFAULT_RESTITUTION_VELOCITY = 1.0;
 	
 	/** The default linear tolerance; in meters */
@@ -136,9 +140,11 @@ public class Settings {
 	private double maximumWarmStartDistanceSquared = Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE * Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE;
 	
 	/** The restitution velocity */
+	@Deprecated
 	private double restitutionVelocity = Settings.DEFAULT_RESTITUTION_VELOCITY;
 	
 	/** The squared value of {@link #restitutionVelocity} */
+	@Deprecated
 	private double restitutionVelocitySquared = Settings.DEFAULT_RESTITUTION_VELOCITY * Settings.DEFAULT_RESTITUTION_VELOCITY;
 	
 	/** The allowed linear tolerance */
@@ -191,7 +197,6 @@ public class Settings {
 		.append("|PositionConstraintSolverIterations=").append(this.positionConstraintSolverIterations)
 		.append("|WarmStartingEnabled=").append(this.warmStartingEnabled)
 		.append("|MaximumWarmStartDistance=").append(this.maximumWarmStartDistance)
-		.append("|RestitutionVelocity=").append(this.restitutionVelocity)
 		.append("|LinearTolerance=").append(this.linearTolerance)
 		.append("|AngularTolerance=").append(this.angularTolerance)
 		.append("|MaximumLinearCorrection=").append(this.maximumLinearCorrection)
@@ -600,7 +605,9 @@ public class Settings {
 	 * Returns the restitution velocity.
 	 * @return double the restitution velocity
 	 * @see #setRestitutionVelocity(double)
+	 * @deprecated Deprecated in 4.2.0. Use the BodyFixture.restitutionVelocity instead.
 	 */
+	@Deprecated
 	public double getRestitutionVelocity() {
 		return this.restitutionVelocity;
 	}
@@ -610,7 +617,9 @@ public class Settings {
 	 * @see #getRestitutionVelocity()
 	 * @see #setRestitutionVelocity(double)
 	 * @return double
+	 * @deprecated Deprecated in 4.2.0. Use the BodyFixture.restitutionVelocity instead.
 	 */
+	@Deprecated
 	public double getRestitutionVelocitySquared() {
 		return restitutionVelocitySquared;
 	}
@@ -624,7 +633,9 @@ public class Settings {
 	 * Valid values are in the range [0, &infin;] meters/second
 	 * @param restitutionVelocity the restitution velocity
 	 * @throws IllegalArgumentException if restitutionVelocity is less than zero
+	 * @deprecated Deprecated in 4.2.0. Use the BodyFixture.restitutionVelocity instead.
 	 */
+	@Deprecated
 	public void setRestitutionVelocity(double restitutionVelocity) {
 		if (restitutionVelocity < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidRestitutionVelocity"));
 		this.restitutionVelocity = restitutionVelocity;
