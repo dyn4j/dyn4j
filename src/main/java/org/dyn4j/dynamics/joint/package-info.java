@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,7 +36,7 @@
  * Current joint implementations:
  * <ul>
  * <li>{@link org.dyn4j.dynamics.joint.AngleJoint} for constraining the rotation of two bodies</li>
- * <li>{@link org.dyn4j.dynamics.joint.DistanceJoint} for fixed length distance and spring/damper</li>
+ * <li>{@link org.dyn4j.dynamics.joint.DistanceJoint} for fixed length distance, spring/damper, and limits</li>
  * <li>{@link org.dyn4j.dynamics.joint.FrictionJoint} for applying friction, air resistance, joint
  * friction, etc</li>
  * <li>{@link org.dyn4j.dynamics.joint.MotorJoint} primarily for character control</li>
@@ -48,13 +48,12 @@
  * tackle</li>
  * <li>{@link org.dyn4j.dynamics.joint.RevoluteJoint} for only allowing relative rotation with or
  * without a motor</li>
- * <li>{@link org.dyn4j.dynamics.joint.RopeJoint} for min/max distance between bodies</li>
  * <li>{@link org.dyn4j.dynamics.joint.WeldJoint} for connecting two bodies together completely</li>
  * <li>{@link org.dyn4j.dynamics.joint.WheelJoint} for connecting two bodies in a frame-wheel type
  * configuration with linear spring/damper and angular motor</li>
  * </ul>
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.0
  * @since 1.0.0
  */
 package org.dyn4j.dynamics.joint;

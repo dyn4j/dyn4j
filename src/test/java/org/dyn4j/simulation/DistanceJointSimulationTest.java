@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -38,7 +38,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link DistanceJoint} class in simulation.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.0
  * @since 4.0.0
  */
 public class DistanceJointSimulationTest {
@@ -72,12 +72,12 @@ public class DistanceJointSimulationTest {
 		
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(g, b, g.getWorldCenter(), b.getWorldCenter());
 		
-		dj.setDistance(10.0);
+		dj.setRestDistance(10.0);
 		w.addJoint(dj);
 		
 		Vector2 v1 = g.getWorldCenter();
 		Vector2 v2 = b.getWorldCenter();
-		TestCase.assertTrue(v1.distance(v2) < dj.getDistance());
+		TestCase.assertTrue(v1.distance(v2) < dj.getRestDistance());
 		
 		// the way the distance joint is currently working is that it will immediately try to solve
 		// it to be the correct distance apart, but the position solver is bound by the default
@@ -90,6 +90,6 @@ public class DistanceJointSimulationTest {
 		
 		v1 = g.getWorldCenter();
 		v2 = b.getWorldCenter();
-		TestCase.assertEquals(v1.distance(v2), dj.getDistance(), 1e-5);	
+		TestCase.assertEquals(v1.distance(v2), dj.getRestDistance(), 1e-5);	
 	}
 }

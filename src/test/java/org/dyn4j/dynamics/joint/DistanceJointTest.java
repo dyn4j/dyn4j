@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link DistanceJoint} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.0
  * @since 1.0.2
  */
 public class DistanceJointTest extends AbstractJointTest {
@@ -141,11 +141,11 @@ public class DistanceJointTest extends AbstractJointTest {
 	public void setPositiveDistance() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
-		dj.setDistance(0.0);
-		TestCase.assertEquals(0.0, dj.getDistance());
+		dj.setRestDistance(0.0);
+		TestCase.assertEquals(0.0, dj.getRestDistance());
 		
-		dj.setDistance(1.0);
-		TestCase.assertEquals(1.0, dj.getDistance());
+		dj.setRestDistance(1.0);
+		TestCase.assertEquals(1.0, dj.getRestDistance());
 	}
 	
 	/**
@@ -154,7 +154,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeDistance() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		dj.setDistance(-2.0);
+		dj.setRestDistance(-2.0);
 	}
 	
 	/**
@@ -224,26 +224,26 @@ public class DistanceJointTest extends AbstractJointTest {
 	public void setDistanceAtRest() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
-		double distance = dj.getDistance();
+		double distance = dj.getRestDistance();
 		
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(distance, dj.getDistance());
+		TestCase.assertEquals(distance, dj.getRestDistance());
 		
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
 		// set the distance to the same value
-		dj.setDistance(distance);
+		dj.setRestDistance(distance);
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
-		TestCase.assertEquals(distance, dj.getDistance());
+		TestCase.assertEquals(distance, dj.getRestDistance());
 		
 		// set the distance to a different value and make
 		// sure the bodies are awakened
-		dj.setDistance(10);
+		dj.setRestDistance(10);
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(10.0, dj.getDistance());
+		TestCase.assertEquals(10.0, dj.getRestDistance());
 	}
 }
