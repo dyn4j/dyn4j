@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -38,7 +38,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link FrictionJoint} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.0
  * @since 4.0.0
  */
 public class FrictionJointSimulationTest {
@@ -85,12 +85,18 @@ public class FrictionJointSimulationTest {
 		TestCase.assertTrue(b.getLinearVelocity().getMagnitude() < 5.0);
 		TestCase.assertTrue(b.getAngularVelocity() < Math.toRadians(30));
 		
+		double invdt = w.getTimeStep().getInverseDeltaTime();
+		TestCase.assertEquals(3.084, fj.getReactionTorque(invdt), 1e-3);
+		TestCase.assertEquals(235.619, fj.getReactionForce(invdt).getMagnitude(), 1e-3);
+		
 		// perform another step to ensure it doesn't increase velocities
 		// with the maximums as high as above, the first iteration should
 		// complete stop the body
 		w.step(1);
 		TestCase.assertTrue(b.getLinearVelocity().getMagnitude() < 5.0);
 		TestCase.assertTrue(b.getAngularVelocity() < Math.toRadians(30));
+		TestCase.assertEquals(0.0, fj.getReactionTorque(invdt), 1e-3);
+		TestCase.assertEquals(0.0, fj.getReactionForce(invdt).getMagnitude(), 1e-3);
 	}
 	
 	/**
@@ -164,10 +170,13 @@ public class FrictionJointSimulationTest {
 		// so about 13 iterations
 
 		w.step(1);
+		double invdt = w.getTimeStep().getInverseDeltaTime();
 		
 		// make sure that the body has been slowed linearly and angularly
 		TestCase.assertTrue(b.getLinearVelocity().getMagnitude() < 5.0);
 		TestCase.assertTrue(b.getAngularVelocity() < Math.toRadians(30));
+		TestCase.assertEquals(0.25, fj.getReactionTorque(invdt), 1e-3);
+		TestCase.assertEquals(10.0, fj.getReactionForce(invdt).getMagnitude(), 1e-3);
 		
 		for (int i = 0 ; i < 12; i++) {
 			w.step(1);

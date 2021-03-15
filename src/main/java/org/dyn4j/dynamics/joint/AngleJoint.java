@@ -78,7 +78,7 @@ import org.dyn4j.resources.Messages;
  * the world space center points for the joined bodies.  This constraint 
  * doesn't need anchor points.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.2.0
  * @since 2.2.2
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Angle_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/12/angle-constraint/" target="_blank">Angle Constraint</a>
@@ -174,7 +174,7 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		this.axialMass = invI1 + invI2;
+		this.axialMass = invI1 + Math.abs(this.ratio) * invI2;
 		if (this.axialMass > Epsilon.E) {
 			this.axialMass = 1.0 / this.axialMass;
 		} else {
@@ -204,17 +204,11 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 			this.lowerImpulse *= dtr;
 			this.upperImpulse *= dtr;
 			
-			double axialImpulse1 = this.impulse + this.lowerImpulse - this.upperImpulse;
-			double axialImpulse2 = axialImpulse1;
-			if (this.limitEnabled) {
-				axialImpulse2 = this.impulse * this.ratio + this.lowerImpulse - this.upperImpulse;
-			}
+			double axialImpulse = this.impulse * Math.signum(this.ratio) + this.lowerImpulse - this.upperImpulse;
 			
 			// warm start
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * axialImpulse1);
-			// we only want to apply the ratio to the impulse if the limits are not active.  When the
-			// limits are active we effectively disable the ratio
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * axialImpulse2);
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * axialImpulse);
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * axialImpulse);
 		} else {
 			this.impulse = 0.0;
 			this.lowerImpulse = 0.0;
@@ -267,13 +261,14 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 			// the limit is inactive and the ratio is not one
 			// get the relative velocity
 			double C = this.body1.getAngularVelocity() - this.ratio * this.body2.getAngularVelocity();
+			
 			// get the impulse required to obtain the speed
 			double impulse = this.axialMass * -C;
 			this.impulse += impulse;
 			
 			// apply the impulse
 			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * impulse);
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * impulse * this.ratio);
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * impulse * Math.signum(this.ratio));
 		}
 	}
 	
@@ -399,14 +394,21 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	/**
 	 * Sets the angular velocity ratio between the two bodies.
 	 * <p>
-	 * To disable the ratio and fix their velocities set the ratio to 1.0.
+	 * A value of 0.5 means that body1 will rotate 2 times while body2 rotates once.  A value of
+	 * 2 means that body2 will rotate 2 times while body1 rotates once.
 	 * <p>
-	 * The ratio can be negative to reverse the direction of the velocity
-	 * of the other body.
-	 * @param ratio the ratio
+	 * A value of 1.0 means that the body rotate at the same rate.
+	 * <p>
+	 * A negative ratio indicates that the anglular velocities of the joined bodies should be in
+	 * opposite directions.
+	 * <p>
+	 * A ratio of zero is not supported.
+	 * @param ratio the ratio; anything, just not zero
 	 * @since 3.1.0
+	 * @throws IllegalArgumentException if ratio is equal to zero
 	 */
 	public void setRatio(double ratio) {
+		if (ratio == 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.angle.invalidRaio"));
 		this.ratio = ratio;
 	}
 	

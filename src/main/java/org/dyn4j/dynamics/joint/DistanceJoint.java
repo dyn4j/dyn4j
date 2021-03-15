@@ -427,7 +427,7 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		double C = 0.0;
 		
 		if (this.upperLimitEnabled && this.lowerLimitEnabled && this.upperLimit == this.lowerLimit) {
-			// upper and lower limits enabled, but basically the same
+			// upper and lower limits enabled, but the same value
 			C = l - this.lowerLimit;
 		} else if (this.lowerLimitEnabled && l < this.lowerLimit) {
 			// lower limit only
@@ -435,11 +435,11 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		} else if (this.upperLimitEnabled && l > this.upperLimit) {
 			// upper limit only
 			C = l - this.upperLimit;
-		} else if (this.stiffness <= 0.0) {
-			// fixed length joint
+		} else if (!this.upperLimitEnabled && !this.lowerLimitEnabled && this.stiffness <= 0.0) {
+			// fixed length joint (no spring and no limits)
 			C = l - this.restDistance;
 		} else {
-			// no limits, spring joint
+			// no limits, or not outside the limits, or spring joint
 			return true;
 		}
 

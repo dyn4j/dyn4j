@@ -46,7 +46,7 @@ public class DistanceJointSimulationTest {
 	 * Tests the body separation as enforced by the distance joint.
 	 */
 	@Test
-	public void distanceChange() {
+	public void fixedDistance() {
 		World<Body> w = new World<Body>();
 		// take gravity out the picture
 		w.setGravity(World.ZERO_GRAVITY);
@@ -77,7 +77,7 @@ public class DistanceJointSimulationTest {
 		
 		Vector2 v1 = g.getWorldCenter();
 		Vector2 v2 = b.getWorldCenter();
-		TestCase.assertTrue(v1.distance(v2) < dj.getRestDistance());
+		TestCase.assertEquals(2.0, v1.distance(v2));
 		
 		// the way the distance joint is currently working is that it will immediately try to solve
 		// it to be the correct distance apart, but the position solver is bound by the default
@@ -91,5 +91,287 @@ public class DistanceJointSimulationTest {
 		v1 = g.getWorldCenter();
 		v2 = b.getWorldCenter();
 		TestCase.assertEquals(v1.distance(v2), dj.getRestDistance(), 1e-5);	
+	}
+	
+	/**
+	 * Tests the body separation as enforced by the distance joint with limits
+	 */
+	@Test
+	public void limits() {
+		World<Body> w = new World<Body>();
+		// take gravity out the picture
+		w.setGravity(World.ZERO_GRAVITY);
+		
+		// take friction and damping out of the picture
+		
+		Body g = new Body();
+		BodyFixture gf = g.addFixture(Geometry.createRectangle(10.0, 0.5));
+		gf.setFriction(0.0);
+		g.setMass(MassType.INFINITE);
+		g.setLinearDamping(0.0);
+		g.setAngularDamping(0.0);
+		w.addBody(g);
+		
+		Body b = new Body();
+		BodyFixture bf = b.addFixture(Geometry.createCircle(0.5));
+		bf.setFriction(0.0);
+		b.setMass(MassType.NORMAL);
+		b.translate(0.0, 2.0);
+		b.setLinearDamping(0.0);
+		b.setAngularDamping(0.0);
+		w.addBody(b);
+		
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(g, b, g.getWorldCenter(), b.getWorldCenter());
+		
+		// NOTE: that I've set the rest distance to more than the limits
+		dj.setRestDistance(10.0);
+		dj.setLimitsEnabled(1.0, 5.0);
+		w.addJoint(dj);
+		
+		Vector2 v1 = g.getWorldCenter();
+		Vector2 v2 = b.getWorldCenter();
+		TestCase.assertEquals(2.0, v1.distance(v2));
+		
+		w.step(1);
+		
+		// since the bodies are already 2.0 units apparent, nothing should happen
+		v1 = g.getWorldCenter();
+		v2 = b.getWorldCenter();
+		TestCase.assertEquals(2.0, v1.distance(v2), 1e-5);
+		
+		dj.setLimitsEnabled(6.0, 7.0);
+		w.step(1);
+		
+		// the bodies should be placed at the lower limit
+		v1 = g.getWorldCenter();
+		v2 = b.getWorldCenter();
+		TestCase.assertEquals(6.0, v1.distance(v2), 1e-5);
+		
+		dj.setLimitsEnabled(1.0, 3.0);
+		w.step(1);
+		
+		// the bodies should be placed at the upper limit
+		v1 = g.getWorldCenter();
+		v2 = b.getWorldCenter();
+		TestCase.assertEquals(3.0, v1.distance(v2), 1e-5);
+		
+		dj.setLimitsEnabled(5.0, 10.0);
+		dj.setLowerLimitEnabled(false);
+		w.step(1);
+		
+		// the distance will be outside the limits, but because the lower
+		// limit is disabled it should keep them at 3.0
+		v1 = g.getWorldCenter();
+		v2 = b.getWorldCenter();
+		TestCase.assertEquals(3.0, v1.distance(v2), 1e-5);
+
+		dj.setLimitsEnabled(0.0, 2.0);
+		dj.setUpperLimitEnabled(false);
+		w.step(1);
+		
+		// the distance will be outside the limits, but because the upper
+		// limit is disabled it should keep them at 3.0
+		v1 = g.getWorldCenter();
+		v2 = b.getWorldCenter();
+		TestCase.assertEquals(3.0, v1.distance(v2), 1e-5);
+	}
+
+	/**
+	 * Tests the body separation as enforced by the distance joint with limits with a spring.
+	 */
+	@Test
+	public void upperLimitWithSpring() {
+		World<Body> w = new World<Body>();
+		// take gravity out the picture
+		w.setGravity(World.ZERO_GRAVITY);
+		
+		// take friction and damping out of the picture
+		
+		Body g = new Body();
+		BodyFixture gf = g.addFixture(Geometry.createRectangle(10.0, 0.5));
+		gf.setFriction(0.0);
+		g.setMass(MassType.INFINITE);
+		g.setLinearDamping(0.0);
+		g.setAngularDamping(0.0);
+		w.addBody(g);
+		
+		Body b = new Body();
+		BodyFixture bf = b.addFixture(Geometry.createCircle(0.5));
+		bf.setFriction(0.0);
+		b.setMass(MassType.NORMAL);
+		b.translate(0.0, 2.0);
+		b.setLinearDamping(0.0);
+		b.setAngularDamping(0.0);
+		w.addBody(b);
+		
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(g, b, g.getWorldCenter(), b.getWorldCenter());
+		
+		// NOTE: that I've set the rest distance to more than the limits
+		dj.setRestDistance(10.0);
+		dj.setLimitsEnabled(1.0, 5.0);
+		dj.setFrequency(8.0);
+		dj.setDampingRatio(0.2);
+		w.addJoint(dj);
+		
+		Vector2 v1 = g.getWorldCenter();
+		Vector2 v2 = b.getWorldCenter();
+		TestCase.assertEquals(2.0, v1.distance(v2));
+		
+		w.step(10);
+		
+		// the spring, because the rest distance is 10, should push them to the
+		// upper limit of 5.0
+		v1 = g.getWorldCenter();
+		v2 = b.getWorldCenter();
+		TestCase.assertEquals(5.0, v1.distance(v2), 1e-5);
+	}
+	
+	/**
+	 * Tests the body separation as enforced by the distance joint with limits with a spring.
+	 */
+	@Test
+	public void lowerLimitWithSpring() {
+		World<Body> w = new World<Body>();
+		// take gravity out the picture
+		w.setGravity(World.ZERO_GRAVITY);
+		
+		// take friction and damping out of the picture
+		
+		Body g = new Body();
+		BodyFixture gf = g.addFixture(Geometry.createRectangle(10.0, 0.5));
+		gf.setFriction(0.0);
+		g.setMass(MassType.INFINITE);
+		g.setLinearDamping(0.0);
+		g.setAngularDamping(0.0);
+		w.addBody(g);
+		
+		Body b = new Body();
+		BodyFixture bf = b.addFixture(Geometry.createCircle(0.5));
+		bf.setFriction(0.0);
+		b.setMass(MassType.NORMAL);
+		b.translate(0.0, 2.0);
+		b.setLinearDamping(0.0);
+		b.setAngularDamping(0.0);
+		w.addBody(b);
+		
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(g, b, g.getWorldCenter(), b.getWorldCenter());
+		
+		// NOTE: that I've set the rest distance to more than the limits
+		dj.setRestDistance(1.0);
+		dj.setLimitsEnabled(3.0, 5.0);
+		dj.setFrequency(8.0);
+		dj.setDampingRatio(0.2);
+		w.addJoint(dj);
+		
+		Vector2 v1 = g.getWorldCenter();
+		Vector2 v2 = b.getWorldCenter();
+		TestCase.assertEquals(2.0, v1.distance(v2));
+		
+		w.step(10);
+		
+		// the spring, because the rest distance is 1.0, should push them to the
+		// lower limit of 3.0
+		v1 = g.getWorldCenter();
+		v2 = b.getWorldCenter();
+		TestCase.assertEquals(3.0, v1.distance(v2), 1e-5);
+	}
+
+	/**
+	 * Tests the body separation as enforced by the distance joint with limits with a spring.
+	 */
+	@Test
+	public void limitsWithSpring() {
+		World<Body> w = new World<Body>();
+		// take gravity out the picture
+		w.setGravity(World.ZERO_GRAVITY);
+		
+		// take friction and damping out of the picture
+		
+		Body g = new Body();
+		BodyFixture gf = g.addFixture(Geometry.createRectangle(10.0, 0.5));
+		gf.setFriction(0.0);
+		g.setMass(MassType.INFINITE);
+		g.setLinearDamping(0.0);
+		g.setAngularDamping(0.0);
+		w.addBody(g);
+		
+		Body b = new Body();
+		BodyFixture bf = b.addFixture(Geometry.createCircle(0.5));
+		bf.setFriction(0.0);
+		b.setMass(MassType.NORMAL);
+		b.translate(0.0, 2.0);
+		b.setLinearDamping(0.0);
+		b.setAngularDamping(0.0);
+		w.addBody(b);
+		
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(g, b, g.getWorldCenter(), b.getWorldCenter());
+		
+		// NOTE: that I've set the rest distance to more than the limits
+		dj.setRestDistance(3.0);
+		dj.setLimitsEnabled(1.0, 5.0);
+		dj.setFrequency(8.0);
+		dj.setDampingRatio(0.2);
+		w.addJoint(dj);
+		
+		Vector2 v1 = g.getWorldCenter();
+		Vector2 v2 = b.getWorldCenter();
+		TestCase.assertEquals(2.0, v1.distance(v2));
+		
+		w.step(30);
+		
+		// the spring, because the rest distance is 3, should push them to the
+		// 3.0 since it's between the upper and lower limit
+		v1 = g.getWorldCenter();
+		v2 = b.getWorldCenter();
+		TestCase.assertEquals(3.0, v1.distance(v2), 1e-3);
+	}
+	
+	/**
+	 * Tests the body separation as enforced by the distance joint with limits with a spring.
+	 */
+	@Test
+	public void springOnly() {
+		World<Body> w = new World<Body>();
+		// take gravity out the picture
+		w.setGravity(World.ZERO_GRAVITY);
+		
+		// take friction and damping out of the picture
+		
+		Body g = new Body();
+		BodyFixture gf = g.addFixture(Geometry.createRectangle(10.0, 0.5));
+		gf.setFriction(0.0);
+		g.setMass(MassType.INFINITE);
+		g.setLinearDamping(0.0);
+		g.setAngularDamping(0.0);
+		w.addBody(g);
+		
+		Body b = new Body();
+		BodyFixture bf = b.addFixture(Geometry.createCircle(0.5));
+		bf.setFriction(0.0);
+		b.setMass(MassType.NORMAL);
+		b.translate(0.0, 2.0);
+		b.setLinearDamping(0.0);
+		b.setAngularDamping(0.0);
+		w.addBody(b);
+		
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(g, b, g.getWorldCenter(), b.getWorldCenter());
+		
+		// NOTE: that I've set the rest distance to more than the limits
+		dj.setRestDistance(3.0);
+		dj.setFrequency(8.0);
+		dj.setDampingRatio(0.2);
+		w.addJoint(dj);
+		
+		Vector2 v1 = g.getWorldCenter();
+		Vector2 v2 = b.getWorldCenter();
+		TestCase.assertEquals(2.0, v1.distance(v2));
+		
+		w.step(30);
+		
+		// the spring, because the rest distance is 3, should push them to the
+		// 3.0 since it's between the upper and lower limit
+		v1 = g.getWorldCenter();
+		v2 = b.getWorldCenter();
+		TestCase.assertEquals(3.0, v1.distance(v2), 1e-3);
 	}
 }
