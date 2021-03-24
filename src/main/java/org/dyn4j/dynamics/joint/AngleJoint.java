@@ -462,6 +462,8 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 			}
 			// set the new target angle
 			this.upperLimit = upperLimit;
+			// clear accumulated impulse
+			this.upperImpulse = 0.0;
 		}
 	}
 	
@@ -491,6 +493,8 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 			}
 			// set the new target angle
 			this.lowerLimit = lowerLimit;
+			// clear accumulated impulse
+			this.lowerImpulse = 0.0;
 		}
 	}
 	
@@ -514,6 +518,9 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 			// set the limits
 			this.upperLimit = upperLimit;
 			this.lowerLimit = lowerLimit;
+			// clear accumulated impulse
+			this.lowerImpulse = 0.0;
+			this.upperImpulse = 0.0;
 		}
 	}
 
@@ -548,6 +555,9 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 			// set the limits
 			this.upperLimit = limit;
 			this.lowerLimit = limit;
+			// clear accumulated impulse
+			this.lowerImpulse = 0.0;
+			this.upperImpulse = 0.0;
 		}
 	}
 	

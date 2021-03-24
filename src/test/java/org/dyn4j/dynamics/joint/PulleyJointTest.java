@@ -42,7 +42,40 @@ public class PulleyJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void createSuccess() {
-		new PulleyJoint<Body>(b1, b2, new Vector2(), new Vector2(), new Vector2(), new Vector2());
+		Vector2 pa1 = new Vector2(-1.0, 1.0);
+		Vector2 pa2 = new Vector2(1.0, 1.0);
+		Vector2 a1 = new Vector2(-1.0, 0.0);
+		Vector2 a2 = new Vector2(1.0, 0.0);
+		
+		PulleyJoint<Body> pj = new PulleyJoint<Body>(b1, b2, pa1, pa2, a1, a2);
+		
+		TestCase.assertEquals(pa1, pj.getPulleyAnchor1());
+		TestCase.assertEquals(pa2, pj.getPulleyAnchor2());
+		TestCase.assertNotSame(pa1, pj.getPulleyAnchor1());
+		TestCase.assertNotSame(pa2, pj.getPulleyAnchor2());
+
+		TestCase.assertEquals(a1, pj.getAnchor1());
+		TestCase.assertEquals(a2, pj.getAnchor2());
+		TestCase.assertNotSame(a1, pj.getAnchor1());
+		TestCase.assertNotSame(a2, pj.getAnchor2());
+		
+		TestCase.assertEquals(pa1.distance(a1) + pa2.distance(a2), pj.getLength());
+		TestCase.assertEquals(pa1.distance(a1), pj.getCurrentLength1());
+		TestCase.assertEquals(pa2.distance(a2), pj.getCurrentLength2());
+		
+		TestCase.assertEquals(1.0, pj.getRatio());
+		
+		TestCase.assertEquals(b1, pj.getBody1());
+		TestCase.assertEquals(b2, pj.getBody2());
+		
+		TestCase.assertEquals(null, pj.getOwner());
+		TestCase.assertEquals(null, pj.getUserData());
+		TestCase.assertEquals(b2, pj.getOtherBody(b1));
+		
+		TestCase.assertEquals(false, pj.isCollisionAllowed());
+		TestCase.assertEquals(false, pj.isSlackEnabled());
+		
+		TestCase.assertNotNull(pj.toString());
 	}
 
 	/**

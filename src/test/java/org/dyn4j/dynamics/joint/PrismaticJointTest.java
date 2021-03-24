@@ -42,7 +42,38 @@ public class PrismaticJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void createSuccess() {
-		new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		Vector2 anchor = new Vector2();
+		Vector2 axis = new Vector2(0.0, 1.0);
+		
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, anchor, axis);
+		
+		TestCase.assertEquals(anchor, pj.getAnchor1());
+		TestCase.assertEquals(anchor, pj.getAnchor2());
+		TestCase.assertNotSame(anchor, pj.getAnchor1());
+		TestCase.assertNotSame(anchor, pj.getAnchor2());
+		TestCase.assertEquals(axis, pj.getAxis());
+		TestCase.assertNotSame(axis, pj.getAxis());
+		
+		TestCase.assertEquals(1000.0, pj.getMaximumMotorForce());
+		TestCase.assertEquals(0.0, pj.getMotorSpeed());
+		
+		TestCase.assertEquals(0.0, pj.getReferenceAngle());
+		
+		TestCase.assertEquals(0.0, pj.getLowerLimit());
+		TestCase.assertEquals(0.0, pj.getUpperLimit());
+		
+		TestCase.assertEquals(b1, pj.getBody1());
+		TestCase.assertEquals(b2, pj.getBody2());
+		
+		TestCase.assertEquals(null, pj.getOwner());
+		TestCase.assertEquals(null, pj.getUserData());
+		TestCase.assertEquals(b2, pj.getOtherBody(b1));
+		
+		TestCase.assertEquals(false, pj.isCollisionAllowed());
+		TestCase.assertEquals(false, pj.isLimitEnabled());
+		TestCase.assertEquals(false, pj.isMotorEnabled());
+		
+		TestCase.assertNotNull(pj.toString());
 	}
 	
 	/**
@@ -270,6 +301,41 @@ public class PrismaticJointTest extends AbstractJointTest {
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 	}
+
+	/**
+	 * Tests the successful setting of the reference angle.
+	 */
+	@Test
+	public void setReferenceAngle() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		TestCase.assertEquals(0.0, pj.getReferenceAngle());
+		
+		pj.setReferenceAngle(Math.toRadians(30));
+		
+		TestCase.assertEquals(Math.toRadians(30), pj.getReferenceAngle());
+	}
+
+	/**
+	 * Tests the shift method.
+	 */
+	@Test
+	public void shift() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(1.0, 1.0), new Vector2(0.0, 1.0));
+		
+		TestCase.assertEquals(1.0, pj.getAnchor1().x);
+		TestCase.assertEquals(1.0, pj.getAnchor1().y);
+		TestCase.assertEquals(1.0, pj.getAnchor2().x);
+		TestCase.assertEquals(1.0, pj.getAnchor2().y);
+		
+		pj.shift(new Vector2(1.0, 3.0));
+		
+		// nothing should have changed
+		TestCase.assertEquals(1.0, pj.getAnchor1().x);
+		TestCase.assertEquals(1.0, pj.getAnchor1().y);
+		TestCase.assertEquals(1.0, pj.getAnchor2().x);
+		TestCase.assertEquals(1.0, pj.getAnchor2().y);
+	}
 	
 	/**
 	 * Tests the successful setting of the upper limit.
@@ -357,6 +423,19 @@ public class PrismaticJointTest extends AbstractJointTest {
 		TestCase.assertEquals(0.0, pj.getUpperLimit());
 		
 		pj.setLimits(1.0, 0.0);
+	}
+	
+	/**
+	 * Tests the failed setting of the lower and upper limits.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setUpperAndLowerLimitsEnabledInvalid() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		TestCase.assertEquals(0.0, pj.getLowerLimit());
+		TestCase.assertEquals(0.0, pj.getUpperLimit());
+		
+		pj.setLimitsEnabled(1.0, 0.0);
 	}
 	
 	/**

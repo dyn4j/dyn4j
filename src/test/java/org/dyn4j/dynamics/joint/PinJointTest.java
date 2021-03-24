@@ -42,7 +42,29 @@ public class PinJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void createSuccess() {
-		new PinJoint<Body>(b1, new Vector2(), 4.0, 0.4, 10.0);
+		Vector2 p = new Vector2(1.0, -1.0);
+		PinJoint<Body> pj = new PinJoint<Body>(b1, p, 4.0, 0.4, 10.0);
+		
+		TestCase.assertEquals(p, pj.getAnchor1());
+		TestCase.assertEquals(p, pj.getAnchor2());
+		TestCase.assertNotSame(p, pj.getAnchor1());
+		TestCase.assertNotSame(p, pj.getAnchor2());
+		
+		TestCase.assertEquals(0.4, pj.getDampingRatio());
+		TestCase.assertEquals(4.0, pj.getFrequency());
+		TestCase.assertEquals(10.0, pj.getMaximumForce());
+		
+		TestCase.assertEquals(b1, pj.getBody1());
+		TestCase.assertEquals(b1, pj.getBody2());
+		
+		TestCase.assertEquals(null, pj.getOwner());
+		TestCase.assertEquals(null, pj.getUserData());
+		TestCase.assertEquals(b1, pj.getOtherBody(b1));
+		
+		TestCase.assertEquals(false, pj.isCollisionAllowed());
+		TestCase.assertEquals(p, pj.getTarget());
+		
+		TestCase.assertNotNull(pj.toString());
 	}
 	
 	/**
