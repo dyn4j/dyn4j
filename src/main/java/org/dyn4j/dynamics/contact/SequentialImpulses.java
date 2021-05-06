@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents an impulse based rigid {@link PhysicsBody} physics collision resolver.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.0
  * @since 3.2.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -553,8 +553,10 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * @see org.dyn4j.dynamics.contact.ContactConstraintSolver#solvePositionContraints(java.util.List, org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	public boolean solvePositionContraints(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings) {
+		int size = contactConstraints.size();
+		
 		// immediately return true if there are no contact constraints to solve
-		if (contactConstraints.isEmpty()) return true;
+		if (size == 0) return true;
 		
 		// track the minimum separation
 		double minSeparation = 0.0;
@@ -566,7 +568,6 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 		double baumgarte = settings.getBaumgarte();
 		
 		// loop through the contact constraints
-		int size = contactConstraints.size();
 		for (int i = 0; i < size; i++) {
 			ContactConstraint<T> contactConstraint = contactConstraints.get(i);
 			

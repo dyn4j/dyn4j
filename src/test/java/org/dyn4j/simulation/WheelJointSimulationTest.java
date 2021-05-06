@@ -26,7 +26,7 @@ package org.dyn4j.simulation;
 
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.dynamics.joint.PrismaticJoint;
+import org.dyn4j.dynamics.joint.WheelJoint;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
@@ -36,14 +36,14 @@ import org.junit.Test;
 import junit.framework.TestCase;
 
 /**
- * Used to test the {@link PrismaticJoint} class in simulation.
+ * Used to test the {@link WheelJoint} class in simulation.
  * @author William Bittle
  * @version 4.2.0
  * @since 4.2.0
  */
-public class PrismaticJointSimulationTest {
+public class WheelJointSimulationTest {
 	/**
-	 * Tests the body separation as enforced by the distance joint.
+	 * Tests with no motor/limits.
 	 */
 	@Test
 	public void noLimitsNoMotor() {
@@ -68,7 +68,7 @@ public class PrismaticJointSimulationTest {
 		b.setAngularDamping(0.0);
 		w.addBody(b);
 		
-		PrismaticJoint<Body> dj = new PrismaticJoint<Body>(g, b, b.getWorldCenter(), new Vector2(1.0, 0.0));
+		WheelJoint<Body> dj = new WheelJoint<Body>(g, b, b.getWorldCenter(), new Vector2(1.0, 0.0));
 		w.addJoint(dj);
 
 		w.step(4);
@@ -76,8 +76,8 @@ public class PrismaticJointSimulationTest {
 		// because the allowed axis is the x-axis and the position of the axis is at body2's world center
 		// gravity is applied but has no effect
 		Vector2 v2 = b.getWorldCenter();
-		TestCase.assertEquals(0.0, v2.x);
-		TestCase.assertEquals(2.0, v2.y);
+		TestCase.assertEquals(0.0, v2.x, 1e-3);
+		TestCase.assertEquals(2.0, v2.y, 1e-3);
 		
 		// apply some velocity along the y-axis
 		b.setLinearVelocity(0.0, 1.0);
@@ -86,8 +86,8 @@ public class PrismaticJointSimulationTest {
 		
 		// still nothing should happen
 		v2 = b.getWorldCenter();
-		TestCase.assertEquals(0.0, v2.x);
-		TestCase.assertEquals(2.0, v2.y);
+		TestCase.assertEquals(0.0, v2.x, 1e-3);
+		TestCase.assertEquals(2.0, v2.y, 1e-3);
 		
 		// now apply some velocity along the x-axis
 		b.setLinearVelocity(1.0, 1.0);
@@ -97,7 +97,7 @@ public class PrismaticJointSimulationTest {
 		// still nothing should happen
 		v2 = b.getWorldCenter();
 		TestCase.assertTrue(v2.x > 0.0);
-		TestCase.assertEquals(2.0, v2.y);
+		TestCase.assertEquals(2.0, v2.y, 1e-3);
 		
 		b.applyTorque(Math.toRadians(30));
 		w.step(1);
@@ -107,9 +107,10 @@ public class PrismaticJointSimulationTest {
 		// still nothing should happen
 		v2 = b.getWorldCenter();
 		TestCase.assertTrue(v2.x > 0.0);
-		TestCase.assertEquals(2.0, v2.y);
-		TestCase.assertEquals(0.0, b.getTransform().getRotationAngle());
-		TestCase.assertEquals(0.01047, dj.getReactionTorque(invdt), 1e-5);
+		TestCase.assertEquals(2.0, v2.y, 1e-3);
+		TestCase.assertEquals(0.0, b.getTransform().getRotationAngle(), 1e-3);
+		TestCase.assertEquals(7.91236, dj.getReactionForce(invdt).getMagnitude(), 1e-5);
+		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt), 1e-5);
 	}
 	
 	/**
@@ -118,8 +119,6 @@ public class PrismaticJointSimulationTest {
 	@Test
 	public void limits() {
 		World<Body> w = new World<Body>();
-		// take gravity out the picture
-		w.setGravity(World.ZERO_GRAVITY);
 		
 		// take friction and damping out of the picture
 		
@@ -141,7 +140,85 @@ public class PrismaticJointSimulationTest {
 		w.addBody(b);
 		
 		Vector2 p = b.getWorldCenter();
-		PrismaticJoint<Body> dj = new PrismaticJoint<Body>(g, b, p, new Vector2(1.0, 0.0));
+		WheelJoint<Body> dj = new WheelJoint<Body>(g, b, p, new Vector2(0.0, -1.0));
+		
+		// NOTE: that I've set the rest distance to more than the limits
+		dj.setLimitsEnabled(-1.0, 5.0);
+		dj.setFrequency(0.0);
+		w.addJoint(dj);
+		
+		Vector2 v2 = b.getWorldCenter();
+		TestCase.assertEquals(0.0, p.distance(v2));
+		
+		w.step(30);
+		double invdt = w.getTimeStep().getInverseDeltaTime();
+		
+		// gravity pulls down the circle to the lower limit
+		v2 = b.getWorldCenter();
+		TestCase.assertEquals(1.0, p.distance(v2), 1e-5);
+		TestCase.assertEquals(7.696, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
+		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt), 1e-3);
+		
+		w.setGravity(0.0, 98.0);
+		
+		w.step(30);
+
+		// gravity pulls up the circle to the upper limit
+		v2 = b.getWorldCenter();
+		TestCase.assertEquals(5.0, p.distance(v2), 1e-5);
+		TestCase.assertEquals(76.969, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
+		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt), 1e-3);
+		
+		w.setGravity(0.0, -9.8);
+		dj.setLimitsEnabled(-1.0, 4.0);
+		w.step(1);
+		
+		// the bodies should be placed at the upper limit
+		v2 = b.getWorldCenter();
+		TestCase.assertEquals(4.0, p.distance(v2), 1e-5);
+		TestCase.assertEquals(0.0, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
+		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt), 1e-3);
+		
+		w.step(50);
+		
+		dj.setLimitsEnabled(1.0, 3.0);
+		w.step(1);
+		
+		// the bodies should be placed at the lower limit
+		v2 = b.getWorldCenter();
+		TestCase.assertEquals(1.0, p.distance(v2), 1e-5);
+		TestCase.assertEquals(400.238, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
+		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt), 1e-3);
+	}
+
+	/**
+	 * Tests the bodies not exceeding the limits
+	 */
+	@Test
+	public void springDamper() {
+		World<Body> w = new World<Body>();
+		
+		// take friction and damping out of the picture
+		
+		Body g = new Body();
+		BodyFixture gf = g.addFixture(Geometry.createRectangle(10.0, 0.5));
+		gf.setFriction(0.0);
+		g.setMass(MassType.INFINITE);
+		g.setLinearDamping(0.0);
+		g.setAngularDamping(0.0);
+		w.addBody(g);
+		
+		Body b = new Body();
+		BodyFixture bf = b.addFixture(Geometry.createCircle(0.5));
+		bf.setFriction(0.0);
+		b.setMass(MassType.NORMAL);
+		b.translate(0.0, 2.0);
+		b.setLinearDamping(0.0);
+		b.setAngularDamping(0.0);
+		w.addBody(b);
+		
+		Vector2 p = b.getWorldCenter();
+		WheelJoint<Body> dj = new WheelJoint<Body>(g, b, p, new Vector2(0.0, -1.0));
 		
 		// NOTE: that I've set the rest distance to more than the limits
 		dj.setLimitsEnabled(-1.0, 5.0);
@@ -150,40 +227,41 @@ public class PrismaticJointSimulationTest {
 		Vector2 v2 = b.getWorldCenter();
 		TestCase.assertEquals(0.0, p.distance(v2));
 		
-		b.setLinearVelocity(16.0, 0.0);
-		w.step(1);
-		
+		w.step(20);
 		double invdt = w.getTimeStep().getInverseDeltaTime();
 		
-		// since the bodies are already 2.0 units apparent, nothing should happen
+		// gravity pulls down the circle, but spring fights back
 		v2 = b.getWorldCenter();
-		TestCase.assertEquals(0.26666, p.distance(v2), 1e-5);
-		TestCase.assertEquals(0.0, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
+		TestCase.assertEquals(0.00387, p.distance(v2), 1e-5);
+		TestCase.assertEquals(7.695, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
+		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt), 1e-3);
 		
-		dj.setLimitsEnabled(6.0, 7.0);
-		w.step(1);
+		// swap the lower limit
+		dj.setLimitsEnabled(1.0, 5.0);
+		w.step(2);
 		
-		// the bodies should be placed at the lower limit
+		// gravity pulls down the circle, but spring fights back
 		v2 = b.getWorldCenter();
-		TestCase.assertEquals(6.0, p.distance(v2), 1e-5);
-		TestCase.assertEquals(753.982, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
-		
-		b.setLinearVelocity(-16.0, 0.0);
-		dj.setLimitsEnabled(1.0, 3.0);
-		w.step(1);
-		
-		// the bodies should be placed at the upper limit
-		v2 = b.getWorldCenter();
-		TestCase.assertEquals(3.0, p.distance(v2), 1e-5);
-		TestCase.assertEquals(753.982, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
-	}
+		TestCase.assertEquals(1.0, p.distance(v2), 1e-5);
+		TestCase.assertEquals(7.695, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
+		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt), 1e-3);
 
+		// swap the upper limit
+		dj.setLimitsEnabled(-1.0, -0.5);
+		w.step(2);
+		
+		// gravity pulls down the circle, but spring fights back
+		v2 = b.getWorldCenter();
+		TestCase.assertEquals(0.5, p.distance(v2), 1e-5);
+		TestCase.assertEquals(911.350, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
+		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt), 1e-3);
+	}
 
 	/**
 	 * Tests the bodies with a motor
 	 */
 	@Test
-	public void motorWithAndWithoutLimits() {
+	public void motor() {
 		World<Body> w = new World<Body>();
 		// take gravity out the picture
 		w.setGravity(World.ZERO_GRAVITY);
@@ -208,11 +286,11 @@ public class PrismaticJointSimulationTest {
 		w.addBody(b);
 		
 		Vector2 p = b.getWorldCenter();
-		PrismaticJoint<Body> dj = new PrismaticJoint<Body>(g, b, p, new Vector2(-1.0, 0.0));
+		WheelJoint<Body> dj = new WheelJoint<Body>(g, b, p, new Vector2(-1.0, 0.0));
 		
 		// NOTE: that I've set the rest distance to more than the limits
-		dj.setMaximumMotorForce(1000);
-		dj.setMotorSpeed(10);
+		dj.setMaximumMotorTorque(10000);
+		dj.setMotorSpeed(Math.toRadians(90));
 		dj.setMotorEnabled(true);
 		w.addJoint(dj);
 		
@@ -221,70 +299,22 @@ public class PrismaticJointSimulationTest {
 		Vector2 v2 = b.getWorldCenter();
 		Vector2 v = b.getLinearVelocity();
 		TestCase.assertEquals(0.0, p.distance(v2));
-		TestCase.assertEquals(0.0, dj.getJointTranslation());
+		TestCase.assertEquals(0.0, dj.getAngularTranslation());
 		TestCase.assertEquals(0.0, v.x);
-		TestCase.assertEquals(0.0000, dj.getJointSpeed(), 1e-5);
-		TestCase.assertEquals(0.0, dj.getMotorForce(invdt));
+		TestCase.assertEquals(0.0000, dj.getAngularSpeed(), 1e-5);
+		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt));
 		
 		w.step(1);
 		
 		// since the bodies are already 2.0 units apparent, nothing should happen
 		v2 = b.getWorldCenter();
 		v = b.getLinearVelocity();
-		TestCase.assertEquals(0.16666, p.distance(v2), 1e-5);
-		TestCase.assertEquals(0.16666, dj.getJointTranslation(), 1e-5);
-		TestCase.assertEquals(10.0000, v.x, 1e-5);
-		TestCase.assertEquals(10.0000, dj.getJointSpeed(), 1e-5);
-		TestCase.assertEquals(471.238, dj.getMotorForce(invdt), 1e-3);
-		TestCase.assertEquals(471.238, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
-		
-		dj.setLimitsEnabled(6.0, 7.0);
-		w.step(1);
-		
-		// the bodies should be placed at the lower limit
-		v2 = b.getWorldCenter();
-		v = b.getLinearVelocity();
-		TestCase.assertEquals(6.0, p.distance(v2), 1e-5);
-		TestCase.assertEquals(6.0, dj.getJointTranslation(), 1e-5);
-		TestCase.assertEquals(10.0000, v.x, 1e-5);
-		TestCase.assertEquals(10.0000, dj.getJointSpeed(), 1e-5);
-		TestCase.assertEquals(0.0000, dj.getMotorForce(invdt), 1e-3);
-		TestCase.assertEquals(0.0000, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
-
-		// make sure it stops at the upper limit
-		w.step(10);
-		v2 = b.getWorldCenter();
-		v = b.getLinearVelocity();
-		TestCase.assertEquals(7.0000, p.distance(v2), 1e-5);
-		TestCase.assertEquals(7.0000, dj.getJointTranslation(), 1e-5);
-		TestCase.assertEquals(0.0000, v.x, 1e-5);
-		TestCase.assertEquals(0.0000, dj.getJointSpeed(), 1e-5);
-		TestCase.assertEquals(1000.0, dj.getMotorForce(invdt), 1e-3);
-		TestCase.assertEquals(0.0000, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
-		
-		dj.setMotorSpeed(-10.0);
-		
-		w.step(1);
-		v2 = b.getWorldCenter();
-		v = b.getLinearVelocity();
-		TestCase.assertEquals(6.83333, p.distance(v2), 1e-5);
-		TestCase.assertEquals(6.83333, dj.getJointTranslation(), 1e-5);
-		TestCase.assertEquals(-10.0000, v.x, 1e-5);
-		TestCase.assertEquals(-10.0000, dj.getJointSpeed(), 1e-5);
-		TestCase.assertEquals(-471.238, dj.getMotorForce(invdt), 1e-3);
-		TestCase.assertEquals(471.238, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
-		
-		w.step(10);
-		
-		// the bodies should be placed at the upper limit
-		v2 = b.getWorldCenter();
-		v = b.getLinearVelocity();
-		TestCase.assertEquals(6.0000, p.distance(v2), 1e-5);
-		TestCase.assertEquals(6.0000, dj.getJointTranslation(), 1e-5);
-		TestCase.assertEquals(0.0000, v.x, 1e-5);
-		TestCase.assertEquals(0.0000, dj.getJointSpeed(), 1e-5);
-		TestCase.assertEquals(-1000.0000, dj.getMotorForce(invdt), 1e-3);
-		TestCase.assertEquals(0.0000, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
+		TestCase.assertEquals(0.0, p.distance(v2), 1e-3);
+		TestCase.assertEquals(-0.026, dj.getAngularTranslation(), 1e-3);
+		TestCase.assertEquals(0.0, v.x, 1e-3);
+		TestCase.assertEquals(-1.5707, dj.getAngularSpeed(), 1e-3);
+		TestCase.assertEquals(9.252, dj.getReactionTorque(invdt), 1e-3);
+		TestCase.assertEquals(9.252, dj.getMotorTorque(invdt), 1e-3);
 	}
 	
 }
