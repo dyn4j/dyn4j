@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,11 +41,11 @@ import org.dyn4j.resources.Messages;
  * This algorithm is a O(nr) complexity algorithm where n is the number of input vertices and r is the number of
  * output convex polygons.  This algorithm can achieve optimal decompositions, however this is not guaranteed.
  * @author William Bittle
- * @version 3.1.10
+ * @version 4.2.0
  * @since 2.2.0
  * @see <a href="http://mnbayazit.com/406/bayazit" target="_blank">Bayazit</a>
  */
-public class Bayazit implements Decomposer {
+public class Bayazit extends AbstractDecomposer implements Decomposer {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.decompose.Decomposer#decompose(org.dyn4j.geometry.Vector2[])
 	 */

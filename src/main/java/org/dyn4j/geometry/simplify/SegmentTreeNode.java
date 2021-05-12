@@ -22,23 +22,58 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.dyn4j.geometry.simplify;
 
-module org.dyn4j
-{
-  exports org.dyn4j.collision.broadphase;
-  exports org.dyn4j.collision.continuous;
-  exports org.dyn4j.collision.manifold;
-  exports org.dyn4j.collision.narrowphase;
-  exports org.dyn4j.collision;
-  exports org.dyn4j.dynamics.contact;
-  exports org.dyn4j.dynamics.joint;
-  exports org.dyn4j.dynamics;
-  exports org.dyn4j.geometry.simplify;
-  exports org.dyn4j.geometry.decompose;
-  exports org.dyn4j.geometry.hull;
-  exports org.dyn4j.geometry;
-  exports org.dyn4j.world;
-  exports org.dyn4j.world.listener;
-  exports org.dyn4j.world.result;
-  exports org.dyn4j;
+import org.dyn4j.geometry.AABB;
+
+/**
+ * A generic {@link SegmentTree} node representing an AABB
+ * that encompasses all {@link SegmentTreeNode}s under this
+ * node.
+ * @author William Bittle
+ * @version 4.2.0
+ * @since 4.2.0
+ */
+class SegmentTreeNode {
+	/** The left child */
+	SegmentTreeNode left;
+	
+	/** The right child */
+	SegmentTreeNode right;
+	
+	/** The parent node */
+	SegmentTreeNode parent;
+	
+	/** The height of this subtree */
+	int height;
+	
+	/** The aabb containing all children */
+	final AABB aabb;
+	
+	/**
+	 * Default constructor.
+	 */
+	public SegmentTreeNode() {
+		this.aabb = new AABB(0,0,0,0);
+	}
+	
+	/**
+	 * Returns true if this node is a leaf node.
+	 * @return boolean true if this node is a leaf node
+	 */
+	public boolean isLeaf() {
+		return this.left == null;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("RTreeNode[AABB=").append(this.aabb.toString())
+		  .append("|Height=").append(this.height)
+		  .append("]");
+		return sb.toString();
+	}
 }

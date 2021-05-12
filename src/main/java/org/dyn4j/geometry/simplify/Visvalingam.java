@@ -1,127 +1,198 @@
+/*
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted 
+ * provided that the following conditions are met:
+ * 
+ *   * Redistributions of source code must retain the above copyright notice, this list of conditions 
+ *     and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+ *     and the following disclaimer in the documentation and/or other materials provided with the 
+ *     distribution.
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
+ *     promote products derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.dyn4j.geometry.simplify;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-import org.dyn4j.Epsilon;
-import org.dyn4j.geometry.AABB;
-import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
-// TODO this is the simple Visvalingam algorithm that doesn't handle self-intersection
-public final class Visvalingam extends AbstractSimplifier implements Simplifier {
-	private final double clusterTolerance;
+/**
+ * Simple polygon (without holes) simplifier that reduces the number of vertices by 
+ * inspecting the area created by adjacent vertices.  If the area created by three
+ * adjacent vertices is less than the given minimum, it's removed.
+ * <p>
+ * This algorithm is typically used to pre-process a simple polygon before another
+ * simplification algorithm is used.
+ * <p>
+ * This algorithm has O(n log n) complexity where n is the number of vertices in the source
+ * polygon.  This algorithm prevents self-intersections arising from the simplification
+ * process by skipping the simplification.
+ * <p>
+ * This method does not require the polygon to have any defined winding, but does assume
+ * that it does not have holes and is not self-intersecting.
+ * <p>
+ * This method handles null/empty lists, null elements, and all null elements.  In these
+ * cases it's possible the returned list will be empty or have less than 3 vertices.
+ * <p>
+ * NOTE: This algorithm's result is highly dependent on the given cluster tolerance, minimum
+ * area and the input polygon.  There's no guarantee that the result will have 3 or more 
+ * vertices.
+ * @author William Bittle
+ * @version 4.2.0
+ * @since 4.2.0
+ * @see <a href="https://bost.ocks.org/mike/simplify/">Visvalingam</a>
+ */
+public final class Visvalingam extends VertexClusterReduction implements Simplifier {
+	/** The minimum allowed triangular area */
 	private final double minimumTriangleArea;
-	private final boolean avoidSelfIntersection;
 	
-	private final RTree tree;
-	
+	/**
+	 * Minimal constructor.
+	 * @param clusterTolerance the minimum distance between adjacent points
+	 * @param minimumTriangleArea the minimum triangular area at each vertex
+	 * @throws IllegalArgumentException if clusterTolerance is less than zero or minimumTriangleArea is less than zero
+	 */
 	public Visvalingam(double clusterTolerance, double minimumTriangleArea) {
-		this(clusterTolerance, minimumTriangleArea, true);
-	}
-	
-	public Visvalingam(double clusterTolerance, double minimumTriangleArea, boolean avoidSelfIntersection) {
-		this.clusterTolerance = clusterTolerance;
-		this.minimumTriangleArea = minimumTriangleArea;
-		this.avoidSelfIntersection = avoidSelfIntersection;
+		super(clusterTolerance);
 		
-		this.tree = new RTree();
+		if (minimumTriangleArea < 0) throw new IllegalArgumentException(Messages.getString("geometry.simplify.invalidMinimumArea"));
+		
+		this.minimumTriangleArea = minimumTriangleArea;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.simplify.VertexClusterReduction#simplify(java.util.List)
+	 */
 	public List<Vector2> simplify(List<Vector2> vertices) {
 		if (vertices == null) {
 			return vertices;
 		}
 		
-		if (vertices.size() < 4) {
-			return vertices;
+		// reduce based on vertex clustering first
+		List<Vector2> reduced =  super.simplify(vertices);
+		
+		// check the total vertex size
+		if (reduced.size() < 4) {
+			return reduced;
 		}
 		
-		// 0. first reduce any clustered vertices in the polygon
-		vertices = this.simplifyClusteredVertices(vertices, this.clusterTolerance);
+		// now perform visvalingam
+		reduced = this.visvalingam(reduced);
 		
-		// 2. split into two polylines to simplify
-		List<Vector2> aReduced = this.visvalingam(vertices);
-		
-		this.tree.clear();
-		
-		return aReduced;
+		return reduced;
 	}
 	
 	/**
-	 * Recursively sub-divide the given polyline performing the douglas Peucker algorithm.
-	 * <p>
-	 * O(mn) in worst case, O(n log m) in best case, where n is the number of vertices in the
-	 * original polyline and m is the number of vertices in the reduced polyline.
-	 * @param polyline
-	 * @return
+	 * Compute the triangular area of each vertex and place them in a priority queue
+	 * from least area to greatest. Then, iterate the queue until a vertex is removed
+	 * who's area is greater than or equal to the configured area.
+	 * @param polygon the polygon to simplify
+	 * @return List&lt;{@link Vector2}&gt;
 	 */
-	private List<Vector2> visvalingam(List<Vector2> polyline) {
-		int size = polyline.size();
-		
+	private final List<Vector2> visvalingam(List<Vector2> polygon) {
 		// 1. compute the triangle area of each triplet of vertices
 		// 2. put all of them into a priority queue sorted by least area
 		// 3. iterate through all triangles
 		//		a. Pop triangle from queue
-		//		b. if triangle area > epsilon then skip
+		//		b. if triangle area > epsilon then we're done
 		//		c. if triangle area <= epsilon
 		//			i. remove the middle point
 		//			ii. recompute the areas of the two adjacent triangles
-		//			
-		// maintain a link from the vertices to a result list
-		// when a vertex is removed, remove it from the result
-		// maintain a doubly link list to update adjacent triangles?
-		// maintain a priority queue to order the triangles by least area
-
-		Queue<Vertex> queue = new PriorityQueue<Vertex>();
 		
-		Vector2 v0 = polyline.get(size - 1);
-		Vector2 v1 = polyline.get(0);
-		Vector2 v2 = polyline.get(1);
+		// build the priority queue of all triangles of the polygon
+		Queue<AreaTrackedVertex> queue = this.buildTriangleAreaQueue(polygon);
 		
-		Vertex vertex = new Vertex();
-		vertex.point = v1;
-		vertex.index = 0;
-		vertex.area = getTriangleArea(v0, v1, v2);
+		// build the segment tree
+		SegmentTree tree = this.buildSegmentTree(queue.peek());
+		
+		// begin evaluating the triangles
+		do {
+			// get a vertex (triangle)
+			AreaTrackedVertex v = queue.poll();
+			
+			// if the vertex with the minimum area is 
+			// greater than or equal to the minimum area
+			// we want, then we can stop, build the resulting
+			// simplified polygon and exit
+			if (v.area >= this.minimumTriangleArea) {
+				// use the linked list of vertices
+				// to build the simplified polygon
+				return this.buildResult(v);
+			}
+			
+			// next, check if removing this triangle will
+			// introduce a self intersection
+			if (isSelfIntersectionProduced(v, tree)) {
+				// if it does, then keep the vertex and
+				// continue the process
+				continue;
+			}
+			
+			// otherwise, remove this vertex from the linked
+			// list of vertices
+			if (this.removeVertex(v, queue, tree)) {
+				break;
+			}
+		} while (!queue.isEmpty());
+		
+		// return the result
+		return new ArrayList<Vector2>();
+	}
+	
+	/**
+	 * Builds a queue of vertices sorted by their triangular area. 
+	 * @param polygon the polygon vertices
+	 * @return Queue&lt;{@link AreaTrackedVertex}&gt;
+	 */
+	private final Queue<AreaTrackedVertex> buildTriangleAreaQueue(List<Vector2> polygon) {
+		int size = polygon.size();
+		Queue<AreaTrackedVertex> queue = new PriorityQueue<AreaTrackedVertex>();
+		
+		Vector2 v0 = polygon.get(size - 1);
+		Vector2 v1 = polygon.get(0);
+		Vector2 v2 = polygon.get(1);
+		
+		AreaTrackedVertex vertex = new AreaTrackedVertex(0, v1);
+		vertex.area = this.getTriangleArea(v0, v1, v2);
 		vertex.next = null;
 		vertex.prev = null;
 		vertex.prevSegment = null;
-		vertex.nextSegment = null;
-		
-		if (this.avoidSelfIntersection) {
-			// create the segments and add to RTree
-			RTreeLeaf nextSegment = new RTreeLeaf(v1, v2, 0, 1);
-			vertex.nextSegment = nextSegment;
-			tree.add(nextSegment);
-		}
+		vertex.nextSegment = new SegmentTreeLeaf(v1, v2, 0, 1);
+		queue.add(vertex);
 		
 		// reference the segments on the vertices (so we can remove/add when we remove add vertices)
-		
-		Vertex first = vertex;
-		Vertex prev = vertex;
+		AreaTrackedVertex first = vertex;
+		AreaTrackedVertex prev = vertex;
 		for (int i = 1; i < size; i++) {
 			int i0 = i - 1;
 			int i2 = i + 1 == size ? 0 : i + 1;
 			
-			v0 = polyline.get(i0);
-			v1 = polyline.get(i);
-			v2 = polyline.get(i2);
+			v0 = polygon.get(i0);
+			v1 = polygon.get(i);
+			v2 = polygon.get(i2);
 			
-			vertex = new Vertex();
-			vertex.point = v1;
-			vertex.index = i;
-			vertex.area = getTriangleArea(v0, v1, v2);
+			vertex = new AreaTrackedVertex(i, v1);
+			vertex.area = this.getTriangleArea(v0, v1, v2);
 			vertex.next = null;
 			vertex.prev = prev;
-
-			if (this.avoidSelfIntersection) {
-				vertex.prevSegment = prev.nextSegment;
-				vertex.nextSegment = new RTreeLeaf(v1, v2, i, i2);
-				tree.add(vertex.nextSegment);
-			}
+			vertex.prevSegment = prev.nextSegment;
+			vertex.nextSegment = new SegmentTreeLeaf(v1, v2, i, i2);
 			
 			prev.next = vertex;
 			prev = vertex;
@@ -130,296 +201,108 @@ public final class Visvalingam extends AbstractSimplifier implements Simplifier 
 		
 		first.prev = prev;
 		prev.next = first;
+		first.prevSegment = prev.nextSegment;
 		
-		if (this.avoidSelfIntersection) {
-			first.prevSegment = prev.nextSegment;
-		}
-		
-		List<Vector2> result = new ArrayList<Vector2>();
-		do {
-			Vertex v = queue.poll();
-			
-			if (v.area < this.minimumTriangleArea) {
-				if (this.avoidSelfIntersection && intersects(v)) {
-					// keep the vertex
-					continue;
-				}
-				
-				// skip this triangle, and update the others
-				Vertex tprev = v.prev;
-				Vertex tnext = v.next;
-				tprev.next = tnext;
-				tnext.prev = tprev;
-				
-				v0 = tprev.prev.point;
-				v1 = tprev.point;
-				v2 = tnext.point;
-				v.prev.area = getTriangleArea(v0, v1, v2);
-				
-				v0 = tprev.point;
-				v1 = tnext.point;
-				v2 = tnext.next.point;
-				v.next.area = getTriangleArea(v0, v1, v2);
-				
-				if (this.avoidSelfIntersection) {
-					v.prev.nextSegment = new RTreeLeaf(v1, v2, tprev.index, tnext.index);
-					v.next.prevSegment = v.prev.nextSegment;
-					tree.remove(v.prevSegment);
-					tree.remove(v.nextSegment);
-					tree.add(v.prev.nextSegment);
-				}
-				
-				queue.remove(tprev);
-				queue.remove(tnext);
-				
-				queue.add(tprev);
-				queue.add(tnext);
-			} else {
-				result.add(v.point);
-				Vertex n = v.next;
-				while (n != v) {
-					result.add(n.point);
-					n = n.next;
-				}
-				break;
-			}
-		} while (!queue.isEmpty());
-		
-		return result;
+		return queue;
 	}
 	
-	private double getTriangleArea(Vector2 v0, Vector2 v1, Vector2 v2) {
+	/**
+	 * Removes the given vertex from the queue and segment tree.
+	 * @param v the vertex to remove
+	 * @param queue the queue to remove the vertex from
+	 * @param tree the segment tree to remove the vertex from
+	 */
+	private final boolean removeVertex(AreaTrackedVertex v, Queue<AreaTrackedVertex> queue, SegmentTree tree) {
+		Vector2 v0 = null;
+		Vector2 v1 = null;
+		Vector2 v2 = null;
+		
+		AreaTrackedVertex tprev = (AreaTrackedVertex)v.prev;
+		AreaTrackedVertex tnext = (AreaTrackedVertex)v.next;
+		SegmentTreeLeaf tprevSegment = v.prevSegment;
+		SegmentTreeLeaf tnextSegment = v.nextSegment;
+		
+		tprev.next = tnext;
+		tnext.prev = tprev;
+		
+		// recompute the previous segment's triangular area
+		v0 = tprev.prev.point;
+		v1 = tprev.point;
+		v2 = tnext.point;
+		tprev.area = getTriangleArea(v0, v1, v2);
+
+		// recompute the next segment's triangular area
+		v0 = tprev.point;
+		v1 = tnext.point;
+		v2 = tnext.next.point;
+		tnext.area = getTriangleArea(v0, v1, v2);
+		
+		// build a new segment with the given vertex removed
+		v1 = tprev.point;
+		v2 = tnext.point;
+		
+		// update the segment tree to account for the removed segments/vertex
+		tprev.nextSegment = new SegmentTreeLeaf(v1, v2, tprev.index, tnext.index);
+		tnext.prevSegment = tprev.nextSegment;
+		// remove the two segments attached to the removed vertex
+		tree.remove(tprevSegment);
+		tree.remove(tnextSegment);
+		// add the new segment to the segment tree
+		tree.add(tprev.nextSegment);
+		
+		// remove the adjacent vertices from the queue
+		queue.remove(tprev);
+		queue.remove(tnext);
+		
+		// add them back to the queue so they are sorted in the correct place
+		queue.add(tprev);
+		queue.add(tnext);
+		
+		return tprev == tnext;
+	}
+	
+	/**
+	 * Returns the triangle area for the given vertices.
+	 * @param v0 the first vertex
+	 * @param v1 the second vertex
+	 * @param v2 the third vertex
+	 * @return double
+	 */
+	private final double getTriangleArea(Vector2 v0, Vector2 v1, Vector2 v2) {
 		double area = v0.x * (v1.y - v2.y) + v1.x * (v2.y - v0.y) + v2.x * (v0.y - v1.y);
 		area *= 0.5;
+		// abs to account for winding
 		return Math.abs(area);
 	}
 	
-
-	public boolean intersects(Vertex vertex) {
-		Vector2 v1 = vertex.prev.point;
-		Vector2 v2 = vertex.next.point;
-		
-		AABB aabb = AABB.createFromPoints(v1, v2);
-		Iterator<RTreeLeaf> bp = tree.getAABBDetectIterator(aabb);
-		while (bp.hasNext()) {
-			RTreeLeaf leaf = bp.next();
-			
-			if (vertex.index == leaf.index1 || vertex.index == leaf.index2) {
-				continue;
-			}
-			
-			if (vertex.prev.index == leaf.index1 || vertex.prev.index == leaf.index2) {
-				continue;
-			}
-			
-			if (vertex.next.index == leaf.index1 || vertex.next.index == leaf.index2) {
-				continue;
-			}
-			
-			// we need to verify the segments truly overlap
-			if (intersects(v1, v2, leaf.point1, leaf.point2)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	private boolean intersects(Vector2 a1, Vector2 a2, Vector2 b1, Vector2 b2) {
-		Vector2 A = a1.to(a2);
-		Vector2 B = b1.to(b2);
-
-		// compute the bottom
-		double BxA = B.cross(A);
-		// compute the top
-		double ambxA = a1.difference(b1).cross(A);
-		
-		// if the bottom is zero, then the segments are either parallel or coincident
-		if (Math.abs(BxA) <= Epsilon.E) {
-			// if the top is zero, then the segments are coincident
-			if (Math.abs(ambxA) <= Epsilon.E) {
-				// project the segment points onto the segment vector (which
-				// is the same for A and B since they are coincident)
-				A.normalize();
-				double ad1 = a1.dot(A);
-				double ad2 = a2.dot(A);
-				double bd1 = b1.dot(A);
-				double bd2 = b2.dot(A);
-				
-				// then compare their location on the number line for intersection
-				Interval ia = new Interval(ad1, ad2);
-				Interval ib = new Interval(bd1 < bd2 ? bd1 : bd2, bd1 > bd2 ? bd1 : bd2);
-				
-				if (ia.overlaps(ib)) {
-					return true;
-				}
-			}
-			
-			// otherwise they are parallel
-			return false;
-		}
-		
-		// if just the top is zero, then there's no intersection
-		if (Math.abs(ambxA) <= Epsilon.E) {
-			return false;
-		}
-		
-		// compute tb
-		double tb = ambxA / BxA;
-		if (tb <= 0.0 || tb >= 1.0) {
-			// no intersection
-			return false;
-		}
-		
-		// compute the intersection point
-		Vector2 ip = B.product(tb).add(b1);
-		
-		// since both are segments we need to verify that
-		// ta is also valid.
-		// compute ta
-		double ta = ip.difference(a1).dot(A) / A.dot(A);
-		if (ta <= 0.0 || ta >= 1.0) {
-			// no intersection
-			return false;
-		}
-		
-		return true;
-		
-//		// solve the problem algebraically
-//		Vector2 p0 = a1;
-//		Vector2 d0 = a1.to(a2);
-//		
-//		Vector2 p1 = b1;
-//		Vector2 p2 = b2;
-//		Vector2 d1 = b1.to(b2);
-//		
-//		// is the segment vertical or horizontal?
-//		boolean isVertical = Math.abs(d1.x) <= Epsilon.E;
-//		boolean isHorizontal = Math.abs(d1.y) <= Epsilon.E;
-//		
-//		// if it's both, then it's degenerate
-//		if (isVertical && isHorizontal) {
-//			// it's a degenerate line segment
-//			return false;
-//		}
-//		
-//		// any point on a ray can be found by the parametric equation:
-//		// P = tD0 + P0
-//		// any point on a segment can be found by:
-//		// P = sD1 + P1
-//		// substituting the first equation into the second yields:
-//		// tD0 + P0 = sD1 + P1
-//		// solve for s and t:
-//		// tD0.x + P0.x = sD1.x + P1.x
-//		// tD0.y + P0.y = sD1.y + P1.y
-//		// solve the first equation for s
-//		// s = (tD0.x + P0.x - P1.x) / D1.x
-//		// substitute into the second equation
-//		// tD0.y + P0.y = ((tD0.x + P0.x - P1.x) / D1.x) * D1.y + P1.y
-//		// solve for t
-//		// tD0.yD1.x + P0.yD1.x = tD0.xD1.y + P0.xD1.y - P1.xD1.y + P1.yD1.x
-//		// t(D0.yD1.x - D0.xD1.y) = P0.xD1.y - P0.yD1.x + D1.xP1.y - D1.yP1.x
-//		// t(D0.yD1.x - D0.xD1.y) = P0.cross(D1) + D1.cross(P1)
-//		// since the cross product is anti-cummulative
-//		// t(D0.yD1.x - D0.xD1.y) = -D1.cross(P0) + D1.cross(P1)
-//		// t(D0.yD1.x - D0.xD1.y) = D1.cross(P1) - D1.cross(P0)
-//		// t(D0.yD1.x - D0.xD1.y) = D1.cross(P1 - P0)
-//		// tD1.cross(D0) = D1.cross(P1 - P0)
-//		// t = D1.cross(P1 - P0) / D1.cross(D0)
-//		Vector2 p0ToP1 = p1.difference(p0);
-//		double num = d1.cross(p0ToP1);
-//		double den = d1.cross(d0);
-//		
-//		// check for zero denominator
-//		if (Math.abs(den) <= Epsilon.E) {
-//			// they are parallel but could be overlapping
-//			
-//			// since they are parallel d0 is the direction for both the
-//			// segment and the ray; ie d0 = d1
-//			
-//			// get the common direction's normal
-//			Vector2 n = d0.getRightHandOrthogonalVector();
-//			// project a point from each onto the normal
-//			double nDotP0 = n.dot(p0);
-//			double nDotP1 = n.dot(p1);
-//			// project the segment and ray onto the common direction's normal
-//			if (Math.abs(nDotP0 - nDotP1) < Epsilon.E) {
-//				// if their projections are close enough then they are
-//				// on the same line
-//				
-//				// project the ray start point onto the ray direction
-//				double d0DotP0 = d0.dot(p0);
-//				
-//				// project the segment points onto the ray direction
-//				// and subtract the ray start point to receive their
-//				// location on the ray direction relative to the ray
-//				// start
-//				double d0DotP1 = d0.dot(p1) - d0DotP0;
-//				double d0DotP2 = d0.dot(p2) - d0DotP0;
-//				
-//				// if one or both are behind the ray, then
-//				// we consider this a non-intersection
-//				if (d0DotP1 < 0.0 || d0DotP2 < 0.0) {
-//					// if either point is behind the ray
-//					return false;
-//				}
-//				
-//				return true;
-//			} else {
-//				// parallel but not overlapping
-//				return false;
-//			}
-//		}
-//		
-//		// compute t
-//		double t = num / den;
-//		
-//		// t should be in the range t >= 0.0
-//		if (t < 0.0) {
-//			return false;
-//		}
-//		
-//		double s = 0;
-//		if (isVertical) {
-//			// use the y values to compute s
-//			s = (t * d0.y + p0.y - p1.y) / d1.y;
-//		} else {
-//			// use the x values to compute s
-//			s = (t * d0.x + p0.x - p1.x) / d1.x;
-//		}
-//		
-//		// s should be in the range 0.0 <= s <= 1.0
-//		if (s < 0.0 || s > 1.0) {
-//			return false;
-//		}
-//		
-//		// return success
-//		return true;
-		
-	}
-	
-	private class Vertex implements Comparable<Vertex> {
-		/** The index of the vertex in the original simple polygon */
-		public int index;
-		
-		/** The next vertex */
-		public Vertex next;
-		
-		/** The prev vertex */
-		public Vertex prev;
-		
-		/** The vertex point */
-		public Vector2 point;
-		
+	/**
+	 * Represents a vertex of a simple polygon with a linked list
+	 * running through it.  It also contains the area produced by this
+	 * vertex and the adjacent vertices. We also use it to track the
+	 * vertex index (for comparing adjacent segments) and the adjacent
+	 * segments.
+	 * @author William Bittle
+	 * @version 4.2.0
+	 * @since 4.2.0
+	 */
+	private final class AreaTrackedVertex extends SimplePolygonVertex implements Comparable<AreaTrackedVertex> {
 		/** The triangle area */
-		public double area;
+		double area;
 		
-		// only used if avoiding self intersection
+		/**
+		 * Minimal constructor.
+		 * @param index the vertex index
+		 * @param point the vertex point
+		 */
+		public AreaTrackedVertex(int index, Vector2 point) {
+			super(index, point);
+		}
 		
-		public RTreeLeaf prevSegment;
-		public RTreeLeaf nextSegment;
-		
+		/* (non-Javadoc)
+		 * @see java.lang.Comparable#compareTo(java.lang.Object)
+		 */
 		@Override
-		public int compareTo(Vertex o) {
+		public int compareTo(AreaTrackedVertex o) {
 			// order based on triangle area
 			double diff = this.area - o.area;
 			if (diff < 0) {
@@ -430,6 +313,9 @@ public final class Visvalingam extends AbstractSimplifier implements Simplifier 
 			return 0;
 		}
 		
+		/* (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
 		@Override
 		public String toString() {
 			return this.point.toString();

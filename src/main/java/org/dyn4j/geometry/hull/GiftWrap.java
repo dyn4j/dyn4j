@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,10 +40,10 @@ import org.dyn4j.resources.Messages;
  * This algorithm is O(nh) worst case where n is the number of points and h is the
  * number of sides in the resulting convex hull.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.2.0
  * @since 2.2.0
  */
-public class GiftWrap implements HullGenerator {
+public class GiftWrap extends AbstractHullGenerator implements HullGenerator {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.hull.HullGenerator#generate(org.dyn4j.geometry.Vector2[])
 	 */

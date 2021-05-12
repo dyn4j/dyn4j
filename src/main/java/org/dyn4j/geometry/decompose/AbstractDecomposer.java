@@ -22,23 +22,27 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.dyn4j.geometry.decompose;
 
-module org.dyn4j
-{
-  exports org.dyn4j.collision.broadphase;
-  exports org.dyn4j.collision.continuous;
-  exports org.dyn4j.collision.manifold;
-  exports org.dyn4j.collision.narrowphase;
-  exports org.dyn4j.collision;
-  exports org.dyn4j.dynamics.contact;
-  exports org.dyn4j.dynamics.joint;
-  exports org.dyn4j.dynamics;
-  exports org.dyn4j.geometry.simplify;
-  exports org.dyn4j.geometry.decompose;
-  exports org.dyn4j.geometry.hull;
-  exports org.dyn4j.geometry;
-  exports org.dyn4j.world;
-  exports org.dyn4j.world.listener;
-  exports org.dyn4j.world.result;
-  exports org.dyn4j;
+import java.util.List;
+
+import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Vector2;
+
+/**
+ * Abstract implementation of the {@link Decomposer} interface.
+ * @author William Bittle
+ * @version 4.2.0
+ * @since 4.2.0
+ */
+public abstract class AbstractDecomposer implements Decomposer {
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.decompose.Decomposer#decompose(java.util.List)
+	 */
+	@Override
+	public List<Convex> decompose(List<Vector2> points) {
+		Vector2[] pts = new Vector2[points.size()];
+		points.toArray(pts);
+		return this.decompose(pts);
+	}
 }

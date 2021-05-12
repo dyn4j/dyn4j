@@ -27,9 +27,8 @@ package org.dyn4j.geometry;
 /**
  * This class provides geometric routines that have guarantees about some properties
  * of their floating point results and operations.
- * 
  * @author Manolis Tsamis
- * @version 3.4.0
+ * @version 4.2.0
  * @since 3.4.0
  */
 public final class RobustGeometry {
@@ -81,7 +80,7 @@ public final class RobustGeometry {
 	 * @return The result
 	 * @see #cross(double, double, double, double, AdaptiveDecimal)
 	 */
-	public static AdaptiveDecimal cross(double ax, double ay, double bx, double by) {
+	static AdaptiveDecimal cross(double ax, double ay, double bx, double by) {
 		return cross(ax, ay, bx, by, null);
 	}
 	
@@ -98,7 +97,7 @@ public final class RobustGeometry {
 	 * @param result The {@link AdaptiveDecimal} in which the cross product is stored
 	 * @return The result
 	 */
-	public static AdaptiveDecimal cross(double ax, double ay, double bx, double by, AdaptiveDecimal result) {
+	static AdaptiveDecimal cross(double ax, double ay, double bx, double by, AdaptiveDecimal result) {
 		double axby = ax * by;
 		double aybx = bx * ay;
 		double axbyTail = AdaptiveDecimal.getErrorComponentFromProduct(ax, by, axby);

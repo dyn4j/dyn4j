@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,8 @@
  */
 package org.dyn4j.geometry.hull;
 
+import java.util.List;
+
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Vector2;
@@ -36,7 +38,7 @@ import org.dyn4j.geometry.Vector2;
  * Algorithms implementing this interface are intended for general use but does not imply that
  * the results produced would be appropriate for the core dyn4j engine.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.2.0
  * @since 2.2.0
  */
 public interface HullGenerator {
@@ -51,4 +53,17 @@ public interface HullGenerator {
 	 * @throws NullPointerException if points is null or contains null points
 	 */
 	public abstract Vector2[] generate(Vector2... points);
+	
+	/**
+	 * Returns a convex hull generated from the given point set in counter-clockwise point order.
+	 * <p>
+	 * Returns null if the given points array is null.
+	 * <p>
+	 * Returns the array unchanged if the length is less than or equal to 2.
+	 * @param points the point set or cloud
+	 * @return List&lt;{@link Vector2}&gt; the convex hull vertices
+	 * @throws NullPointerException if points is null or contains null points
+	 * @since 4.2.0
+	 */
+	public abstract List<Vector2> generate(List<Vector2> points);
 }

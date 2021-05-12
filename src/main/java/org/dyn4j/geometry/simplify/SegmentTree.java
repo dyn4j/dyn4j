@@ -1,37 +1,80 @@
+/*
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted 
+ * provided that the following conditions are met:
+ * 
+ *   * Redistributions of source code must retain the above copyright notice, this list of conditions 
+ *     and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+ *     and the following disclaimer in the documentation and/or other materials provided with the 
+ *     distribution.
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
+ *     promote products derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.dyn4j.geometry.simplify;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.dyn4j.Epsilon;
 import org.dyn4j.geometry.AABB;
-import org.dyn4j.geometry.Vector2;
 
-class RTree {
-
-	RTreeNode root;
+/**
+ * An adaptation of the DynamicAABBTree implementation specifically for segments
+ * used to detect self-intersection during the simple polygon (without holes)
+ * simplification.
+ * <p>
+ * This is not a general purpose data structure.  Instead it's intended exactly
+ * for the purpose described above.  If you want a more general purpose implementation
+ * look at the DynamicAABBTree implementation in the broadphase package.
+ * @author William Bittle
+ * @version 4.2.0
+ * @since 4.2.0
+ */
+final class SegmentTree {
+	/** The root node */
+	private SegmentTreeNode root;
 	
-	public void add(RTreeLeaf leaf) {
+	/**
+	 * Adds the given segment to the tree.
+	 * @param leaf the segment to add
+	 */
+	public void add(SegmentTreeLeaf leaf) {
 		this.insert(leaf);
 	}
 	
-	public void remove(RTreeLeaf leaf) {
-		this.remove((RTreeNode)leaf);
+	/**
+	 * Removes the given segment from the tree.
+	 * @param leaf the segment to remove
+	 */
+	public void remove(SegmentTreeLeaf leaf) {
+		this.remove((SegmentTreeNode)leaf);
 	}
 	
-	public Iterator<RTreeLeaf> getAABBDetectIterator(AABB aabb) {
+	/**
+	 * Returns all segments that collide with the given AABB.
+	 * @param aabb the AABB
+	 * @return Iterator&lt;{@link SegmentTreeLeaf}&gt;
+	 */
+	public Iterator<SegmentTreeLeaf> getAABBDetectIterator(AABB aabb) {
 		return new DetectAABBIterator(aabb);
-	}
-	
-	public void clear() {
-		this.root = null;
 	}
 	
 	/**
 	 * Internal method to insert a node into the tree.
 	 * @param item the node to insert
 	 */
-	private void insert(RTreeNode item) {
+	private void insert(SegmentTreeNode item) {
 		// make sure the root is not null
 		if (this.root == null) {
 			// if it is then set this node as the root
@@ -46,7 +89,7 @@ class RTree {
 		AABB itemAABB = item.aabb;
 		
 		// start looking for the insertion point at the root
-		RTreeNode node = this.root;
+		SegmentTreeNode node = this.root;
 		// loop until node is a leaf or we find a better location
 		while (!node.isLeaf()) {
 			// get the current node's aabb
@@ -71,8 +114,8 @@ class RTree {
 			double descendCost = 2 * (unionPerimeter - perimeter);
 			
 			// get the left and right nodes
-			RTreeNode left = node.left;
-			RTreeNode right = node.right;
+			SegmentTreeNode left = node.left;
+			SegmentTreeNode right = node.right;
 			
 			// compute the cost of descending to the left
 			double costl = 0.0;
@@ -111,11 +154,9 @@ class RTree {
 		
 		// now that we have found a suitable place, insert a new root
 		// node for node and item
-		RTreeNode parent = node.parent;
-		RTreeNode newParent = new RTreeNode();
+		SegmentTreeNode parent = node.parent;
+		SegmentTreeNode newParent = new SegmentTreeNode();
 		newParent.parent = node.parent;
-//		newParent.aabb = node.aabb.getUnion(itemAABB);
-//		newParent.aabb.set(node.aabb.getUnion(itemAABB));
 		newParent.aabb.union(node.aabb, itemAABB);
 		newParent.height = node.height + 1;
 		
@@ -146,8 +187,8 @@ class RTree {
 			// balance the current tree
 			node = balance(node);
 			
-			RTreeNode left = node.left;
-			RTreeNode right = node.right;
+			SegmentTreeNode left = node.left;
+			SegmentTreeNode right = node.right;
 			
 			// neither node should be null
 			node.height = 1 + Math.max(left.height, right.height);
@@ -162,7 +203,7 @@ class RTree {
 	 * Internal method to remove a node from the tree.
 	 * @param node the node to remove
 	 */
-	private void remove(RTreeNode node) {
+	private void remove(SegmentTreeNode node) {
 		// check for an empty tree
 		// should never happen based on current usage
 		if (this.root == null) return;
@@ -175,9 +216,9 @@ class RTree {
 		}
 		
 		// get the node's parent, grandparent, and sibling
-		RTreeNode parent = node.parent;
-		RTreeNode grandparent = parent.parent;
-		RTreeNode other;
+		SegmentTreeNode parent = node.parent;
+		SegmentTreeNode grandparent = parent.parent;
+		SegmentTreeNode other;
 		if (parent.left == node) {
 			other = parent.right;
 		} else {
@@ -198,17 +239,16 @@ class RTree {
 			other.parent = grandparent;
 			
 			// finally rebalance the tree
-			RTreeNode n = grandparent;
+			SegmentTreeNode n = grandparent;
 			while (n != null) {
 				// balance the current subtree
 				n = balance(n);
 				
-				RTreeNode left = n.left;
-				RTreeNode right = n.right;
+				SegmentTreeNode left = n.left;
+				SegmentTreeNode right = n.right;
 				
 				// neither node should be null
 				n.height = 1 + Math.max(left.height, right.height);
-//				n.aabb.set(left.aabb).union(right.aabb);
 				n.aabb.union(left.aabb, right.aabb);
 				
 				n = n.parent;
@@ -226,8 +266,8 @@ class RTree {
 	 * @param node the root node of the subtree to balance
 	 * @return {@link DynamicAABBTreeNode} the new root of the subtree
 	 */
-	private RTreeNode balance(RTreeNode node) {
-		RTreeNode a = node;
+	private SegmentTreeNode balance(SegmentTreeNode node) {
+		SegmentTreeNode a = node;
 		
 		// see if the node is a leaf node or if
 		// it doesn't have enough children to be unbalanced
@@ -237,8 +277,8 @@ class RTree {
 		}
 		
 		// get the nodes left and right children
-		RTreeNode b = a.left;
-		RTreeNode c = a.right;
+		SegmentTreeNode b = a.left;
+		SegmentTreeNode c = a.right;
 		
 		// compute the balance factor for node a
 		int balance = c.height - b.height;
@@ -246,8 +286,8 @@ class RTree {
 		// if the balance is off on the right side
 		if (balance > 1) {
 			// get the c's left and right nodes
-			RTreeNode f = c.left;
-			RTreeNode g = c.right;
+			SegmentTreeNode f = c.left;
+			SegmentTreeNode g = c.right;
 			
 			// switch a and c
 			c.left = a;
@@ -272,9 +312,7 @@ class RTree {
 				a.right = g;
 				g.parent = a;
 				// update the aabb
-//				a.aabb.set(b.aabb).union(g.aabb);
 				a.aabb.union(b.aabb, g.aabb);
-//				c.aabb.set(a.aabb).union(f.aabb);
 				c.aabb.union(a.aabb, f.aabb);
 				// update the heights
 				a.height = 1 + Math.max(b.height, g.height);
@@ -285,9 +323,7 @@ class RTree {
 				a.right = f;
 				f.parent = a;
 				// update the aabb
-//				a.aabb.set(b.aabb).union(f.aabb);
 				a.aabb.union(b.aabb, f.aabb);
-//				c.aabb.set(a.aabb).union(g.aabb);
 				c.aabb.union(a.aabb, g.aabb);
 				// update the heights
 				a.height = 1 + Math.max(b.height, f.height);
@@ -299,8 +335,8 @@ class RTree {
 		// if the balance is off on the left side
 		if (balance < -1) {
 			// get b's children
-			RTreeNode d = b.left;
-			RTreeNode e = b.right;
+			SegmentTreeNode d = b.left;
+			SegmentTreeNode e = b.right;
 			
 			// switch a and b
 			b.left = a;
@@ -325,9 +361,7 @@ class RTree {
 				a.left = e;
 				e.parent = a;
 				// update the aabb
-//				a.aabb.set(c.aabb).union(e.aabb);
 				a.aabb.union(c.aabb, e.aabb);
-//				b.aabb.set(a.aabb).union(d.aabb);
 				b.aabb.union(a.aabb, d.aabb);
 				// update the heights
 				a.height = 1 + Math.max(c.height, e.height);
@@ -338,9 +372,7 @@ class RTree {
 				a.left = d;
 				d.parent = a;
 				// update the aabb
-//				a.aabb.set(c.aabb).union(d.aabb);
 				a.aabb.union(c.aabb, d.aabb);
-//				b.aabb.set(a.aabb).union(e.aabb);
 				b.aabb.union(a.aabb, e.aabb);
 				// update the heights
 				a.height = 1 + Math.max(c.height, d.height);
@@ -359,15 +391,15 @@ class RTree {
 	 * @version 4.0.0
 	 * @since 4.0.0
 	 */
-	private final class DetectAABBIterator implements Iterator<RTreeLeaf> {
+	private final class DetectAABBIterator implements Iterator<SegmentTreeLeaf> {
 		/** The {@link AABB} to test with */
 		private final AABB aabb;
 		
 		/** Internal state to track the node in the tree we're testing against */
-		private RTreeNode currentNode;
+		private SegmentTreeNode currentNode;
 		
 		/** The next item to return */
-		private RTreeLeaf nextItem;
+		private SegmentTreeLeaf nextItem;
 		
 		/**
 		 * Minimal constructor.
@@ -375,7 +407,7 @@ class RTree {
 		 */
 		public DetectAABBIterator(AABB aabb) {
 			this.aabb = aabb;
-			this.currentNode = RTree.this.root;
+			this.currentNode = SegmentTree.this.root;
 			this.findNext();
 		}
 		
@@ -391,9 +423,9 @@ class RTree {
 		 * @see java.util.Iterator#next()
 		 */
 		@Override
-		public RTreeLeaf next() {
+		public SegmentTreeLeaf next() {
 			if (this.nextItem != null) {
-				RTreeLeaf item = this.nextItem;
+				SegmentTreeLeaf item = this.nextItem;
 				this.findNext();
 				return item;
 			}
@@ -420,7 +452,7 @@ class RTree {
 			boolean foundCollision = false;
 			
 			// start where we left off
-			RTreeNode node = this.currentNode;
+			SegmentTreeNode node = this.currentNode;
 			
 			// perform a iterative, stack-less, traversal of the tree
 			while (node != null) {
@@ -433,8 +465,7 @@ class RTree {
 						continue;
 					} else {
 						// if both are null, then this is a leaf node
-						@SuppressWarnings("unchecked")
-						RTreeLeaf leaf = (RTreeLeaf)node;
+						SegmentTreeLeaf leaf = (SegmentTreeLeaf)node;
 						
 						// record the collision details
 						this.nextItem = leaf;

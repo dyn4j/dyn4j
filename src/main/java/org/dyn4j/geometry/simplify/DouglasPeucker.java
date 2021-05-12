@@ -1,100 +1,102 @@
+/*
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted 
+ * provided that the following conditions are met:
+ * 
+ *   * Redistributions of source code must retain the above copyright notice, this list of conditions 
+ *     and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+ *     and the following disclaimer in the documentation and/or other materials provided with the 
+ *     distribution.
+ *   * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
+ *     promote products derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.dyn4j.geometry.simplify;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.dyn4j.Epsilon;
-import org.dyn4j.geometry.AABB;
-import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.resources.Messages;
 
-// TODO this is the simple Douglas-Peucker algorithm that doesn't handle self-intersection
-public final class DouglasPeucker extends AbstractSimplifier implements Simplifier {
-	// TODO this should be an input
-	private final double clusterTolerance;
-	private final double e;
-	private final boolean avoidSelfIntersection;
-	
-	private final RTree tree;
-	
+/**
+ * Simple polygon (without holes) simplifier that reduces the number of vertices by 
+ * removing points that are less than epsilon distance away from a guide line.
+ * <p>
+ * NOTE: This algorithm is designed for polylines, but has been adapted for simple
+ * polygons without holes by first sub-dividing the polygon into two polylines.
+ * This first sub-division process will always be from the first vertex in the polygon
+ * to the vertex farthest from the first vertex.
+ * <p>
+ * The guide line is defined by the line from the start to the end of the polyline
+ * being processed.  If all points between the start and end point of the polyline are
+ * epsilon or more distant from the guide line, the algorithm splits the polyline
+ * and processes each part.  This continues recursively until the algorithm is complete.
+ * <p>
+ * This algorithm has O(n log n) complexity where n is the number of vertices in the source
+ * polygon.  This algorithm prevents self-intersections arising from the simplification
+ * process by skipping the simplification.
+ * <p>
+ * This method does not require the polygon to have any defined winding, but does assume
+ * that it does not have holes and is not self-intersecting.
+ * <p>
+ * This method handles null/empty lists, null elements, and all null elements.  In these
+ * cases it's possible the returned list will be empty or have less than 3 vertices.
+ * <p>
+ * NOTE: This algorithm's result is highly dependent on the given cluster tolerance, epsilon
+ * and the input polygon.  There's no guarantee that the result will have 3 or more vertices.
+ * @author William Bittle
+ * @version 4.2.0
+ * @since 4.2.0
+ * @see <a href="https://bost.ocks.org/mike/simplify/">Vertex Cluster Reduction</a>
+ */
+public final class DouglasPeucker extends VertexClusterReduction implements Simplifier {
+	/** The minimum distance epsilon */
+	private final double epsilon;
+
+	/**
+	 * Minimal constructor.
+	 * @param clusterTolerance the cluster tolerance; must be zero or greater
+	 * @param epsilon the minimum distance epsilon; must be zero or greater
+	 * @throws IllegalArgumentException if clusterTolerance is less than zero or epsilon is less than zero
+	 */
 	public DouglasPeucker(double clusterTolerance, double epsilon) {
-		this.clusterTolerance = clusterTolerance;
-		this.e = epsilon;
-		this.avoidSelfIntersection = true;
-		this.tree = new RTree();
+		super(clusterTolerance);
+		
+		if (epsilon < 0) throw new IllegalArgumentException(Messages.getString("geometry.simplify.invalidEpsilon"));
+		
+		this.epsilon = epsilon;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.simplify.VertexClusterReduction#simplify(java.util.List)
+	 */
 	public List<Vector2> simplify(List<Vector2> vertices) {
 		if (vertices == null) {
 			return vertices;
 		}
 		
+		// first simplify via vertex clustering
+		vertices = super.simplify(vertices);
+		
 		if (vertices.size() < 4) {
 			return vertices;
 		}
 		
-		List<Vector2> result = new ArrayList<Vector2>();
-		
-		// 0. first reduce any clustered vertices in the polygon
-		vertices = this.simplifyClusteredVertices(vertices, this.clusterTolerance);
-		
-		int size = vertices.size();
-		List<Vertex> verts = new ArrayList<Vertex>();
-		
-		Vector2 v1 = vertices.get(0);
-		Vector2 v2 = vertices.get(1);
-		
-		Vertex vertex = new Vertex();
-		vertex.point = v1;
-		vertex.index = 0;
-		vertex.next = null;
-		vertex.prev = null;
-		vertex.prevSegment = null;
-		vertex.nextSegment = null;
-		
-		if (this.avoidSelfIntersection) {
-			// create the segments and add to RTree
-			RTreeLeaf nextSegment = new RTreeLeaf(v1, v2, 0, 1);
-			vertex.nextSegment = nextSegment;
-			tree.add(nextSegment);
-		}
-		
-		// reference the segments on the vertices (so we can remove/add when we remove add vertices)
-		
-		Vertex first = vertex;
-		Vertex prev = vertex;
-		for (int i = 0; i < size; i++) {
-			int i0 = i - 1;
-			int i2 = i + 1 == size ? 0 : i + 1;
-			
-			v1 = vertices.get(i);
-			v2 = vertices.get(i2);
-			
-			vertex = new Vertex();
-			vertex.point = v1;
-			vertex.index = i;
-			vertex.next = null;
-			vertex.prev = prev;
-
-			if (this.avoidSelfIntersection) {
-				vertex.prevSegment = prev.nextSegment;
-				vertex.nextSegment = new RTreeLeaf(v1, v2, i, i2);
-				tree.add(vertex.nextSegment);
-			}
-			
-			prev.next = vertex;
-			prev = vertex;
-			verts.add(vertex);	
-		}
-		
-		first.prev = prev;
-		prev.next = first;
-		
-		if (this.avoidSelfIntersection) {
-			first.prevSegment = prev.nextSegment;
-		}
-		
+		// build a linked list of vertices
+		List<SimplePolygonVertex> verts = this.buildVertexList(vertices);
+		SegmentTree tree = this.buildSegmentTree(verts.get(0));
 		
 		// 1. find two points to split the poly into two halves
 		// for example:
@@ -107,14 +109,13 @@ public final class DouglasPeucker extends AbstractSimplifier implements Simplifi
 		int endIndex = this.getFartherestVertexFromVertex(startIndex, vertices);
 		
 		// 2. split into two polylines to simplify
-		List<Vector2> aReduced = this.douglasPeucker(verts.subList(startIndex, endIndex + 1));
-		List<Vector2> bReduced = this.douglasPeucker(verts.subList(endIndex, vertices.size()));
+		List<Vector2> aReduced = this.douglasPeucker(verts.subList(startIndex, endIndex + 1), tree);
+		List<Vector2> bReduced = this.douglasPeucker(verts.subList(endIndex, vertices.size()), tree);
 		
 		// 3. merge the two polylines back together
+		List<Vector2> result = new ArrayList<Vector2>();
 		result.addAll(aReduced.subList(0, aReduced.size() - 1));
 		result.addAll(bReduced);
-		
-		this.tree.clear();
 		
 		return result;
 	}
@@ -125,62 +126,81 @@ public final class DouglasPeucker extends AbstractSimplifier implements Simplifi
 	 * O(mn) in worst case, O(n log m) in best case, where n is the number of vertices in the
 	 * original polyline and m is the number of vertices in the reduced polyline.
 	 * @param polyline
-	 * @return
+	 * @return List&lt;{@link Vector2}&gt;
 	 */
-	private List<Vector2> douglasPeucker(List<Vertex> polyline) {
+	private final List<Vector2> douglasPeucker(List<SimplePolygonVertex> polyline, SegmentTree tree) {
 		int size = polyline.size();
-
+		List<Vector2> result = new ArrayList<Vector2>();
+		
+		// can't do anything with 1 or 2 points - we just have to keep them
+		if (size < 3) {
+			for (int i = 0; i < size; i++) {
+				result.add(polyline.get(i).point);
+			}
+			return result;
+		}
+		
 		// get the start/end vertices of the polyline
-		Vector2 start = polyline.get(0).point;
-		Vector2 end = polyline.get(size - 1).point;
+		SimplePolygonVertex sv = polyline.get(0);
+		SimplePolygonVertex ev = polyline.get(size - 1);
 		
 		// get the farthest vertex from the line created from the start to the end
 		// vertex on the polyline
-		FarthestVertex fv = this.getFarthestVertexFromLine(start, end, polyline);
+		FarthestVertex fv = this.getFarthestVertexFromLine(sv, ev, polyline);
 		
 		// check the farthest point's distance - if it's higher than the minimum
 		// distance epsilon, then we need to subdivide the polyline since we can't
 		// reduce here (we might be able to reduce elsewhere)
-		List<Vector2> result = new ArrayList<Vector2>();
-		if (fv.distance > e) {
+		if (fv.distance >= epsilon) {
 			// sub-divide and run the algo on each half
-			List<Vector2> aReduced = this.douglasPeucker(polyline.subList(0, fv.index + 1));
-			List<Vector2> bReduced = this.douglasPeucker(polyline.subList(fv.index, size));
+			List<Vector2> aReduced = this.douglasPeucker(polyline.subList(0, fv.index + 1), tree);
+			List<Vector2> bReduced = this.douglasPeucker(polyline.subList(fv.index, size), tree);
 			
 			// recombine the reduced polylines
 			result.addAll(aReduced.subList(0, aReduced.size() - 1));
 			result.addAll(bReduced);
 		} else {
-			if (this.avoidSelfIntersection && this.intersects(polyline.get(0), polyline.get(size - 1))) {
-				for (int i = 0; i < size; i++) {
-					result.add(polyline.get(i).point);
-				}
+			// check for self-intersection
+			if (this.isSelfIntersectionProduced(sv, ev, tree)) {
+				// if removing all the points between v1 and v2 produces self-intersection
+				// then we can either stop and all points between v1 and v2 to the result
+				// or we can split the polyline by the farthest point and try to simplify
+				// those sub-polylines
+				
+				// sub-divide and run the algo on each half
+				List<Vector2> aReduced = this.douglasPeucker(polyline.subList(0, fv.index + 1), tree);
+				List<Vector2> bReduced = this.douglasPeucker(polyline.subList(fv.index, size), tree);
+				
+				// recombine the reduced polylines
+				result.addAll(aReduced.subList(0, aReduced.size() - 1));
+				result.addAll(bReduced);
+				
 				return result;
 			}
 			
-			if (this.avoidSelfIntersection && size >= 3) {
-				// remove all segments from the r-tree in between these vertices
-				Vertex s = polyline.get(0);
-				Vertex e = polyline.get(size - 1);
-				
-				Vertex b = s;
-				while (b != e) {
-					this.tree.remove(b.nextSegment);
-					b = b.next;
-				}
-				
-				s.next = e;
-				e.prev = s;
-				s.nextSegment = new RTreeLeaf(start, end, s.index, e.index);
-				e.prevSegment = s.nextSegment;
-				
-				this.tree.add(s.nextSegment);
+			// if there's no self-intersection, then we need to remove
+			// all segments from the segment tree in between these vertices
+			SimplePolygonVertex b = sv;
+			while (b != ev) {
+				tree.remove(b.nextSegment);
+				b = b.next;
 			}
 			
+			// remove all the vertices between sv/ev
+			sv.next = ev;
+			ev.prev = sv;
+			
+			// create a new segment between sv/ev
+			sv.nextSegment = new SegmentTreeLeaf(sv.point, ev.point, sv.index, ev.index);
+			ev.prevSegment = sv.nextSegment;
+			
+			// add the new segment to the segment tree
+			tree.add(sv.nextSegment);
+			
 			// just use the start/end vertices
-			// as the new polyline
-			result.add(start);
-			result.add(end);
+			// as the result
+			result.add(sv.point);
+			result.add(ev.point);
 		}
 		
 		return result;
@@ -190,11 +210,11 @@ public final class DouglasPeucker extends AbstractSimplifier implements Simplifi
 	 * Returns the vertex farthest from the given vertex.
 	 * <p>
 	 * O(n)
-	 * @param index
-	 * @param polygon
-	 * @return
+	 * @param index the vertex index
+	 * @param polygon the entire polygon
+	 * @return int
 	 */
-	private int getFartherestVertexFromVertex(int index, List<Vector2> polygon) {
+	private final int getFartherestVertexFromVertex(int index, List<Vector2> polygon) {
 		double dist2 = 0.0;
 		int max = -1;
 		int size = polygon.size();
@@ -215,253 +235,65 @@ public final class DouglasPeucker extends AbstractSimplifier implements Simplifi
 	 * Returns the farthest vertex in the polyline from the line created by lineVertex1 and lineVertex2.
 	 * <p>
 	 * O(n)
-	 * @param lineVertex1
-	 * @param lineVertex2
-	 * @param polyline
-	 * @return
+	 * @param lineVertex1 the first vertex of the line
+	 * @param lineVertex2 the second vertex of the line
+	 * @param polyline the entire polyline
+	 * @return {@link FarthestVertex}
 	 */
-	private FarthestVertex getFarthestVertexFromLine(Vector2 lineVertex1, Vector2 lineVertex2, List<Vertex> polyline) {
-		FarthestVertex max = new FarthestVertex();
+	private final FarthestVertex getFarthestVertexFromLine(SimplePolygonVertex lineVertex1, SimplePolygonVertex lineVertex2, List<SimplePolygonVertex> polyline) {
+		int index = -1;
+		double distance = 0.0;
+		
+		Vector2 lp1 = lineVertex1.point;
+		Vector2 lp2 = lineVertex2.point;
+		
+		// find the vertex on the polyline that's farthest from the line created
+		// by lineVertex1 and lineVertex2
 		int size = polyline.size();
-		Vector2 line = lineVertex1.to(lineVertex2);
+		Vector2 line = lp1.to(lp2);
 		Vector2 lineNormal = line.getLeftHandOrthogonalVector();
 		lineNormal.normalize();
 		for (int i = 0; i < size; i++) {
 			Vector2 vert = polyline.get(i).point;
-			double test = Math.abs(lineVertex1.to(vert).dot(lineNormal));
-			if (test > max.distance) {
-				max.distance = test;
-				max.index = i;
+			double test = Math.abs(lp1.to(vert).dot(lineNormal));
+			if (test > distance) {
+				distance = test;
+				index = i;
 			}
 		}
-		return max;
+		
+		// make sure we found a winner
+		if (index < 0) {
+			// then they were all colinear, so take the middle one
+			// NOTE: integer division here
+			index = size / 2;
+			distance = 0.0;
+		}
+		
+		return new FarthestVertex(index, distance);
 	}
 	
-
-	public boolean intersects(Vertex ve1, Vertex ve2) {
-		Vector2 v1 = ve1.point;
-		Vector2 v2 = ve2.point;
-
-		int min = ve1.index < ve2.index ? ve1.index : ve2.index;
-		int max = ve1.index > ve2.index ? ve1.index : ve2.index;
+	/**
+	 * Represents the farthest vertex from a line.
+	 * @author William Bittle
+	 * @version 4.2.0
+	 * @since 4.2.0
+	 */
+	private final class FarthestVertex {
+		/** The index */
+		final int index;
 		
-		AABB aabb = AABB.createFromPoints(v1, v2);
-		Iterator<RTreeLeaf> bp = tree.getAABBDetectIterator(aabb);
-		while (bp.hasNext()) {
-			RTreeLeaf leaf = bp.next();
-
-			if (leaf.index1 >= min && leaf.index2 <= max ||
-				leaf.index1 <= max && leaf.index2 >= min) {
-				continue;
-			}
-			
-			// we need to verify the segments truly overlap
-			if (intersects(v1, v2, leaf.point1, leaf.point2)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	private boolean intersects(Vector2 a1, Vector2 a2, Vector2 b1, Vector2 b2) {
-		Vector2 A = a1.to(a2);
-		Vector2 B = b1.to(b2);
-
-		// compute the bottom
-		double BxA = B.cross(A);
-		// compute the top
-		double ambxA = a1.difference(b1).cross(A);
+		/** The distance */
+		final double distance;
 		
-		// if the bottom is zero, then the segments are either parallel or coincident
-		if (Math.abs(BxA) <= Epsilon.E) {
-			// if the top is zero, then the segments are coincident
-			if (Math.abs(ambxA) <= Epsilon.E) {
-				// project the segment points onto the segment vector (which
-				// is the same for A and B since they are coincident)
-				A.normalize();
-				double ad1 = a1.dot(A);
-				double ad2 = a2.dot(A);
-				double bd1 = b1.dot(A);
-				double bd2 = b2.dot(A);
-				
-				// then compare their location on the number line for intersection
-				Interval ia = new Interval(ad1, ad2);
-				Interval ib = new Interval(bd1 < bd2 ? bd1 : bd2, bd1 > bd2 ? bd1 : bd2);
-				
-				if (ia.overlaps(ib)) {
-					return true;
-				}
-			}
-			
-			// otherwise they are parallel
-			return false;
-		}
-		
-		// if just the top is zero, then there's no intersection
-		if (Math.abs(ambxA) <= Epsilon.E) {
-			return false;
-		}
-		
-		// compute tb
-		double tb = ambxA / BxA;
-		if (tb <= 0.0 || tb >= 1.0) {
-			// no intersection
-			return false;
-		}
-		
-		// compute the intersection point
-		Vector2 ip = B.product(tb).add(b1);
-		
-		// since both are segments we need to verify that
-		// ta is also valid.
-		// compute ta
-		double ta = ip.difference(a1).dot(A) / A.dot(A);
-		if (ta <= 0.0 || ta >= 1.0) {
-			// no intersection
-			return false;
-		}
-		
-		return true;
-		
-//		// solve the problem algebraically
-//		Vector2 p0 = a1;
-//		Vector2 d0 = a1.to(a2);
-//		
-//		Vector2 p1 = b1;
-//		Vector2 p2 = b2;
-//		Vector2 d1 = b1.to(b2);
-//		
-//		// is the segment vertical or horizontal?
-//		boolean isVertical = Math.abs(d1.x) <= Epsilon.E;
-//		boolean isHorizontal = Math.abs(d1.y) <= Epsilon.E;
-//		
-//		// if it's both, then it's degenerate
-//		if (isVertical && isHorizontal) {
-//			// it's a degenerate line segment
-//			return false;
-//		}
-//		
-//		// any point on a ray can be found by the parametric equation:
-//		// P = tD0 + P0
-//		// any point on a segment can be found by:
-//		// P = sD1 + P1
-//		// substituting the first equation into the second yields:
-//		// tD0 + P0 = sD1 + P1
-//		// solve for s and t:
-//		// tD0.x + P0.x = sD1.x + P1.x
-//		// tD0.y + P0.y = sD1.y + P1.y
-//		// solve the first equation for s
-//		// s = (tD0.x + P0.x - P1.x) / D1.x
-//		// substitute into the second equation
-//		// tD0.y + P0.y = ((tD0.x + P0.x - P1.x) / D1.x) * D1.y + P1.y
-//		// solve for t
-//		// tD0.yD1.x + P0.yD1.x = tD0.xD1.y + P0.xD1.y - P1.xD1.y + P1.yD1.x
-//		// t(D0.yD1.x - D0.xD1.y) = P0.xD1.y - P0.yD1.x + D1.xP1.y - D1.yP1.x
-//		// t(D0.yD1.x - D0.xD1.y) = P0.cross(D1) + D1.cross(P1)
-//		// since the cross product is anti-cummulative
-//		// t(D0.yD1.x - D0.xD1.y) = -D1.cross(P0) + D1.cross(P1)
-//		// t(D0.yD1.x - D0.xD1.y) = D1.cross(P1) - D1.cross(P0)
-//		// t(D0.yD1.x - D0.xD1.y) = D1.cross(P1 - P0)
-//		// tD1.cross(D0) = D1.cross(P1 - P0)
-//		// t = D1.cross(P1 - P0) / D1.cross(D0)
-//		Vector2 p0ToP1 = p1.difference(p0);
-//		double num = d1.cross(p0ToP1);
-//		double den = d1.cross(d0);
-//		
-//		// check for zero denominator
-//		if (Math.abs(den) <= Epsilon.E) {
-//			// they are parallel but could be overlapping
-//			
-//			// since they are parallel d0 is the direction for both the
-//			// segment and the ray; ie d0 = d1
-//			
-//			// get the common direction's normal
-//			Vector2 n = d0.getRightHandOrthogonalVector();
-//			// project a point from each onto the normal
-//			double nDotP0 = n.dot(p0);
-//			double nDotP1 = n.dot(p1);
-//			// project the segment and ray onto the common direction's normal
-//			if (Math.abs(nDotP0 - nDotP1) < Epsilon.E) {
-//				// if their projections are close enough then they are
-//				// on the same line
-//				
-//				// project the ray start point onto the ray direction
-//				double d0DotP0 = d0.dot(p0);
-//				
-//				// project the segment points onto the ray direction
-//				// and subtract the ray start point to receive their
-//				// location on the ray direction relative to the ray
-//				// start
-//				double d0DotP1 = d0.dot(p1) - d0DotP0;
-//				double d0DotP2 = d0.dot(p2) - d0DotP0;
-//				
-//				// if one or both are behind the ray, then
-//				// we consider this a non-intersection
-//				if (d0DotP1 < 0.0 || d0DotP2 < 0.0) {
-//					// if either point is behind the ray
-//					return false;
-//				}
-//				
-//				return true;
-//			} else {
-//				// parallel but not overlapping
-//				return false;
-//			}
-//		}
-//		
-//		// compute t
-//		double t = num / den;
-//		
-//		// t should be in the range t >= 0.0
-//		if (t < 0.0) {
-//			return false;
-//		}
-//		
-//		double s = 0;
-//		if (isVertical) {
-//			// use the y values to compute s
-//			s = (t * d0.y + p0.y - p1.y) / d1.y;
-//		} else {
-//			// use the x values to compute s
-//			s = (t * d0.x + p0.x - p1.x) / d1.x;
-//		}
-//		
-//		// s should be in the range 0.0 <= s <= 1.0
-//		if (s < 0.0 || s > 1.0) {
-//			return false;
-//		}
-//		
-//		// return success
-//		return true;
-		
-	}
-	
-	private class FarthestVertex {
-		int index;
-		double distance;
-	}
-	
-	private class Vertex {
-		/** The index of the vertex in the original simple polygon */
-		public int index;
-		
-		/** The next vertex */
-		public Vertex next;
-		
-		/** The prev vertex */
-		public Vertex prev;
-		
-		/** The vertex point */
-		public Vector2 point;
-		
-		// only used if avoiding self intersection
-		
-		public RTreeLeaf prevSegment;
-		public RTreeLeaf nextSegment;
-
-		@Override
-		public String toString() {
-			return this.point.toString();
+		/**
+		 * Minimal constructor.
+		 * @param index the index in the polyline
+		 * @param distance the distance from the line
+		 */
+		public FarthestVertex(int index, double distance) {
+			this.index = index;
+			this.distance = distance;
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -48,10 +48,10 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This algorithm total complexity is O(n log n).
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.2.0
  * @since 2.2.0
  */
-public class SweepLine implements Decomposer, Triangulator {
+public class SweepLine extends AbstractDecomposer implements Decomposer, Triangulator {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.decompose.Decomposer#decompose(org.dyn4j.geometry.Vector2[])
 	 */

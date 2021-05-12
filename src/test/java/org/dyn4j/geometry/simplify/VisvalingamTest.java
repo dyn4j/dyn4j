@@ -35,14 +35,14 @@ import junit.framework.TestCase;
  * @version 4.2.0
  * @since 4.2.0
  */
-public class DouglasPeuckerTest extends AbstractSimplifyTest {
+public class VisvalingamTest extends AbstractSimplifyTest {
 	/**
 	 * Tests no change due to configuration values.
 	 */
 	@Test
 	public void noChange() {
-		Simplifier simplifier = new DouglasPeucker(0, 0);
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/bird.dat"));
+		Simplifier simplifier = new Visvalingam(0, 0);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/bird.dat"));
 		Vector2[] simplified = simplifier.simplify(vertices);
 		
 		TestCase.assertEquals(vertices.length, simplified.length);
@@ -53,7 +53,7 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void nullArray() {
-		Simplifier simplifier = new DouglasPeucker(0, 0);
+		Simplifier simplifier = new Visvalingam(0, 0);
 		simplifier.simplify((Vector2[])null);
 	}
 	
@@ -63,7 +63,7 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	@Test
 	public void emptyArray() {
 		Vector2[] vertices = new Vector2[0];
-		Simplifier simplifier = new DouglasPeucker(0, 0);
+		Simplifier simplifier = new Visvalingam(0, 0);
 		vertices = simplifier.simplify(vertices);
 		TestCase.assertEquals(0, vertices.length);
 	}
@@ -78,7 +78,7 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 			new Vector2(),
 			null
 		};
-		Simplifier simplifier = new DouglasPeucker(0, 0);
+		Simplifier simplifier = new Visvalingam(0, 0);
 		vertices = simplifier.simplify(vertices);
 		TestCase.assertEquals(1, vertices.length);
 	}
@@ -95,7 +95,7 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 			new Vector2(1, 1),
 			null
 		};
-		Simplifier simplifier = new DouglasPeucker(0, 0);
+		Simplifier simplifier = new Visvalingam(0, 0);
 		vertices = simplifier.simplify(vertices);
 		TestCase.assertEquals(2, vertices.length);
 	}
@@ -116,9 +116,9 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 			new Vector2(1.7, 0.0),
 			null
 		};
-		Simplifier simplifier = new DouglasPeucker(0.11, 0.1);
+		Simplifier simplifier = new Visvalingam(0.11, 0.1);
 		vertices = simplifier.simplify(vertices);
-		TestCase.assertEquals(2, vertices.length);
+		TestCase.assertEquals(0, vertices.length);
 	}
 	
 	/**
@@ -126,10 +126,10 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test
 	public void successBird() {
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/bird.dat"));
-		Simplifier simplifier = new DouglasPeucker(0.5, 0.5);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/bird.dat"));
+		Simplifier simplifier = new Visvalingam(0.1, 0.5);
 		vertices = simplifier.simplify(vertices);
-		TestCase.assertEquals(38, vertices.length);
+		TestCase.assertEquals(35, vertices.length);
 	}
 	
 	/**
@@ -137,11 +137,11 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test
 	public void successTank() {
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/tank.dat"));
-		Simplifier simplifier = new DouglasPeucker(10.0, 10.0);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/tank.dat"));
+		Simplifier simplifier = new Visvalingam(10.0, 10.0);
 		vertices = simplifier.simplify(vertices);
 		// the original shape is so optimized we can't get much more out of it
-		TestCase.assertEquals(21, vertices.length);
+		TestCase.assertEquals(40, vertices.length);
 	}
 	
 	/**
@@ -162,7 +162,7 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 				new Vector2(2.364,-6.81),
 				new Vector2(-3.092,-5.05),
 		};
-		Simplifier simplifier = new DouglasPeucker(2.0, 1.0);
+		Simplifier simplifier = new Visvalingam(2.0, 1.0);
 		vertices = simplifier.simplify(vertices);
 		// this would generate a self-intersection, but it doesn't because we're preventing them
 		TestCase.assertEquals(6, vertices.length);
@@ -173,10 +173,10 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test
 	public void successNazcaMonkey() {
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/nazca_monkey.dat"));
-		Simplifier simplifier = new DouglasPeucker(0.5, 0.5);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/nazca_monkey.dat"));
+		Simplifier simplifier = new Visvalingam(0.5, 0.5);
 		vertices = simplifier.simplify(vertices);
-		TestCase.assertEquals(304, vertices.length);
+		TestCase.assertEquals(446, vertices.length);
 	}
 	
 	/**
@@ -184,10 +184,10 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test
 	public void successNazcaHeron() {
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/nazca_heron.dat"));
-		Simplifier simplifier = new DouglasPeucker(0.5, 0.5);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/nazca_heron.dat"));
+		Simplifier simplifier = new Visvalingam(0.5, 0.5);
 		vertices = simplifier.simplify(vertices);
-		TestCase.assertEquals(115, vertices.length);
+		TestCase.assertEquals(198, vertices.length);
 	}
 
 	/**
@@ -195,10 +195,10 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test
 	public void successZoom1() {
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/zoom1.dat"));
-		Simplifier simplifier = new DouglasPeucker(0.5, 0.5);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/zoom1.dat"));
+		Simplifier simplifier = new Visvalingam(0.5, 0.5);
 		vertices = simplifier.simplify(vertices);
-		TestCase.assertEquals(41, vertices.length);
+		TestCase.assertEquals(46, vertices.length);
 	}
 
 	/**
@@ -206,10 +206,10 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test
 	public void successZoom2() {
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/zoom2.dat"));
-		Simplifier simplifier = new DouglasPeucker(0.5, 0.5);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/zoom2.dat"));
+		Simplifier simplifier = new Visvalingam(0.5, 0.5);
 		vertices = simplifier.simplify(vertices);
-		TestCase.assertEquals(47, vertices.length);
+		TestCase.assertEquals(46, vertices.length);
 	}
 
 	/**
@@ -217,10 +217,10 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test
 	public void successZoom3() {
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/zoom3.dat"));
-		Simplifier simplifier = new DouglasPeucker(0.5, 0.5);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/zoom3.dat"));
+		Simplifier simplifier = new Visvalingam(0.5, 0.5);
 		vertices = simplifier.simplify(vertices);
-		TestCase.assertEquals(37, vertices.length);
+		TestCase.assertEquals(46, vertices.length);
 	}
 
 	/**
@@ -228,10 +228,10 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test
 	public void successZoom4() {
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/zoom4.dat"));
-		Simplifier simplifier = new DouglasPeucker(0.5, 0.5);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/zoom4.dat"));
+		Simplifier simplifier = new Visvalingam(0.5, 0.5);
 		vertices = simplifier.simplify(vertices);
-		TestCase.assertEquals(28, vertices.length);
+		TestCase.assertEquals(30, vertices.length);
 	}
 
 	/**
@@ -239,10 +239,10 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test
 	public void successZoom5() {
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/zoom5.dat"));
-		Simplifier simplifier = new DouglasPeucker(0.5, 0.5);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/zoom5.dat"));
+		Simplifier simplifier = new Visvalingam(0.5, 0.5);
 		vertices = simplifier.simplify(vertices);
-		TestCase.assertEquals(35, vertices.length);
+		TestCase.assertEquals(45, vertices.length);
 	}
 
 	/**
@@ -250,10 +250,10 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test
 	public void successZoom6() {
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/zoom6.dat"));
-		Simplifier simplifier = new DouglasPeucker(0.5, 0.5);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/zoom6.dat"));
+		Simplifier simplifier = new Visvalingam(0.5, 0.5);
 		vertices = simplifier.simplify(vertices);
-		TestCase.assertEquals(42, vertices.length);
+		TestCase.assertEquals(59, vertices.length);
 	}
 
 	/**
@@ -261,10 +261,10 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test
 	public void successZoom7() {
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/zoom7.dat"));
-		Simplifier simplifier = new DouglasPeucker(0.5, 0.5);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/zoom7.dat"));
+		Simplifier simplifier = new Visvalingam(0.5, 0.5);
 		vertices = simplifier.simplify(vertices);
-		TestCase.assertEquals(22, vertices.length);
+		TestCase.assertEquals(21, vertices.length);
 	}
 	
 	/**
@@ -272,8 +272,8 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test
 	public void successTridol1() {
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/tridol1.dat"));
-		Simplifier simplifier = new DouglasPeucker(1.5, 0.5);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/tridol1.dat"));
+		Simplifier simplifier = new Visvalingam(1.5, 0.5);
 		vertices = simplifier.simplify(vertices);
 		TestCase.assertEquals(18, vertices.length);
 	}
@@ -283,8 +283,8 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test
 	public void successTridol2() {
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/tridol2.dat"));
-		Simplifier simplifier = new DouglasPeucker(1.5, 0.5);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/tridol2.dat"));
+		Simplifier simplifier = new Visvalingam(1.5, 0.5);
 		vertices = simplifier.simplify(vertices);
 		TestCase.assertEquals(11, vertices.length);
 	}
@@ -294,10 +294,10 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test
 	public void successTridol3() {
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/tridol3.dat"));
-		Simplifier simplifier = new DouglasPeucker(1.5, 0.5);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/tridol3.dat"));
+		Simplifier simplifier = new Visvalingam(1.5, 0.5);
 		vertices = simplifier.simplify(vertices);
-		TestCase.assertEquals(17, vertices.length);
+		TestCase.assertEquals(18, vertices.length);
 	}
 	
 	/**
@@ -305,9 +305,9 @@ public class DouglasPeuckerTest extends AbstractSimplifyTest {
 	 */
 	@Test
 	public void successNsoft1() {
-		Vector2[] vertices = this.load(DouglasPeuckerTest.class.getResourceAsStream("/org/dyn4j/data/nsoft1.dat"));
-		Simplifier simplifier = new DouglasPeucker(0.1, 0.1);
+		Vector2[] vertices = this.load(VisvalingamTest.class.getResourceAsStream("/org/dyn4j/data/nsoft1.dat"));
+		Simplifier simplifier = new Visvalingam(0.1, 0.1);
 		vertices = simplifier.simplify(vertices);
-		TestCase.assertEquals(11, vertices.length);
+		TestCase.assertEquals(9, vertices.length);
 	}
 }
