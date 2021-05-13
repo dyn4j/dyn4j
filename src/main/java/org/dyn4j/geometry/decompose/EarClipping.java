@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -53,10 +53,10 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This algorithm is O(n<sup>2</sup>).
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.2.0
  * @since 2.2.0
  */
-public class EarClipping implements Decomposer, Triangulator {
+public class EarClipping extends AbstractDecomposer implements Decomposer, Triangulator {
 	/** Epsilon for checking for near containment of vertices within triangles */
 	private static final double CONTAINS_EPSILON = Math.sqrt(Epsilon.E);
 	

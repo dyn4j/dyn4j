@@ -22,23 +22,38 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.dyn4j.geometry.simplify;
 
-module org.dyn4j
-{
-  exports org.dyn4j.collision.broadphase;
-  exports org.dyn4j.collision.continuous;
-  exports org.dyn4j.collision.manifold;
-  exports org.dyn4j.collision.narrowphase;
-  exports org.dyn4j.collision;
-  exports org.dyn4j.dynamics.contact;
-  exports org.dyn4j.dynamics.joint;
-  exports org.dyn4j.dynamics;
-  exports org.dyn4j.geometry.simplify;
-  exports org.dyn4j.geometry.decompose;
-  exports org.dyn4j.geometry.hull;
-  exports org.dyn4j.geometry;
-  exports org.dyn4j.world;
-  exports org.dyn4j.world.listener;
-  exports org.dyn4j.world.result;
-  exports org.dyn4j;
+import java.util.List;
+
+import org.dyn4j.geometry.Vector2;
+
+/**
+ * Represents a simple polygon (without holes) simplification algorithm.
+ * <p>
+ * Polygon simplification is the process of reducing the number of vertices in a
+ * source polygon without too much loss in fidelity.  The goal is to keep significant
+ * features and simplify insignificant features.  For example, a polygon with two
+ * adjacent edges that are colinear provide no value visually and can have a 
+ * negative effect when used as is.
+ * @author William Bittle
+ * @version 4.2.0
+ * @since 4.2.0
+ */
+public interface Simplifier {
+	/**
+	 * Simplifies the given simple polygon and returns a new
+	 * simplified simple polygon.
+	 * @param vertices the simple polygon's vertices
+	 * @return List&lt;{@link Vector2}&gt;
+	 */
+	public List<Vector2> simplify(List<Vector2> vertices);
+	
+	/**
+	 * Simplifies the given simple polygon and returns a new
+	 * simplified simple polygon.
+	 * @param vertices the simple polygon's vertices
+	 * @return {@link Vector2}[]
+	 */
+	public Vector2[] simplify(Vector2... vertices);
 }
