@@ -89,7 +89,7 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * more than one world. Likewise, the {@link Joint#setOwner(Object)} method is used to handle
  * joints being added to the world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
- * @version 4.1.4
+ * @version 4.2.0
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
@@ -104,8 +104,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	/** The world gravity vector */
 	protected final Vector2 gravity;
 	
-	/** The {@link CoefficientMixer} */
-	protected CoefficientMixer coefficientMixer;
+	/** The {@link ValueMixer} */
+	protected ValueMixer valueMixer;
 	
 	/** The {@link ContactConstraintSolver} */
 	protected ContactConstraintSolver<T> contactConstraintSolver;
@@ -202,7 +202,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// the CollisionWorld uses the DefaultBroadphaseFilter but 
 		// the PhysicsWorld needs to use the DetectBroadphaseFilter
 		this.broadphaseFilter = new PhysicsBodyBroadphaseCollisionDataFilter<T>(this);
-		this.coefficientMixer = CoefficientMixer.DEFAULT_MIXER;
+		this.valueMixer = ValueMixer.DEFAULT_MIXER;
 		this.contactConstraintSolver = new SequentialImpulses<T>();
 		this.timeOfImpactSolver = new ForceCollisionTimeOfImpactSolver<T>();
 		
@@ -820,17 +820,35 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @see org.dyn4j.world.PhysicsWorld#getCoefficientMixer()
 	 */
 	@Override
+	@Deprecated
 	public CoefficientMixer getCoefficientMixer() {
-		return this.coefficientMixer;
+		return (CoefficientMixer)this.getValueMixer();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.PhysicsWorld#setCoefficientMixer(org.dyn4j.world.CoefficientMixer)
 	 */
 	@Override
+	@Deprecated
 	public void setCoefficientMixer(CoefficientMixer coefficientMixer) {
-		if (coefficientMixer == null) throw new NullPointerException(Messages.getString("dynamics.world.nullCoefficientMixer"));
-		this.coefficientMixer = coefficientMixer;
+		this.setValueMixer(coefficientMixer);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#getValueMixer()
+	 */
+	@Override
+	public ValueMixer getValueMixer() {
+		return this.valueMixer;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.world.PhysicsWorld#setValueMixer(org.dyn4j.world.ValueMixer)
+	 */
+	@Override
+	public void setValueMixer(ValueMixer valueMixer) {
+		if (valueMixer == null) throw new NullPointerException(Messages.getString("dynamics.world.nullValueMixer"));
+		this.valueMixer = valueMixer;
 	}
 
 	/* (non-Javadoc)
@@ -1689,7 +1707,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	/**
 	 * A {@link ContactUpdateHandler} that uses the local mixers and listeners.
 	 * @author William Bittle
-	 * @version 4.0.0
+	 * @version 4.2.0
 	 * @since 4.0.0
 	 */
 	private final class WarmStartHandler implements ContactUpdateHandler {
@@ -1705,7 +1723,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		 */
 		@Override
 		public double getFriction(BodyFixture fixture1, BodyFixture fixture2) {
-			return AbstractPhysicsWorld.this.coefficientMixer.mixFriction(fixture1.getFriction(), fixture2.getFriction());
+			return AbstractPhysicsWorld.this.valueMixer.mixFriction(fixture1.getFriction(), fixture2.getFriction());
 		}
 
 		/* (non-Javadoc)
@@ -1713,7 +1731,15 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		 */
 		@Override
 		public double getRestitution(BodyFixture fixture1, BodyFixture fixture2) {
-			return AbstractPhysicsWorld.this.coefficientMixer.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution());
+			return AbstractPhysicsWorld.this.valueMixer.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution());
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.dynamics.contact.ContactUpdateHandler#getRestitutionVelocity(org.dyn4j.dynamics.BodyFixture, org.dyn4j.dynamics.BodyFixture)
+		 */
+		@Override
+		public double getRestitutionVelocity(BodyFixture fixture1, BodyFixture fixture2) {
+			return AbstractPhysicsWorld.this.valueMixer.mixRestitutionVelocity(fixture1.getRestitutionVelocity(), fixture2.getRestitutionVelocity());
 		}
 
 		/* (non-Javadoc)

@@ -73,7 +73,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link AbstractPhysicsWorld} class.
  * @author William Bittle
- * @version 4.1.1
+ * @version 4.2.0
  * @since 4.0.0
  */
 public class AbstractPhysicsWorldTest {
@@ -178,7 +178,7 @@ public class AbstractPhysicsWorldTest {
 		TestCase.assertNotNull(w.timeOfImpactDetector);
 		TestCase.assertNull(w.userData);
 		
-		TestCase.assertNotNull(w.coefficientMixer);
+		TestCase.assertNotNull(w.valueMixer);
 		TestCase.assertNotNull(w.contactCollisions);
 		TestCase.assertNotNull(w.contactConstraintSolver);
 		TestCase.assertNotNull(w.contactListeners);
@@ -945,16 +945,19 @@ public class AbstractPhysicsWorldTest {
 	 * Tests the get/set CoefficientMixer method.
 	 */
 	@Test
+	@Deprecated
 	public void getSetCoefficientMixer() {
 		TestWorld w = new TestWorld();
 		
-		TestCase.assertEquals(CoefficientMixer.DEFAULT_MIXER, w.getCoefficientMixer());
+		TestCase.assertFalse(CoefficientMixer.class == w.getValueMixer().getClass());
 		
 		CoefficientMixer cm = new CoefficientMixer() {
 			@Override
 			public double mixRestitution(double restitution1, double restitution2) { return (restitution1 + restitution2) * 0.5; }
 			@Override
 			public double mixFriction(double friction1, double friction2) { return (friction1 + friction2) * 0.5; }
+			@Override
+			public double mixRestitutionVelocity(double restitutionVelocity1, double restitutionVelocity2) { return 0; }
 		};
 		w.setCoefficientMixer(cm);
 		
@@ -962,12 +965,44 @@ public class AbstractPhysicsWorldTest {
 	}
 	
 	/**
+	 * Tests the get/set ValueMixer method.
+	 */
+	@Test
+	public void getSetValueMixer() {
+		TestWorld w = new TestWorld();
+		
+		TestCase.assertEquals(ValueMixer.DEFAULT_MIXER, w.getValueMixer());
+		
+		ValueMixer cm = new ValueMixer() {
+			@Override
+			public double mixRestitution(double restitution1, double restitution2) { return (restitution1 + restitution2) * 0.5; }
+			@Override
+			public double mixFriction(double friction1, double friction2) { return (friction1 + friction2) * 0.5; }
+			@Override
+			public double mixRestitutionVelocity(double restitutionVelocity1, double restitutionVelocity2) { return 0; }
+		};
+		w.setValueMixer(cm);
+		
+		TestCase.assertEquals(cm, w.getValueMixer());
+	}
+	
+	/**
 	 * Tests the set coefficient mixer method passing a null value.
 	 */
 	@Test(expected = NullPointerException.class)
+	@Deprecated
 	public void setNullCoefficientMixer() {
 		TestWorld w = new TestWorld();
 		w.setCoefficientMixer(null);
+	}
+	
+	/**
+	 * Tests the set value mixer method passing a null value.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setNullVaueMixer() {
+		TestWorld w = new TestWorld();
+		w.setValueMixer(null);
 	}
 	
 	/**

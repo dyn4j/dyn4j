@@ -179,4 +179,24 @@ public class BodyFixtureTest {
 		TestCase.assertTrue(mass.getInertia() > 0);
 		TestCase.assertTrue(mass.getMass() > 0);
 	}
+	
+	/**
+	 * Tests the get/set restitution velocity methods.
+	 */
+	@Test
+	public void getSetRestitutionVelocity() {
+		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION_VELOCITY, fixture.getRestitutionVelocity());
+		
+		fixture.setRestitutionVelocity(0.0001);
+		TestCase.assertEquals(0.0001, fixture.getRestitutionVelocity());
+		
+		fixture.setRestitutionVelocity(5.0);
+		TestCase.assertEquals(5.0, fixture.getRestitutionVelocity());
+		
+		fixture.setRestitutionVelocity(0.0);
+		TestCase.assertEquals(0.0, fixture.getRestitutionVelocity());
+		
+		fixture.setRestitutionVelocity(-1.0);
+		TestCase.assertEquals(-1.0, fixture.getRestitutionVelocity());
+	}
 }

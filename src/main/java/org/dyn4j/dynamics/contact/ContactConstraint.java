@@ -45,7 +45,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a {@link SolvableContact} constraint for each {@link PhysicsBody} pair.  
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.2.0
  * @since 1.0.0
  * @param <T> The {@link PhysicsBody} type
  */
@@ -70,6 +70,9 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	
 	/** The coefficient of restitution */
 	protected double restitution;
+	
+	/** The minimum velocity at which to apply restitution */
+	protected double restitutionVelocity;
 
 	/** Whether the contact is a sensor contact or not */
 	protected boolean sensor;
@@ -104,8 +107,9 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		// set the tangent
 		this.tangent = new Vector2();
 		// set coefficients
-		this.friction = 0.0;
-		this.restitution = 0.0;
+		this.friction = BodyFixture.DEFAULT_FRICTION;
+		this.restitution = BodyFixture.DEFAULT_RESTITUTION;
+		this.restitutionVelocity = BodyFixture.DEFAULT_RESTITUTION_VELOCITY;
 		// set the sensor flag (if either fixture is a sensor then the
 		// contact constraint between the fixtures is a sensor)
 		this.sensor = false;
@@ -142,9 +146,12 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		this.tangent.x = normal.y;
 		this.tangent.y = -normal.x;
 		
+		// get mixed values from the two colliding fixtures
 		this.friction = handler.getFriction(fixture1, fixture2);
 		this.restitution = handler.getRestitution(fixture1, fixture2);
+		this.restitutionVelocity = handler.getRestitutionVelocity(fixture1, fixture2);
 		this.sensor = fixture1.isSensor() || fixture2.isSensor();
+		
 		this.tangentSpeed = 0;
 		this.enabled = true;
 		
@@ -226,6 +233,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		  .append("|Tangent=").append(this.tangent)
 		  .append("|Friction=").append(this.friction)
 		  .append("|Restitution=").append(this.restitution)
+		  .append("|RestitutionVelocity=").append(this.restitutionVelocity)
 		  .append("|IsSensor=").append(this.sensor)
 		  .append("|TangentSpeed=").append(this.tangentSpeed)
 		  .append("|Enabled=").append(this.enabled)
@@ -428,6 +436,24 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	public void setRestitution(double restitution) {
 		if (restitution < 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidRestitution"));
 		this.restitution = restitution;
+	}
+	
+	/**
+	 * Returns the minimum velocity required for restitution to be applied.
+	 * @return double
+	 * @since 4.2.0
+	 */
+	public double getRestitutionVelocity() {
+		return this.restitutionVelocity;
+	}
+	
+	/**
+	 * Sets the minimum velocity required for restitution to be applied.
+	 * @param restitutionVelocity the restitution velocity
+	 * @since 4.2.0
+	 */
+	public void setRestitutionVelocity(double restitutionVelocity) {
+		this.restitutionVelocity = restitutionVelocity;
 	}
 	
 	/**

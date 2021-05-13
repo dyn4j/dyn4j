@@ -37,7 +37,7 @@ import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.world.CoefficientMixer;
+import org.dyn4j.world.ValueMixer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,7 +46,7 @@ import junit.framework.TestCase;
 /**
  * Tests the methods of the {@link ContactConstraint} class.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.2.0
  * @since 4.0.0
  */
 public class ContactConstraintTest {
@@ -58,7 +58,7 @@ public class ContactConstraintTest {
 	private CountingContactUpdateHandler cuh;
 	
 	private class CountingContactUpdateHandler implements ContactUpdateHandler {
-		private final CoefficientMixer cm = CoefficientMixer.DEFAULT_MIXER;
+		private final ValueMixer cm = ValueMixer.DEFAULT_MIXER;
 		private int persist;
 		private int end;
 		private int begin;
@@ -67,6 +67,8 @@ public class ContactConstraintTest {
 		public double getRestitution(BodyFixture fixture1, BodyFixture fixture2) { return cm.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution()); }
 		@Override
 		public double getFriction(BodyFixture fixture1, BodyFixture fixture2) { return cm.mixFriction(fixture1.getFriction(), fixture2.getFriction()); }
+		@Override
+		public double getRestitutionVelocity(BodyFixture fixture1, BodyFixture fixture2) { return cm.mixRestitutionVelocity(fixture1.getRestitutionVelocity(), fixture2.getRestitutionVelocity()); }
 		@Override
 		public void begin(Contact contact) { this.begin++; }
 		@Override
@@ -108,8 +110,8 @@ public class ContactConstraintTest {
 		TestCase.assertEquals(0, cc.contactsUnmodifiable.size());
 		TestCase.assertTrue(cc.enabled);
 		TestCase.assertTrue(cc.isEnabled());
-		TestCase.assertEquals(0.0, cc.friction);
-		TestCase.assertEquals(0.0, cc.getFriction());
+		TestCase.assertEquals(BodyFixture.DEFAULT_FRICTION, cc.friction);
+		TestCase.assertEquals(BodyFixture.DEFAULT_FRICTION, cc.getFriction());
 		TestCase.assertNull(cc.invK);
 		TestCase.assertNull(cc.K);
 		TestCase.assertNotNull(cc.normal);
@@ -124,8 +126,10 @@ public class ContactConstraintTest {
 		TestCase.assertEquals(this.b2, cc.getBody2());
 		TestCase.assertEquals(this.f1, cc.getFixture1());
 		TestCase.assertEquals(this.f2, cc.getFixture2());
-		TestCase.assertEquals(0.0, cc.restitution);
-		TestCase.assertEquals(0.0, cc.getRestitution());
+		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION, cc.restitution);
+		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION, cc.getRestitution());
+		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION_VELOCITY, cc.restitutionVelocity);
+		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION_VELOCITY, cc.getRestitutionVelocity());
 		TestCase.assertFalse(cc.sensor);
 		TestCase.assertFalse(cc.isSensor());
 		TestCase.assertNotNull(cc.tangent);
@@ -201,6 +205,8 @@ public class ContactConstraintTest {
 		TestCase.assertEquals(this.f2, cc.getFixture2());
 		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION, cc.restitution);
 		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION, cc.getRestitution());
+		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION_VELOCITY, cc.restitutionVelocity);
+		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION_VELOCITY, cc.getRestitutionVelocity());
 		TestCase.assertFalse(cc.sensor);
 		TestCase.assertFalse(cc.isSensor());
 		TestCase.assertNotNull(cc.tangent);
@@ -269,6 +275,8 @@ public class ContactConstraintTest {
 		TestCase.assertEquals(this.f2, cc.getFixture2());
 		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION, cc.restitution);
 		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION, cc.getRestitution());
+		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION_VELOCITY, cc.restitutionVelocity);
+		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION_VELOCITY, cc.getRestitutionVelocity());
 		TestCase.assertTrue(cc.sensor);
 		TestCase.assertTrue(cc.isSensor());
 		TestCase.assertNotNull(cc.tangent);
@@ -329,6 +337,8 @@ public class ContactConstraintTest {
 		TestCase.assertEquals(this.f2, cc.getFixture2());
 		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION, cc.restitution);
 		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION, cc.getRestitution());
+		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION_VELOCITY, cc.restitutionVelocity);
+		TestCase.assertEquals(BodyFixture.DEFAULT_RESTITUTION_VELOCITY, cc.getRestitutionVelocity());
 		TestCase.assertFalse(cc.sensor);
 		TestCase.assertFalse(cc.isSensor());
 		TestCase.assertNotNull(cc.tangent);
@@ -432,6 +442,26 @@ public class ContactConstraintTest {
 		
 		cc.setRestitution(40.0);
 		TestCase.assertEquals(40.0, cc.getRestitution());
+	}
+
+	/**
+	 * Tests the get/set restitution methods.
+	 */
+	@Test
+	public void getSetRestitutionVelocity() {
+		ContactConstraint<Body> cc = new ContactConstraint<Body>(this.cp);
+		
+		cc.setRestitutionVelocity(0.5);
+		TestCase.assertEquals(0.5, cc.getRestitutionVelocity());
+		
+		cc.setRestitutionVelocity(0.0);
+		TestCase.assertEquals(0.0, cc.getRestitutionVelocity());
+		
+		cc.setRestitutionVelocity(40.0);
+		TestCase.assertEquals(40.0, cc.getRestitutionVelocity());
+
+		cc.setRestitutionVelocity(-2.0);
+		TestCase.assertEquals(-2.0, cc.getRestitutionVelocity());
 	}
 
 	/**

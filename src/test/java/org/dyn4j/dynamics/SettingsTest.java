@@ -263,6 +263,7 @@ public class SettingsTest {
 	 * Tests the set restitution velocity method.
 	 */
 	@Test
+	@Deprecated
 	public void setValidRestitutionVelocity() {
 		settings.setRestitutionVelocity(3.0);
 		TestCase.assertEquals(3.0, settings.getRestitutionVelocity());
@@ -273,6 +274,7 @@ public class SettingsTest {
 	 * Tests the set restitution velocity method passing a negative value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
+	@Deprecated
 	public void setNegativeRestitutionVelocity() {
 		settings.setRestitutionVelocity(-2.0);
 	}
@@ -414,7 +416,6 @@ public class SettingsTest {
 		settings.setMaximumWarmStartDistance(Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE * 2);
 		settings.setMinimumAtRestTime(Settings.DEFAULT_MINIMUM_AT_REST_TIME * 2);
 		settings.setPositionConstraintSolverIterations(Settings.DEFAULT_SOLVER_ITERATIONS * 2);
-		settings.setRestitutionVelocity(Settings.DEFAULT_RESTITUTION_VELOCITY * 2);
 		settings.setStepFrequency(Settings.DEFAULT_STEP_FREQUENCY * 2);
 		settings.setVelocityConstraintSolverIterations(Settings.DEFAULT_SOLVER_ITERATIONS * 2);
 		settings.setWarmStartingEnabled(false);
@@ -433,7 +434,6 @@ public class SettingsTest {
 		TestCase.assertEquals(Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE * 2, settings.getMaximumWarmStartDistance());
 		TestCase.assertEquals(Settings.DEFAULT_MINIMUM_AT_REST_TIME * 2, settings.getMinimumAtRestTime());
 		TestCase.assertEquals(Settings.DEFAULT_SOLVER_ITERATIONS * 2, settings.getPositionConstraintSolverIterations());
-		TestCase.assertEquals(Settings.DEFAULT_RESTITUTION_VELOCITY * 2, settings.getRestitutionVelocity());
 		TestCase.assertEquals(Settings.DEFAULT_STEP_FREQUENCY * 2, settings.getStepFrequency());
 		TestCase.assertEquals(Settings.DEFAULT_SOLVER_ITERATIONS * 2, settings.getVelocityConstraintSolverIterations());
 		TestCase.assertEquals(false, settings.isWarmStartingEnabled());
@@ -458,7 +458,6 @@ public class SettingsTest {
 		settings.setMaximumWarmStartDistance(Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE * 2);
 		settings.setMinimumAtRestTime(Settings.DEFAULT_MINIMUM_AT_REST_TIME * 2);
 		settings.setPositionConstraintSolverIterations(Settings.DEFAULT_SOLVER_ITERATIONS * 2);
-		settings.setRestitutionVelocity(Settings.DEFAULT_RESTITUTION_VELOCITY * 2);
 		settings.setStepFrequency(Settings.DEFAULT_STEP_FREQUENCY * 2);
 		settings.setVelocityConstraintSolverIterations(Settings.DEFAULT_SOLVER_ITERATIONS * 2);
 		settings.setWarmStartingEnabled(false);
@@ -479,7 +478,6 @@ public class SettingsTest {
 		TestCase.assertEquals(settings.getMaximumWarmStartDistance(), copy.getMaximumWarmStartDistance());
 		TestCase.assertEquals(settings.getMinimumAtRestTime(), copy.getMinimumAtRestTime());
 		TestCase.assertEquals(settings.getPositionConstraintSolverIterations(), copy.getPositionConstraintSolverIterations());
-		TestCase.assertEquals(settings.getRestitutionVelocity(), copy.getRestitutionVelocity());
 		TestCase.assertEquals(settings.getStepFrequency(), copy.getStepFrequency());
 		TestCase.assertEquals(settings.getVelocityConstraintSolverIterations(), copy.getVelocityConstraintSolverIterations());
 		TestCase.assertEquals(settings.isWarmStartingEnabled(), copy.isWarmStartingEnabled());
