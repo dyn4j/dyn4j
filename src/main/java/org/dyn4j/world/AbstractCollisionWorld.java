@@ -1277,6 +1277,13 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 				// perform post processing
 				if (AbstractCollisionWorld.this.narrowphasePostProcessor != null) {
 					AbstractCollisionWorld.this.narrowphasePostProcessor.process(convex1, transform1, convex2, transform2, penetration);
+					// should we continue processing this collision?
+					if (penetration.getDepth() == 0.0) {
+						// this happens when the process finds a collision that should not
+						// be handled. In most cases this will be when an object is sliding
+						// across a chain of segments (Links)
+						return collision;
+					}
 				}
 				
 				// notify of the narrow-phase collision
