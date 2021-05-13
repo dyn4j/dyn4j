@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -52,10 +52,11 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This joint can also model a block-and-tackle system by setting the ratio
  * using the {@link #setRatio(double)} method.  A value of 1.0 indicates no
- * ratio.  Values between 0 and 1 exclusive indicate that the first body's
- * rope length will be 1/x times longer than the second body's rope length.
- * Values between 1 and infinity indicate that the second body's rope length
- * will be x times longer than the first body's rope length.
+ * ratio.  For all values of the ratio, the length of the "rope" stays constant.
+ * The ratio applies only when computing the impulse between the two bodies.
+ * If the ratio is between 0 and 1 exclusive, the second body exhibits the
+ * effect of having 1/x more mass.  If the ration is greater than 1, the first
+ * body exhibits the effect of having x more mass.
  * <p>
  * By default this joint acts very similar to two {@link DistanceJoint}s in
  * that the bodies are forced to be their respective rope-distance away from 
@@ -63,7 +64,7 @@ import org.dyn4j.resources.Messages;
  * behave as if connected by flexible rope pass in <code>true</code> to the 
  * {@link #setSlackEnabled(boolean)} method.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.2.0
  * @since 2.1.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Pulley_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/12/pulley-constraint/" target="_blank">Pulley Constraint</a>
@@ -91,7 +92,7 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 	// current state
 	
 	/** The state of the limit (only used for slack) */
-	private boolean underLength;
+	private boolean overLength;
 	
 	/** The total length of the pulley system */
 	private double length;
@@ -134,8 +135,8 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 		if (bodyAnchor1 == null) throw new NullPointerException(Messages.getString("dynamics.joint.pulley.nullBodyAnchor1"));
 		if (bodyAnchor2 == null) throw new NullPointerException(Messages.getString("dynamics.joint.pulley.nullBodyAnchor2"));
 		// set the pulley anchor points
-		this.pulleyAnchor1 = pulleyAnchor1;
-		this.pulleyAnchor2 = pulleyAnchor2;
+		this.pulleyAnchor1 = pulleyAnchor1.copy();
+		this.pulleyAnchor2 = pulleyAnchor2.copy();
 		// get the local anchor points
 		this.localAnchor1 = body1.getLocalPoint(bodyAnchor1);
 		this.localAnchor2 = body2.getLocalPoint(bodyAnchor2);
@@ -151,7 +152,7 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 		this.impulse = 0.0;
 		// initialize the slack parameters
 		this.slackEnabled = false;
-		this.underLength = false;
+		this.overLength = false;
 	}
 	
 	/* (non-Javadoc)
@@ -206,11 +207,11 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 		double l2 = this.n2.normalize();
 		
 		// get the current total length
-		double l = l1 + this.ratio * l2;
+		double l = l1 + l2;
 		
 		// check if we need to solve the constraint
 		if (l > this.length || !this.slackEnabled) {
-			this.underLength = false;
+			this.overLength = true;
 			
 			// check for near zero length
 			if (l1 <= 10.0 * linearTolerance) {
@@ -256,7 +257,7 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 		} else {
 			// clear the impulse and don't solve anything
 			this.impulse = 0;
-			this.underLength = true;
+			this.overLength = false;
 		}
 	}
 	
@@ -265,7 +266,7 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 	 */
 	@Override
 	public void solveVelocityConstraints(TimeStep step, Settings settings) {
-		if (!this.underLength) {
+		if (this.overLength || !this.slackEnabled) {
 			Transform t1 = this.body1.getTransform();
 			Transform t2 = this.body2.getTransform();
 			Mass m1 = this.body1.getMass();
@@ -307,7 +308,7 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 	 */
 	@Override
 	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
-		if (this.underLength) {
+		if (this.overLength || !this.slackEnabled) {
 			double linearTolerance = settings.getLinearTolerance();
 			
 			Transform t1 = this.body1.getTransform();
@@ -353,7 +354,7 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 			double r2CrossN2 = r2.cross(this.n2);
 			double pm1 = invM1 + invI1 * r1CrossN1 * r1CrossN1;
 			double pm2 = invM2 + invI2 * r2CrossN2 * r2CrossN2;
-			this.invK = pm1 + this.ratio * this.ratio * pm2;
+			this.invK = pm1 + pm2;
 			// make sure we can invert it
 			if (this.invK > Epsilon.E) {
 				this.invK = 1.0 / this.invK;
@@ -362,7 +363,7 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 			}
 			
 			// compute the constraint error
-			double C = this.length - l1 - this.ratio * l2;
+			double C = this.length - l1 - l2;
 			linearError = Math.abs(C);
 			
 			// clamp the error
@@ -370,7 +371,7 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 			
 			// compute the impulse along the axes
 			Vector2 J1 = this.n1.product(-impulse);
-			Vector2 J2 = this.n2.product(-this.ratio * impulse);
+			Vector2 J2 = this.n2.product(-impulse);
 			
 			// apply the impulse
 			this.body1.translate(J1.x * invM1, J1.y * invM1);
@@ -446,13 +447,32 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 	}
 	
 	/**
-	 * Returns the total length of the pulley "rope."
+	 * Returns the target total length of the pulley "rope."
+	 * <p>
+	 * NOTE: this is the target length with the ratio taken into account.
 	 * @since 3.0.1
 	 * @return double
 	 * @see #setLength(double)
 	 */
 	public double getLength() {
 		return this.length;
+	}
+	
+	/**
+	 * Returns the current length of the pulley "rope."
+	 * <p>
+	 * This should always be close to, or equal to, the {@link #getLength()}.
+	 * @return double
+	 * @since 4.2.0
+	 */
+	public double getCurrentLength() {
+		Vector2 a1 = this.body1.getWorldPoint(this.localAnchor1);
+		Vector2 a2 = this.body2.getWorldPoint(this.localAnchor2);
+		
+		double l1 = this.pulleyAnchor1.distance(a1);
+		double l2 = this.pulleyAnchor2.distance(a2);
+		
+		return l1 + l2;
 	}
 	
 	/**
@@ -481,7 +501,9 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 	 * This is used, in conjunction with length2, to compute the total length
 	 * when the ratio is changed.
 	 * @return double
+	 * @deprecated Deprecated in 4.2.0. Use {@link #getCurrentLength1()} instead.
 	 */
+	@Deprecated
 	public double getLength1() {
 		// get the body anchor point in world space
 		Vector2 ba = this.body1.getWorldPoint(this.localAnchor1);
@@ -495,8 +517,40 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 	 * This is used, in conjunction with length1, to compute the total length
 	 * when the ratio is changed.
 	 * @return double
+	 * @deprecated Deprecated in 4.2.0. Use {@link #getCurrentLength2()} instead.
 	 */
+	@Deprecated
 	public double getLength2() {
+		// get the body anchor point in world space
+		Vector2 ba = this.body2.getWorldPoint(this.localAnchor2);
+		return this.pulleyAnchor2.distance(ba);
+	}
+
+	/**
+	 * Returns the current length from the first pulley anchor point to the
+	 * anchor point on the first {@link PhysicsBody}.
+	 * <p>
+	 * This is used, in conjunction with length2, to compute the total length
+	 * when the ratio is changed.
+	 * @return double
+	 * @since 4.2.0
+	 */
+	public double getCurrentLength1() {
+		// get the body anchor point in world space
+		Vector2 ba = this.body1.getWorldPoint(this.localAnchor1);
+		return this.pulleyAnchor1.distance(ba);
+	}
+
+	/**
+	 * Returns the current length from the second pulley anchor point to the
+	 * anchor point on the second {@link PhysicsBody}.
+	 * <p>
+	 * This is used, in conjunction with length1, to compute the total length
+	 * when the ratio is changed.
+	 * @return double
+	 * @since 4.2.0
+	 */
+	public double getCurrentLength2() {
 		// get the body anchor point in world space
 		Vector2 ba = this.body2.getWorldPoint(this.localAnchor2);
 		return this.pulleyAnchor2.distance(ba);
@@ -516,7 +570,8 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 	 * The ratio value is used to simulate a block-and-tackle.  A ratio of 1.0 is the default
 	 * and indicates that the pulley is not a block-and-tackle.
 	 * <p>
-	 * This method recomputes the total length of the pulley system.
+	 * A ratio in the range (0, 1) indicates that the second body weighs more.  A ratio in the
+	 * range of (1, &infin;] indicates that the first body weighs more.
 	 * @param ratio the ratio; must be greater than zero
 	 * @throws IllegalArgumentException if ratio is less than or equal to zero
 	 */
@@ -549,6 +604,13 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 	 * @since 3.1.6
 	 */
 	public void setSlackEnabled(boolean flag) {
-		this.slackEnabled = flag;
+		// make sure the ratio changed
+		if (this.slackEnabled != flag) {
+			// set the new ratio
+			this.slackEnabled = flag;
+			// wake up both bodies
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
+		}
 	}
 }

@@ -551,8 +551,10 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * @see org.dyn4j.dynamics.contact.ContactConstraintSolver#solvePositionContraints(java.util.List, org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
 	public boolean solvePositionContraints(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings) {
+		int size = contactConstraints.size();
+		
 		// immediately return true if there are no contact constraints to solve
-		if (contactConstraints.isEmpty()) return true;
+		if (size == 0) return true;
 		
 		// track the minimum separation
 		double minSeparation = 0.0;
@@ -564,7 +566,6 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 		double baumgarte = settings.getBaumgarte();
 		
 		// loop through the contact constraints
-		int size = contactConstraints.size();
 		for (int i = 0; i < size; i++) {
 			ContactConstraint<T> contactConstraint = contactConstraints.get(i);
 			

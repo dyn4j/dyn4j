@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * {@link Island}s are used and setup by the {@link ConstraintGraph} during it's solving process.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.0
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -129,6 +129,7 @@ public final class Island<T extends PhysicsBody> {
 
 		final int size = this.bodies.size();
 		final int jSize = this.joints.size();
+		final int cSize = this.contactConstraints.size();
 		
 		// integrate the velocities
 		for (int i = 0; i < size; i++) {
@@ -145,7 +146,7 @@ public final class Island<T extends PhysicsBody> {
 			joint.initializeConstraints(step, settings);
 		}
 		
-		if (!this.contactConstraints.isEmpty() || !this.joints.isEmpty()) {
+		if (cSize > 0 || jSize > 0) {
 			// solve the velocity constraints if needed
 			for (int i = 0; i < velocitySolverIterations; i++) {
 				// solve the joint velocity constraints

@@ -69,7 +69,7 @@ import org.dyn4j.resources.Messages;
  * or opposite the axis direction.  The maximum motor force must be greater 
  * than zero for the motor to apply any motion.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.2.0
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Prismatic_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2011/03/prismatic-constraint/" target="_blank">Prismatic Constraint</a>
@@ -735,6 +735,9 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 			}
 			// set the new value
 			this.motorSpeed = motorSpeed;
+			this.motorImpulse = 0.0;
+			this.lowerImpulse = 0.0;
+			this.upperImpulse = 0.0;
 		}
 	}
 	

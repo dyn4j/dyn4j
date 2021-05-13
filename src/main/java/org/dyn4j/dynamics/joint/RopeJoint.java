@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -56,13 +56,15 @@ import org.dyn4j.resources.Messages;
  * separate, but it's recommended that they start separated instead. If the lower
  * limit is not being used, then the initial state doesn't matter.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.2.0
  * @since 2.2.1
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Rope_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>
  * @see <a href="http://www.dyn4j.org/2010/12/max-distance-constraint/" target="_blank">Max Distance Constraint</a>
  * @param <T> the {@link PhysicsBody} type
+ * @deprecated Deprecated in 4.2.0.  Use the {@link DistanceJoint} instead.
  */
+@Deprecated
 public class RopeJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
 	/** The local anchor point on the first {@link PhysicsBody} */
 	protected final Vector2 localAnchor1;

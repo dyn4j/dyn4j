@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -62,7 +62,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * Renamed from MouseJoint in 3.2.0.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.0
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Pin_Joint" target="_blank">Documentation</a>
  * @param <T> the {@link PhysicsBody} type
@@ -85,6 +85,9 @@ public class PinJoint<T extends PhysicsBody> extends Joint<T> implements Shiftab
 	
 	// current state
 
+	/** The world-space vector from the local center to the local anchor point */
+	private Vector2 r;
+	
 	/** The stiffness (k) of the spring */
 	private double stiffness;
 	
@@ -203,17 +206,17 @@ public class PinJoint<T extends PhysicsBody> extends Joint<T> implements Shiftab
 		double erp = this.getErrorReductionParameter(dt, this.stiffness, this.damping);
 		
 		// compute the r vector
-		Vector2 r = transform.getTransformedR(body.getLocalCenter().to(this.anchor));
+		this.r = transform.getTransformedR(body.getLocalCenter().to(this.anchor));
 		
 		// compute the bias = ERP where ERP = hk / (hk + d)
-		this.bias = body.getWorldCenter().add(r).difference(this.target);
+		this.bias = body.getWorldCenter().add(this.r).difference(this.target);
 		this.bias.multiply(erp);
 		
 		// compute the K inverse matrix
-		this.K.m00 = invM + r.y * r.y * invI;
-		this.K.m01 = -invI * r.x * r.y; 
+		this.K.m00 = invM + this.r.y * this.r.y * invI;
+		this.K.m01 = -invI * this.r.x * this.r.y; 
 		this.K.m10 = this.K.m01;
-		this.K.m11 = invM + r.x * r.x * invI;
+		this.K.m11 = invM + this.r.x * this.r.x * invI;
 		
 		// apply the spring
 		this.K.m00 += this.gamma;
@@ -223,7 +226,7 @@ public class PinJoint<T extends PhysicsBody> extends Joint<T> implements Shiftab
 		if (settings.isWarmStartingEnabled()) {
 			this.impulse.multiply(step.getDeltaTimeRatio());
 			body.getLinearVelocity().add(this.impulse.product(invM));
-			body.setAngularVelocity(body.getAngularVelocity() + invI * r.cross(this.impulse));
+			body.setAngularVelocity(body.getAngularVelocity() + invI * this.r.cross(this.impulse));
 		} else {
 			this.impulse.zero();
 		}
@@ -235,18 +238,14 @@ public class PinJoint<T extends PhysicsBody> extends Joint<T> implements Shiftab
 	@Override
 	public void solveVelocityConstraints(TimeStep step, Settings settings) {
 		T body = this.body2;
-		Transform transform = body.getTransform();
 		
 		Mass mass = this.body2.getMass();
 		
 		double invM = mass.getInverseMass();
 		double invI = mass.getInverseInertia();
 		
-		// compute r
-		Vector2 r = transform.getTransformedR(body.getLocalCenter().to(this.anchor));
-
 		// Cdot = v + cross(w, r)
-		Vector2 C = r.cross(body.getAngularVelocity()).add(body.getLinearVelocity());
+		Vector2 C = this.r.cross(body.getAngularVelocity()).add(body.getLinearVelocity());
 		// compute Jv + b
 		Vector2 jvb = C;
 		jvb.add(this.bias);
@@ -265,7 +264,7 @@ public class PinJoint<T extends PhysicsBody> extends Joint<T> implements Shiftab
 		J = this.impulse.difference(oldImpulse);
 		
 		body.getLinearVelocity().add(J.product(invM));
-		body.setAngularVelocity(body.getAngularVelocity() + invI * r.cross(J));
+		body.setAngularVelocity(body.getAngularVelocity() + invI * this.r.cross(J));
 	}
 	
 	/* (non-Javadoc)

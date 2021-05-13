@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -72,7 +72,7 @@ import org.dyn4j.resources.Messages;
  * clockwise or counter-clockwise rotation.  The maximum motor torque must be 
  * greater than zero for the motor to apply any motion.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.2.0
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Revolute_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/07/point-to-point-constraint/" target="_blank">Point-to-Point Constraint</a>
@@ -588,15 +588,30 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			}
 			// set the motor speed
 			this.motorSpeed = motorSpeed;
+			this.motorImpulse = 0.0;
+			this.lowerImpulse = 0.0;
+			this.upperImpulse = 0.0;
 		}
 	}
 	
 	/**
 	 * Returns the motor torque in newton-meters.
 	 * @return double
+	 * @deprecated Deprecated in 4.2.0. Use {@link #getMotorTorque(double)} instead.
 	 */
+	@Deprecated
 	public double getMotorTorque() {
 		return this.motorImpulse;
+	}
+	
+	/**
+	 * Returns the motor torque in newton-meters.
+	 * @param invdt the inverse delta time
+	 * @return double
+	 * @since 4.2.0 
+	 */
+	public double getMotorTorque(double invdt) {
+		return this.motorImpulse * invdt;
 	}
 	
 	/**
@@ -713,6 +728,56 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			// set the values
 			this.lowerLimit = lowerLimit;
 			this.upperLimit = upperLimit;
+			// clear accumulated impulse
+			this.lowerImpulse = 0.0;
+			this.upperImpulse = 0.0;
+		}
+	}
+	
+	/**
+	 * Sets both the lower and upper limits and enables them.
+	 * <p>
+	 * See the class documentation for more details on the limit ranges.
+	 * @param lowerLimit the lower limit in radians
+	 * @param upperLimit the upper limit in radians
+	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
+	 * @since 4.2.0
+	 */
+	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
+		// enable the limits
+		this.setLimitEnabled(true);
+		// set the values
+		this.setLimits(lowerLimit, upperLimit);
+	}
+
+	/**
+	 * Sets both the lower and upper limits to the given limit and enables them.
+	 * <p>
+	 * See the class documentation for more details on the limit ranges.
+	 * @param limit the desired limit
+	 * @since 4.2.0
+	 */
+	public void setLimitsEnabled(double limit) {
+		this.setLimitsEnabled(limit, limit);
+	}
+	
+	/**
+	 * Sets both the lower and upper limits to the given limit.
+	 * <p>
+	 * See the class documentation for more details on the limit ranges.
+	 * @param limit the desired limit
+	 * @since 4.2.0
+	 */
+	public void setLimits(double limit) {
+		if (this.lowerLimit != limit || this.upperLimit != limit) {
+			if (this.limitEnabled) {
+				// wake up the bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+			// set the limits
+			this.upperLimit = limit;
+			this.lowerLimit = limit;
 			// clear accumulated impulse
 			this.lowerImpulse = 0.0;
 			this.upperImpulse = 0.0;

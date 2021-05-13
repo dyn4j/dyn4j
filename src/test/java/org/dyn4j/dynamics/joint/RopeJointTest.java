@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,9 +33,11 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link RopeJoint} class.
  * @author William Bittle
- * @version 4.0.1
+ * @version 4.2.0
  * @since 2.2.2
+ * @deprecated Deprecated in 4.2.0.
  */
+@Deprecated
 public class RopeJointTest extends AbstractJointTest {
 	/**
 	 * Tests the successful creation of an rope joint.

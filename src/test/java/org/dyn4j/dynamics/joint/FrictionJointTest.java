@@ -42,7 +42,28 @@ public class FrictionJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void createWithTwoDifferentBodies() {
-		new FrictionJoint<Body>(b1, b2, new Vector2());
+		Vector2 p = new Vector2(1.0, 2.0);
+		
+		FrictionJoint<Body> fj = new FrictionJoint<Body>(b1, b2, p);
+		
+		TestCase.assertEquals(p, fj.getAnchor1());
+		TestCase.assertEquals(p, fj.getAnchor2());
+		TestCase.assertNotSame(p, fj.getAnchor1());
+		TestCase.assertNotSame(p, fj.getAnchor2());
+		
+		TestCase.assertEquals(10.0, fj.getMaximumForce());
+		TestCase.assertEquals(0.25, fj.getMaximumTorque());
+		
+		TestCase.assertEquals(b1, fj.getBody1());
+		TestCase.assertEquals(b2, fj.getBody2());
+		
+		TestCase.assertEquals(null, fj.getOwner());
+		TestCase.assertEquals(null, fj.getUserData());
+		TestCase.assertEquals(b2, fj.getOtherBody(b1));
+		
+		TestCase.assertEquals(false, fj.isCollisionAllowed());
+		
+		TestCase.assertNotNull(fj.toString());
 	}
 	
 	/**
@@ -128,4 +149,26 @@ public class FrictionJointTest extends AbstractJointTest {
 		FrictionJoint<Body> fj = new FrictionJoint<Body>(b1, b2, new Vector2());
 		fj.setMaximumForce(-2.0);
 	}
+
+	/**
+	 * Tests the shift method.
+	 */
+	@Test
+	public void shift() {
+		FrictionJoint<Body> fj = new FrictionJoint<Body>(b1, b2, new Vector2(1.0, 2.0));
+		
+		TestCase.assertEquals(1.0, fj.getAnchor1().x);
+		TestCase.assertEquals(2.0, fj.getAnchor1().y);
+		TestCase.assertEquals(1.0, fj.getAnchor2().x);
+		TestCase.assertEquals(2.0, fj.getAnchor2().y);
+		
+		fj.shift(new Vector2(1.0, 3.0));
+		
+		// nothing should have changed
+		TestCase.assertEquals(1.0, fj.getAnchor1().x);
+		TestCase.assertEquals(2.0, fj.getAnchor1().y);
+		TestCase.assertEquals(1.0, fj.getAnchor2().x);
+		TestCase.assertEquals(2.0, fj.getAnchor2().y);
+	}
+	
 }

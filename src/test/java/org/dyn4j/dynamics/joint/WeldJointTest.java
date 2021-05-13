@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link WeldJoint} class.
  * @author William Bittle
- * @version 4.0.1
+ * @version 4.2.0
  * @since 1.0.2
  */
 public class WeldJointTest extends AbstractJointTest {
@@ -42,7 +42,31 @@ public class WeldJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void createSuccess() {
-		new WeldJoint<Body>(b1, b2, new Vector2());
+		Vector2 p = new Vector2(2.0, 4.0);
+		
+		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, p);
+		
+		TestCase.assertEquals(p, wj.getAnchor1());
+		TestCase.assertEquals(p, wj.getAnchor2());
+		TestCase.assertNotSame(p, wj.getAnchor1());
+		TestCase.assertNotSame(p, wj.getAnchor2());
+		
+		TestCase.assertEquals(0.0, wj.getDampingRatio());
+		TestCase.assertEquals(0.0, wj.getFrequency());
+		TestCase.assertEquals(0.0, wj.getReferenceAngle());
+		
+		TestCase.assertEquals(b1, wj.getBody1());
+		TestCase.assertEquals(b2, wj.getBody2());
+		
+		TestCase.assertEquals(null, wj.getOwner());
+		TestCase.assertEquals(null, wj.getUserData());
+		TestCase.assertEquals(b2, wj.getOtherBody(b1));
+		
+		TestCase.assertEquals(false, wj.isCollisionAllowed());
+		TestCase.assertEquals(false, wj.isSpringDamperEnabled());
+		TestCase.assertEquals(false, wj.isSpringEnabled());
+		
+		TestCase.assertNotNull(wj.toString());
 	}
 
 	/**
@@ -193,4 +217,40 @@ public class WeldJointTest extends AbstractJointTest {
 		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
 		wj.setFrequency(-0.3);
 	}
+
+	/**
+	 * Tests setting the reference angle.
+	 */
+	@Test
+	public void setReferenceAngle() {
+		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
+		
+		TestCase.assertEquals(0, wj.getReferenceAngle(), 1e-6);
+		
+		wj.setReferenceAngle(Math.toRadians(30));
+		
+		TestCase.assertEquals(Math.toRadians(30), wj.getReferenceAngle(), 1e-6);
+	}
+
+	/**
+	 * Tests the shift method.
+	 */
+	@Test
+	public void shift() {
+		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2(-3.0, 0.5));
+		
+		TestCase.assertEquals(-3.0, wj.getAnchor1().x);
+		TestCase.assertEquals(0.5, wj.getAnchor1().y);
+		TestCase.assertEquals(-3.0, wj.getAnchor2().x);
+		TestCase.assertEquals(0.5, wj.getAnchor2().y);
+		
+		wj.shift(new Vector2(1.0, 3.0));
+		
+		// nothing should have changed
+		TestCase.assertEquals(-3.0, wj.getAnchor1().x);
+		TestCase.assertEquals(0.5, wj.getAnchor1().y);
+		TestCase.assertEquals(-3.0, wj.getAnchor2().x);
+		TestCase.assertEquals(0.5, wj.getAnchor2().y);
+	}
+	
 }

@@ -57,7 +57,7 @@ import org.dyn4j.resources.Messages;
  * The joint also supports upper and lower limits. The limits represent the
  * maximum displacement from the anchor point along the given axis.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.2.0
  * @since 3.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Wheel_Joint" target="_blank">Documentation</a>
  * @param <T> the {@link PhysicsBody} type
@@ -209,7 +209,7 @@ public class WheelJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		
 		// spring
 		this.frequency = 8.0;
-		this.dampingRatio = 0.0;
+		this.dampingRatio = 0.3;
 		
 		// initialize
 		this.stiffness = 0.0;
@@ -421,7 +421,7 @@ public class WheelJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		double w2 = this.body2.getAngularVelocity();
 		
 		// solve the spring constraint
-		{
+		if (this.stiffness > 0.0) {
 			double Cdt = this.axis.dot(v1.difference(v2)) + this.a1 * w1 - this.a2 * w2;
 			// compute the impulse
 			double impulse = -this.springMass * (Cdt + this.bias + this.gamma * this.springImpulse);
@@ -797,12 +797,12 @@ public class WheelJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	 * Sets the spring frequency.
 	 * <p>
 	 * Larger values increase the stiffness of the spring.
-	 * @param frequency the spring frequency in hz; must be greater than zero
-	 * @throws IllegalArgumentException if frequency is less than or equal to zero
+	 * @param frequency the spring frequency in hz; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if frequency is less than zero
 	 */
 	public void setFrequency(double frequency) {
 		// check for valid value
-		if (frequency <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequencyZero"));
+		if (frequency < 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
 		// wake up both bodies
 		this.body1.setAtRest(false);
 		this.body2.setAtRest(false);
@@ -1010,6 +1010,24 @@ public class WheelJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 			this.lowerImpulse = 0.0;
 			this.upperImpulse = 0.0;
 		}
+	}
+
+	/**
+	 * Sets the upper and lower limits and enables the limits.
+	 * <p>
+	 * The lower limit must be less than or equal to the upper limit.
+	 * @param lowerLimit the lower limit in meters
+	 * @param upperLimit the upper limit in meters
+	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
+	 * @since 4.2.0
+	 */
+	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
+		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
+		// enable the limits
+		this.setLimitEnabled(true);
+		// set the limits
+		this.setLimits(lowerLimit, upperLimit);
+		// NOTE: one of these will wake the bodies
 	}
 	
 	/**

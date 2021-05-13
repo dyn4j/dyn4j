@@ -42,7 +42,29 @@ public class MotorJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void createWithTwoDifferentBodies() {
-		new MotorJoint<Body>(b1, b2);
+		MotorJoint<Body> mj = new MotorJoint<Body>(b1, b2);
+		
+		TestCase.assertEquals(b1.getWorldCenter(), mj.getAnchor1());
+		TestCase.assertEquals(b2.getWorldCenter(), mj.getAnchor2());
+		
+		TestCase.assertEquals(0.0, mj.getAngularTarget());
+		TestCase.assertEquals(b2.getWorldCenter(), mj.getLinearTarget());
+		
+		TestCase.assertEquals(0.3, mj.getCorrectionFactor());
+		
+		TestCase.assertEquals(0.0, mj.getMaximumForce());
+		TestCase.assertEquals(0.0, mj.getMaximumTorque());
+		
+		TestCase.assertEquals(b1, mj.getBody1());
+		TestCase.assertEquals(b2, mj.getBody2());
+		
+		TestCase.assertEquals(null, mj.getOwner());
+		TestCase.assertEquals(null, mj.getUserData());
+		TestCase.assertEquals(b2, mj.getOtherBody(b1));
+		
+		TestCase.assertEquals(false, mj.isCollisionAllowed());
+		
+		TestCase.assertNotNull(mj.toString());
 	}
 	
 	/**
@@ -232,4 +254,22 @@ public class MotorJointTest extends AbstractJointTest {
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(1.0, mj.getAngularTarget());
 	}
+
+	/**
+	 * Tests the shift method.
+	 */
+	@Test
+	public void shift() {
+		MotorJoint<Body> mj = new MotorJoint<Body>(b1, b2);
+		
+		TestCase.assertEquals(b1.getWorldCenter(), mj.getAnchor1());
+		TestCase.assertEquals(b2.getWorldCenter(), mj.getAnchor2());
+		
+		mj.shift(new Vector2(1.0, 3.0));
+		
+		// nothing should have changed
+		TestCase.assertEquals(b1.getWorldCenter(), mj.getAnchor1());
+		TestCase.assertEquals(b2.getWorldCenter(), mj.getAnchor2());
+	}
+	
 }

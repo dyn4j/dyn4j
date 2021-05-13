@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,6 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
-import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
@@ -50,7 +49,7 @@ import org.dyn4j.resources.Messages;
  * zero.  A good starting point is a frequency of 8.0 and damping ratio of 0.3
  * then adjust as necessary.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.2.0
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/documentation/joints/#Distance_Joint" target="_blank">Documentation</a>
  * @see <a href="http://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>
@@ -63,16 +62,38 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	/** The local anchor point on the second {@link PhysicsBody} */
 	protected final Vector2 localAnchor2;
 	
-	/** The computed distance between the two world space anchor points */
+	/** 
+	 * The rest distance
+	 * @deprecated Deprecated in 4.2.0. Use {@link #restDistance} instead. 
+	 */
+	@Deprecated
 	protected double distance;
-
+	
+	/** The rest distance */
+	protected double restDistance;
+	
 	/** The oscillation frequency in hz */
 	protected double frequency;
 	
 	/** The damping ratio */
 	protected double dampingRatio;
 	
+	/** The maximum distance between the two world space anchor points */
+	protected double upperLimit;
+	
+	/** The minimum distance between the two world space anchor points */
+	protected double lowerLimit;
+	
+	/** Whether the maximum distance is enabled */
+	protected boolean upperLimitEnabled;
+	
+	/** Whether the minimum distance is enabled */
+	protected boolean lowerLimitEnabled;
+	
 	// current state
+
+	/** The current distance as of constraint initialization */
+	protected double currentDistance;
 
 	/** The stiffness (k) of the spring */
 	private double stiffness;
@@ -90,12 +111,22 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	private double bias;
 
 	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */
-	private double invK;
+	private double mass;
+	
+	/** The effective mass of the soft constraint of the two body system */
+	private double softMass;
 	
 	// output
 	
 	/** The accumulated impulse from the previous time step */
 	private double impulse;
+
+	/** The accumulated upper limit impulse */
+	private double upperImpulse;
+	
+	/** The accumulated lower limit impulse */
+	private double lowerImpulse;
+	
 	
 	/**
 	 * Minimal constructor.
@@ -121,7 +152,13 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		this.localAnchor1 = body1.getLocalPoint(anchor1);
 		this.localAnchor2 = body2.getLocalPoint(anchor2);
 		// compute the initial distance
-		this.distance = anchor1.distance(anchor2);
+		this.restDistance = this.distance = anchor1.distance(anchor2);
+		this.currentDistance = restDistance;
+		this.upperLimit = restDistance;
+		this.lowerLimit = restDistance;
+		this.upperLimitEnabled = false;
+		this.lowerLimitEnabled = false;
+		
 		this.frequency = 0.0;
 		this.dampingRatio = 0.0;
 		
@@ -131,7 +168,10 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		
 		this.gamma = 0.0;
 		this.bias = 0.0;
-		this.invK = 0.0;
+		this.mass = 0.0;
+		
+		this.lowerImpulse = 0.0;
+		this.upperImpulse = 0.0;
 	}
 	
 	/* (non-Javadoc)
@@ -144,7 +184,11 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		  .append("|Anchor2=").append(this.getAnchor2())
 		  .append("|Frequency=").append(this.frequency)
 		  .append("|DampingRatio=").append(this.dampingRatio)
-		  .append("|Distance=").append(this.distance)
+		  .append("|RestDistance=").append(this.restDistance)
+		  .append("|LowerLimit=").append(this.lowerLimit)
+		  .append("|UpperLimit=").append(this.upperLimit)
+		  .append("|LowerLimitEnabled=").append(this.lowerLimitEnabled)
+		  .append("|UpperLimitEnabled=").append(this.upperLimitEnabled)
 		  .append("]");
 		return sb.toString();
 	}
@@ -156,10 +200,10 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	public void initializeConstraints(TimeStep step, Settings settings) {
 		double linearTolerance = settings.getLinearTolerance();
 		
-		Transform t1 = body1.getTransform();
-		Transform t2 = body2.getTransform();
-		Mass m1 = body1.getMass();
-		Mass m2 = body2.getMass();
+		Transform t1 = this.body1.getTransform();
+		Transform t2 = this.body2.getTransform();
+		Mass m1 = this.body1.getMass();
+		Mass m2 = this.body2.getMass();
 		
 		double invM1 = m1.getInverseMass();
 		double invM2 = m2.getInverseMass();
@@ -172,13 +216,23 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		this.n = r1.sum(this.body1.getWorldCenter()).subtract(r2.sum(this.body2.getWorldCenter()));
 		
 		// get the current length
-		double length = this.n.getMagnitude();
+		this.currentDistance = this.n.getMagnitude();
 		// check for the tolerance
-		if (length < linearTolerance) {
+		if (this.currentDistance < linearTolerance) {
 			this.n.zero();
+			this.upperImpulse = 0.0;
+			this.lowerImpulse = 0.0;
+			return;
 		} else {
 			// normalize it
-			this.n.multiply(1.0 / length);
+			this.n.multiply(1.0 / this.currentDistance);
+		}
+
+		if (!this.upperLimitEnabled) {
+			this.upperImpulse = 0.0;
+		}
+		if (!this.lowerLimitEnabled) {
+			this.lowerImpulse = 0.0;
 		}
 		
 		// compute K inverse
@@ -187,6 +241,9 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		double invMass = 
 				invM1 + invI1 * cr1n * cr1n + 
 				invM2 + invI2 * cr2n * cr2n;
+		
+		// check for zero before inverting
+		this.mass = invMass <= Epsilon.E ? 0.0 : 1.0 / invMass;
 		
 		// recompute spring reduced mass (m), stiffness (k), and damping (d)
 		// since frequency, dampingRatio, or the masses of the joined bodies
@@ -206,7 +263,7 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		if (this.stiffness > 0.0) {
 			double dt = step.getDeltaTime();
 			// get the current compression/extension of the spring
-			double x = length - this.distance;
+			double x = this.currentDistance - this.restDistance;
 			
 			// compute the CIM
 			this.gamma = this.getConstraintImpulseMixing(dt, this.stiffness, this.damping);
@@ -220,25 +277,29 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			
 			// compute the effective mass
 			invMass += this.gamma;
-			// check for zero before inverting
-			this.invK = invMass <= Epsilon.E ? 0.0 : 1.0 / invMass;
+			this.softMass = invMass <= Epsilon.E ? 0.0 : 1.0 / invMass;
+			
 		} else {
 			this.gamma = 0.0;
 			this.bias = 0.0;
-			this.invK = invMass <= Epsilon.E ? 0.0 : 1.0 / invMass;
+			this.softMass = this.mass;
 		}
 		
 		if (settings.isWarmStartingEnabled()) {
 			// warm start
 			this.impulse *= step.getDeltaTimeRatio();
+			this.upperImpulse *= step.getDeltaTimeRatio();
+			this.lowerImpulse *= step.getDeltaTimeRatio();
 			
-			Vector2 J = this.n.product(this.impulse);
+			Vector2 J = this.n.product(this.impulse + this.lowerImpulse - this.upperImpulse);
 			this.body1.getLinearVelocity().add(J.product(invM1));
 			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
 			this.body2.getLinearVelocity().subtract(J.product(invM2));
 			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(J));
 		} else {
 			this.impulse = 0.0;
+			this.upperImpulse = 0.0;
+			this.lowerImpulse = 0.0;
 		}
 	}
 	
@@ -264,20 +325,77 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		// compute the relative velocity
 		Vector2 v1 = this.body1.getLinearVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
 		Vector2 v2 = this.body2.getLinearVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
-		
-		// compute Jv
-		double Jv = n.dot(v1.difference(v2));
-		
-		// compute lambda (the magnitude of the impulse)
-		double j = -this.invK * (Jv + this.bias + this.gamma * this.impulse);
-		this.impulse += j;
-		
-		// apply the impulse
-		Vector2 J = this.n.product(j);
-		this.body1.getLinearVelocity().add(J.product(invM1));
-		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
-		this.body2.getLinearVelocity().subtract(J.product(invM2));
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(J));
+
+		double invdt = step.getInverseDeltaTime();		
+		if (this.lowerLimit < this.upperLimit) {
+			if (this.stiffness > 0.0) {
+				// compute Jv
+				double Jv = n.dot(v1.difference(v2));
+				
+				// compute lambda (the magnitude of the impulse)
+				double j = -this.softMass * (Jv + this.bias + this.gamma * this.impulse);
+				this.impulse += j;
+				
+				// apply the impulse
+				Vector2 J = this.n.product(j);
+				this.body1.getLinearVelocity().add(J.product(invM1));
+				this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
+				this.body2.getLinearVelocity().subtract(J.product(invM2));
+				this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(J));
+			}
+			
+			// upper limit (max length)
+			if (this.lowerLimitEnabled) {
+				double d = this.currentDistance - this.lowerLimit;
+				double Jv = this.n.dot(v1.difference(v2));
+				
+				// compute lambda (the magnitude of the impulse)
+				double impulse = -this.mass * (Jv + Math.max(d, 0.0) * invdt);
+				double oldImpulse = this.lowerImpulse;
+				this.lowerImpulse = Math.max(0.0, this.lowerImpulse + impulse);
+				impulse = this.lowerImpulse - oldImpulse;
+				
+				// apply the impulse
+				Vector2 J = this.n.product(impulse);
+				this.body1.getLinearVelocity().add(J.product(invM1));
+				this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
+				this.body2.getLinearVelocity().subtract(J.product(invM2));
+				this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(J));
+			}
+			
+			// lower limit (min length)
+			if (this.upperLimitEnabled) {
+				double d = this.upperLimit - this.currentDistance;
+				double Jv = this.n.dot(v2.difference(v1));
+				
+				// compute lambda (the magnitude of the impulse)
+				double impulse = -this.mass * (Jv + Math.max(d, 0.0) * invdt);
+				double oldImpulse = this.upperImpulse;
+				this.upperImpulse = Math.max(0.0, this.upperImpulse + impulse);
+				impulse = this.upperImpulse - oldImpulse;
+				
+				// apply the impulse
+				Vector2 J = this.n.product(impulse);
+				this.body1.getLinearVelocity().subtract(J.product(invM1));
+				this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * r1.cross(J));
+				this.body2.getLinearVelocity().add(J.product(invM2));
+				this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J));
+			}
+		} else {
+			// compute Jv
+			double Jv = n.dot(v1.difference(v2));
+			
+			// compute lambda (the magnitude of the impulse)
+			double j = -this.softMass * (Jv + this.bias + this.gamma * this.impulse);
+			this.impulse += j;
+			
+			// apply the impulse
+			Vector2 J = this.n.product(j);
+			this.body1.getLinearVelocity().add(J.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
+			this.body2.getLinearVelocity().subtract(J.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(J));
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -285,16 +403,7 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	 */
 	@Override
 	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
-		// check if this is a spring
-		// we do this because stiffness is a function of the frequency
-		// and the mass of the bodies (both of which could make stiffness zero)
-		if (this.stiffness > 0.0) {
-			// don't solve position constraints for springs
-			return true;
-		}
-		
 		double linearTolerance = settings.getLinearTolerance();
-		double maxLinearCorrection = settings.getMaximumLinearCorrection();
 		
 		Transform t1 = this.body1.getTransform();
 		Transform t2 = this.body2.getTransform();
@@ -314,12 +423,27 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		this.n = r1.sum(this.body1.getWorldCenter()).subtract(r2.sum(this.body2.getWorldCenter()));
 		
-		// solve the position constraint
 		double l = this.n.normalize();
-		double C = l - this.distance;
-		C = Interval.clamp(C, -maxLinearCorrection, maxLinearCorrection);
+		double C = 0.0;
 		
-		double impulse = -this.invK * C;
+		if (this.upperLimitEnabled && this.lowerLimitEnabled && this.upperLimit == this.lowerLimit) {
+			// upper and lower limits enabled, but the same value
+			C = l - this.lowerLimit;
+		} else if (this.lowerLimitEnabled && l < this.lowerLimit) {
+			// lower limit only
+			C = l - this.lowerLimit;
+		} else if (this.upperLimitEnabled && l > this.upperLimit) {
+			// upper limit only
+			C = l - this.upperLimit;
+		} else if (!this.upperLimitEnabled && !this.lowerLimitEnabled && this.stiffness <= 0.0) {
+			// fixed length joint (no spring and no limits)
+			C = l - this.restDistance;
+		} else {
+			// no limits, or not outside the limits, or spring joint
+			return true;
+		}
+
+		double impulse = -this.mass * C;
 		
 		Vector2 J = this.n.product(impulse);
 		
@@ -352,7 +476,7 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	 */
 	@Override
 	public Vector2 getReactionForce(double invdt) {
-		return this.n.product(this.impulse * invdt);
+		return this.n.product((this.impulse + this.lowerImpulse - this.upperImpulse) * invdt);
 	}
 	
 	/**
@@ -396,28 +520,64 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	/**
 	 * Returns the rest distance between the two constrained {@link PhysicsBody}s in meters.
 	 * @return double
+	 * @deprecated Deprecated in 4.2.0. Use {@link #getRestDistance()} instead.
 	 */
+	@Deprecated
 	public double getDistance() {
-		return this.distance;
+		return this.getRestDistance();
 	}
 	
 	/**
 	 * Sets the rest distance between the two constrained {@link PhysicsBody}s in meters.
 	 * @param distance the distance in meters
 	 * @throws IllegalArgumentException if distance is less than zero
+	 * @deprecated Deprecated in 4.2.0. Use {@link #setRestDistance(double)} instead.
 	 */
+	@Deprecated
 	public void setDistance(double distance) {
+		this.setRestDistance(distance);
+	}
+
+	/**
+	 * Returns the rest distance between the two constrained {@link PhysicsBody}s in meters.
+	 * @return double
+	 * @since 4.2.0
+	 */
+	public double getRestDistance() {
+		return this.restDistance;
+	}
+	
+	/**
+	 * Sets the rest distance between the two constrained {@link PhysicsBody}s in meters.
+	 * @param distance the distance in meters
+	 * @throws IllegalArgumentException if distance is less than zero
+	 * @since 4.2.0
+	 */
+	public void setRestDistance(double distance) {
 		// make sure the distance is greater than zero
 		if (distance < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.distance.invalidDistance"));
-		if (this.distance != distance) {
+		if (this.restDistance != distance) {
 			// wake up both bodies
 			this.body1.setAtRest(false);
 			this.body2.setAtRest(false);
 			// set the new target distance
-			this.distance = distance;
+			this.restDistance = this.distance = distance;
 		}
 	}
-	
+
+	/**
+	 * Returns the current distance between the anchor points.
+	 * @return double
+	 * @since 4.2.0
+	 */
+	public double getCurrentDistance() {
+		Transform t1 = this.body1.getTransform();
+		Transform t2 = this.body2.getTransform();
+		Vector2 p1 = t1.getTransformed(this.localAnchor1);
+		Vector2 p2 = t2.getTransformed(this.localAnchor2);
+		return p1.distance(p2);
+	}
+
 	/**
 	 * Returns the damping ratio.
 	 * @return double
@@ -460,5 +620,234 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		if (frequency < 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
 		// set the new value
 		this.frequency = frequency;
+	}
+	
+	/**
+	 * Returns the upper limit in meters.
+	 * @return double
+	 * @since 4.2.0
+	 */
+	public double getUpperLimit() {
+		return this.upperLimit;
+	}
+	
+	/**
+	 * Sets the upper limit in meters.
+	 * @param upperLimit the upper limit in meters; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if upperLimit is less than zero or less than the current lower limit
+	 * @since 4.2.0
+	 */
+	public void setUpperLimit(double upperLimit) {
+		// make sure the distance is greater than zero
+		if (upperLimit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.lessThanZeroUpperLimit"));
+		// make sure the minimum is less than or equal to the maximum
+		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
+		
+		if (this.upperLimit != upperLimit) {
+			// make sure its changed and enabled before waking the bodies
+			if (this.upperLimitEnabled) {
+				// wake up both bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+			// set the new target distance
+			this.upperLimit = upperLimit;
+			// clear the accumulated impulse
+			this.upperImpulse = 0.0;
+		}
+	}
+	
+	/**
+	 * Sets whether the upper limit is enabled.
+	 * @param flag true if the upper limit should be enabled
+	 * @since 4.2.0
+	 */
+	public void setUpperLimitEnabled(boolean flag) {
+		if (this.upperLimitEnabled != flag) {
+			// wake up both bodies
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
+			// set the flag
+			this.upperLimitEnabled = flag;
+			// clear the accumulated impulse
+			this.upperImpulse = 0.0;
+		}
+	}
+	
+	/**
+	 * Returns true if the upper limit is enabled.
+	 * @return boolean true if the upper limit is enabled
+	 * @since 4.2.0
+	 */
+	public boolean isUpperLimitEnabled() {
+		return this.upperLimitEnabled;
+	}
+	
+	/**
+	 * Returns the lower limit in meters.
+	 * @return double
+	 * @since 4.2.0
+	 */
+	public double getLowerLimit() {
+		return this.lowerLimit;
+	}
+	
+	/**
+	 * Sets the lower limit in meters.
+	 * @param lowerLimit the lower limit in meters; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if lowerLimit is less than zero or greater than the current upper limit
+	 * @since 4.2.0
+	 */
+	public void setLowerLimit(double lowerLimit) {
+		// make sure the distance is greater than zero
+		if (lowerLimit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.lessThanZeroLowerLimit"));
+		// make sure the minimum is less than or equal to the maximum
+		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
+		
+		if (this.lowerLimit != lowerLimit) {
+			// make sure its changed and enabled before waking the bodies
+			if (this.lowerLimitEnabled) {
+				// wake up both bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+			// set the new target distance
+			this.lowerLimit = lowerLimit;
+			// clear the accumulated impulse
+			this.lowerImpulse = 0.0;
+		}
+	}
+
+	/**
+	 * Sets whether the lower limit is enabled.
+	 * @param flag true if the lower limit should be enabled
+	 * @since 4.2.0
+	 */
+	public void setLowerLimitEnabled(boolean flag) {
+		if (this.lowerLimitEnabled != flag) {
+			// wake up both bodies
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
+			// set the flag
+			this.lowerLimitEnabled = flag;
+			// clear the accumulated impulse
+			this.lowerImpulse = 0.0;
+		}
+	}
+
+	/**
+	 * Returns true if the lower limit is enabled.
+	 * @return boolean true if the lower limit is enabled
+	 * @since 4.2.0
+	 */
+	public boolean isLowerLimitEnabled() {
+		return this.lowerLimitEnabled;
+	}
+	
+	/**
+	 * Sets both the lower and upper limits.
+	 * @param lowerLimit the lower limit in meters; must be greater than or equal to zero
+	 * @param upperLimit the upper limit in meters; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if lowerLimit is less than zero, upperLimit is less than zero, or lowerLimit is greater than upperLimit
+	 * @since 4.2.0
+	 */
+	public void setLimits(double lowerLimit, double upperLimit) {
+		// make sure the minimum distance is greater than zero
+		if (lowerLimit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.lessThanZeroLowerLimit"));
+		// make sure the maximum distance is greater than zero
+		if (upperLimit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.lessThanZeroUpperLimit"));
+		// make sure the min < max
+		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
+		
+		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
+			// make sure one of the limits is enabled and has changed before waking the bodies
+			if (this.lowerLimitEnabled || this.upperLimitEnabled) {
+				// wake up the bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+			// set the limits
+			this.upperLimit = upperLimit;
+			this.lowerLimit = lowerLimit;
+			// clear the accumulated impulse
+			this.upperImpulse = 0.0;
+			this.lowerImpulse = 0.0;
+		}
+	}
+
+	/**
+	 * Sets both the lower and upper limits and enables both.
+	 * @param lowerLimit the lower limit in meters; must be greater than or equal to zero
+	 * @param upperLimit the upper limit in meters; must be greater than or equal to zero
+	 * @throws IllegalArgumentException if lowerLimit is less than zero, upperLimit is less than zero, or lowerLimit is greater than upperLimit
+	 * @since 4.2.0
+	 */
+	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
+		// enable the limits
+		this.setLimitsEnabled(true);
+		// set the values
+		this.setLimits(lowerLimit, upperLimit);
+	}
+	
+	/**
+	 * Enables or disables both the lower and upper limits.
+	 * @param flag true if both limits should be enabled
+	 * @since 4.2.0
+	 */
+	public void setLimitsEnabled(boolean flag) {
+		if (this.upperLimitEnabled != flag || this.lowerLimitEnabled != flag) {
+			this.upperLimitEnabled = flag;
+			this.lowerLimitEnabled = flag;
+			// wake up the bodies
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
+			// clear the accumulated impulse
+			this.upperImpulse = 0.0;
+			this.lowerImpulse = 0.0;
+		}
+	}
+	
+	/**
+	 * Sets both the lower and upper limits to the given limit.
+	 * <p>
+	 * This makes the joint a fixed length joint.
+	 * @param limit the desired limit
+	 * @throws IllegalArgumentException if limit is less than zero
+	 * @since 4.2.0
+	 */
+	public void setLimits(double limit) {
+		// make sure the distance is greater than zero
+		if (limit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.invalidLimit"));
+		
+		if (this.lowerLimit != limit || this.upperLimit != limit) {
+			// make sure one of the limits is enabled and has changed before waking the bodies
+			if (this.lowerLimitEnabled || this.upperLimitEnabled) {
+				// wake up the bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+			// set the limits
+			this.upperLimit = limit;
+			this.lowerLimit = limit;
+			// clear the accumulated impulse
+			this.upperImpulse = 0.0;
+			this.lowerImpulse = 0.0;
+		}
+	}
+	
+	/**
+	 * Sets both the lower and upper limits to the given limit and
+	 * enables both.
+	 * <p>
+	 * This makes the joint a fixed length joint.
+	 * @param limit the desired limit
+	 * @throws IllegalArgumentException if limit is less than zero
+	 * @since 4.2.0
+	 */
+	public void setLimitsEnabled(double limit) {
+		// enable the limits
+		this.setLimitsEnabled(true);
+		// set the values
+		this.setLimits(limit);
 	}
 }

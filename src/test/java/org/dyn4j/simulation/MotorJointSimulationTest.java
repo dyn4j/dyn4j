@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,7 +25,8 @@
 package org.dyn4j.simulation;
 
 import org.dyn4j.dynamics.Body;
-import org.dyn4j.dynamics.joint.PinJoint;
+import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.joint.MotorJoint;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
@@ -35,36 +36,63 @@ import org.junit.Test;
 import junit.framework.TestCase;
 
 /**
- * Used to test the {@link PinJoint} class.
+ * Used to test the {@link MotorJoint} class.
  * @author William Bittle
- * @version 4.0.0
- * @since 1.0.2
+ * @version 4.2.0
+ * @since 4.2.0
  */
-public class PinJointSimulationTest {
+public class MotorJointSimulationTest {
 	/**
-	 * Tests the pin joint with a body who has FIXED_LINEAR_VELOCITY as its
-	 * mass type.  The pin joint applied at a point on the body should rotate
-	 * the body (before it wasn't doing anything).
+	 * Tests the MotorJoint.
 	 */
 	@Test
-	public void fixedLinearVelocity() {
+	public void simple() {
 		World<Body> w = new World<Body>();
+		// take gravity out the picture
+		w.setGravity(World.ZERO_GRAVITY);
 		
-		Body body = new Body();
-		body.addFixture(Geometry.createCircle(1.0));
-		body.setMass(MassType.FIXED_LINEAR_VELOCITY);
-		w.addBody(body);
+		// take friction and damping out of the picture
 		
-		PinJoint<Body> pj = new PinJoint<Body>(body, new Vector2(0.5, 0.0), 8.0, 0.3, 1000.0);
-		w.addJoint(pj);
+		Body g = new Body();
+		BodyFixture gf = g.addFixture(Geometry.createCircle(0.5));
+		gf.setFriction(0.0);
+		g.setMass(MassType.INFINITE);
+		g.setLinearDamping(0.0);
+		g.setAngularDamping(0.0);
+		w.addBody(g);
 		
-		pj.setTarget(new Vector2(0.7, -0.5));
+		Body b = new Body();
+		BodyFixture bf = b.addFixture(Geometry.createCircle(0.5));
+		bf.setFriction(0.0);
+		b.setMass(MassType.NORMAL);
+		b.translate(0.0, 2.0);
+		b.setLinearDamping(0.0);
+		b.setAngularDamping(0.0);
+		w.addBody(b);
 		
-		double invdt = w.getTimeStep().getInverseDeltaTime();
-		w.step(1);
+		MotorJoint<Body> mj = new MotorJoint<Body>(g, b);
+		mj.setLinearTarget(new Vector2(0.0, 3.0));
+		mj.setAngularTarget(Math.toRadians(30));
+		w.addJoint(mj);
 		
-		TestCase.assertTrue(pj.getReactionForce(w.getTimeStep().getInverseDeltaTime()).getMagnitude() > 0);
-		TestCase.assertTrue(body.getTransform().getRotationAngle() < 0);
-		TestCase.assertEquals(0.0, pj.getReactionTorque(invdt));
+		w.step(25);
+		
+		// nothing should happen because the maximum force/torque are zero
+		TestCase.assertEquals(2.0, b.getWorldCenter().distance(g.getWorldCenter()));
+		TestCase.assertEquals(0.0, b.getTransform().getRotationAngle());
+		
+		mj.setMaximumForce(100.0);
+		mj.setMaximumTorque(10.0);
+		
+		w.step(5);
+		
+		// The bodies should be approaching the linear/angular targets
+		TestCase.assertTrue(b.getWorldCenter().distance(g.getWorldCenter()) > 2.0);
+		TestCase.assertTrue(b.getTransform().getRotationAngle() > Math.toRadians(5));
+		
+		w.step(20);
+		
+		TestCase.assertEquals(3.0, b.getWorldCenter().distance(g.getWorldCenter()), 1e-3);
+		TestCase.assertEquals(Math.toRadians(30), b.getTransform().getRotationAngle(), 1e-3);
 	}
 }

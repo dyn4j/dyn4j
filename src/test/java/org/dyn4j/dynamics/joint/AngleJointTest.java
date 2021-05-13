@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,6 +25,7 @@
 package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.dynamics.Body;
+import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
 import junit.framework.TestCase;
@@ -32,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link AngleJoint} class.
  * @author William Bittle
- * @version 4.0.1
+ * @version 4.2.0
  * @since 2.2.2
  */
 public class AngleJointTest extends AbstractJointTest {
@@ -41,7 +42,29 @@ public class AngleJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void createWithTwoDifferentBodies() {
-		new AngleJoint<Body>(b1, b2);
+		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
+		
+		TestCase.assertEquals(b1.getWorldCenter(), aj.getAnchor1());
+		TestCase.assertEquals(b2.getWorldCenter(), aj.getAnchor2());
+		
+		TestCase.assertEquals(0.0, aj.getJointAngle());
+		TestCase.assertEquals(1.0, aj.getRatio());
+		
+		TestCase.assertEquals(0.0, aj.getReferenceAngle());
+		TestCase.assertEquals(0.0, aj.getLowerLimit());
+		TestCase.assertEquals(0.0, aj.getUpperLimit());
+		
+		TestCase.assertEquals(b1, aj.getBody1());
+		TestCase.assertEquals(b2, aj.getBody2());
+		
+		TestCase.assertEquals(null, aj.getOwner());
+		TestCase.assertEquals(null, aj.getUserData());
+		TestCase.assertEquals(b2, aj.getOtherBody(b1));
+		
+		TestCase.assertEquals(false, aj.isCollisionAllowed());
+		TestCase.assertEquals(true, aj.isLimitEnabled());
+		
+		TestCase.assertNotNull(aj.toString());
 	}
 	
 	/**
@@ -139,6 +162,64 @@ public class AngleJointTest extends AbstractJointTest {
 		
 		TestCase.assertEquals(Math.toRadians(30), aj.getLowerLimit(), 1e-6);
 		TestCase.assertEquals(Math.toRadians(30), aj.getUpperLimit(), 1e-6);
+	}
+
+	/**
+	 * Tests the get/set for the reference angle.
+	 */
+	@Test
+	public void setReferenceAngle() {
+		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
+		
+		TestCase.assertEquals(0.0, aj.getReferenceAngle());
+	
+		aj.setReferenceAngle(Math.toRadians(30.0));
+		
+		TestCase.assertEquals(Math.toRadians(30.0), aj.getReferenceAngle());
+	}
+
+	/**
+	 * Tests the get/set for the ratio.
+	 */
+	@Test
+	public void setRatio() {
+		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
+		
+		TestCase.assertEquals(1.0, aj.getRatio());
+	
+		aj.setRatio(1.5);
+		
+		TestCase.assertEquals(1.5, aj.getRatio());
+		
+		aj.setRatio(-1.0);
+		
+		TestCase.assertEquals(-1.0, aj.getRatio());
+	}
+	
+	/**
+	 * Tests the scenario where the ratio is zero.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setRatioZero() {
+		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
+		aj.setRatio(0.0);
+	}
+
+	/**
+	 * Tests the shift method.
+	 */
+	@Test
+	public void shift() {
+		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
+		
+		TestCase.assertEquals(b1.getWorldCenter(), aj.getAnchor1());
+		TestCase.assertEquals(b2.getWorldCenter(), aj.getAnchor2());
+		
+		aj.shift(new Vector2(1.0, 3.0));
+		
+		// nothing should have changed
+		TestCase.assertEquals(b1.getWorldCenter(), aj.getAnchor1());
+		TestCase.assertEquals(b2.getWorldCenter(), aj.getAnchor2());
 	}
 	
 	/**

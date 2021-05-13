@@ -42,7 +42,35 @@ public class RevoluteJointTest extends AbstractJointTest {
 	 */
 	@Test
 	public void createSuccess() {
-		new RevoluteJoint<Body>(b1, b2, new Vector2());
+		Vector2 p = new Vector2(1.0, 2.0);
+		
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, p);
+		
+		TestCase.assertEquals(p, rj.getAnchor1());
+		TestCase.assertEquals(p, rj.getAnchor2());
+		TestCase.assertNotSame(p, rj.getAnchor1());
+		TestCase.assertNotSame(p, rj.getAnchor2());
+		
+		TestCase.assertEquals(0.0, rj.getJointAngle());
+		TestCase.assertEquals(1000.0, rj.getMaximumMotorTorque());
+		TestCase.assertEquals(0.0, rj.getMotorSpeed());
+		
+		TestCase.assertEquals(0.0, rj.getReferenceAngle());
+		TestCase.assertEquals(0.0, rj.getLowerLimit());
+		TestCase.assertEquals(0.0, rj.getUpperLimit());
+		
+		TestCase.assertEquals(b1, rj.getBody1());
+		TestCase.assertEquals(b2, rj.getBody2());
+		
+		TestCase.assertEquals(null, rj.getOwner());
+		TestCase.assertEquals(null, rj.getUserData());
+		TestCase.assertEquals(b2, rj.getOtherBody(b1));
+		
+		TestCase.assertEquals(false, rj.isCollisionAllowed());
+		TestCase.assertEquals(false, rj.isLimitEnabled());
+		TestCase.assertEquals(false, rj.isMotorEnabled());
+		
+		TestCase.assertNotNull(rj.toString());
 	}
 	
 	/**
@@ -337,6 +365,20 @@ public class RevoluteJointTest extends AbstractJointTest {
 	}
 	
 	/**
+	 * Tests setting the reference angle.
+	 */
+	@Test
+	public void setReferenceAngle() {
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
+		
+		TestCase.assertEquals(0, rj.getReferenceAngle(), 1e-6);
+		
+		rj.setReferenceAngle(Math.toRadians(30));
+		
+		TestCase.assertEquals(Math.toRadians(30), rj.getReferenceAngle(), 1e-6);
+	}
+	
+	/**
 	 * Tests the sleep interaction when enabling/disabling the limits.
 	 */
 	@Test
@@ -434,7 +476,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		rj.setLimits(Math.PI, Math.PI);
+		rj.setLimits(Math.PI);
 		TestCase.assertTrue(rj.isLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
@@ -447,7 +489,7 @@ public class RevoluteJointTest extends AbstractJointTest {
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		rj.setLimits(Math.PI, Math.PI);
+		rj.setLimitsEnabled(Math.PI);
 		TestCase.assertTrue(rj.isLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
@@ -657,4 +699,26 @@ public class RevoluteJointTest extends AbstractJointTest {
 		TestCase.assertEquals(defaultLowerLimit, rj.getLowerLimit());
 		TestCase.assertEquals(2*Math.PI, rj.getUpperLimit());
 	}
+	
+	/**
+	 * Tests the shift method.
+	 */
+	@Test
+	public void shift() {
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2(-3.0, 0.5));
+		
+		TestCase.assertEquals(-3.0, rj.getAnchor1().x);
+		TestCase.assertEquals(0.5, rj.getAnchor1().y);
+		TestCase.assertEquals(-3.0, rj.getAnchor2().x);
+		TestCase.assertEquals(0.5, rj.getAnchor2().y);
+		
+		rj.shift(new Vector2(1.0, 3.0));
+		
+		// nothing should have changed
+		TestCase.assertEquals(-3.0, rj.getAnchor1().x);
+		TestCase.assertEquals(0.5, rj.getAnchor1().y);
+		TestCase.assertEquals(-3.0, rj.getAnchor2().x);
+		TestCase.assertEquals(0.5, rj.getAnchor2().y);
+	}
+	
 }
