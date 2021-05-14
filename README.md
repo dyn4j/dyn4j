@@ -6,7 +6,7 @@
 ![Java](https://img.shields.io/badge/java-%3E%3D%206-orange)
 ![Maven Central](https://img.shields.io/maven-central/v/org.dyn4j/dyn4j)
 [![javadoc](https://javadoc.io/badge2/org.dyn4j/dyn4j/javadoc.svg?kill_cache=1)](https://javadoc.io/doc/org.dyn4j/dyn4j)
-![Code Coverage](https://img.shields.io/badge/coverage-78.3%25-brightgreen)
+![Code Coverage](https://img.shields.io/badge/coverage-93.9%25-brightgreen)
 
 ## Java Collision Detection and Physics Engine
 
@@ -32,7 +32,7 @@ Add dyn4j to your classpath by adding a Maven dependency from
 <dependency>
     <groupId>org.dyn4j</groupId>
     <artifactId>dyn4j</artifactId>
-    <version>4.1.4</version>
+    <version>4.2.0</version>
 </dependency>
 ```
 
@@ -71,14 +71,14 @@ for (int i = 0; i < 100; i++) {
 Unlike this example, a GUI based application you would call the World.update(elapsedTime) method in it's render loop.  Either way, each time the world is advanced forward in time (which may or may not occur when using the World.update(elapsedTime) methods) the bodies added to it will be moved based on the world gravity (if any) and will interact with other bodies placed in the world.
 
 #### Next Steps
-From here you should take a look at the [dyn4j-samples](https://github.com/dyn4j/dyn4j-samples) sub project to get a jump start with a simple Java2D framework. You can also check out the documentation [here](http://www.dyn4j.org/documentation/).
+From here you should take a look at the [dyn4j-samples](https://github.com/dyn4j/dyn4j-samples) sub project to get a jump start with a simple Java2D framework. You can also check out the [full getting started documentation](https://dyn4j.org/pages/getting-started).
 
 ### Links
-* [www.dyn4j.org](http://www.dyn4j.org)
+* [dyn4j.org](https://dyn4j.org)
+* [Getting Started](https://dyn4j.org/pages/getting-started)
 * [Latest Release Notes](https://github.com/dyn4j/dyn4j/blob/master/RELEASE-NOTES.md)
 * [Latest Javadocs](https://www.javadoc.io/doc/org.dyn4j/dyn4j/latest/index.html)
-* [Forum](http://forum.dyn4j.org) - disabled but still a good resource
-* [Blog](http://www.dyn4j.org/category/blog/)
+* [Blog](https://dyn4j.org/categories#blog)
 
 ### Building
 * Maven build goals: clean package

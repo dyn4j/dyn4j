@@ -1,3 +1,38 @@
+## v4.2.0 - May 13th, 2021
+
+[Milestone](https://github.com/dyn4j/dyn4j/milestone/8?closed=1) |
+[Tag](https://github.com/dyn4j/dyn4j/tree/4.2.0) |
+[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/4.2.0/bundle) |
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=4.2.0)
+
+The primary goal of this release was to fix an issue with the way smooth sliding was implemented for the `Link` shape.  This shape is used to avoid the ghost collision problem caused by the selection of collision points during collision detection.  The issue occurred when a long shape would lean over a bend in the `Link` chain causing the algorithm to choose the wrong normal.  To fix the issue, a breaking change was necessary which requires that the `Link` shape be one-sided.  You can read more about the problem and solution on [Erin Catto's blog](https://box2d.org/posts/2020/06/ghost-collisions/).
+
+A secondary goal of this release was to merge the `RopeJoint` into the `DistanceJoint` and to improve automated unit testing for all joints.  The automated tests found a few issues, mostly inconsistencies in usage, that were also fixed in this release.  Some of these fixes were breaking changes.  Some effort was put into normalizing the API surface between the joints also - for example, those joints with limits should have the same methods to get/set those limits (with some exceptions for those who can't control which are enabled).
+
+One _unplanned_ feature in this release is simple-polygon (without holes) simplification algorithms in the new `org.dyn4j.geometry.simplify` package.  The `decompose` package has been around for a while now and does a great job.  The problem is that the decomposition process is exact, the output must include all vertices from the input.  For example, take a simple polygon with 300 vertices, the decomposition algorithms may convert that into 100 convex shapes, but some of those shapes will be thin and long which are particularly bad for collision detection/resolution.  This isn't a problem with the decomposition algorithms, but rather a problem with the input.  The problem shapes emitted in the decomposition process are typically caused by features of little visual significance.  The goal was to evaluate methods to simplify the polygon before decomposition.  Using this new package, a 300 vertex polygon can be reduced to 40 vertices (a reduction of 86%) which is further decomposed into 20 convex shapes - all with minimal loss in fidelity!
+
+Finally, this release also sees the total code coverage go up to 93% with 2100+ automated tests.  Coverage isn't the only metric for code quality, but a lot of time was spent on making the tests meaningful.  For example, simulation based tests were introduced to test different configurations of joints over time.
+
+**New Features:**
+- [#200](https://github.com/dyn4j/dyn4j/pull/200) Added simple polygon simplification algorithms that can be used to optimize geometry before being sent to the decomposition algorithms.
+- [#200](https://github.com/dyn4j/dyn4j/pull/200) Added new methods to the `Decomposer` and `HullGenerator` interfaces that accept `List<Vector2>` for ease of use.
+- [#150](https://github.com/dyn4j/dyn4j/issues/150) Moved the restitution velocity from a global setting to a setting on the `BodyFixture` to allow better control of restitution.
+- [#151](https://github.com/dyn4j/dyn4j/issues/151) The `AngleJoint` now supports negative ratios to allow for opposite angular velocities.
+- [#151](https://github.com/dyn4j/dyn4j/issues/151) The `WheelJoint` now supports the absence of a spring-damper by setting the frequency to zero.
+- [#151](https://github.com/dyn4j/dyn4j/issues/151) The `RopeJoint` has been merged into the `DistanceJoint` allowing toggling between the two behaviors.
+
+**Bug Fixes:**
+- [#105](https://github.com/dyn4j/dyn4j/issues/105) Fixed issue with `Link` shape where collision normals would be adjusted incorrectly in some scenarios.
+- [#151](https://github.com/dyn4j/dyn4j/issues/151) Fixed a few minor issues in the `AngleJoint`, `PrismaticJoint`, and `RevoluteJoint` classes in the context of warm starting and changing limits and motor speed.
+
+**Breaking Changes:**
+- [#105](https://github.com/dyn4j/dyn4j/issues/105) All `Link` shape chains are now one-sided. The direction of the normal is now dependent on the winding.  Counter-clockwise winding will produce normals pointing to the right of the `Link`s and clockwise winding will produce normals pointing to the left of the `Link`s.
+- [#151](https://github.com/dyn4j/dyn4j/issues/151) The `AngleJoint` now throws an exception when a ratio of zero is given.
+- [#151](https://github.com/dyn4j/dyn4j/issues/151) The behavior of the `PulleyJoint` when using the ratio option has changed to be more consistent when changing the total length or ratio.
+  
+**Other:**
+- [#151](https://github.com/dyn4j/dyn4j/issues/151) Minor performance improvement in the `PinJoint`.
+
 ## v4.1.4 - February 26th, 2021
 
 [Milestone](https://github.com/dyn4j/dyn4j/milestone/12?closed=1) |
