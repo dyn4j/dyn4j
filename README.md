@@ -76,6 +76,7 @@ From here you should take a look at the [dyn4j-samples](https://github.com/dyn4j
 ### Links
 * [dyn4j.org](https://dyn4j.org)
 * [Getting Started](https://dyn4j.org/pages/getting-started)
+* [Advanced](https://dyn4j.org/pages/advanced)
 * [Latest Release Notes](https://github.com/dyn4j/dyn4j/blob/master/RELEASE-NOTES.md)
 * [Latest Javadocs](https://www.javadoc.io/doc/org.dyn4j/dyn4j/latest/index.html)
 * [Blog](https://dyn4j.org/categories#blog)
