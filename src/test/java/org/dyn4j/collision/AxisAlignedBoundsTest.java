@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link AxisAlignedBounds} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.1
  * @since 3.1.1
  */
 public class AxisAlignedBoundsTest {
@@ -390,18 +390,22 @@ public class AxisAlignedBoundsTest {
 		
 		// should be in
 		TestCase.assertFalse(bounds.isOutside(aabb));
+		TestCase.assertFalse(bounds.isOutside(aabb, null, null));
 		
 		// test half way in and out
 		aabb.translate(9.5, 0.0);
 		TestCase.assertFalse(bounds.isOutside(aabb));
+		TestCase.assertFalse(bounds.isOutside(aabb, null, null));
 		
 		// test all the way out
 		aabb.translate(1.5, 0.0);
 		TestCase.assertTrue(bounds.isOutside(aabb));
+		TestCase.assertTrue(bounds.isOutside(aabb, null, null));
 		
 		// test half way out a corner
 		aabb.translate(-1.5, 9.5);
 		TestCase.assertFalse(bounds.isOutside(aabb));
+		TestCase.assertFalse(bounds.isOutside(aabb, null, null));
 		
 		// test moving the bounds
 		bounds.translate(2.0, 1.0);
@@ -409,13 +413,16 @@ public class AxisAlignedBoundsTest {
 		// test half way in and out
 		aabb.translate(2.0, 0.0);
 		TestCase.assertFalse(bounds.isOutside(aabb));
+		TestCase.assertFalse(bounds.isOutside(aabb, null, null));
 		
 		// test all the way out
 		aabb.translate(1.0, 0.0);
 		TestCase.assertTrue(bounds.isOutside(aabb));
+		TestCase.assertTrue(bounds.isOutside(aabb, null, null));
 		
 		// test half way out a corner
 		aabb.translate(-0.5, 1.0);
 		TestCase.assertFalse(bounds.isOutside(aabb));
+		TestCase.assertFalse(bounds.isOutside(aabb, null, null));
 	}
 }

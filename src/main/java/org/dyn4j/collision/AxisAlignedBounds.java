@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,6 +25,7 @@
 package org.dyn4j.collision;
 
 import org.dyn4j.geometry.AABB;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Translatable;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.resources.Messages;
@@ -35,7 +36,7 @@ import org.dyn4j.resources.Messages;
  * This class compares its AABB with the AABB of the given body and returns true
  * if they do not overlap.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.1
  * @since 3.1.1
  */
 public final class AxisAlignedBounds extends AbstractBounds implements Bounds, Translatable {
@@ -87,6 +88,14 @@ public final class AxisAlignedBounds extends AbstractBounds implements Bounds, T
 	 */
 	@Override
 	public boolean isOutside(AABB aabb) {
+		return this.isOutside(aabb, null, null);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.Bounds#isOutside(org.dyn4j.geometry.AABB, org.dyn4j.geometry.Transform, org.dyn4j.collision.Fixture)
+	 */
+	@Override
+	public boolean isOutside(AABB aabb, Transform transform, Fixture fixture) {
 		Vector2 tx = this.transform.getTranslation();
 		AABB aabbBounds = this.aabb.getTranslated(tx);
 		

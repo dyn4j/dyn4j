@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,6 +27,7 @@ package org.dyn4j.collision;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Rotatable;
 import org.dyn4j.geometry.Shiftable;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Translatable;
 import org.dyn4j.geometry.Vector2;
 
@@ -37,9 +38,14 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * Though not part of the bounds contract, a bounds object should only return true
  * from the {@link #isOutside(CollisionBody)} method when a {@link CollisionBody} is
- * <strong>fully</strong> outside the bounds.
+ * <strong>fully</strong> outside the bounds.  This applies to the {@link #isOutside(AABB)}
+ * and {@link #isOutside(AABB, Transform, Fixture)} methods as well.
+ * <p>
+ * NOTE: {@link #isOutside(AABB, Transform, Fixture)} method is called from the world implementations
+ * to provide the most flexibility.  The {@link #isOutside(CollisionBody)} and {@link #isOutside(AABB)}
+ * methods are NOT called internally.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.1
  * @since 1.0.0
  */
 public interface Bounds extends Translatable, Shiftable {
@@ -70,4 +76,18 @@ public interface Bounds extends Translatable, Shiftable {
 	 * @since 4.0.0
 	 */
 	public abstract boolean isOutside(AABB aabb);
+
+	/**
+	 * Returns true if the given {@link AABB} or {@link Fixture} is <strong>fully</strong> outside the bounds.
+	 * <p>
+	 * The implementation can use any of the provided information.  For example, the {@link AxisAlignedBounds} class
+	 * only uses the provided {@link AABB}.  For implementations of complex bounds, you can use the {@link Transform}
+	 * and shape contained in the {@link Fixture}.
+	 * @param aabb the {@link AABB} to test
+	 * @param transform the {@link Transform} for the fixture
+	 * @param fixture the {@link Fixture} (shape)
+	 * @return boolean true if outside the bounds
+	 * @since 4.2.1
+	 */
+	public abstract boolean isOutside(AABB aabb, Transform transform, Fixture fixture);
 }

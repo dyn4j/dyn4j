@@ -108,7 +108,7 @@ import org.dyn4j.world.result.RaycastResult;
  * methods to handle certain scenarios like fixture removal on a body or bodies added to
  * more than one world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.2.1
  * @since 4.0.0
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
@@ -668,6 +668,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		CollisionItemAdapter<T, E> bAdapter = new CollisionItemAdapter<T, E>();
 		for (int i = 0; i < bSize; i++) {
 			T body = this.bodies.get(i);
+			Transform tx = body.getTransform();
 			
 			// skip if already not active
 			if (!body.isEnabled()) continue;
@@ -682,7 +683,8 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 				for (int k = 0; k < fSize; k++) {
 					E fixture = body.getFixture(k);
 					bAdapter.set(body, fixture);
-					if (!this.bounds.isOutside(this.broadphaseDetector.getAABB(bAdapter))) {
+					AABB aabb = this.broadphaseDetector.getAABB(bAdapter);
+					if (!this.bounds.isOutside(aabb, tx, fixture)) {
 						withinBounds = true;
 						break;
 					}

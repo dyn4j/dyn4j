@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,6 +25,7 @@
 package org.dyn4j.collision;
 
 import org.dyn4j.geometry.AABB;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
@@ -33,7 +34,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link AbstractBounds} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.1
  * @since 4.0.0
  */
 public class AbstractBoundsTest {
@@ -57,6 +58,11 @@ public class AbstractBoundsTest {
 		
 		@Override
 		public boolean isOutside(CollisionBody<?> body) {
+			return false;
+		}
+		
+		@Override
+		public boolean isOutside(AABB aabb, Transform transform, Fixture fixture) {
 			return false;
 		}
 	}
