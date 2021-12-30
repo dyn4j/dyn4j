@@ -39,7 +39,7 @@ import org.dyn4j.world.PhysicsWorld;
  * <p>
  * Modification of the {@link PhysicsWorld} is not permitted during these methods.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.2.1
  * @since 1.2.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -87,4 +87,19 @@ public interface TimeOfImpactListener<T extends PhysicsBody> extends WorldEventL
 	 * @since 2.0.0
 	 */
 	public abstract boolean collision(T body1, BodyFixture fixture1, T body2, BodyFixture fixture2, TimeOfImpact toi);
+	
+	/**
+	 * Called when the minimum time of impact has been found for the first body.
+	 * <p>
+	 * Returning true from this method indicates that the collision of these
+	 * two {@link PhysicsBody}s should be processed (solved).
+	 * <p>
+	 * The values of the <code>toi</code> parameter can be changed in this method.
+	 * @param body1 the first {@link PhysicsBody}
+	 * @param body2 the second {@link PhysicsBody}
+	 * @param toi the {@link TimeOfImpact}
+	 * @return boolean true if the collision should be handled
+	 * @since 4.2.1
+	 */
+	public abstract boolean collision(T body1, T body2, TimeOfImpact toi);
 }

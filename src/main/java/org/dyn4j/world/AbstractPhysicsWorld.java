@@ -89,7 +89,7 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * more than one world. Likewise, the {@link Joint#setOwner(Object)} method is used to handle
  * joints being added to the world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
- * @version 4.2.0
+ * @version 4.2.1
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
@@ -1672,6 +1672,19 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		
 		// make sure the time of impact is not null
 		if (minToi != null) {
+			// test the time of impact listeners
+			boolean allow = true;
+			for (TimeOfImpactListener<T> tl : listeners) {
+				if (!tl.collision(body1, minBody, minToi)) {
+					// if any toi listener doesnt allow it, then don't allow it
+					// we need to allow all listeners to be notified before we continue
+					allow = false;
+				}
+			}
+			if (!allow) {
+				return false;
+			}
+			
 			// get the time of impact info
 			double t = minToi.getTime();
 			
