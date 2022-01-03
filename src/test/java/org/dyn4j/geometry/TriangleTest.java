@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Triangle} class.
  * @author William Bittle
- * @version 3.1.0
+ * @version 4.2.1
  * @since 1.0.0
  */
 public class TriangleTest {
@@ -72,6 +72,23 @@ public class TriangleTest {
 			new Vector2( 0.5, -0.5),
 			null
 		);
+	}
+	
+	/**
+	 * Tests the toString method.
+	 */
+	@Test
+	public void tostring() {
+		Triangle t = new Triangle(
+			new Vector2( 0.0,  0.5),
+			new Vector2(-0.5, -0.5),
+			new Vector2( 0.5, -0.5)
+		);
+
+		String s = t.toString();
+		
+		TestCase.assertNotNull(s);
+		TestCase.assertTrue(s.length() > 0);
 	}
 	
 	/**

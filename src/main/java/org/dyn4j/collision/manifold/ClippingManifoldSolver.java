@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -51,7 +51,7 @@ import org.dyn4j.geometry.Vector2;
  * It's possible that no contact points are returned, in which case the {@link #getManifold(Penetration, Convex, Transform, Convex, Transform, Manifold)}
  * method will return false.
  * @author William Bittle
- * @version 3.0.2
+ * @version 4.2.1
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/2011/11/contact-points-using-clipping/" target="_blank">Contact Points Using Clipping</a>
  */
@@ -61,9 +61,6 @@ public class ClippingManifoldSolver implements ManifoldSolver {
 	 */
 	@Override
 	public boolean getManifold(Penetration penetration, Convex convex1, Transform transform1, Convex convex2, Transform transform2, Manifold manifold) {
-		// make sure the manifold passed in is cleared
-		manifold.clear();
-		
 		// get the penetration normal
 		Vector2 n = penetration.getNormal();
 		

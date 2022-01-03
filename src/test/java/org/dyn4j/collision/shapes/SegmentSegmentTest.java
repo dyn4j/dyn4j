@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -39,7 +39,7 @@ import junit.framework.TestCase;
 /**
  * Test case for {@link Segment} - {@link Segment} collision detection.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.2.1
  * @since 1.0.0
  */
 public class SegmentSegmentTest extends AbstractNarrowphaseShapeTest {
@@ -70,23 +70,31 @@ public class SegmentSegmentTest extends AbstractNarrowphaseShapeTest {
 		// test overlap
 		TestCase.assertTrue(this.sat.detect(seg1, t1, seg2, t2, p));
 		TestCase.assertTrue(this.sat.detect(seg1, t1, seg2, t2));
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertTrue(this.sat.detect(seg2, t2, seg1, t1, p));
 		TestCase.assertTrue(this.sat.detect(seg2, t2, seg1, t1));
 		
 		// test AABB overlap
+		p.clear();
 		t2.translate(0.5, 0.0);
 		TestCase.assertFalse(this.sat.detect(seg1, t1, seg2, t2, p));
 		TestCase.assertFalse(this.sat.detect(seg1, t1, seg2, t2));
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertFalse(this.sat.detect(seg2, t2, seg1, t1, p));
 		TestCase.assertFalse(this.sat.detect(seg2, t2, seg1, t1));
 		
 		// test no overlap
+		p.clear();
 		t1.translate(-1.0, 0.0);
 		TestCase.assertFalse(this.sat.detect(seg1, t1, seg2, t2, p));
 		TestCase.assertFalse(this.sat.detect(seg1, t1, seg2, t2));
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertFalse(this.sat.detect(seg2, t2, seg1, t1, p));
 		TestCase.assertFalse(this.sat.detect(seg2, t2, seg1, t1));
 	}
@@ -103,23 +111,31 @@ public class SegmentSegmentTest extends AbstractNarrowphaseShapeTest {
 		// test overlap
 		TestCase.assertTrue(this.gjk.detect(seg1, t1, seg2, t2, p));
 		TestCase.assertTrue(this.gjk.detect(seg1, t1, seg2, t2));
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertTrue(this.gjk.detect(seg2, t2, seg1, t1, p));
 		TestCase.assertTrue(this.gjk.detect(seg2, t2, seg1, t1));
 		
 		// test AABB overlap
+		p.clear();
 		t2.translate(0.5, 0.0);
 		TestCase.assertFalse(this.gjk.detect(seg1, t1, seg2, t2, p));
 		TestCase.assertFalse(this.gjk.detect(seg1, t1, seg2, t2));
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertFalse(this.gjk.detect(seg2, t2, seg1, t1, p));
 		TestCase.assertFalse(this.gjk.detect(seg2, t2, seg1, t1));
 		
 		// test no overlap
+		p.clear();
 		t1.translate(-1.0, 0.0);
 		TestCase.assertFalse(this.gjk.detect(seg1, t1, seg2, t2, p));
 		TestCase.assertFalse(this.gjk.detect(seg1, t1, seg2, t2));
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertFalse(this.gjk.detect(seg2, t2, seg1, t1, p));
 		TestCase.assertFalse(this.gjk.detect(seg2, t2, seg1, t1));
 	}
@@ -138,10 +154,13 @@ public class SegmentSegmentTest extends AbstractNarrowphaseShapeTest {
 		
 		// test overlap
 		TestCase.assertFalse(this.gjk.distance(seg1, t1, seg2, t2, s));
+		
 		// try reversing the shapes
+		s.clear();
 		TestCase.assertFalse(this.gjk.distance(seg2, t2, seg1, t1, s));
 		
 		// test AABB overlap
+		s.clear();
 		t2.translate(0.5, 0.0);
 		TestCase.assertTrue(this.gjk.distance(seg1, t1, seg2, t2, s));
 		n = s.getNormal();
@@ -154,7 +173,9 @@ public class SegmentSegmentTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals(0.024, p1.y, 1.0e-3);
 		TestCase.assertEquals(0.000, p2.x, 1.0e-3);
 		TestCase.assertEquals(0.000, p2.y, 1.0e-3);
+		
 		// try reversing the shapes
+		s.clear();
 		TestCase.assertTrue(this.gjk.distance(seg2, t2, seg1, t1, s));
 		n = s.getNormal();
 		p1 = s.getPoint1();
@@ -168,6 +189,7 @@ public class SegmentSegmentTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals(0.024, p2.y, 1.0e-3);
 		
 		// test no overlap
+		s.clear();
 		t1.translate(-1.0, 0.0);
 		TestCase.assertTrue(this.gjk.distance(seg1, t1, seg2, t2, s));
 		n = s.getNormal();
@@ -180,7 +202,9 @@ public class SegmentSegmentTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals(0.300, p1.y, 1.0e-3);
 		TestCase.assertEquals(0.000, p2.x, 1.0e-3);
 		TestCase.assertEquals(0.000, p2.y, 1.0e-3);
+		
 		// try reversing the shapes
+		s.clear();
 		TestCase.assertTrue(this.gjk.distance(seg2, t2, seg1, t1, s));
 		n = s.getNormal();
 		p1 = s.getPoint1();

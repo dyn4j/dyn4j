@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -42,7 +42,7 @@ import junit.framework.TestCase;
 /**
  * Test case for {@link Circle} - {@link Capsule} collision detection.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.2.1
  * @since 3.1.5
  */
 public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
@@ -78,7 +78,9 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.000, n.x, 1.0e-3);
 		TestCase.assertEquals( 1.000, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.750, p.getDepth(), 1.0e-3);
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertTrue(this.sat.detect(capsule, t2, circle, t1, p));
 		TestCase.assertTrue(this.sat.detect(capsule, t2, circle, t1));
 		n = p.getNormal();
@@ -87,6 +89,7 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.750, p.getDepth(), 1.0e-3);
 		
 		// test overlap
+		p.clear();
 		t1.translate(-0.5, 0.0);
 		TestCase.assertTrue(this.sat.detect(circle, t1, capsule, t2, p));
 		TestCase.assertTrue(this.sat.detect(circle, t1, capsule, t2));
@@ -94,7 +97,9 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 1.000, n.x, 1.0e-3);
 		TestCase.assertEquals( 0.000, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.500, p.getDepth(), 1.0e-3);
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertTrue(this.sat.detect(capsule, t2, circle, t1, p));
 		TestCase.assertTrue(this.sat.detect(capsule, t2, circle, t1));
 		n = p.getNormal();
@@ -103,18 +108,24 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.500, p.getDepth(), 1.0e-3);
 		
 		// test AABB overlap
+		p.clear();
 		t2.translate(0.35, -0.5);
 		TestCase.assertFalse(this.sat.detect(circle, t1, capsule, t2, p));
 		TestCase.assertFalse(this.sat.detect(circle, t1, capsule, t2));
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertFalse(this.sat.detect(capsule, t2, circle, t1, p));
 		TestCase.assertFalse(this.sat.detect(capsule, t2, circle, t1));
 		
 		// test no overlap
+		p.clear();
 		t2.translate(1.0, 0.0);
 		TestCase.assertFalse(this.sat.detect(circle, t1, capsule, t2, p));
 		TestCase.assertFalse(this.sat.detect(circle, t1, capsule, t2));
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertFalse(this.sat.detect(capsule, t2, circle, t1, p));
 		TestCase.assertFalse(this.sat.detect(capsule, t2, circle, t1));
 	}
@@ -136,7 +147,9 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.000, n.x, 1.0e-3);
 		TestCase.assertEquals(-1.000, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.750, p.getDepth(), 1.0e-3);
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertTrue(this.gjk.detect(capsule, t2, circle, t1, p));
 		TestCase.assertTrue(this.gjk.detect(capsule, t2, circle, t1));
 		n = p.getNormal();
@@ -145,6 +158,7 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.750, p.getDepth(), 1.0e-3);
 		
 		// test overlap
+		p.clear();
 		t1.translate(-0.5, 0.0);
 		TestCase.assertTrue(this.gjk.detect(circle, t1, capsule, t2, p));
 		TestCase.assertTrue(this.gjk.detect(circle, t1, capsule, t2));
@@ -152,7 +166,9 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 1.000, n.x, 1.0e-3);
 		TestCase.assertEquals( 0.000, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.500, p.getDepth(), 1.0e-3);
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertTrue(this.gjk.detect(capsule, t2, circle, t1, p));
 		TestCase.assertTrue(this.gjk.detect(capsule, t2, circle, t1));
 		n = p.getNormal();
@@ -161,18 +177,24 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.500, p.getDepth(), 1.0e-3);
 		
 		// test AABB overlap
+		p.clear();
 		t2.translate(0.35, -0.5);
 		TestCase.assertFalse(this.gjk.detect(circle, t1, capsule, t2, p));
 		TestCase.assertFalse(this.gjk.detect(circle, t1, capsule, t2));
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertFalse(this.gjk.detect(capsule, t2, circle, t1, p));
 		TestCase.assertFalse(this.gjk.detect(capsule, t2, circle, t1));
 		
 		// test no overlap
+		p.clear();
 		t2.translate(1.0, 0.0);
 		TestCase.assertFalse(this.gjk.detect(circle, t1, capsule, t2, p));
 		TestCase.assertFalse(this.gjk.detect(circle, t1, capsule, t2));
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertFalse(this.gjk.detect(capsule, t2, circle, t1, p));
 		TestCase.assertFalse(this.gjk.detect(capsule, t2, circle, t1));
 	}
@@ -193,16 +215,22 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		
 		// test containment
 		TestCase.assertFalse(this.gjk.distance(circle, t1, capsule, t2, s));
+		
 		// try reversing the shapes
+		s.clear();
 		TestCase.assertFalse(this.gjk.distance(capsule, t2, circle, t1, s));
 		
 		// test overlap
+		s.clear();
 		t1.translate(-0.5, 0.0);
 		TestCase.assertFalse(this.gjk.distance(circle, t1, capsule, t2, s));
+		
 		// try reversing the shapes
+		s.clear();
 		TestCase.assertFalse(this.gjk.distance(capsule, t2, circle, t1, s));
 		
 		// test AABB overlap
+		s.clear();
 		t2.translate(0.35, -0.5);
 		TestCase.assertTrue(this.gjk.distance(circle, t1, capsule, t2, s));
 		n = s.getNormal();
@@ -215,7 +243,9 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals(-0.320, p1.y, 1.0e-3);
 		TestCase.assertEquals(-0.092, p2.x, 1.0e-3);
 		TestCase.assertEquals(-0.339, p2.y, 1.0e-3);
+		
 		// try reversing the shapes
+		s.clear();
 		TestCase.assertTrue(this.gjk.distance(capsule, t2, circle, t1, s));
 		n = s.getNormal();
 		p1 = s.getPoint1();
@@ -229,6 +259,7 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals(-0.320, p2.y, 1.0e-3);
 		
 		// test no overlap
+		s.clear();
 		t2.translate(1.0, 0.0);
 		TestCase.assertTrue(this.gjk.distance(circle, t1, capsule, t2, s));
 		n = s.getNormal();
@@ -241,7 +272,9 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals(-0.149, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.861, p2.x, 1.0e-3);
 		TestCase.assertEquals(-0.425, p2.y, 1.0e-3);
+		
 		// try reversing the shapes
+		s.clear();
 		TestCase.assertTrue(this.gjk.distance(capsule, t2, circle, t1, s));
 		n = s.getNormal();
 		p1 = s.getPoint1();
@@ -273,16 +306,24 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		this.gjk.detect(circle, t1, capsule, t2, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, circle, t1, capsule, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
+		
 		// try reversing the shapes
+		p.clear();
+		m.clear();
 		this.gjk.detect(capsule, t2, circle, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, capsule, t2, circle, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
 		
 		// test containment sat
+		p.clear();
+		m.clear();
 		this.sat.detect(circle, t1, capsule, t2, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, circle, t1, capsule, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
+		
 		// try reversing the shapes
+		p.clear();
+		m.clear();
 		this.sat.detect(capsule, t2, circle, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, capsule, t2, circle, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
@@ -290,6 +331,8 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		t1.translate(-0.5, 0.0);
 		
 		// test overlap gjk
+		p.clear();
+		m.clear();
 		this.gjk.detect(circle, t1, capsule, t2, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, circle, t1, capsule, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
@@ -298,7 +341,10 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.000, p1.x, 1.0e-3);
 		TestCase.assertEquals( 0.000, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.500, mp.getDepth(), 1.0e-3);
+		
 		// try reversing the shapes
+		p.clear();
+		m.clear();
 		this.gjk.detect(capsule, t2, circle, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, capsule, t2, circle, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
@@ -309,6 +355,8 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.500, mp.getDepth(), 1.0e-3);
 		
 		// test overlap sat
+		p.clear();
+		m.clear();
 		this.sat.detect(circle, t1, capsule, t2, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, circle, t1, capsule, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
@@ -317,7 +365,10 @@ public class CircleCapsuleTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.000, p1.x, 1.0e-3);
 		TestCase.assertEquals( 0.000, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.500, mp.getDepth(), 1.0e-3);
+		
 		// try reversing the shapes
+		p.clear();
+		m.clear();
 		this.sat.detect(capsule, t2, circle, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, capsule, t2, circle, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());

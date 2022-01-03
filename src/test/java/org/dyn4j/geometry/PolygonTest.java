@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,12 +26,14 @@ package org.dyn4j.geometry;
 
 import junit.framework.TestCase;
 
+import java.util.Iterator;
+
 import org.junit.Test;
 
 /**
  * Test case for the {@link Polygon} class.
  * @author William Bittle
- * @version 3.1.4
+ * @version 4.2.1
  * @since 1.0.0
  */
 public class PolygonTest {
@@ -473,5 +475,37 @@ public class PolygonTest {
 		Polygon p = new Polygon(vertices);
 		
 		TestCase.assertTrue(p.contains(new Vector2(4.5, 0.0)));
+	}
+	
+	/**
+	 * Tests the getNormals and getNormalIterator methods.
+	 */
+	@Test
+	public void getNormals() {
+		Vector2[] vertices = new Vector2[] {
+			new Vector2(0.0, 1.0),
+			new Vector2(-1.0, 0.0),
+			new Vector2(1.0, 0.0)
+		};
+		Polygon p = new Polygon(vertices);
+		
+		Vector2[] normals = p.getNormals();
+		
+		TestCase.assertNotNull(normals);
+		TestCase.assertEquals(3, normals.length);
+		TestCase.assertEquals(-0.707, normals[0].x, 1e-3);
+		TestCase.assertEquals( 0.707, normals[0].y, 1e-3);
+		TestCase.assertEquals( 0.0, normals[1].x, 1e-3);
+		TestCase.assertEquals(-1.0, normals[1].y, 1e-3);
+		TestCase.assertEquals( 0.707, normals[2].x, 1e-3);
+		TestCase.assertEquals( 0.707, normals[2].y, 1e-3);
+		
+		Iterator<Vector2> iterator = p.getNormalIterator();
+		
+		TestCase.assertNotNull(iterator);
+		TestCase.assertEquals(WoundIterator.class, iterator.getClass());
+		while (iterator.hasNext()) {
+			iterator.next();
+		}
 	}
 }

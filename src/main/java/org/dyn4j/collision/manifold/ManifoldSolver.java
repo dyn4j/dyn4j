@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -52,10 +52,10 @@ public interface ManifoldSolver {
 	 * <p>
 	 * When returning true, this method fills in the {@link Manifold} object with the points, depth, and normal.
 	 * <p>
-	 * The given {@link Manifold} object will be cleared using the {@link Manifold#clear()} method. This allows reuse of the
-	 * {@link Manifold} if desired.
-	 * <p>
 	 * The {@link Penetration} object will be left unchanged by this method.
+	 * <p>
+	 * NOTE: It's the responsibility of the caller to clear the given {@link Manifold} object
+	 * before calling this method.
 	 * @param penetration the {@link Penetration}
 	 * @param convex1 the first {@link Convex} {@link Shape}
 	 * @param transform1 the first {@link Shape}'s {@link Transform}

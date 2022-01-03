@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,6 +41,8 @@ public interface DistanceDetector {
 	 * and closest points.
 	 * <p>
 	 * Returns false if the given {@link Convex} {@link Shape}s are overlapping.
+	 * <p>
+	 * NOTE: It's the responsibility of the caller to clear the given {@link Separation} object before calling this method.
 	 * @param convex1 the first {@link Shape}
 	 * @param transform1 the first {@link Shape}'s {@link Transform}
 	 * @param convex2 the second {@link Shape}

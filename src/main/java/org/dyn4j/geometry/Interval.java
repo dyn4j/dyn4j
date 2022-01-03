@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a one dimensional numeric {@link Interval}.
  * @author William Bittle
- * @version 3.1.9
+ * @version 4.2.1
  * @since 1.0.0
  */
 public class Interval {
@@ -226,12 +226,53 @@ public class Interval {
 	}
 	
 	/**
-	 * Returns true if the given {@link Interval} is contained in this {@link Interval}.
+	 * Returns true if the given {@link Interval} is contained in this {@link Interval} exclusively.
+	 * @param interval the {@link Interval}
+	 * @return boolean
+	 * @deprecated Deprecated in 4.2.1. Use {@link #containsExclusive(Interval)} instead.
+	 */
+	@Deprecated
+	public boolean contains(Interval interval) {
+		return interval.min > this.min && interval.max < this.max;
+	}
+
+	/**
+	 * Returns true if the given {@link Interval} is contained in this {@link Interval} exclusively.
 	 * @param interval the {@link Interval}
 	 * @return boolean
 	 */
-	public boolean contains(Interval interval) {
+	public boolean containsExclusive(Interval interval) {
 		return interval.min > this.min && interval.max < this.max;
+	}
+	
+	/**
+	 * Returns true if the given {@link Interval} is contained in this {@link Interval} inclusively.
+	 * @param interval the {@link Interval}
+	 * @return boolean
+	 * @since 4.2.1
+	 */
+	public boolean containsInclusive(Interval interval) {
+		return interval.min >= this.min && interval.max <= this.max;
+	}
+	
+	/**
+	 * Returns true if the given {@link Interval} is contained in this {@link Interval} max-inclusively.
+	 * @param interval the {@link Interval}
+	 * @return boolean
+	 * @since 4.2.1
+	 */
+	public boolean containsInclusiveMax(Interval interval) {
+		return interval.min > this.min && interval.max <= this.max;
+	}
+	
+	/**
+	 * Returns true if the given {@link Interval} is contained in this {@link Interval} min-inclusively.
+	 * @param interval the {@link Interval}
+	 * @return boolean
+	 * @since 4.2.1
+	 */
+	public boolean containsInclusiveMin(Interval interval) {
+		return interval.min >= this.min && interval.max < this.max;
 	}
 	
 	/**

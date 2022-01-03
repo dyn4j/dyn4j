@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -43,7 +43,7 @@ import junit.framework.TestCase;
 /**
  * Test case for {@link Triangle} - {@link HalfEllipse} collision detection.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.2.1
  * @since 3.1.5
  */
 public class TriangleHalfEllipseTest extends AbstractNarrowphaseShapeTest {
@@ -95,7 +95,9 @@ public class TriangleHalfEllipseTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.000, n.x, 1.0e-3);
 		TestCase.assertEquals( 1.000, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.650, p.getDepth(), 1.0e-3);
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertTrue(this.gjk.detect(e, t2, t, t1, p));
 		TestCase.assertTrue(this.gjk.detect(e, t2, t, t1));
 		n = p.getNormal();
@@ -104,6 +106,7 @@ public class TriangleHalfEllipseTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.650, p.getDepth(), 1.0e-3);
 		
 		// test overlap
+		p.clear();
 		t1.translate(-1.0, 0.0);
 		TestCase.assertTrue(this.gjk.detect(t, t1, e, t2, p));
 		TestCase.assertTrue(this.gjk.detect(t, t1, e, t2));
@@ -111,7 +114,9 @@ public class TriangleHalfEllipseTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.196, n.x, 1.0e-3);
 		TestCase.assertEquals( 0.980, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.498, p.getDepth(), 1.0e-3);
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertTrue(this.gjk.detect(e, t2, t, t1, p));
 		TestCase.assertTrue(this.gjk.detect(e, t2, t, t1));
 		n = p.getNormal();
@@ -120,18 +125,24 @@ public class TriangleHalfEllipseTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.498, p.getDepth(), 1.0e-3);
 		
 		// test AABB overlap
+		p.clear();
 		t2.translate(0.0, -0.8);
 		TestCase.assertFalse(this.gjk.detect(t, t1, e, t2, p));
 		TestCase.assertFalse(this.gjk.detect(t, t1, e, t2));
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertFalse(this.gjk.detect(e, t2, t, t1, p));
 		TestCase.assertFalse(this.gjk.detect(e, t2, t, t1));
 		
 		// test no overlap
+		p.clear();
 		t2.translate(2.0, 0.0);
 		TestCase.assertFalse(this.gjk.detect(t, t1, e, t2, p));
 		TestCase.assertFalse(this.gjk.detect(t, t1, e, t2));
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertFalse(this.gjk.detect(e, t2, t, t1, p));
 		TestCase.assertFalse(this.gjk.detect(e, t2, t, t1));
 	}
@@ -150,16 +161,22 @@ public class TriangleHalfEllipseTest extends AbstractNarrowphaseShapeTest {
 		
 		// test containment
 		TestCase.assertFalse(this.gjk.distance(t, t1, e, t2, s));
+		
 		// try reversing the shapes
+		s.clear();
 		TestCase.assertFalse(this.gjk.distance(e, t2, t, t1, s));
 		
 		// test overlap
+		s.clear();
 		t1.translate(-1.0, 0.0);
 		TestCase.assertFalse(this.gjk.distance(t, t1, e, t2, s));
+		
 		// try reversing the shapes
+		s.clear();
 		TestCase.assertFalse(this.gjk.distance(e, t2, t, t1, s));
 		
 		// test AABB overlap
+		s.clear();
 		t2.translate(0.0, -0.8);
 		TestCase.assertTrue(this.gjk.distance(t, t1, e, t2, s));
 		n = s.getNormal();
@@ -172,7 +189,9 @@ public class TriangleHalfEllipseTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals(-0.392, p1.y, 1.0e-3);
 		TestCase.assertEquals(-0.760, p2.x, 1.0e-3);
 		TestCase.assertEquals(-0.475, p2.y, 1.0e-3);
+		
 		// try reversing the shapes
+		s.clear();
 		TestCase.assertTrue(this.gjk.distance(e, t2, t, t1, s));
 		n = s.getNormal();
 		p1 = s.getPoint1();
@@ -186,6 +205,7 @@ public class TriangleHalfEllipseTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals(-0.392, p2.y, 1.0e-3);
 		
 		// test no overlap
+		s.clear();
 		t2.translate(2.0, 0.0);
 		TestCase.assertTrue(this.gjk.distance(t, t1, e, t2, s));
 		n = s.getNormal();
@@ -198,7 +218,9 @@ public class TriangleHalfEllipseTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.250, p1.y, 1.0e-3);
 		TestCase.assertEquals( 1.107, p2.x, 1.0e-3);
 		TestCase.assertEquals(-0.574, p2.y, 1.0e-3);
+		
 		// try reversing the shapes
+		s.clear();
 		TestCase.assertTrue(this.gjk.distance(e, t2, t, t1, s));
 		n = s.getNormal();
 		p1 = s.getPoint1();
@@ -230,7 +252,10 @@ public class TriangleHalfEllipseTest extends AbstractNarrowphaseShapeTest {
 		this.gjk.detect(t, t1, e, t2, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, t, t1, e, t2, m));
 		TestCase.assertEquals(2, m.getPoints().size());
+
 		// try reversing the shapes
+		p.clear();
+		m.clear();
 		this.gjk.detect(e, t2, t, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, e, t2, t, t1, m));
 		TestCase.assertEquals(2, m.getPoints().size());
@@ -238,6 +263,8 @@ public class TriangleHalfEllipseTest extends AbstractNarrowphaseShapeTest {
 		t1.translate(-1.0, 0.0);
 		
 		// test overlap gjk
+		p.clear();
+		m.clear();
 		this.gjk.detect(t, t1, e, t2, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, t, t1, e, t2, m));
 		TestCase.assertEquals(2, m.getPoints().size());
@@ -251,7 +278,10 @@ public class TriangleHalfEllipseTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.240, p2.x, 1.0e-3);
 		TestCase.assertEquals( 0.000, p2.y, 1.0e-3);
 		TestCase.assertEquals( 0.254, mp2.getDepth(), 1.0e-3);
+
 		// try reversing the shapes
+		p.clear();
+		m.clear();
 		this.gjk.detect(e, t2, t, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, e, t2, t, t1, m));
 		TestCase.assertEquals(2, m.getPoints().size());

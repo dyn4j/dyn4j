@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,6 +25,7 @@
 package org.dyn4j.collision.narrowphase;
 
 import org.dyn4j.geometry.Circle;
+import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
@@ -32,10 +33,13 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Class devoted to {@link Circle} detection queries.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.2.1
  * @since 2.0.0
  */
 public final class CircleDetector {
+	/** Helper vector for methods below */
+	private static final Vector2 X_AXIS = new Vector2(1.0, 0.0);
+	
 	/**
 	 * Hidden constructor.
 	 */
@@ -51,6 +55,9 @@ public final class CircleDetector {
 	 * will be the zero {@link Vector2}, however, the penetration depth will be
 	 * correct.  In this case its up to the caller to determine a reasonable penetration
 	 * {@link Vector2}.
+	 * <p>
+	 * NOTE: It's the responsibility of the caller to clear the given {@link Penetration} object
+	 * before calling this method.
 	 * @param circle1 the first {@link Circle}
 	 * @param transform1 the first {@link Circle}'s {@link Transform}
 	 * @param circle2 the second {@link Circle}
@@ -112,6 +119,9 @@ public final class CircleDetector {
 	 * <p>
 	 * Returns true if the given {@link Circle}s are separated and places the
 	 * separating vector and distance in the given {@link Separation} object.
+	 * <p>
+	 * NOTE: It's the responsibility of the caller to clear the given {@link Separation} object
+	 * before calling this method.
 	 * @param circle1 the first {@link Circle}
 	 * @param transform1 the first {@link Circle}'s {@link Transform}
 	 * @param circle2 the second {@link Circle}
@@ -146,9 +156,49 @@ public final class CircleDetector {
 		}
 		return false;
 	}
+
+	/**
+	 * Fast method for determining whether one circle is contained in another {@link Circle}s.
+	 * <p>
+	 * Returns true if one of the {@link Circle}s is contained in the other and places the result
+	 * in the given {@link Containment} object.
+	 * <p>
+	 * NOTE: It's the responsibility of the caller to clear the given {@link Containment} object
+	 * before calling this method.
+	 * @param circle1 the first {@link Circle}
+	 * @param transform1 the first {@link Circle}'s {@link Transform}
+	 * @param circle2 the second {@link Circle}
+	 * @param transform2 the second {@link Circle}'s {@link Transform}
+	 * @param containment the {@link Containment} object to fill
+	 * @return boolean
+	 * @since 4.2.1
+	 */
+	public static final boolean contains(Circle circle1, Transform transform1, Circle circle2, Transform transform2, Containment containment) {
+		// for circle vs. circle you can project them onto ANY axis and test for containment
+		// so we choose the x-axis for ease
+		Interval i1 = circle1.project(X_AXIS, transform1);
+		Interval i2 = circle2.project(X_AXIS, transform2);
+		
+		boolean aContainsB = i1.containsExclusive(i2);
+		boolean bContainsA = i2.containsExclusive(i1);
+		
+		if (aContainsB || bContainsA) {
+			containment.setAContainedInB(bContainsA);
+			containment.setBContainedInA(aContainsB);
+			return true;
+		}
+		
+		return false;
+	}
 	
 	/**
 	 * Performs a ray cast against the given circle.
+	 * <p>
+	 * Returns true if the given {@link Ray} intersects with the given {@link Circle} and places the result
+	 * in the given {@link Raycast} object.
+	 * <p>
+	 * NOTE: It's the responsibility of the caller to clear the given {@link Raycast} object
+	 * before calling this method.
 	 * @param ray the {@link Ray}
 	 * @param maxLength the maximum ray length
 	 * @param circle the {@link Circle}

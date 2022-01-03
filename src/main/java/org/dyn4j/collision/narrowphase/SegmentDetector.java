@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -44,6 +44,9 @@ public final class SegmentDetector {
 	
 	/**
 	 * Performs a ray cast against the given segment.
+	 * <p>
+	 * NOTE: It's the responsibility of the caller to clear the given {@link Raycast} object
+	 * before calling this method.
 	 * @param ray the {@link Ray}
 	 * @param maxLength the maximum ray length
 	 * @param segment the {@link Segment}

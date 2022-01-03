@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -42,7 +42,7 @@ import junit.framework.TestCase;
 /**
  * Test case for {@link Ellipse} - {@link Slice} collision detection.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.2.1
  * @since 3.1.5
  */
 public class EllipseSliceTest extends AbstractNarrowphaseShapeTest {
@@ -90,7 +90,9 @@ public class EllipseSliceTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.422, n.x, 1.0e-3);
 		TestCase.assertEquals( 0.906, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.309, p.getDepth(), 1.0e-3);
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertTrue(this.gjk.detect(slice, t2, ellipse, t1, p));
 		TestCase.assertTrue(this.gjk.detect(slice, t2, ellipse, t1));
 		n = p.getNormal();
@@ -99,6 +101,7 @@ public class EllipseSliceTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.309, p.getDepth(), 1.0e-3);
 		
 		// test overlap
+		p.clear();
 		t1.translate(-0.25, 0.0);
 		TestCase.assertTrue(this.gjk.detect(ellipse, t1, slice, t2, p));
 		TestCase.assertTrue(this.gjk.detect(ellipse, t1, slice, t2));
@@ -106,7 +109,9 @@ public class EllipseSliceTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.422, n.x, 1.0e-3);
 		TestCase.assertEquals(-0.906, n.y, 1.0e-3);
 		TestCase.assertEquals( 0.204, p.getDepth(), 1.0e-3);
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertTrue(this.gjk.detect(slice, t2, ellipse, t1, p));
 		TestCase.assertTrue(this.gjk.detect(slice, t2, ellipse, t1));
 		n = p.getNormal();
@@ -115,18 +120,24 @@ public class EllipseSliceTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.204, p.getDepth(), 1.0e-3);
 		
 		// test AABB overlap
+		p.clear();
 		t2.translate(0.0, -0.25);
 		TestCase.assertFalse(this.gjk.detect(ellipse, t1, slice, t2, p));
 		TestCase.assertFalse(this.gjk.detect(ellipse, t1, slice, t2));
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertFalse(this.gjk.detect(slice, t2, ellipse, t1, p));
 		TestCase.assertFalse(this.gjk.detect(slice, t2, ellipse, t1));
 		
 		// test no overlap
+		p.clear();
 		t2.translate(1.0, 0.0);
 		TestCase.assertFalse(this.gjk.detect(ellipse, t1, slice, t2, p));
 		TestCase.assertFalse(this.gjk.detect(ellipse, t1, slice, t2));
+		
 		// try reversing the shapes
+		p.clear();
 		TestCase.assertFalse(this.gjk.detect(slice, t2, ellipse, t1, p));
 		TestCase.assertFalse(this.gjk.detect(slice, t2, ellipse, t1));
 	}
@@ -147,16 +158,22 @@ public class EllipseSliceTest extends AbstractNarrowphaseShapeTest {
 		
 		// test containment
 		TestCase.assertFalse(this.gjk.distance(ellipse, t1, slice, t2, s));
+		
 		// try reversing the shapes
+		s.clear();
 		TestCase.assertFalse(this.gjk.distance(slice, t2, ellipse, t1, s));
 		
 		// test overlap
+		s.clear();
 		t1.translate(-0.25, 0.0);
 		TestCase.assertFalse(this.gjk.distance(ellipse, t1, slice, t2, s));
+		
 		// try reversing the shapes
+		s.clear();
 		TestCase.assertFalse(this.gjk.distance(slice, t2, ellipse, t1, s));
 		
 		// test AABB overlap
+		s.clear();
 		t2.translate(0.0, -0.25);
 		TestCase.assertTrue(this.gjk.distance(ellipse, t1, slice, t2, s));
 		n = s.getNormal();
@@ -169,7 +186,9 @@ public class EllipseSliceTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals(-0.182, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.100, p2.x, 1.0e-3);
 		TestCase.assertEquals(-0.203, p2.y, 1.0e-3);
+		
 		// try reversing the shapes
+		s.clear();
 		TestCase.assertTrue(this.gjk.distance(slice, t2, ellipse, t1, s));
 		n = s.getNormal();
 		p1 = s.getPoint1();
@@ -183,6 +202,7 @@ public class EllipseSliceTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals(-0.182, p2.y, 1.0e-3);
 		
 		// test no overlap
+		s.clear();
 		t2.translate(1.0, 0.0);
 		TestCase.assertTrue(this.gjk.distance(ellipse, t1, slice, t2, s));
 		n = s.getNormal();
@@ -195,7 +215,9 @@ public class EllipseSliceTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals(-0.035, p1.y, 1.0e-3);
 		TestCase.assertEquals( 1.000, p2.x, 1.0e-3);
 		TestCase.assertEquals(-0.250, p2.y, 1.0e-3);
+		
 		// try reversing the shapes
+		s.clear();
 		TestCase.assertTrue(this.gjk.distance(slice, t2, ellipse, t1, s));
 		n = s.getNormal();
 		p1 = s.getPoint1();
@@ -227,7 +249,10 @@ public class EllipseSliceTest extends AbstractNarrowphaseShapeTest {
 		this.gjk.detect(ellipse, t1, slice, t2, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, ellipse, t1, slice, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
+		
 		// try reversing the shapes
+		p.clear();
+		m.clear();
 		this.gjk.detect(slice, t2, ellipse, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, slice, t2, ellipse, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());
@@ -235,6 +260,8 @@ public class EllipseSliceTest extends AbstractNarrowphaseShapeTest {
 		t1.translate(-0.25, 0.0);
 		
 		// test overlap gjk
+		p.clear();
+		m.clear();
 		this.gjk.detect(ellipse, t1, slice, t2, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, ellipse, t1, slice, t2, m));
 		TestCase.assertEquals(1, m.getPoints().size());
@@ -243,7 +270,10 @@ public class EllipseSliceTest extends AbstractNarrowphaseShapeTest {
 		TestCase.assertEquals( 0.091, p1.x, 1.0e-3);
 		TestCase.assertEquals(-0.182, p1.y, 1.0e-3);
 		TestCase.assertEquals( 0.204, mp.getDepth(), 1.0e-3);
+		
 		// try reversing the shapes
+		p.clear();
+		m.clear();
 		this.gjk.detect(slice, t2, ellipse, t1, p);
 		TestCase.assertTrue(this.cmfs.getManifold(p, slice, t2, ellipse, t1, m));
 		TestCase.assertEquals(1, m.getPoints().size());

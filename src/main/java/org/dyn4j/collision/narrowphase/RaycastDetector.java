@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -45,6 +45,9 @@ public interface RaycastDetector {
 	 * The raycast parameter is used to stored the results of the raycast when returning true.
 	 * <p>
 	 * Returns false if the start position of the ray lies inside the given convex.
+	 * <p>
+	 * NOTE: It's the responsibility of the caller to clear the given {@link Raycast} object
+	 * before calling this method.
 	 * @param ray the {@link Ray}
 	 * @param maxLength the maximum length of the ray; 0 for infinite length
 	 * @param convex the {@link Convex} {@link Shape}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Wound} class.
  * @author William Bittle
- * @version 3.1.0
+ * @version 4.2.1
  * @since 3.1.0
  */
 public class WoundTest {
@@ -110,5 +110,36 @@ public class WoundTest {
 		}
 		
 		TestCase.assertEquals(w.getVertices().length, i);
+	}
+
+	/**
+	 * You should NOT be able to remove points of a wound shape.
+	 */
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void woundIteratorFail() {
+		Wound w = Geometry.createPolygon(
+				new Vector2(0.0, 0.0),
+				new Vector2(1.0, 0.0),
+				new Vector2(0.0, 1.0));
+		Iterator<Vector2> it = w.getVertexIterator();
+		while (true) {
+			it.next();
+		}
+	}
+	
+	/**
+	 * You should NOT be able to remove points of a wound shape.
+	 */
+	@Test(expected = UnsupportedOperationException.class)
+	public void woundIteratorRemove() {
+		Wound w = Geometry.createPolygon(
+				new Vector2(0.0, 0.0),
+				new Vector2(1.0, 0.0),
+				new Vector2(0.0, 1.0));
+		Iterator<Vector2> it = w.getVertexIterator();
+		while (it.hasNext()) {
+			it.next();
+			it.remove();
+		}
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,6 +27,7 @@ package org.dyn4j.collision.narrowphase;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Interval;
+import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
@@ -46,11 +47,11 @@ import org.dyn4j.geometry.Vector2;
  * with the least overlap.  The normal will be the edge normal of the {@link Interval} and the depth will be the {@link Interval}
  * overlap.
  * @author William Bittle
- * @version 3.0.2
+ * @version 4.2.1
  * @since 1.0.0
  * @see <a href="http://www.dyn4j.org/2010/01/sat/" target="_blank">SAT (Separating Axis Theorem)</a>
  */
-public class Sat implements NarrowphaseDetector {
+public class Sat implements NarrowphaseDetector, ContainmentDetector {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.narrowphase.NarrowphaseDetector#detect(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.collision.narrowphase.Penetration)
 	 */
@@ -62,7 +63,6 @@ public class Sat implements NarrowphaseDetector {
 			return CircleDetector.detect((Circle) convex1, transform1, (Circle) convex2, transform2, penetration);
 		}
 		
-		penetration.clear();
 		Vector2 n = null;
 		double overlap = Double.MAX_VALUE;
 		
@@ -94,7 +94,7 @@ public class Sat implements NarrowphaseDetector {
 		            	// get the overlap
 		            	double o = intervalA.getOverlap(intervalB);
 		            	// check for containment
-		            	if (intervalA.contains(intervalB) || intervalB.contains(intervalA)) {
+		            	if (intervalA.containsExclusive(intervalB) || intervalB.containsExclusive(intervalA)) {
 		            		// if containment exists then get the overlap plus the distance
 		            		// to between the two end points that are the closest
 		            		double max = Math.abs(intervalA.getMax() - intervalB.getMax());
@@ -140,7 +140,7 @@ public class Sat implements NarrowphaseDetector {
 		            	// get the magnitude of the overlap
 		            	double o = intervalA.getOverlap(intervalB);
 		            	// check for containment
-		            	if (intervalA.contains(intervalB) || intervalB.contains(intervalA)) {
+		            	if (intervalA.containsExclusive(intervalB) || intervalB.containsExclusive(intervalA)) {
 		            		// if containment exists then get the overlap plus the distance
 		            		// to between the two end points that are the closest
 		            		double max = Math.abs(intervalA.getMax() - intervalB.getMax());
@@ -182,7 +182,7 @@ public class Sat implements NarrowphaseDetector {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.narrowphase.NarrowphaseDetector#test(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.collision.narrowphase.NarrowphaseDetector#detect(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform)
 	 */
 	@Override
 	public boolean detect(Convex convex1, Transform transform1, Convex convex2, Transform transform2) {
@@ -243,5 +243,91 @@ public class Sat implements NarrowphaseDetector {
 		
 		// if we get here, then we have intersection
 		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.narrowphase.ContainmentDetector#contains(org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.geometry.Convex, org.dyn4j.geometry.Transform, org.dyn4j.collision.narrowphase.Containment)
+	 */
+	@Override
+	public boolean contains(Convex convex1, Transform transform1, Convex convex2, Transform transform2, Containment containment) {
+		// check for circles
+		if (convex1 instanceof Circle && convex2 instanceof Circle) {
+			// if its a circle - circle collision use the faster method
+			return CircleDetector.contains((Circle) convex1, transform1, (Circle) convex2, transform2, containment);
+		}
+		
+		// segment vs. segment containment can never be true since we treat
+		// overlapping edges as NOT contained
+		if (convex1 instanceof Segment && convex2 instanceof Segment) {
+			return false;
+		}
+		
+		// get the foci from both shapes, the foci are used to test any
+		// voronoi regions of the other shape
+		Vector2[] foci1 = convex1.getFoci(transform1);
+		Vector2[] foci2 = convex2.getFoci(transform2);
+		
+		// get the vector arrays for the separating axes tests
+		Vector2[] axes1 = convex1.getAxes(foci2, transform1);
+		Vector2[] axes2 = convex2.getAxes(foci1, transform2);
+		
+		boolean aContainsB = true;
+		boolean bContainsA = true;
+		
+		// loop through shape1 axes
+		if (axes1 != null) {
+			int size = axes1.length;
+			for (int i = 0; i < size; i++) {
+				Vector2 axis = axes1[i];
+				// check for the zero vector
+				if (!axis.isZero()) {
+					// project both shapes onto the axis
+	        		Interval intervalA = convex1.project(axis, transform1);
+		            Interval intervalB = convex2.project(axis, transform2);
+
+		            if (!intervalA.containsExclusive(intervalB)) {
+		            	aContainsB = false;
+		            }
+		            if (!intervalB.containsExclusive(intervalA)) {
+		            	bContainsA = false;
+		            }
+				}
+				
+				if (!aContainsB && !bContainsA) {
+					return false;
+				}
+			}
+		}
+		
+		// loop through shape2 axes
+		if (axes2 != null) {
+			int size = axes2.length;
+			for (int i = 0; i < size; i++) {
+				Vector2 axis = axes2[i];
+				// check for the zero vector
+				// check for the zero vector
+				if (!axis.isZero()) {
+					// project both shapes onto the axis
+	        		Interval intervalA = convex1.project(axis, transform1);
+		            Interval intervalB = convex2.project(axis, transform2);
+
+		            if (!intervalA.containsExclusive(intervalB)) {
+		            	aContainsB = false;
+		            }
+		            if (!intervalB.containsExclusive(intervalA)) {
+		            	bContainsA = false;
+		            }
+				}
+				
+				if (!aContainsB && !bContainsA) {
+					return false;
+				}
+			}
+		}
+		
+		containment.setAContainedInB(bContainsA);
+		containment.setBContainedInA(aContainsB);
+		
+        return true;
 	}
 }

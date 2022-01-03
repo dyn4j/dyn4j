@@ -143,10 +143,6 @@ public class IntervalTest {
 		TestCase.assertEquals(0.0, i1.distance(i2));
 		TestCase.assertEquals(0.0, i2.distance(i1));
 		
-		// contains should return false
-		TestCase.assertTrue(!i1.contains(i2));
-		TestCase.assertTrue(!i2.contains(i1));
-		
 		double ov1 = i1.getOverlap(i2);
 		double ov2 = i2.getOverlap(i1);
 		
@@ -155,6 +151,79 @@ public class IntervalTest {
 		
 		double ov0 = i1.getOverlap(new Interval(-10.0, -6.0));
 		TestCase.assertEquals(0.0, ov0);
+	}
+	
+	/**
+	 * Tests the various contains methods.
+	 */
+	@SuppressWarnings("deprecation")
+	@Test
+	public void contains() {
+		Interval i1 = new Interval(-2.0, 5.0);
+		Interval i2 = new Interval(-1.0, 3.0);
+
+		// contains
+		TestCase.assertTrue(i1.contains(i2));
+		TestCase.assertFalse(i2.contains(i1));
+		TestCase.assertTrue(i1.containsExclusive(i2));
+		TestCase.assertFalse(i2.containsExclusive(i1));
+		TestCase.assertTrue(i1.containsInclusive(i2));
+		TestCase.assertFalse(i2.containsInclusive(i1));
+		TestCase.assertTrue(i1.containsInclusiveMax(i2));
+		TestCase.assertFalse(i2.containsInclusiveMax(i1));
+		TestCase.assertTrue(i1.containsInclusiveMin(i2));
+		TestCase.assertFalse(i2.containsInclusiveMin(i1));
+		
+		// now test min inclusivity
+		
+		i1 = new Interval(-1.0, 5.0);
+		i2 = new Interval(-1.0, 3.0);
+
+		// contains should return false
+		TestCase.assertFalse(i1.contains(i2));
+		TestCase.assertFalse(i2.contains(i1));
+		TestCase.assertFalse(i1.containsExclusive(i2));
+		TestCase.assertFalse(i2.containsExclusive(i1));
+		TestCase.assertTrue(i1.containsInclusive(i2));
+		TestCase.assertFalse(i2.containsInclusive(i1));
+		TestCase.assertFalse(i1.containsInclusiveMax(i2));
+		TestCase.assertFalse(i2.containsInclusiveMax(i1));
+		TestCase.assertTrue(i1.containsInclusiveMin(i2));
+		TestCase.assertFalse(i2.containsInclusiveMin(i1));
+		
+		// now test max inclusivity
+		
+		i1 = new Interval(-2.0, 5.0);
+		i2 = new Interval(-1.0, 5.0);
+
+		// contains should return false
+		TestCase.assertFalse(i1.contains(i2));
+		TestCase.assertFalse(i2.contains(i1));
+		TestCase.assertFalse(i1.containsExclusive(i2));
+		TestCase.assertFalse(i2.containsExclusive(i1));
+		TestCase.assertTrue(i1.containsInclusive(i2));
+		TestCase.assertFalse(i2.containsInclusive(i1));
+		TestCase.assertTrue(i1.containsInclusiveMax(i2));
+		TestCase.assertFalse(i2.containsInclusiveMax(i1));
+		TestCase.assertFalse(i1.containsInclusiveMin(i2));
+		TestCase.assertFalse(i2.containsInclusiveMin(i1));
+		
+		// now test total inclusivity
+		
+		i1 = new Interval(-1.0, 5.0);
+		i2 = new Interval(-1.0, 5.0);
+
+		// contains should return false
+		TestCase.assertFalse(i1.contains(i2));
+		TestCase.assertFalse(i2.contains(i1));
+		TestCase.assertFalse(i1.containsExclusive(i2));
+		TestCase.assertFalse(i2.containsExclusive(i1));
+		TestCase.assertTrue(i1.containsInclusive(i2));
+		TestCase.assertTrue(i2.containsInclusive(i1));
+		TestCase.assertFalse(i1.containsInclusiveMax(i2));
+		TestCase.assertFalse(i2.containsInclusiveMax(i1));
+		TestCase.assertFalse(i1.containsInclusiveMin(i2));
+		TestCase.assertFalse(i2.containsInclusiveMin(i1));
 	}
 	
 	/**
