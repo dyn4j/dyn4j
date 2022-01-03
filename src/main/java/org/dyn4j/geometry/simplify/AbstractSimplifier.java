@@ -46,6 +46,8 @@ public abstract class AbstractSimplifier implements Simplifier {
 	 */
 	@Override
 	public Vector2[] simplify(Vector2... vertices) {
+		if (vertices == null) return vertices;
+		
 		List<Vector2> verts = Arrays.asList(vertices);
 		verts = this.simplify(verts);
 		return verts.toArray(new Vector2[verts.size()]);

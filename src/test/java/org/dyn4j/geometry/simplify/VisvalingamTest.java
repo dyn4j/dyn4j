@@ -24,18 +24,45 @@
  */
 package org.dyn4j.geometry.simplify;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
 import junit.framework.TestCase;
 
 /**
- * Test case for the {@link DouglasPeucker} class.
+ * Test case for the {@link Visvalingam} class.
  * @author William Bittle
  * @version 4.2.0
  * @since 4.2.0
  */
 public class VisvalingamTest extends AbstractSimplifyTest {
+	/**
+	 * Tests invalid VCR tolerance
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createInvalidTolerance() {
+		new Visvalingam(-1, 0);
+	}
+	
+	/**
+	 * Tests invalid epsilon
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createInvalidEpsilon() {
+		new Visvalingam(0, -1);
+	}
+
+	/**
+	 * Tests invalid epsilon
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createInvalidBoth() {
+		new Visvalingam(-1, -1);
+	}
+	
 	/**
 	 * Tests no change due to configuration values.
 	 */
@@ -47,14 +74,23 @@ public class VisvalingamTest extends AbstractSimplifyTest {
 		
 		TestCase.assertEquals(vertices.length, simplified.length);
 	}
-	
+
 	/**
 	 * Tests passing a null array.
 	 */
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullArray() {
 		Simplifier simplifier = new Visvalingam(0, 0);
-		simplifier.simplify((Vector2[])null);
+		TestCase.assertNull(simplifier.simplify((Vector2[])null));
+	}
+
+	/**
+	 * Tests passing a null list.
+	 */
+	@Test
+	public void nullList() {
+		Simplifier simplifier = new Visvalingam(0, 0);
+		TestCase.assertNull(simplifier.simplify((List<Vector2>)null));
 	}
 	
 	/**
@@ -66,6 +102,17 @@ public class VisvalingamTest extends AbstractSimplifyTest {
 		Simplifier simplifier = new Visvalingam(0, 0);
 		vertices = simplifier.simplify(vertices);
 		TestCase.assertEquals(0, vertices.length);
+	}
+
+	/**
+	 * Tests passing an empty array.
+	 */
+	@Test
+	public void emptyList() {
+		List<Vector2> vertices = new ArrayList<Vector2>();
+		Simplifier simplifier = new Visvalingam(0, 0);
+		vertices = simplifier.simplify(vertices);
+		TestCase.assertEquals(0, vertices.size());
 	}
 	
 	/**
@@ -117,6 +164,39 @@ public class VisvalingamTest extends AbstractSimplifyTest {
 			null
 		};
 		Simplifier simplifier = new Visvalingam(0.11, 0.1);
+		vertices = simplifier.simplify(vertices);
+		TestCase.assertEquals(0, vertices.length);
+	}
+
+	/**
+	 * Tests passing close elements.
+	 */
+	@Test
+	public void allNull() {
+		Vector2[] vertices = new Vector2[] {
+			null,
+			null,
+			null
+		};
+		Simplifier simplifier = new Visvalingam(0, 0);
+		vertices = simplifier.simplify(vertices);
+		TestCase.assertEquals(0, vertices.length);
+	}
+	
+	/**
+	 * Tests passing close elements - should never return less than two because
+	 * of the split location.
+	 */
+	@Test
+	public void allSamePoints() {
+		Vector2[] vertices = new Vector2[] {
+			new Vector2(1.1, 0.0),
+			new Vector2(1.11, 0.0),
+			new Vector2(1.12, 0.0),
+			new Vector2(1.13, 0.0),
+			new Vector2(1.14, 0.0)
+		};
+		Simplifier simplifier = new Visvalingam(0.0, 1.0);
 		vertices = simplifier.simplify(vertices);
 		TestCase.assertEquals(0, vertices.length);
 	}

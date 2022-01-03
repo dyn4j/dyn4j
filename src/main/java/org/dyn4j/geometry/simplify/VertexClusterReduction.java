@@ -182,9 +182,14 @@ public class VertexClusterReduction extends AbstractSimplifier implements Simpli
 			list.add(vertex);
 		}
 		
-		first.prev = prev;
-		first.prevSegment = prev.nextSegment = new SegmentTreeLeaf(prev.point, first.point, prev.index, first.index);
-		prev.next = first;
+		if (first != null) {
+			first.prev = prev;
+			first.prevSegment = prev.nextSegment = new SegmentTreeLeaf(prev.point, first.point, prev.index, first.index);
+		}
+		
+		if (prev != null) {
+			prev.next = first;
+		}
 		
 		return list;
 	}
@@ -201,6 +206,10 @@ public class VertexClusterReduction extends AbstractSimplifier implements Simpli
 		
 		SimplePolygonVertex tprev = v.prev;
 		SimplePolygonVertex tnext = v.next;
+		
+		SegmentTreeLeaf sprev = v.prevSegment;
+		SegmentTreeLeaf snext = v.nextSegment;
+		
 		tprev.next = tnext;
 		tnext.prev = tprev;
 		
@@ -212,8 +221,8 @@ public class VertexClusterReduction extends AbstractSimplifier implements Simpli
 		tprev.nextSegment = new SegmentTreeLeaf(v1, v2, tprev.index, tnext.index);
 		tnext.prevSegment = tprev.nextSegment;
 		// remove the two segments attached to the removed vertex
-		tree.remove(v.prevSegment);
-		tree.remove(v.nextSegment);
+		tree.remove(sprev);
+		tree.remove(snext);
 		// add the new segment to the segment tree
 		tree.add(tprev.nextSegment);
 	}

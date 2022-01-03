@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,9 @@
  */
 package org.dyn4j.geometry.simplify;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.dyn4j.geometry.Vector2;
 import org.junit.Test;
 
@@ -32,10 +35,18 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link DouglasPeucker} class.
  * @author William Bittle
- * @version 4.2.0
+ * @version 4.2.1
  * @since 4.2.0
  */
 public class VertexClusterReductionTest extends AbstractSimplifyTest {
+	/**
+	 * Tests no change due to configuration values.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void createInvalidTolerance() {
+		new VertexClusterReduction(-1);
+	}
+	
 	/**
 	 * Tests no change due to configuration values.
 	 */
@@ -51,10 +62,19 @@ public class VertexClusterReductionTest extends AbstractSimplifyTest {
 	/**
 	 * Tests passing a null array.
 	 */
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void nullArray() {
 		Simplifier simplifier = new VertexClusterReduction(0);
-		simplifier.simplify((Vector2[])null);
+		TestCase.assertNull(simplifier.simplify((Vector2[])null));
+	}
+
+	/**
+	 * Tests passing a null list.
+	 */
+	@Test
+	public void nullList() {
+		Simplifier simplifier = new VertexClusterReduction(0);
+		TestCase.assertNull(simplifier.simplify((List<Vector2>)null));
 	}
 	
 	/**
@@ -66,6 +86,17 @@ public class VertexClusterReductionTest extends AbstractSimplifyTest {
 		Simplifier simplifier = new VertexClusterReduction(0);
 		vertices = simplifier.simplify(vertices);
 		TestCase.assertEquals(0, vertices.length);
+	}
+
+	/**
+	 * Tests passing an empty array.
+	 */
+	@Test
+	public void emptyList() {
+		List<Vector2> vertices = new ArrayList<Vector2>();
+		Simplifier simplifier = new VertexClusterReduction(0);
+		vertices = simplifier.simplify(vertices);
+		TestCase.assertEquals(0, vertices.size());
 	}
 	
 	/**
@@ -98,6 +129,38 @@ public class VertexClusterReductionTest extends AbstractSimplifyTest {
 		Simplifier simplifier = new VertexClusterReduction(0);
 		vertices = simplifier.simplify(vertices);
 		TestCase.assertEquals(2, vertices.length);
+	}
+
+	/**
+	 * Tests passing close elements.
+	 */
+	@Test
+	public void allNull() {
+		Vector2[] vertices = new Vector2[] {
+			null,
+			null,
+			null
+		};
+		Simplifier simplifier = new VertexClusterReduction(0.1);
+		vertices = simplifier.simplify(vertices);
+		TestCase.assertEquals(0, vertices.length);
+	}
+	
+	/**
+	 * Tests passing close elements.
+	 */
+	@Test
+	public void allSamePoints() {
+		Vector2[] vertices = new Vector2[] {
+			new Vector2(1.1, 0.0),
+			new Vector2(1.11, 0.0),
+			new Vector2(1.12, 0.0),
+			new Vector2(1.13, 0.0),
+			new Vector2(1.14, 0.0)
+		};
+		Simplifier simplifier = new VertexClusterReduction(0.1);
+		vertices = simplifier.simplify(vertices);
+		TestCase.assertEquals(1, vertices.length);
 	}
 	
 	/**
