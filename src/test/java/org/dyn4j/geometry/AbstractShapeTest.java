@@ -48,6 +48,8 @@ public class AbstractShapeTest {
 		@Override
 		public boolean contains(Vector2 point, Transform transform) { return false; }	
 		@Override
+		public boolean contains(Vector2 point, Transform transform, boolean inclusive) { return false; }	
+		@Override
 		public Mass createMass(double density) { return new Mass(); }
 		@Override
 		public double getRadius(Vector2 center) { return 0.0; }

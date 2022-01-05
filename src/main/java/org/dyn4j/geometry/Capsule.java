@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * A capsule's width and height must be larger than zero and cannot be equal.  A {@link Circle} should be used
  * instead of an equal width/height capsule for both performance and stability.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.2.1
  * @since 3.1.5
  */
 public class Capsule extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -349,15 +349,15 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#contains(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Shape#contains(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform, boolean)
 	 */
 	@Override
-	public boolean contains(Vector2 point, Transform transform) {
+	public boolean contains(Vector2 point, Transform transform, boolean inclusive) {
 		// a capsule is just a radially expanded line segment
 		Vector2 p = Segment.getPointOnSegmentClosestToPoint(point, transform.getTransformed(this.foci[0]), transform.getTransformed(this.foci[1]));
 		double r2 = this.capRadius * this.capRadius;
 		double d2 = p.distanceSquared(point);
-		return d2 <= r2;
+		return inclusive ? d2 <= r2 : d2 < r2;
 	}
 	
 	/* (non-Javadoc)

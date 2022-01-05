@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link HalfEllipse} class.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.2.1
  * @since 3.1.5
  */
 public class HalfEllipseTest {
@@ -95,9 +95,11 @@ public class HalfEllipseTest {
 		
 		// shouldn't be in
 		TestCase.assertTrue(!e.contains(p, t));
+		TestCase.assertTrue(!e.contains(p, t, false));
 		
 		p.set(0.75, -0.2);
 		TestCase.assertTrue(!e.contains(p, t));
+		TestCase.assertTrue(!e.contains(p, t, false));
 		
 		// move a bit
 		p.set(0.75, 0.35);
@@ -105,16 +107,19 @@ public class HalfEllipseTest {
 		
 		// should be in
 		TestCase.assertTrue(e.contains(p, t));
+		TestCase.assertTrue(e.contains(p, t, false));
 		
 		p.set(1.5, 0.0);
 		
 		// should be on the edge
 		TestCase.assertTrue(e.contains(p, t));
+		TestCase.assertFalse(e.contains(p, t, false));
 		
 		// another test for failure case
 		p.set(0.75, 0.35);
 		e.translate(e.getCenter().getNegative());
 		TestCase.assertFalse(e.contains(p, t));
+		TestCase.assertFalse(e.contains(p, t, false));
 		
 		// try local rotation and translation
 		e.rotate(Math.toDegrees(90));
@@ -122,9 +127,11 @@ public class HalfEllipseTest {
 		
 		p.set(0.3, 0.3);
 		TestCase.assertFalse(e.contains(p, t));
+		TestCase.assertFalse(e.contains(p, t, false));
 		
 		p.set(0.7, 0.4);
 		TestCase.assertTrue(e.contains(p, t));
+		TestCase.assertTrue(e.contains(p, t, false));
 	}
 	
 	/**

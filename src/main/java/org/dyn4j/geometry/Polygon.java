@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -38,7 +38,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * A polygon cannot have coincident vertices.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.2.1
  * @since 1.0.0
  */
 public class Polygon extends AbstractShape implements Convex, Wound, Shape, Transformable, DataContainer {
@@ -274,10 +274,10 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#contains(org.dyn4j.geometry.Vector, org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Shape#contains(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform, boolean)
 	 */
 	@Override
-	public boolean contains(Vector2 point, Transform transform) {
+	public boolean contains(Vector2 point, Transform transform, boolean inclusive) {
 		// if the polygon is convex then do a simple inside test
 		// if the the sign of the location of the point on the side of an edge (or line)
 		// is always the same and the polygon is convex then we know that the
@@ -301,12 +301,17 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			// p2 is the next point
 			p2 = this.vertices[i + 1];
 			// check if they are equal (one of the vertices)
-			if (p.equals(p1) || p.equals(p2)) {
+			if (inclusive && (p.equals(p1) || p.equals(p2))) {
 				return true;
 			}
 			
 			// do side of line test
 			double location = Segment.getLocation(p, p1, p2);
+			
+			// check for on the edge
+			if (!inclusive && location == 0.0) {
+				return false;
+			}
 			
 			// multiply the last location with this location
 			// if they are the same sign then the opertation will yield a positive result

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -35,7 +35,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This class represents a line segment that is infinitely thin.
  * @author William Bittle
- * @version 4.2.0
+ * @version 4.2.1
  * @since 1.0.0
  */
 public class Segment extends AbstractShape implements Convex, Wound, Shape, Transformable, DataContainer {
@@ -206,7 +206,7 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	 * @throws NullPointerException if point, linePoint1, or linePoint2 is null
 	 * @return double
 	 */
-	public static double getLocation(Vector2 point, Vector2 linePoint1, Vector2 linePoint2) {
+	public static final double getLocation(Vector2 point, Vector2 linePoint1, Vector2 linePoint2) {
 		return (linePoint2.x - linePoint1.x) * (point.y - linePoint1.y) -
 			  (point.x - linePoint1.x) * (linePoint2.y - linePoint1.y);
 	}
@@ -226,7 +226,7 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	 * @throws NullPointerException if point, linePoint1, or linePoint2 is null
 	 * @return {@link Vector2}
 	 */
-	public static Vector2 getPointOnLineClosestToPoint(Vector2 point, Vector2 linePoint1, Vector2 linePoint2) {
+	public static final Vector2 getPointOnLineClosestToPoint(Vector2 point, Vector2 linePoint1, Vector2 linePoint2) {
 		// create a vector from the point to the first line point
 		Vector2 p1ToP = point.difference(linePoint1);
 		// create a vector representing the line
@@ -273,7 +273,7 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	 * @return {@link Vector2}
 	 * @throws NullPointerException if point, linePoint1, or linePoint2 is null
 	 */
-	public static Vector2 getPointOnSegmentClosestToPoint(Vector2 point, Vector2 linePoint1, Vector2 linePoint2) {
+	public static final Vector2 getPointOnSegmentClosestToPoint(Vector2 point, Vector2 linePoint1, Vector2 linePoint2) {
 		// create a vector from the point to the first line point
 		Vector2 p1ToP = point.difference(linePoint1);
 		// create a vector representing the line
@@ -335,7 +335,7 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	 * @throws NullPointerException if ap1, ap2, bp1 or bp2 is null
 	 * @since 3.1.1
 	 */
-	public static Vector2 getLineIntersection(Vector2 ap1, Vector2 ap2, Vector2 bp1, Vector2 bp2) {
+	public static final Vector2 getLineIntersection(Vector2 ap1, Vector2 ap2, Vector2 bp1, Vector2 bp2) {
 		Vector2 A = ap1.to(ap2);
 		Vector2 B = bp1.to(bp2);
 		
@@ -410,7 +410,28 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	 * @throws NullPointerException if ap1, ap2, bp1, or bp2 is null
 	 * @since 3.1.1
 	 */
-	public static Vector2 getSegmentIntersection(Vector2 ap1, Vector2 ap2, Vector2 bp1, Vector2 bp2) {
+	public static final Vector2 getSegmentIntersection(Vector2 ap1, Vector2 ap2, Vector2 bp1, Vector2 bp2) {
+		return Segment.getSegmentIntersection(ap1, ap2, bp1, bp2, true);
+	}
+
+	/**
+	 * Returns the intersection point of the two line segments or null if they are parallel, coincident
+	 * or don't intersect.
+	 * <p>
+	 * In the scenario where two segments intersect at an end point, the behavior is determined by the inclusive
+	 * parameter.  When true, this method will return the intersection point - the end point.  When false, this 
+	 * method will return null (indicating no intersection.
+	 * @param ap1 the first point of the first line segment
+	 * @param ap2 the second point of the first line segment
+	 * @param bp1 the first point of the second line segment
+	 * @param bp2 the second point of the second line segment
+	 * @param inclusive see method documentation for more detail
+	 * @return Vector2 the intersection point; null if the line segments don't intersect, are parallel, or are coincident
+	 * @see #getSegmentIntersection(Vector2, Vector2, Vector2, Vector2)
+	 * @throws NullPointerException if ap1, ap2, bp1, or bp2 is null
+	 * @since 4.2.1
+	 */
+	public static final Vector2 getSegmentIntersection(Vector2 ap1, Vector2 ap2, Vector2 bp1, Vector2 bp2, boolean inclusive) {
 		Vector2 A = ap1.to(ap2);
 		Vector2 B = bp1.to(bp2);
 		
@@ -430,9 +451,10 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 		
 		// compute tb
 		double tb = ambxA / BxA;
-		if (tb < 0.0 || tb > 1.0) {
-			// no intersection
-			return null;
+		if (inclusive) {
+			if (tb < 0.0 || tb > 1.0) return null;
+		} else {
+			if (tb <= 0.0 || tb >= 1.0) return null;
 		}
 		
 		// compute the intersection point
@@ -442,9 +464,10 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 		// ta is also valid.
 		// compute ta
 		double ta = ip.difference(ap1).dot(A) / A.dot(A);
-		if (ta < 0.0 || ta > 1.0) {
-			// no intersection
-			return null;
+		if (inclusive) {
+			if (ta < 0.0 || ta > 1.0) return null;
+		} else {
+			if (ta <= 0.0 || ta >= 1.0) return null;
 		}
 		
 		return ip;
@@ -464,7 +487,7 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	 * @see #getSegmentIntersection(Vector2, Vector2, Vector2, Vector2)
 	 */
 	public Vector2 getSegmentIntersection(Segment segment) {
-		return Segment.getSegmentIntersection(this.vertices[0], this.vertices[1], segment.vertices[0], segment.vertices[1]);
+		return Segment.getSegmentIntersection(this.vertices[0], this.vertices[1], segment.vertices[0], segment.vertices[1], true);
 	}
 	
 	/**
@@ -591,7 +614,14 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	 * method instead for better, though technically inaccurate, results.
 	 */
 	@Override
-	public boolean contains(Vector2 point, Transform transform) {
+	public boolean contains(Vector2 point, Transform transform, boolean inclusive) {
+		// if we don't consider the point on the segment
+		// contains, then nothing can possibly be contained
+		// in this segment
+		if (!inclusive) {
+			return false;
+		}
+		
 		// put the point in local coordinates
 		Vector2 p = transform.getInverseTransformed(point);
 		// create a reference to the end points

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -42,7 +42,7 @@ import org.dyn4j.resources.Messages;
  * This class also contains various helper methods for cleaning vector arrays and lists and performing
  * various operations on {@link Shape}s.
  * @author William Bittle
- * @version 4.0.1
+ * @version 4.2.1
  * @since 1.0.0
  */
 public final class Geometry {
@@ -1860,5 +1860,167 @@ public final class Geometry {
 		}
 		
 		return links;
+	}
+	
+	/**
+	 * Returns the intersection {@link Polygon} for the given {@link Polygon}s or returns null if there's no intersection.
+	 * <p>
+	 * Since all {@link Polygon}s in dyn4j are convex, their intersection will always be convex.
+	 * <p>
+	 * The basic premise of the algorithm is to track which polygon's edge is on the outside and when they intersect. This
+	 * allows the algorithm to be O(n+m) complexity (linear time) by iterating the edges of each polygon until all intersections
+	 * have been found. See the linked paper for more details.
+	 * <p>
+	 * NOTE: This algorithm returns null for all scenarios where the two {@link Polygon}s have touching edges or touching vertices.
+	 * The primary reason for this is to improve the robustness of the algorithm, but also to ensure the output is always
+	 * non-degenerate.
+	 * @param p1 the first {@link Polygon}
+	 * @param tx1 the first {@link Polygon}'s {@link Transform}
+	 * @param p2 the second {@link Polygon}
+	 * @param tx2 the second {@link Polygon}'s {@link Transform}
+	 * @see <a href="https://www.cs.jhu.edu/~misha/Spring20/ORourke82.pdf">A New Linear Algorithm for Intersecting Convex Polygons</a>
+	 * @return {@link Polygon}
+	 * @since 4.2.1
+	 */
+	public static final Polygon getIntersection(Polygon p1, Transform tx1, Polygon p2, Transform tx2) {
+		int firstIntersectionI = -1;
+		int firstIntersectionP = -1;
+		int firstIntersectionQ = -1;
+		
+		List<Vector2> result = new ArrayList<Vector2>();
+		
+		final int pn = p1.vertices.length;
+		final int qn = p2.vertices.length;
+		
+		int pi = 0;
+		int qi = 0;
+		
+		Vector2 p = tx1.getTransformed(p1.vertices[0]);
+		Vector2 q = tx2.getTransformed(p2.vertices[0]);
+		
+		// get the previous point
+		Vector2 p0 = tx1.getTransformed(p1.vertices[p1.vertices.length - 1]);
+		Vector2 q0 = tx2.getTransformed(p2.vertices[p2.vertices.length - 1]);
+		
+		Vector2 pv = p0.to(p);
+		Vector2 qv = q0.to(q);
+		
+		boolean insideP = false;
+		boolean insideQ = false;
+		
+		final int n = 2 * (pn + qn);
+		for (int i = 0; i < n; i++) {
+			// step 1: check for intersection of the two current edges
+			
+			Vector2 intersection = Segment.getSegmentIntersection(p0, p, q0, q, false);
+			if (intersection != null) {
+				
+				// check if this intersection is the same intersection as the first
+				// this would indicate we've made it all the way around both shapes
+				
+				// the extra condition about the first intersection index is specifically
+				// for the case where a vertex from one polygon lies on the edge of another
+				// polygon. This ensures we don't exit early in these scenarios
+				if (pi == firstIntersectionP && 
+					qi == firstIntersectionQ && 
+					(i - 1) != firstIntersectionI) {
+					// then we're done, result should contain the intersection polygon
+					return new Polygon(result.toArray(new Vector2[0]));
+				}
+				
+				// record the first intersection
+				if (firstIntersectionP == -1) {
+					firstIntersectionI = i;
+					firstIntersectionP = pi;
+					firstIntersectionQ = qi;
+				}
+				
+				// add the intersection point to the result
+				result.add(intersection);
+				
+				// test whether p is on the inside or outside of qv
+				insideP = Segment.getLocation(p, q0, q) >= 0;
+				insideQ = !insideP;
+			}
+			
+			// step 2: Advance p or q
+			
+			// determine the direction of p and q relative to one another
+			if (qv.cross(pv) >= 0) {
+				// q is pointing outside p1
+				
+				// is p inside p2?
+				double ploc = Segment.getLocation(p, q0, q);
+				if (ploc >= 0) {
+					// should we add the current q vertex?
+					if (insideQ) {
+						result.add(q);
+					}
+					
+					// advance q
+					qi = qi + 1 == qn ? 0 : qi + 1;
+					q0.set(q);
+					q = tx2.getTransformed(p2.vertices[qi]);
+					qv.set(q).subtract(q0);
+				} else {
+					// should we add the current p vertex?
+					if (insideP) {
+						result.add(p);
+					}
+					
+					// advance p
+					pi = pi + 1 == pn ? 0 : pi + 1;
+					p0.set(p);
+					p = tx1.getTransformed(p1.vertices[pi]);
+					pv.set(p).subtract(p0);
+				}
+			} else {
+				// q is pointing inside p1
+				
+				// is q inside p1?
+				double ploc = Segment.getLocation(q, p0, p);
+				if (ploc >= 0) {
+					// should we add the current p vertex?
+					if (insideP) {
+						result.add(p);
+					}
+					
+					// advance p
+					pi = pi + 1 == pn ? 0 : pi + 1;
+					p0.set(p);
+					p = tx1.getTransformed(p1.vertices[pi]);
+					pv.set(p).subtract(p0);
+				} else {
+					// should we add the current q vertex?
+					if (insideQ) {
+						result.add(q);
+					}
+					
+					// advance q
+					qi = qi + 1 == qn ? 0 : qi + 1;
+					q0.set(q);
+					q = tx2.getTransformed(p2.vertices[qi]);
+					qv.set(q).subtract(q0);
+				}
+			}
+		}
+		
+		// if we make it here, 3 possibilities exist
+		// 1: P1 & P2 do not overlap at all
+		// 2: P1 is fully contained in P2
+		// 3: P2 is fully contained in P1
+		tx1.getTransformed(p1.vertices[0], p);
+		tx2.getTransformed(p2.vertices[0], q);
+		
+		// we know if P1 is fully contained in P2 if ANY of p1's vertices are contained in P2's bounds
+		// because we already determined that there were no intersections - there can only be zero intersections
+		// when they don't overlap at all or when one is contained in the other.
+		if (p2.contains(p, tx2, false)) {
+			return p1;
+		} else if (p1.contains(q, tx1, false)) {
+			return p2;
+		} else {
+			return null;
+		}
 	}
 }

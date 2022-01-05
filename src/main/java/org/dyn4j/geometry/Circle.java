@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * A {@link Circle}'s radius must be greater than zero.
  * @author William Bittle
- * @version 3.2.0
+ * @version 4.2.1
  * @since 1.0.0
  */
 public class Circle extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -89,20 +89,18 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#contains(org.dyn4j.geometry.Vector, org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Shape#contains(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform, boolean)
 	 */
 	@Override
-	public boolean contains(Vector2 point, Transform transform) {
+	public boolean contains(Vector2 point, Transform transform, boolean inclusive) {
 		// transform the center
 		Vector2 v = transform.getTransformed(this.center);
 		// get the transformed radius squared
 		double radiusSquared = this.radius * this.radius;
 		// create a vector from the center to the given point
 		v.subtract(point);
-		if (v.getMagnitudeSquared() <= radiusSquared) {
-			return true;
-		}
-		return false;
+		
+		return inclusive ? v.getMagnitudeSquared() <= radiusSquared : v.getMagnitudeSquared() < radiusSquared;
 	}
 
 	/* (non-Javadoc)

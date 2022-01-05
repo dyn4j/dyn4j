@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,7 +36,7 @@ import org.dyn4j.DataContainer;
  * mutable objects.  It's recommended that a {@link Shape}, after creation and use, remain
  * unchanged and instead be replaced with a new {@link Shape} if modification is necessary.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.1
  * @since 1.0.0
  */
 public interface Shape extends Transformable, DataContainer {
@@ -124,6 +124,23 @@ public interface Shape extends Transformable, DataContainer {
 	 * @return boolean
 	 */
 	public abstract boolean contains(Vector2 point, Transform transform);
+
+	/**
+	 * Returns true if the given point is inside this {@link Shape}.
+	 * <p>
+	 * If the given point lies on an edge the behavior is determined by the
+	 * inclusive parameter. Set to true to consider the point inside or contained,
+	 * or false to consider it outside or not contained.
+	 * <p>
+	 * The given point is assumed to be in world space.
+	 * @param point world space point
+	 * @param transform {@link Transform} for this {@link Shape}
+	 * @param inclusive whether points on the edge of the shape should be considered inside
+	 * @throws NullPointerException if the given point or transform is null
+	 * @return boolean
+	 * @since 4.2.1
+	 */
+	public abstract boolean contains(Vector2 point, Transform transform, boolean inclusive);
 	
 	/**
 	 * Creates a {@link Mass} object using the geometric properties of

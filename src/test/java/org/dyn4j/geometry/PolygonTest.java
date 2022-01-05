@@ -163,27 +163,32 @@ public class PolygonTest {
 		
 		// shouldn't be in the polygon
 		TestCase.assertTrue(!p.contains(pt, t));
+		TestCase.assertTrue(!p.contains(pt, t, false));
 		
 		// move the polygon a bit
 		t.translate(2.0, 3.5);
 		
 		// should be in the polygon
 		TestCase.assertTrue(p.contains(pt, t));
+		TestCase.assertTrue(p.contains(pt, t, false));
 		
 		t.translate(0.0, -0.5);
 		
 		// should be on a vertex
 		TestCase.assertTrue(p.contains(pt, t));
+		TestCase.assertFalse(p.contains(pt, t, false));
 
 		t.translate(0.5, 0.5);
 		
 		// should be on an edge
 		TestCase.assertTrue(p.contains(pt, t));
+		TestCase.assertFalse(p.contains(pt, t, false));
 		
 		t.translate(-1.0, -1.0);
 		
 		// should be outside, but colinear
 		TestCase.assertFalse(p.contains(pt, t));
+		TestCase.assertFalse(p.contains(pt, t, false));
 	}
 	
 	/**

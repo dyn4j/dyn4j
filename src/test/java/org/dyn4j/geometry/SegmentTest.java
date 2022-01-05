@@ -236,7 +236,9 @@ public class SegmentTest {
 		Transform t = new Transform();
 		
 		TestCase.assertFalse(s.contains(new Vector2(2.0, 2.0), t));
+		TestCase.assertFalse(s.contains(new Vector2(2.0, 2.0), t, false));
 		TestCase.assertTrue(s.contains(new Vector2(0.75, 2.0), t));
+		TestCase.assertFalse(s.contains(new Vector2(0.75, 2.0), t, false));
 	}
 	
 	/**
@@ -496,6 +498,15 @@ public class SegmentTest {
 		TestCase.assertEquals(0.0, p.x);
 		TestCase.assertEquals(0.0, p.y);
 		
+		p = Segment.getSegmentIntersection(
+				new Vector2(-3.0, -1.0), new Vector2(3.0, 1.0), 
+				new Vector2(-1.0, -2.0), new Vector2(1.0, 2.0),
+				false);
+		
+		TestCase.assertNotNull(p);
+		TestCase.assertEquals(0.0, p.x);
+		TestCase.assertEquals(0.0, p.y);
+		
 		// normal case, no intersection
 		p = Segment.getSegmentIntersection(
 				new Vector2(-1.0, -1.0), new Vector2(2.0, 0.0), 
@@ -503,10 +514,26 @@ public class SegmentTest {
 		
 		TestCase.assertNull(p);
 		
+		p = Segment.getSegmentIntersection(
+				new Vector2(-1.0, -1.0), new Vector2(2.0, 0.0), 
+				new Vector2(-1.0,  0.0), new Vector2(1.0, 0.5),
+				false);
+		
+		TestCase.assertNull(p);
+		
 		// try horizontal segment
 		p = Segment.getSegmentIntersection(
 				new Vector2(-1.0, 1.0), new Vector2(2.0, 1.0), 
 				new Vector2(-1.0, 0.0), new Vector2(1.0, 2.0));
+		
+		TestCase.assertNotNull(p);
+		TestCase.assertEquals(0.0, p.x);
+		TestCase.assertEquals(1.0, p.y);
+		
+		p = Segment.getSegmentIntersection(
+				new Vector2(-1.0, 1.0), new Vector2(2.0, 1.0), 
+				new Vector2(-1.0, 0.0), new Vector2(1.0, 2.0),
+				false);
 		
 		TestCase.assertNotNull(p);
 		TestCase.assertEquals(0.0, p.x);
@@ -521,10 +548,28 @@ public class SegmentTest {
 		TestCase.assertEquals(3.0, p.x);
 		TestCase.assertEquals(1.0, p.y);
 		
+		p = Segment.getSegmentIntersection(
+				new Vector2(3.0, 0.0), new Vector2(3.0, 3.0), 
+				new Vector2(4.0, 0.0), new Vector2(1.0, 3.0),
+				false);
+		
+		TestCase.assertNotNull(p);
+		TestCase.assertEquals(3.0, p.x);
+		TestCase.assertEquals(1.0, p.y);
+		
 		// try a vertical and horizontal segment
 		p = Segment.getSegmentIntersection(
 				new Vector2(3.0, 2.0), new Vector2(3.0, -2.0), 
 				new Vector2(0.0, 1.0), new Vector2(4.0, 1.0));
+		
+		TestCase.assertNotNull(p);
+		TestCase.assertEquals(3.0, p.x);
+		TestCase.assertEquals(1.0, p.y);
+		
+		p = Segment.getSegmentIntersection(
+				new Vector2(3.0, 2.0), new Vector2(3.0, -2.0), 
+				new Vector2(0.0, 1.0), new Vector2(4.0, 1.0),
+				false);
 		
 		TestCase.assertNotNull(p);
 		TestCase.assertEquals(3.0, p.x);
@@ -537,10 +582,24 @@ public class SegmentTest {
 		
 		TestCase.assertNull(p);
 		
+		p = Segment.getSegmentIntersection(
+				new Vector2(-2.0, -1.0), new Vector2(-1.0, 0.0), 
+				new Vector2(-1.0, -1.0), new Vector2(0.0, 0.0),
+				false);
+		
+		TestCase.assertNull(p);
+		
 		// try two vertical segments (parallel)
 		p = Segment.getSegmentIntersection(
 				new Vector2(3.0, 0.0), new Vector2(3.0, 1.0), 
 				new Vector2(2.0, 0.0), new Vector2(2.0, 1.0));
+		
+		TestCase.assertNull(p);
+		
+		p = Segment.getSegmentIntersection(
+				new Vector2(3.0, 0.0), new Vector2(3.0, 1.0), 
+				new Vector2(2.0, 0.0), new Vector2(2.0, 1.0),
+				false);
 		
 		TestCase.assertNull(p);
 		
@@ -551,10 +610,24 @@ public class SegmentTest {
 		
 		TestCase.assertNull(p);
 		
+		p = Segment.getSegmentIntersection(
+				new Vector2(3.0, 1.0), new Vector2(4.0, 1.0), 
+				new Vector2(3.0, 2.0), new Vector2(4.0, 2.0),
+				false);
+		
+		TestCase.assertNull(p);
+		
 		// try colinear segments
 		p = Segment.getSegmentIntersection(
 				new Vector2(-1.0, -1.0), new Vector2(1.0, 1.0), 
 				new Vector2(-2.0, -2.0), new Vector2(-1.5, -1.5));
+		
+		TestCase.assertNull(p);
+		
+		p = Segment.getSegmentIntersection(
+				new Vector2(-1.0, -1.0), new Vector2(1.0, 1.0), 
+				new Vector2(-2.0, -2.0), new Vector2(-1.5, -1.5),
+				false);
 		
 		TestCase.assertNull(p);
 		
@@ -565,10 +638,24 @@ public class SegmentTest {
 		
 		TestCase.assertNull(p);
 		
+		p = Segment.getSegmentIntersection(
+				new Vector2(3.0, 0.0), new Vector2(3.0, 1.0), 
+				new Vector2(3.0, -1.0), new Vector2(3.0, 7.0),
+				false);
+		
+		TestCase.assertNull(p);
+		
 		// try colinear horizontal segments
 		p = Segment.getSegmentIntersection(
 				new Vector2(-1.0, 1.0), new Vector2(5.0, 1.0), 
 				new Vector2(-1.0, 1.0), new Vector2(1.0, 1.0));
+		
+		TestCase.assertNull(p);
+		
+		p = Segment.getSegmentIntersection(
+				new Vector2(-1.0, 1.0), new Vector2(5.0, 1.0), 
+				new Vector2(-1.0, 1.0), new Vector2(1.0, 1.0),
+				false);
 		
 		TestCase.assertNull(p);
 		
@@ -580,6 +667,13 @@ public class SegmentTest {
 		TestCase.assertNotNull(p);
 		TestCase.assertEquals(1.0, p.x);
 		TestCase.assertEquals(0.0, p.y);
+		
+		p = Segment.getSegmentIntersection(
+				new Vector2(1.0, 0.0), new Vector2(3.0, -2.0), 
+				new Vector2(-1.0, -1.0), new Vector2(1.0, 0.0),
+				false);
+		
+		TestCase.assertNull(p);
 		
 		// test segment intersection perpendicular
 		Segment s1 = new Segment(new Vector2(-10, 10), new Vector2(10, 10));

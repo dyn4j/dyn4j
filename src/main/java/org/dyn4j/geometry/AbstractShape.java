@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ import org.dyn4j.DataContainer;
 /**
  * Base implementation of the {@link Shape} interface.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.1
  * @since 1.0.0
  */
 public abstract class AbstractShape implements Shape, Transformable, DataContainer {
@@ -203,7 +203,15 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	 */
 	@Override
 	public boolean contains(Vector2 point) {
-		return this.contains(point, IDENTITY);
+		return this.contains(point, IDENTITY, true);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#contains(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
+	 */
+	@Override
+	public boolean contains(Vector2 point, Transform transform) {
+		return this.contains(point, transform, true);
 	}
 	
 	/* (non-Javadoc)

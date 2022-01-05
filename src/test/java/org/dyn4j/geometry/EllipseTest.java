@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Ellipse} class.
  * @author William Bittle
- * @version 3.1.7
+ * @version 4.2.1
  * @since 3.1.5
  */
 public class EllipseTest {
@@ -94,27 +94,34 @@ public class EllipseTest {
 		
 		// shouldn't be in the circle
 		TestCase.assertTrue(!e.contains(p, t));
+		TestCase.assertTrue(!e.contains(p, t, false));
 		
 		// move the circle a bit
 		t.translate(0.5, 0.0);
 		
 		// should be in the circle
 		TestCase.assertTrue(e.contains(p, t));
+		TestCase.assertTrue(e.contains(p, t, false));
 		
 		p.set(1.5, 0.0);
 		
 		// should be on the edge
 		TestCase.assertTrue(e.contains(p, t));
+		TestCase.assertFalse(e.contains(p, t, false));
 		
 		// test with local translation
 		e.rotate(Math.toRadians(90));
 		e.translate(0.5, 1.0);
 		
 		TestCase.assertFalse(e.contains(p, t));
+		TestCase.assertFalse(e.contains(p, t, false));
 		p.set(1.0, 2.1);
 		TestCase.assertFalse(e.contains(p, t));
+		TestCase.assertFalse(e.contains(p, t, false));
 		p.set(1.0, 2.0);
 		TestCase.assertTrue(e.contains(p, t));
+		// its on the edge
+		TestCase.assertFalse(e.contains(p, t, false));
 	}
 	
 	/**

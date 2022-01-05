@@ -94,16 +94,19 @@ public class SliceTest {
 		
 		// shouldn't be inside
 		TestCase.assertTrue(!e.contains(p, t));
+		TestCase.assertTrue(!e.contains(p, t, false));
 		
 		// move it a bit
 		t.translate(-0.25, 0.0);
 		
 		// should be inside
 		TestCase.assertTrue(e.contains(p, t));
+		TestCase.assertTrue(e.contains(p, t, false));
 		
 		p.set(0.75, 0.0);
 		// should be on the edge
 		TestCase.assertTrue(e.contains(p, t));
+		TestCase.assertFalse(e.contains(p, t, false));
 	}
 	
 	/**

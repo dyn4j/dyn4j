@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Capsule} class.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.2.1
  * @since 3.1.5
  */
 public class CapsuleTest {
@@ -121,19 +121,23 @@ public class CapsuleTest {
 		
 		// shouldn't be inside
 		TestCase.assertTrue(!e.contains(p, t));
+		TestCase.assertTrue(!e.contains(p, t, false));
 		
 		// move it a bit
 		t.translate(0.5, 0.0);
 		
 		// should be inside
 		TestCase.assertTrue(e.contains(p, t));
+		TestCase.assertTrue(e.contains(p, t, false));
 		
 		p.set(1.5, 0.0);
 		// should be on the edge
 		TestCase.assertTrue(e.contains(p, t));
+		TestCase.assertFalse(e.contains(p, t, false));
 		p.set(0.75, 0.5);
 		// should be on the edge
 		TestCase.assertTrue(e.contains(p, t));
+		TestCase.assertFalse(e.contains(p, t, false));
 	}
 	
 	/**

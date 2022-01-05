@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,7 +34,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This shape can represent any slice of a circle up to 180 degrees (half circle).
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.2.1
  * @since 3.1.5
  */
 public class Slice extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -376,10 +376,10 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dyn4j.geometry.Shape#contains(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
+	 * @see org.dyn4j.geometry.Shape#contains(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform, boolean)
 	 */
 	@Override
-	public boolean contains(Vector2 point, Transform transform) {
+	public boolean contains(Vector2 point, Transform transform, boolean inclusive) {
 		// see if the point is in the circle
 		// transform the point into local space
 		Vector2 lp = transform.getInverseTransformed(point);
@@ -387,13 +387,24 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		double radiusSquared = this.sliceRadius * this.sliceRadius;
 		// create a vector from the circle center to the given point
 		Vector2 v = this.vertices[0].to(lp);
-		if (v.getMagnitudeSquared() <= radiusSquared) {
-			// if its in the circle then we need to make sure its in the section
-			if (Segment.getLocation(lp, this.vertices[0], this.vertices[1]) <= 0 &&
-				Segment.getLocation(lp, this.vertices[0], this.vertices[2]) >= 0) { 
-				return true;
-			}
+		
+		// is it within the circle bounds?
+		if (inclusive) {
+			if (v.getMagnitudeSquared() > radiusSquared) return false;
+		} else {
+			if (v.getMagnitudeSquared() >= radiusSquared) return false;
 		}
+
+		double l1 = Segment.getLocation(lp, this.vertices[0], this.vertices[1]);
+		double l2 = Segment.getLocation(lp, this.vertices[0], this.vertices[2]);
+		
+		// if its in the circle then we need to make sure its in the section
+		if (inclusive) {
+			if (l1 <= 0 && l2 >= 0) return true;
+		} else {
+			if (l1 < 0 && l2 > 0) return true;
+		}
+
 		// if its not in the circle then no other checks need to be performed
 		return false;
 	}

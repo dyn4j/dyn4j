@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Circle} class.
  * @author William Bittle
- * @version 3.1.4
+ * @version 4.2.1
  * @since 1.0.0
  */
 public class CircleTest {
@@ -74,17 +74,20 @@ public class CircleTest {
 		
 		// shouldn't be in the circle
 		TestCase.assertTrue(!c.contains(p, t));
+		TestCase.assertTrue(!c.contains(p, t, false));
 		
 		// move the circle a bit
 		t.translate(2.0, 2.5);
 		
 		// should be in the circle
 		TestCase.assertTrue(c.contains(p, t));
+		TestCase.assertTrue(c.contains(p, t, false));
 		
 		t.translate(0.0, -0.5);
 		
 		// should be on the edge
 		TestCase.assertTrue(c.contains(p, t));
+		TestCase.assertFalse(c.contains(p, t, false));
 	}
 	
 	/**

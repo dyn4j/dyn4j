@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,7 +36,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link Geometry} class.
  * @author William Bittle
- * @version 4.0.1
+ * @version 4.2.1
  * @since 1.0.0
  */
 public class GeometryTest {
@@ -2225,5 +2225,466 @@ public class GeometryTest {
 		TestCase.assertEquals(Math.toRadians(30), s.getTheta());
 		TestCase.assertEquals(0.000, s.getCenter().x);
 		TestCase.assertEquals(0.000, s.getCenter().y);
+	}
+	
+	/**
+	 * Tests polygon intersection under a non-degenerate case.
+	 * @since 4.2.1
+	 */
+	@Test
+	public void polygonIntersection() {
+		Polygon p1 = new Polygon(
+				new Vector2(0.0, 0.0),
+				new Vector2(2.0, 1.0),
+				new Vector2(4.0, 3.0),
+				new Vector2(4.25, 4.0),
+				new Vector2(2.0, 5.0),
+				new Vector2(-2.0, 5.0),
+				new Vector2(-4.0, 3.75));
+		Polygon p2 = new Polygon(
+				new Vector2(1.0, 0.0),
+				new Vector2(3.0, 1.0),
+				new Vector2(3.25, 3.75),
+				new Vector2(1.5, 4.75),
+				new Vector2(0.0, 5.25),
+				new Vector2(-2.5, 4.5),
+				new Vector2(-2.75, 3.25),
+				new Vector2(-2.5, 1.5));
+		Transform tx1 = new Transform();
+		Transform tx2 = new Transform();
+		
+		Polygon result = Geometry.getIntersection(p1, tx1, p2, tx2);
+		
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(11, result.vertices.length);
+		TestCase.assertEquals(-0.842, result.vertices[0].x, 1e-3);
+		TestCase.assertEquals( 0.789, result.vertices[0].y, 1e-3);
+		TestCase.assertEquals( 0.461, result.vertices[1].x, 1e-3);
+		TestCase.assertEquals( 0.230, result.vertices[1].y, 1e-3);
+		TestCase.assertEquals( 2.000, result.vertices[2].x, 1e-3);
+		TestCase.assertEquals( 1.000, result.vertices[2].y, 1e-3);
+		TestCase.assertEquals( 3.100, result.vertices[3].x, 1e-3);
+		TestCase.assertEquals( 2.100, result.vertices[3].y, 1e-3);
+		TestCase.assertEquals( 3.250, result.vertices[4].x, 1e-3);
+		TestCase.assertEquals( 3.750, result.vertices[4].y, 1e-3);
+		TestCase.assertEquals( 1.500, result.vertices[5].x, 1e-3);
+		TestCase.assertEquals( 4.750, result.vertices[5].y, 1e-3);
+		TestCase.assertEquals( 0.750, result.vertices[6].x, 1e-3);
+		TestCase.assertEquals( 5.000, result.vertices[6].y, 1e-3);
+		TestCase.assertEquals(-0.833, result.vertices[7].x, 1e-3);
+		TestCase.assertEquals( 5.000, result.vertices[7].y, 1e-3);
+		TestCase.assertEquals(-2.500, result.vertices[8].x, 1e-3);
+		TestCase.assertEquals( 4.500, result.vertices[8].y, 1e-3);
+		TestCase.assertEquals(-2.750, result.vertices[9].x, 1e-3);
+		TestCase.assertEquals( 3.250, result.vertices[9].y, 1e-3);
+		TestCase.assertEquals(-2.639, result.vertices[10].x, 1e-3);
+		TestCase.assertEquals( 2.474, result.vertices[10].y, 1e-3);
+	}
+	
+	/**
+	 * Tests polygon intersection under the degenerate case where a vertex
+	 * of one of the polygons (A) is on an edge of the other (B).
+	 * @since 4.2.1
+	 */
+	@Test
+	public void polygonIntersectionVertexOnEdgeA() {
+		Polygon p1 = new Polygon(
+				new Vector2(0.0, 0.0),
+				new Vector2(2.0, 1.0),
+				new Vector2(4.0, 3.0),
+				new Vector2(4.25, 4.0),
+				new Vector2(2.0, 5.0),
+				new Vector2(-2.0, 5.0),
+				new Vector2(-2.6, 4.0));
+		Polygon p2 = new Polygon(
+				new Vector2(1.0, 0.0),
+				new Vector2(3.0, 1.0),
+				new Vector2(3.25, 3.75),
+				new Vector2(1.5, 4.75),
+				new Vector2(0.0, 5.25),
+				new Vector2(-2.5, 4.5),
+				new Vector2(-2.75, 3.25),
+				new Vector2(-2.5, 1.5));
+		Transform tx1 = new Transform();
+		Transform tx2 = new Transform();
+		
+		Polygon result = Geometry.getIntersection(p1, tx1, p2, tx2);
+		
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(10, result.vertices.length);
+		TestCase.assertEquals(-0.386, result.vertices[0].x, 1e-3);
+		TestCase.assertEquals( 0.594, result.vertices[0].y, 1e-3);
+		TestCase.assertEquals( 0.461, result.vertices[1].x, 1e-3);
+		TestCase.assertEquals( 0.230, result.vertices[1].y, 1e-3);
+		TestCase.assertEquals( 2.000, result.vertices[2].x, 1e-3);
+		TestCase.assertEquals( 1.000, result.vertices[2].y, 1e-3);
+		TestCase.assertEquals( 3.100, result.vertices[3].x, 1e-3);
+		TestCase.assertEquals( 2.100, result.vertices[3].y, 1e-3);
+		TestCase.assertEquals( 3.250, result.vertices[4].x, 1e-3);
+		TestCase.assertEquals( 3.750, result.vertices[4].y, 1e-3);
+		TestCase.assertEquals( 1.500, result.vertices[5].x, 1e-3);
+		TestCase.assertEquals( 4.750, result.vertices[5].y, 1e-3);
+		TestCase.assertEquals( 0.750, result.vertices[6].x, 1e-3);
+		TestCase.assertEquals( 5.000, result.vertices[6].y, 1e-3);
+		TestCase.assertEquals(-0.833, result.vertices[7].x, 1e-3);
+		TestCase.assertEquals( 5.000, result.vertices[7].y, 1e-3);
+		TestCase.assertEquals(-2.256, result.vertices[8].x, 1e-3);
+		TestCase.assertEquals( 4.573, result.vertices[8].y, 1e-3);
+		TestCase.assertEquals(-2.600, result.vertices[9].x, 1e-3);
+		TestCase.assertEquals( 4.000, result.vertices[9].y, 1e-3);
+	}
+	
+	/**
+	 * Tests polygon intersection under the degenerate case where a vertex
+	 * of one of the polygons (B) is on an edge of the other (A).
+	 * @since 4.2.1
+	 */
+	@Test
+	public void polygonIntersectionVertexOnEdgeB() {
+		Polygon p1 = new Polygon(
+				new Vector2(0.0, 0.0),
+				new Vector2(2.0, 1.0),
+				new Vector2(4.0, 3.0),
+				new Vector2(4.25, 4.0),
+				new Vector2(2.0, 5.0),
+				new Vector2(-2.0, 5.0),
+				new Vector2(-4.0, 3.75));
+		Polygon p2 = new Polygon(
+				new Vector2(1.0, 0.0),
+				new Vector2(3.0, 1.0),
+				new Vector2(3.25, 3.75),
+				new Vector2(1.5, 4.75),
+				new Vector2(0.0, 5.0),
+				new Vector2(-2.5, 4.5),
+				new Vector2(-2.75, 3.25),
+				new Vector2(-2.5, 1.5));
+		Transform tx1 = new Transform();
+		Transform tx2 = new Transform();
+		
+		Polygon result = Geometry.getIntersection(p1, tx1, p2, tx2);
+		
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(10, result.vertices.length);
+		TestCase.assertEquals(-0.842, result.vertices[0].x, 1e-3);
+		TestCase.assertEquals( 0.789, result.vertices[0].y, 1e-3);
+		TestCase.assertEquals( 0.461, result.vertices[1].x, 1e-3);
+		TestCase.assertEquals( 0.230, result.vertices[1].y, 1e-3);
+		TestCase.assertEquals( 2.000, result.vertices[2].x, 1e-3);
+		TestCase.assertEquals( 1.000, result.vertices[2].y, 1e-3);
+		TestCase.assertEquals( 3.100, result.vertices[3].x, 1e-3);
+		TestCase.assertEquals( 2.100, result.vertices[3].y, 1e-3);
+		TestCase.assertEquals( 3.250, result.vertices[4].x, 1e-3);
+		TestCase.assertEquals( 3.750, result.vertices[4].y, 1e-3);
+		TestCase.assertEquals( 1.500, result.vertices[5].x, 1e-3);
+		TestCase.assertEquals( 4.750, result.vertices[5].y, 1e-3);
+		TestCase.assertEquals( 0.000, result.vertices[6].x, 1e-3);
+		TestCase.assertEquals( 5.000, result.vertices[6].y, 1e-3);
+		TestCase.assertEquals(-2.500, result.vertices[7].x, 1e-3);
+		TestCase.assertEquals( 4.500, result.vertices[7].y, 1e-3);
+		TestCase.assertEquals(-2.750, result.vertices[8].x, 1e-3);
+		TestCase.assertEquals( 3.250, result.vertices[8].y, 1e-3);
+		TestCase.assertEquals(-2.639, result.vertices[9].x, 1e-3);
+		TestCase.assertEquals( 2.474, result.vertices[9].y, 1e-3);
+	}
+	
+	/**
+	 * Tests polygon intersection under the degenerate case where a vertex
+	 * of one of the polygons (A) is coincident with a vertex of the other (B).
+	 * @since 4.2.1
+	 */
+	@Test
+	public void polygonIntersectionCoincidentVertexA() {
+		Polygon p1 = new Polygon(
+				new Vector2(0.0, 0.0),
+				new Vector2(2.0, 1.0),
+				new Vector2(4.0, 3.0),
+				new Vector2(4.25, 4.0),
+				new Vector2(2.0, 5.0),
+				new Vector2(-2.0, 5.0),
+				new Vector2(-2.75, 3.25));
+		Polygon p2 = new Polygon(
+				new Vector2(1.0, 0.0),
+				new Vector2(3.0, 1.0),
+				new Vector2(3.25, 3.75),
+				new Vector2(1.5, 4.75),
+				new Vector2(0.0, 5.25),
+				new Vector2(-2.5, 4.5),
+				new Vector2(-2.75, 3.25),
+				new Vector2(-2.5, 1.5));
+		Transform tx1 = new Transform();
+		Transform tx2 = new Transform();
+		
+		Polygon result = Geometry.getIntersection(p1, tx1, p2, tx2);
+		
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(10, result.vertices.length);
+		TestCase.assertEquals(-0.568, result.vertices[0].x, 1e-3);
+		TestCase.assertEquals( 0.672, result.vertices[0].y, 1e-3);
+		TestCase.assertEquals( 0.461, result.vertices[1].x, 1e-3);
+		TestCase.assertEquals( 0.230, result.vertices[1].y, 1e-3);
+		TestCase.assertEquals( 2.000, result.vertices[2].x, 1e-3);
+		TestCase.assertEquals( 1.000, result.vertices[2].y, 1e-3);
+		TestCase.assertEquals( 3.100, result.vertices[3].x, 1e-3);
+		TestCase.assertEquals( 2.100, result.vertices[3].y, 1e-3);
+		TestCase.assertEquals( 3.250, result.vertices[4].x, 1e-3);
+		TestCase.assertEquals( 3.750, result.vertices[4].y, 1e-3);
+		TestCase.assertEquals( 1.500, result.vertices[5].x, 1e-3);
+		TestCase.assertEquals( 4.750, result.vertices[5].y, 1e-3);
+		TestCase.assertEquals( 0.750, result.vertices[6].x, 1e-3);
+		TestCase.assertEquals( 5.000, result.vertices[6].y, 1e-3);
+		TestCase.assertEquals(-0.833, result.vertices[7].x, 1e-3);
+		TestCase.assertEquals( 5.000, result.vertices[7].y, 1e-3);
+		TestCase.assertEquals(-2.172, result.vertices[8].x, 1e-3);
+		TestCase.assertEquals( 4.598, result.vertices[8].y, 1e-3);
+		TestCase.assertEquals(-2.750, result.vertices[9].x, 1e-3);
+		TestCase.assertEquals( 3.250, result.vertices[9].y, 1e-3);
+	}
+	
+	/**
+	 * Tests polygon intersection under the degenerate case where a vertex
+	 * of one of the polygons (B) is coincident with a vertex of the other (A).
+	 * @since 4.2.1
+	 */
+	@Test
+	public void polygonIntersectionCoincidentVertexB() {
+		Polygon p1 = new Polygon(
+				new Vector2(0.0, 0.0),
+				new Vector2(2.0, 1.0),
+				new Vector2(4.0, 3.0),
+				new Vector2(4.25, 4.0),
+				new Vector2(2.0, 5.0),
+				new Vector2(-2.0, 5.0),
+				new Vector2(-4.0, 3.75));
+		Polygon p2 = new Polygon(
+				new Vector2(1.0, 0.0),
+				new Vector2(3.0, 1.0),
+				new Vector2(3.25, 3.75),
+				new Vector2(1.5, 4.75),
+				new Vector2(-2.0, 5.0),
+				new Vector2(-2.5, 4.5),
+				new Vector2(-2.75, 3.25),
+				new Vector2(-2.5, 1.5));
+		Transform tx1 = new Transform();
+		Transform tx2 = new Transform();
+		
+		Polygon result = Geometry.getIntersection(p1, tx1, p2, tx2);
+		
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(10, result.vertices.length);
+		TestCase.assertEquals(-0.842, result.vertices[0].x, 1e-3);
+		TestCase.assertEquals( 0.789, result.vertices[0].y, 1e-3);
+		TestCase.assertEquals( 0.461, result.vertices[1].x, 1e-3);
+		TestCase.assertEquals( 0.230, result.vertices[1].y, 1e-3);
+		TestCase.assertEquals( 2.000, result.vertices[2].x, 1e-3);
+		TestCase.assertEquals( 1.000, result.vertices[2].y, 1e-3);
+		TestCase.assertEquals( 3.100, result.vertices[3].x, 1e-3);
+		TestCase.assertEquals( 2.100, result.vertices[3].y, 1e-3);
+		TestCase.assertEquals( 3.250, result.vertices[4].x, 1e-3);
+		TestCase.assertEquals( 3.750, result.vertices[4].y, 1e-3);
+		TestCase.assertEquals( 1.500, result.vertices[5].x, 1e-3);
+		TestCase.assertEquals( 4.750, result.vertices[5].y, 1e-3);
+		TestCase.assertEquals(-2.000, result.vertices[6].x, 1e-3);
+		TestCase.assertEquals( 5.000, result.vertices[6].y, 1e-3);
+		TestCase.assertEquals(-2.500, result.vertices[7].x, 1e-3);
+		TestCase.assertEquals( 4.500, result.vertices[7].y, 1e-3);
+		TestCase.assertEquals(-2.750, result.vertices[8].x, 1e-3);
+		TestCase.assertEquals( 3.250, result.vertices[8].y, 1e-3);
+		TestCase.assertEquals(-2.639, result.vertices[9].x, 1e-3);
+		TestCase.assertEquals( 2.474, result.vertices[9].y, 1e-3);
+	}
+	
+	/**
+	 * Tests polygon intersection under the degenerate case where an edge
+	 * of one of the polygons (A) is colinear with an edge of the other (B).
+	 * @since 4.2.1
+	 */
+	@Test
+	public void polygonIntersectionColinearEdgeB() {
+		Polygon p1 = new Polygon(
+				new Vector2(0.0, 0.0),
+				new Vector2(2.0, 1.0),
+				new Vector2(4.0, 3.0),
+				new Vector2(4.25, 4.0),
+				new Vector2(2.0, 5.0),
+				new Vector2(-2.0, 5.0),
+				new Vector2(-4.0, 3.75));
+		Polygon p2 = new Polygon(
+				new Vector2(1.0, 0.0),
+				new Vector2(3.0, 1.0),
+				new Vector2(3.25, 3.75),
+				new Vector2(1.5, 4.75),
+				new Vector2(0.5, 5.0),
+				new Vector2(-0.5, 5.0),
+				new Vector2(-2.5, 4.5),
+				new Vector2(-2.75, 3.25),
+				new Vector2(-2.5, 1.5));
+		Transform tx1 = new Transform();
+		Transform tx2 = new Transform();
+		
+		Polygon result = Geometry.getIntersection(p1, tx1, p2, tx2);
+		
+		TestCase.assertNotNull(result);
+		TestCase.assertEquals(11, result.vertices.length);
+		TestCase.assertEquals(-0.842, result.vertices[0].x, 1e-3);
+		TestCase.assertEquals( 0.789, result.vertices[0].y, 1e-3);
+		TestCase.assertEquals( 0.461, result.vertices[1].x, 1e-3);
+		TestCase.assertEquals( 0.230, result.vertices[1].y, 1e-3);
+		TestCase.assertEquals( 2.000, result.vertices[2].x, 1e-3);
+		TestCase.assertEquals( 1.000, result.vertices[2].y, 1e-3);
+		TestCase.assertEquals( 3.100, result.vertices[3].x, 1e-3);
+		TestCase.assertEquals( 2.100, result.vertices[3].y, 1e-3);
+		TestCase.assertEquals( 3.250, result.vertices[4].x, 1e-3);
+		TestCase.assertEquals( 3.750, result.vertices[4].y, 1e-3);
+		TestCase.assertEquals( 1.500, result.vertices[5].x, 1e-3);
+		TestCase.assertEquals( 4.750, result.vertices[5].y, 1e-3);
+		TestCase.assertEquals( 0.500, result.vertices[6].x, 1e-3);
+		TestCase.assertEquals( 5.000, result.vertices[6].y, 1e-3);
+		TestCase.assertEquals(-0.500, result.vertices[7].x, 1e-3);
+		TestCase.assertEquals( 5.000, result.vertices[7].y, 1e-3);
+		TestCase.assertEquals(-2.500, result.vertices[8].x, 1e-3);
+		TestCase.assertEquals( 4.500, result.vertices[8].y, 1e-3);
+		TestCase.assertEquals(-2.750, result.vertices[9].x, 1e-3);
+		TestCase.assertEquals( 3.250, result.vertices[9].y, 1e-3);
+		TestCase.assertEquals(-2.639, result.vertices[10].x, 1e-3);
+		TestCase.assertEquals( 2.474, result.vertices[10].y, 1e-3);
+	}
+	
+	/**
+	 * Tests polygon intersection under the degenerate case where only the
+	 * edges of the polygons are touching.
+	 * @since 4.2.1
+	 */
+	@Test
+	public void polygonIntersectionEdgeTouching() {
+		Polygon p1 = new Polygon(
+				new Vector2(0.0, 0.0),
+				new Vector2(2.0, 1.0),
+				new Vector2(4.0, 3.0),
+				new Vector2(4.25, 4.0),
+				new Vector2(2.0, 5.0),
+				new Vector2(-2.0, 5.0),
+				new Vector2(-4.0, 3.75));
+		Polygon p2 = new Polygon(
+				new Vector2(-1.0, 5.0),
+				new Vector2(1.0, 5.0),
+				new Vector2(1.0, 6.0),
+				new Vector2(-1.0, 6.0));
+		Transform tx1 = new Transform();
+		Transform tx2 = new Transform();
+		
+		Polygon result = Geometry.getIntersection(p1, tx1, p2, tx2);
+		
+		TestCase.assertNull(result);
+	}
+	
+	/**
+	 * Tests polygon intersection under the degenerate case where only a
+	 * single vertex of the polygons are touching.
+	 * @since 4.2.1
+	 */
+	@Test
+	public void polygonIntersectionVertexTouching() {
+		Polygon p1 = new Polygon(
+				new Vector2(0.0, 0.0),
+				new Vector2(2.0, 1.0),
+				new Vector2(4.0, 3.0),
+				new Vector2(4.25, 4.0),
+				new Vector2(2.0, 5.0),
+				new Vector2(-2.0, 5.0),
+				new Vector2(-4.0, 3.75));
+		Polygon p2 = new Polygon(
+				new Vector2(2.0, 5.0),
+				new Vector2(4.0, 5.0),
+				new Vector2(4.0, 6.0),
+				new Vector2(2.0, 6.0));
+		Transform tx1 = new Transform();
+		Transform tx2 = new Transform();
+		
+		Polygon result = Geometry.getIntersection(p1, tx1, p2, tx2);
+		
+		TestCase.assertNull(result);
+	}
+	
+	/**
+	 * Tests polygon intersection under the degenerate case where only a
+	 * vertex of the polygons are touching along edges that are coincident.
+	 * @since 4.2.1
+	 */
+	@Test
+	public void polygonIntersectionVertexTouchingCoincident() {
+		Polygon p1 = new Polygon(
+				new Vector2(0.0, 0.0),
+				new Vector2(2.0, 1.0),
+				new Vector2(4.0, 3.0),
+				new Vector2(4.25, 4.0),
+				new Vector2(2.0, 5.0),
+				new Vector2(-2.0, 5.0),
+				new Vector2(-4.0, 3.75));
+		Polygon p2 = new Polygon(
+				new Vector2(2.0, 5.0),
+				new Vector2(4.0, 5.0),
+				new Vector2(1.0, 6.0),
+				new Vector2(-1.0, 6.0));
+		Transform tx1 = new Transform();
+		Transform tx2 = new Transform();
+		
+		Polygon result = Geometry.getIntersection(p1, tx1, p2, tx2);
+		
+		TestCase.assertNull(result);
+	}
+
+	/**
+	 * Tests polygon intersection in the case of separation (no intersection)
+	 * @since 4.2.1
+	 */
+	@Test
+	public void polygonIntersectionNoIntersection() {
+		Polygon p1 = new Polygon(
+				new Vector2(0.0, 0.0),
+				new Vector2(2.0, 1.0),
+				new Vector2(4.0, 3.0),
+				new Vector2(4.25, 4.0),
+				new Vector2(2.0, 5.0),
+				new Vector2(-2.0, 5.0),
+				new Vector2(-4.0, 3.75));
+		Polygon p2 = new Polygon(
+				new Vector2(3.0, 5.0),
+				new Vector2(5.0, 5.0),
+				new Vector2(5.0, 6.0),
+				new Vector2(3.0, 6.0));
+		Transform tx1 = new Transform();
+		Transform tx2 = new Transform();
+		
+		Polygon result = Geometry.getIntersection(p1, tx1, p2, tx2);
+		
+		TestCase.assertNull(result);
+	}
+
+	/**
+	 * Tests polygon intersection when one shape is completely contained in the other.
+	 * @since 4.2.1
+	 */
+	@Test
+	public void polygonIntersectionContainment() {
+		Polygon p1 = new Polygon(
+				new Vector2(0.0, 0.0),
+				new Vector2(2.0, 1.0),
+				new Vector2(4.0, 3.0),
+				new Vector2(4.25, 4.0),
+				new Vector2(2.0, 5.0),
+				new Vector2(-2.0, 5.0),
+				new Vector2(-4.0, 3.75));
+		Polygon p2 = new Polygon(
+				new Vector2(-1.0, 2.0),
+				new Vector2( 1.0, 2.0),
+				new Vector2( 1.0, 3.0),
+				new Vector2(-1.0, 3.0));
+		Transform tx1 = new Transform();
+		Transform tx2 = new Transform();
+		
+		Polygon result = Geometry.getIntersection(p1, tx1, p2, tx2);
+		
+		TestCase.assertNotNull(result);
+		TestCase.assertSame(result, p2);
 	}
 }

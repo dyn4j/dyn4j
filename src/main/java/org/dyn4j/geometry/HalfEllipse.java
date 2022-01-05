@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
  * algorithm for this shape only and use SAT on others.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.2.1
  * @since 3.1.7
  */
 public class HalfEllipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -546,7 +546,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 * @see org.dyn4j.geometry.Shape#contains(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Transform)
 	 */
 	@Override
-	public boolean contains(Vector2 point, Transform transform) {
+	public boolean contains(Vector2 point, Transform transform, boolean inclusive) {
 		// equation of an ellipse:
 		// (x - h)^2/a^2 + (y - k)^2/b^2 = 1
 		// for a point to be inside the ellipse, we can plug in
@@ -571,7 +571,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		double b2 = this.height * this.height;
 		double value = x2 / a2 + y2 / b2;
 		
-		return value <= 1.0;
+		return inclusive ? value <= 1.0 : value < 1.0;
 	}
 	
 

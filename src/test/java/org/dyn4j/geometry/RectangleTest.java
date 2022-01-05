@@ -114,18 +114,21 @@ public class RectangleTest {
 		Vector2 pt = new Vector2(2.0, 0.5);
 		
 		TestCase.assertTrue(!r.contains(pt, t));
+		TestCase.assertTrue(!r.contains(pt, t, false));
 		
 		// move the rectangle a bit
 		t.translate(2.0, 0.0);
 		t.rotate(Math.toRadians(30), r.center);
 		
 		TestCase.assertTrue(r.contains(pt, t));
+		TestCase.assertTrue(r.contains(pt, t, false));
 		
 		// check for on the edge
 		t.identity();
 		pt.set(0.5, 0.5);
 		
 		TestCase.assertTrue(r.contains(pt, t));
+		TestCase.assertFalse(r.contains(pt, t, false));
 	}
 	
 	/**
