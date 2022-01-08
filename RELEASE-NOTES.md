@@ -1,3 +1,26 @@
+## v4.2.1 - January 7th, 2022
+
+[Milestone](https://github.com/dyn4j/dyn4j/milestone/13?closed=1) |
+[Tag](https://github.com/dyn4j/dyn4j/tree/4.2.1) |
+[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/4.2.1/bundle) |
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=4.2.1)
+
+This update contains a few requested features (see below) and a few minor bug fixes.
+
+**New Features:**
+- [#201](https://github.com/dyn4j/dyn4j/issues/201) Added a new `collision(T, T, TimeOfImpact)` method to the `TimeOfImpactListener` interface that can be used to perform logic (or ignore the collision) when the minimum time of impact event has been detected.  Before, the `TimeOfImpactListener`s would notify of potential collisions to allow you to filter out detections that weren't necessary (for performance).  There was also a notification that was triggered when a valid time of impact event was detected.  What was missing is the _minimum_ time of impact and the opportunity to change or halt the solving after the minimum was detected.
+- [#211](https://github.com/dyn4j/dyn4j/issues/211) Added a new `isOutside(AABB, Transform, Fixture)` method to the `Bounds` interface to better support extension to arbitrary bounding shapes.  The given `AABB` is in world space whereas the `Fixture` is in local coordinates.  This is the **only** method called from the `World` class and super classes.
+- [#212](https://github.com/dyn4j/dyn4j/issues/212) Added a new `getIntersection(Polygon, Polygon)` method to the `Geometry` class to return the intersection `Polygon`.  Because the input `Polygon`s are `Convex` this method operates in O(n+m) time.  It will return null in the case where the `Polygon`s do not overlap or if they overlap only by a vertex or edge.
+- [#213](https://github.com/dyn4j/dyn4j/issues/213) Added a new `ContainmentDetector` interface that the `Sat` class implements to detect full containment of a `Convex` in another `Convex`.  NOTE: The `Sat` class does not support all `Shape`s and the same holds true for this new containment detection feature.
+- [#218](https://github.com/dyn4j/dyn4j/issues/218) Added a new `getArea` method to the `Shape` class to return the area.
+
+**Bug Fixes**
+- [#214](https://github.com/dyn4j/dyn4j/issues/214) Fixed an issue where only the `Sat` class would clear the `Penetration` / `Separation` objects.  Now all detectors require the caller to clear these objects before calling the methods that use them.
+- [#215](https://github.com/dyn4j/dyn4j/issues/215) Fixed an issue where the `VertexClusterReduction` class would fail with an exception in certain degenerate cases
+- [#216](https://github.com/dyn4j/dyn4j/issues/216) Fixed an issue where the `Simplifier` implementations would behave differently when passing in null/empty lists vs arrays.
+- [#217](https://github.com/dyn4j/dyn4j/issues/217) Fixed an issue where the `Slice` class would not return the correct inertia when using a density other than 1
+
+
 ## v4.2.0 - May 13th, 2021
 
 [Milestone](https://github.com/dyn4j/dyn4j/milestone/8?closed=1) |

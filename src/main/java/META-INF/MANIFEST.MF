@@ -2,5 +2,5 @@ Manifest-Version: 1.0
 Main-Class: org.dyn4j.Version
 Name: dyn4j
 Implementation-Title: Java Collision Detection and Physics Engine
-Implementation-Version: 4.2.0
+Implementation-Version: 4.2.1
 Implementation-Vendor: dyn4j.org
