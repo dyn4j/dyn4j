@@ -348,8 +348,17 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 		double m = density * r2 * this.alpha;
 		// inertia about z: http://www.efunda.com/math/areas/CircularSection.cfm
 		double sina = Math.sin(this.alpha);
-		double I = 1.0 / 18.0 * r2 * r2 * (9.0 * this.alpha * this.alpha - 8.0 * sina * sina) / this.alpha;
+		double I = density * (1.0 / 18.0 * r2 * r2 * (9.0 * this.alpha * this.alpha - 8.0 * sina * sina) / this.alpha);
 		return new Mass(this.center, m, I);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#getArea()
+	 */
+	@Override
+	public double getArea() {
+		// area of a circular section is a = r^2 * alpha
+		return this.sliceRadius * this.sliceRadius * this.alpha;
 	}
 
 	/* (non-Javadoc)

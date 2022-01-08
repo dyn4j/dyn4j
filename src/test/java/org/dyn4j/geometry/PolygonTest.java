@@ -513,4 +513,26 @@ public class PolygonTest {
 			iterator.next();
 		}
 	}
+
+	/**
+	 * Test case for the polygon createMass method.
+	 */
+	@Test
+	public void createMass() {
+		Polygon p = Geometry.createUnitCirclePolygon(5, 0.5);
+		Mass m = p.createMass(1.0);
+		// the polygon mass should be the area * d
+		TestCase.assertEquals(0.594, m.getMass(), 1.0e-3);
+		TestCase.assertEquals(0.057, m.getInertia(), 1.0e-3);
+	}
+
+	/**
+	 * Test case for the polygon getArea method.
+	 */
+	@Test
+	public void getArea() {
+		Polygon p = Geometry.createUnitCirclePolygon(5, 0.5);
+		TestCase.assertEquals(0.594, p.getArea(), 1.0e-3);
+	}
+	
 }

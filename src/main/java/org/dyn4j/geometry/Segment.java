@@ -759,6 +759,16 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	/**
 	 * Creates a {@link Mass} object using the geometric properties of
 	 * this {@link Segment} and the given density.
+	 * <p>
+	 * NOTE: This class represents an infinitely thin line segment and as such
+	 * would technically have zero mass. However, to support physial simulation
+	 * we assume a width of 1.0, therefore the mass is d * length.  This means
+	 * that a segment would have the same mass as a rectangle of height = 1.0 with
+	 * equal length to this segment.
+	 * <p>
+	 * Typically physical simulation for infinitely thin segments should limited to
+	 * infinite mass "terrain" or static features of the simulation, in which case
+	 * the area computation is irrelevant.
 	 * <p style="white-space: pre;"> m = d * length
 	 * I = l<sup>2</sup> * m / 12</p>
 	 * @param density the density in kg/m<sup>2</sup>
@@ -774,6 +784,17 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 		// since we know that a line segment has only two points we can
 		// feel safe using the averaging method for the centroid
 		return new Mass(this.center, mass, inertia);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This method will always return 0. This is a deviation from the {@link #createMass(double)}
+	 * method where it assumes the dimension of width = 1.0 and uses the length as the "area".
+	 */
+	@Override
+	public double getArea() {
+		return 0;
 	}
 	
 	/**

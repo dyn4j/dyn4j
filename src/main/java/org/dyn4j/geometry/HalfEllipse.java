@@ -375,6 +375,14 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 		double I = m * (this.halfWidth * this.halfWidth + this.height * this.height) * INERTIA_CONSTANT;
 		return new Mass(this.center, m, I);
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#getArea()
+	 */
+	@Override
+	public double getArea() {
+		return Math.PI * this.halfWidth * this.height * 0.5;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shape#getRadius(org.dyn4j.geometry.Vector2)

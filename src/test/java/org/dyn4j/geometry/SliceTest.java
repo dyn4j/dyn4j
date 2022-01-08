@@ -81,6 +81,7 @@ public class SliceTest {
 		// the circle center should be the origin
 		TestCase.assertEquals(0.000, slice.getCircleCenter().x, 1.0e-3);
 		TestCase.assertEquals(0.000, slice.getCircleCenter().y, 1.0e-3);
+		TestCase.assertNotNull(slice.toString());
 	}
 	
 	/**
@@ -304,5 +305,71 @@ public class SliceTest {
 		TestCase.assertEquals(1.000, e.getSliceRadius(), 1.0e-3);
 		TestCase.assertFalse(Math.abs(1.0 - e.getRadius()) < Epsilon.E);
 		TestCase.assertFalse(Math.abs(e.getSliceRadius() - e.getRadius()) < Epsilon.E);
+	}
+	
+	/**
+	 * Tests the createMass method.
+	 */
+	@Test
+	public void createMass() {
+		Slice s = new Slice(0.5, Math.toRadians(30));
+		Mass mass = s.createMass(1.0);
+		TestCase.assertEquals(0.065, mass.getMass(), 1.0e-3);
+		TestCase.assertEquals(0.001, mass.getInertia(), 1.0e-3);
+		TestCase.assertEquals(15.278, mass.getInverseMass(), 1.0e-3);
+		TestCase.assertEquals(931.395, mass.getInverseInertia(), 1.0e-3);
+		TestCase.assertEquals(0.329, mass.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.0, mass.getCenter().y, 1.0e-3);
+		TestCase.assertEquals(MassType.NORMAL, mass.getType());
+		
+		mass = s.createMass(2.0);
+		TestCase.assertEquals(0.130, mass.getMass(), 1.0e-3);
+		TestCase.assertEquals(0.002, mass.getInertia(), 1.0e-3);
+		TestCase.assertEquals(7.639, mass.getInverseMass(), 1.0e-3);
+		TestCase.assertEquals(465.697, mass.getInverseInertia(), 1.0e-3);
+		TestCase.assertEquals(0.329, mass.getCenter().x, 1.0e-3);
+		TestCase.assertEquals(0.0, mass.getCenter().y, 1.0e-3);
+		TestCase.assertEquals(MassType.NORMAL, mass.getType());
+	}
+	
+	/**
+	 * Tests the createMass method.
+	 */
+	@Test
+	public void getArea() {
+		Slice s = new Slice(0.5, Math.toRadians(30));
+		TestCase.assertEquals(0.065, s.getArea(), 1.0e-3);
+	}
+	
+	/**
+	 * Tests the getRadius(Vector2) method.
+	 */
+	@Test
+	public void getRadiusAtPoint() {
+		// NOTE: the center is NOT the circle center, it's the center of mass of the section
+		Slice s = new Slice(0.5, Math.toRadians(30));
+		TestCase.assertEquals(0.329, s.getRadius(s.getCenter()), 1e-3);
+		
+		// if we rotate it about the circle center then it should be the circle radius
+		TestCase.assertEquals(0.5, s.getRadius(new Vector2(0.0, 0.0)), 1e-3);
+	}
+
+	/**
+	 * Tests the getRadius(Vector2) method.
+	 */
+	@Test
+	public void getRotation() {
+		Slice s = new Slice(0.5, Math.toRadians(30));
+		TestCase.assertNotNull(s.getRotation());
+		TestCase.assertEquals(1.0, s.getRotation().cost, 1e-3);
+		TestCase.assertEquals(0.0, s.getRotation().sint, 1e-3);
+		TestCase.assertEquals(0.0, s.getRotationAngle(), 1e-3);
+		
+		// rotate the shape
+		s.rotate(Math.toRadians(30));
+		TestCase.assertNotNull(s.getRotation());
+		TestCase.assertEquals(0.866, s.getRotation().cost, 1e-3);
+		TestCase.assertEquals(0.499, s.getRotation().sint, 1e-3);
+		TestCase.assertEquals(Math.toRadians(30), s.getRotationAngle(), 1e-3);
 	}
 }

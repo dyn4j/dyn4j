@@ -344,15 +344,27 @@ public class CapsuleTest {
 		TestCase.assertEquals(MassType.NORMAL, mass.getType());
 		
 		e = new Capsule(0.5, 1.0);
-		mass = e.createMass(1.0);
+		mass = e.createMass(2.0);
 		
-		TestCase.assertEquals(0.446, mass.getMass(), 1e-3);
-		TestCase.assertEquals(0.028, mass.getInertia(), 1e-3);
-		TestCase.assertEquals(2.240, mass.getInverseMass(), 1e-3);
-		TestCase.assertEquals(34.692, mass.getInverseInertia(), 1e-3);
+		TestCase.assertEquals(0.892, mass.getMass(), 1e-3);
+		TestCase.assertEquals(0.057, mass.getInertia(), 1e-3);
+		TestCase.assertEquals(1.120, mass.getInverseMass(), 1e-3);
+		TestCase.assertEquals(17.346, mass.getInverseInertia(), 1e-3);
 		TestCase.assertEquals(0.0, mass.getCenter().x, 1e-3);
 		TestCase.assertEquals(0.0, mass.getCenter().y, 1e-3);
 		TestCase.assertEquals(MassType.NORMAL, mass.getType());
+	}
+
+	/**
+	 * Tests the area calculation.
+	 */
+	@Test
+	public void getArea() {
+		Capsule e = new Capsule(1.0, 0.5);
+		TestCase.assertEquals(0.446, e.getArea(), 1e-3);
+
+		e = new Capsule(0.5, 1.0);
+		TestCase.assertEquals(0.446, e.getArea(), 1e-3);
 	}
 
 	/**

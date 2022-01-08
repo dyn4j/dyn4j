@@ -270,4 +270,13 @@ public class CircleTest {
 		TestCase.assertEquals(0.0, mass.getCenter().y, 1e-3);
 		TestCase.assertEquals(MassType.NORMAL, mass.getType());
 	}
+	
+	/**
+	 * Tests the area method.
+	 */
+	@Test
+	public void getArea() {
+		Circle c = new Circle(3.0);
+		TestCase.assertEquals(28.274, c.getArea(), 1e-3);
+	}
 }

@@ -198,5 +198,6 @@ public class ListenerAdaptersTest {
 		TestCase.assertTrue(sla.collision(null, null, null, null));
 		TestCase.assertTrue(sla.collision(null, null, null, null, null));
 		TestCase.assertTrue(sla.collision(b, f, b, f, new TimeOfImpact()));
+		TestCase.assertTrue(sla.collision(b, b, new TimeOfImpact()));
 	}
 }

@@ -188,6 +188,14 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#getArea()
+	 */
+	@Override
+	public double getArea() {
+		return Math.PI * this.radius * this.radius;
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shape#computeAABB(org.dyn4j.geometry.Transform, org.dyn4j.geometry.AABB)
 	 */
 	@Override

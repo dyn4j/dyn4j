@@ -174,4 +174,28 @@ public class RectangleTest {
 		
 		TestCase.assertEquals(30, Math.toDegrees(r.getRotationAngle()), 1.0e-3);
 	}
+
+	/**
+	 * Test case for the rectangle createMass method.
+	 */
+	@Test
+	public void createMass() {
+		Rectangle r = new Rectangle(1.0, 1.0);
+		Mass m = r.createMass(1.5);
+		// the mass of a rectangle should be h * w * d
+		TestCase.assertEquals(1.500, m.getMass(), 1.0e-3);
+		TestCase.assertEquals(0.250, m.getInertia(), 1.0e-3);
+	}
+
+	/**
+	 * Test case for the rectangle createMass method.
+	 */
+	@Test
+	public void getArea() {
+		Rectangle r = new Rectangle(1.0, 1.0);
+		TestCase.assertEquals(1.0, r.getArea(), 1.0e-3);
+		
+		r = new Rectangle(2.5, 3.0);
+		TestCase.assertEquals(7.5, r.getArea(), 1.0e-3);
+	}
 }

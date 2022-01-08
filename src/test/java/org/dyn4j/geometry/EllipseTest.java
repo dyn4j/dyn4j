@@ -368,15 +368,27 @@ public class EllipseTest {
 		TestCase.assertEquals(MassType.NORMAL, mass.getType());
 		
 		e = new Ellipse(0.5, 1.0);
-		mass = e.createMass(1.0);
+		mass = e.createMass(2.0);
 		
-		TestCase.assertEquals(0.392, mass.getMass(), 1e-3);
-		TestCase.assertEquals(0.030, mass.getInertia(), 1e-3);
-		TestCase.assertEquals(2.546, mass.getInverseMass(), 1e-3);
-		TestCase.assertEquals(32.594, mass.getInverseInertia(), 1e-3);
+		TestCase.assertEquals(0.785, mass.getMass(), 1e-3);
+		TestCase.assertEquals(0.061, mass.getInertia(), 1e-3);
+		TestCase.assertEquals(1.273, mass.getInverseMass(), 1e-3);
+		TestCase.assertEquals(16.297, mass.getInverseInertia(), 1e-3);
 		TestCase.assertEquals(0.0, mass.getCenter().x, 1e-3);
 		TestCase.assertEquals(0.0, mass.getCenter().y, 1e-3);
 		TestCase.assertEquals(MassType.NORMAL, mass.getType());
+	}
+
+	/**
+	 * Tests the getArea method
+	 */
+	@Test
+	public void getArea() {
+		Ellipse e = new Ellipse(1.0, 0.5);
+		TestCase.assertEquals(0.392, e.getArea(), 1e-3);
+		
+		e = new Ellipse(0.5, 1.0);
+		TestCase.assertEquals(0.392, e.getArea(), 1e-3);
 	}
 
 	/**

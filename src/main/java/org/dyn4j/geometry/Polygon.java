@@ -585,6 +585,40 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#getArea()
+	 */
+	@Override
+	public double getArea() {
+		double area = 0.0;
+		int n = this.vertices.length;
+		
+		// get the average center
+		Vector2 ac = new Vector2();
+		for (int i = 0; i < n; i++) {
+			ac.add(this.vertices[i]);
+		}
+		ac.divide(n);
+		
+		// loop through the vertices using two variables to avoid branches in the loop
+		for (int i1 = n - 1, i2 = 0; i2 < n; i1 = i2++) {
+			// get two vertices
+			Vector2 p1 = this.vertices[i1];
+			Vector2 p2 = this.vertices[i2];
+			// get the vector from the center to the point
+			p1 = p1.difference(ac);
+			p2 = p2.difference(ac);
+			// perform the cross product (yi * x(i+1) - y(i+1) * xi)
+			double D = p1.cross(p2);
+			// multiply by half
+			double triangleArea = 0.5 * D;
+			// add it to the total area
+			area += triangleArea;
+		}
+		
+		return area;
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shape#computeAABB(org.dyn4j.geometry.Transform, org.dyn4j.geometry.AABB)
 	 */
 	@Override

@@ -339,6 +339,24 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 		
 		return new Mass(this.center, m, I);
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#getArea()
+	 */
+	@Override
+	public double getArea() {
+		double h = this.capRadius * 2.0;
+		double w = this.length - h;
+		double r2 = this.capRadius * this.capRadius;
+		
+		// compute the rectangular area
+		double ra = w * h;
+		// compuate the circle area
+		double ca = r2 * Math.PI;
+		
+		// return the total area
+		return ra + ca;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shape#getRadius(org.dyn4j.geometry.Vector2)

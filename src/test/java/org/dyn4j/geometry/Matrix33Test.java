@@ -52,6 +52,8 @@ public class Matrix33Test {
 		TestCase.assertEquals(1.0, m.m20);
 		TestCase.assertEquals(5.0, m.m21);
 		TestCase.assertEquals(-1.0, m.m22);
+		
+		TestCase.assertNotNull(m.toString());
 	}
 	
 	/**
@@ -71,6 +73,52 @@ public class Matrix33Test {
 		TestCase.assertEquals(1.0, m.m20);
 		TestCase.assertEquals(5.0, m.m21);
 		TestCase.assertEquals(-1.0, m.m22);
+	}
+
+	/**
+	 * Test the creation method passing a double array.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createNullArray() {
+		new Matrix33((double[])null);
+	}
+	
+	/**
+	 * Test the creation method passing a double array.
+	 */
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void createPartialArray() {
+		new Matrix33(new double[] {1.0, 2.0, 1.0,
+                                   -3.0, 8.0, 2.0,
+                                   1.0, 5.0});
+	}
+	
+	/**
+	 * Test the equals method.
+	 */
+	@Test
+	public void equalsHashcode() {
+		Matrix33 m = new Matrix33(1.0, 2.0, 1.0,
+				                 -3.0, 8.0, 2.0,
+				                  1.0, 5.0, -1.0);
+		
+		TestCase.assertTrue(m.equals(m));
+		
+		Matrix33 m2 = new Matrix33(m);
+		
+		TestCase.assertNotSame(m, m2);
+		TestCase.assertTrue(m.equals(m2));
+		TestCase.assertTrue(m2.equals(m));
+		TestCase.assertEquals(m.hashCode(), m2.hashCode());
+		
+		m2.m22 = -5.0;
+		TestCase.assertNotSame(m, m2);
+		TestCase.assertFalse(m.equals(m2));
+		TestCase.assertFalse(m2.equals(m));
+		TestCase.assertFalse(m.hashCode() == m2.hashCode());
+		
+		TestCase.assertFalse(m.equals(null));
+		TestCase.assertFalse(m.equals(new Object()));
 	}
 	
 	/**

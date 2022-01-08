@@ -26,6 +26,8 @@ package org.dyn4j.geometry;
 
 import junit.framework.TestCase;
 
+import java.util.Iterator;
+
 import org.junit.Test;
 
 /**
@@ -76,6 +78,11 @@ public class SegmentTest {
 		
 		TestCase.assertEquals(0.500, s.center.x, 1.0e-3);
 		TestCase.assertEquals(1.500, s.center.y, 1.0e-3);
+		TestCase.assertNotNull(s.toString());
+		TestCase.assertNotNull(s.getVertexIterator());
+		TestCase.assertEquals(WoundIterator.class, s.getVertexIterator().getClass());
+		TestCase.assertNotNull(s.getNormalIterator());
+		TestCase.assertEquals(WoundIterator.class, s.getNormalIterator().getClass());
 	}
 	
 	/**
@@ -147,7 +154,16 @@ public class SegmentTest {
 		TestCase.assertEquals(0.000, p.x, 1.0e-3);
 		TestCase.assertEquals(0.000, p.y, 1.0e-3);
 		
+		p = new Segment(new Vector2(), new Vector2(5.0, 5.0)).getPointOnLineClosestToPoint(pt);
+		// since 0,0 is perp to pt
+		TestCase.assertEquals(0.000, p.x, 1.0e-3);
+		TestCase.assertEquals(0.000, p.y, 1.0e-3);
+		
 		p = Segment.getPointOnLineClosestToPoint(pt, new Vector2(), new Vector2(2.5, 5.0));
+		TestCase.assertEquals(-0.200, p.x, 1.0e-3);
+		TestCase.assertEquals(-0.400, p.y, 1.0e-3);
+		
+		p = new Segment(new Vector2(), new Vector2(2.5, 5.0)).getPointOnLineClosestToPoint(pt);
 		TestCase.assertEquals(-0.200, p.x, 1.0e-3);
 		TestCase.assertEquals(-0.400, p.y, 1.0e-3);
 		
@@ -157,8 +173,17 @@ public class SegmentTest {
 		TestCase.assertEquals(0.000, p.x, 1.0e-3);
 		TestCase.assertEquals(0.000, p.y, 1.0e-3);
 		
+		p = new Segment(new Vector2(-1.0, -1.0), new Vector2(1.0, 1.0)).getPointOnSegmentClosestToPoint(pt);
+		// since 0,0 is perp to pt
+		TestCase.assertEquals(0.000, p.x, 1.0e-3);
+		TestCase.assertEquals(0.000, p.y, 1.0e-3);
+		
 		// test closest is one of the segment points
 		p = Segment.getPointOnSegmentClosestToPoint(pt, new Vector2(), new Vector2(2.5, 5.0));
+		TestCase.assertEquals(0.000, p.x, 1.0e-3);
+		TestCase.assertEquals(0.000, p.y, 1.0e-3);
+		
+		p = new Segment(new Vector2(), new Vector2(2.5, 5.0)).getPointOnSegmentClosestToPoint(pt);
 		TestCase.assertEquals(0.000, p.x, 1.0e-3);
 		TestCase.assertEquals(0.000, p.y, 1.0e-3);
 	}
@@ -254,6 +279,8 @@ public class SegmentTest {
 			
 			TestCase.assertFalse(s.contains(new Vector2(2.0, 2.0), t, 0.1));
 			TestCase.assertTrue(s.contains(new Vector2(1.05, 1.05), t, 0.1));
+			TestCase.assertFalse(s.contains(new Vector2(1.05, 1.05), t, 0.0));
+			TestCase.assertFalse(s.contains(new Vector2(1.05, 1.05), t, 0.05));
 			TestCase.assertTrue(s.contains(new Vector2(0.505, 0.5), t, 0.1));
 	}
 	
@@ -409,6 +436,13 @@ public class SegmentTest {
 		Vector2 p = Segment.getLineIntersection(
 				new Vector2(-1.0, -1.0), new Vector2(2.0, 0.0), 
 				new Vector2(-1.0,  0.0), new Vector2(1.0, 0.5));
+		
+		TestCase.assertNotNull(p);
+		TestCase.assertEquals(11.0, p.x);
+		TestCase.assertEquals(3.0, p.y);
+		
+		p = new Segment(new Vector2(-1.0, -1.0), new Vector2(2.0, 0.0)).getLineIntersection(
+				new Segment(new Vector2(-1.0,  0.0), new Vector2(1.0, 0.5)));
 		
 		TestCase.assertNotNull(p);
 		TestCase.assertEquals(11.0, p.x);
@@ -681,4 +715,56 @@ public class SegmentTest {
 		p = s2.getSegmentIntersection(s1);
 		TestCase.assertNull(p);
 	}
+
+	/**
+	 * Test case for the segment createMass method.
+	 */
+	@Test
+	public void createMass() {
+		Segment s = new Segment(new Vector2(-1.0, 0.0), new Vector2(1.0, 0.5));
+		Mass m = s.createMass(1.0);
+		// the mass of a segment should be l * d
+		TestCase.assertEquals(2.061, m.getMass(), 1.0e-3);
+		// the I of a segment should be 1 / 12 * l ^ 2 * m
+		TestCase.assertEquals(0.730, m.getInertia(), 1.0e-3);
+	}
+
+	/**
+	 * Test case for the segment getArea method.
+	 */
+	@Test
+	public void getArea() {
+		Segment s = new Segment(new Vector2(-1.0, 0.0), new Vector2(1.0, 0.5));
+		
+		// it's always zero
+		TestCase.assertEquals(0.0, s.getArea(), 1.0e-3);
+	}
+
+	/**
+	 * Tests the getNormals and getNormalIterator methods.
+	 */
+	@Test
+	public void getNormals() {
+		Segment p = new Segment(
+				new Vector2(0.0, 1.0),
+				new Vector2(-1.0, 0.0));
+		
+		Vector2[] normals = p.getNormals();
+		
+		TestCase.assertNotNull(normals);
+		TestCase.assertEquals(2, normals.length);
+		TestCase.assertEquals(-0.707, normals[0].x, 1e-3);
+		TestCase.assertEquals(-0.707, normals[0].y, 1e-3);
+		TestCase.assertEquals( 0.707, normals[1].x, 1e-3);
+		TestCase.assertEquals(-0.707, normals[1].y, 1e-3);
+		
+		Iterator<Vector2> iterator = p.getNormalIterator();
+		
+		TestCase.assertNotNull(iterator);
+		TestCase.assertEquals(WoundIterator.class, iterator.getClass());
+		while (iterator.hasNext()) {
+			iterator.next();
+		}
+	}
+
 }

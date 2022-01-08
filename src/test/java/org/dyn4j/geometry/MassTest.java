@@ -160,43 +160,6 @@ public class MassTest {
 	}
 	
 	/**
-	 * Test case for the polygon create method.
-	 */
-	@Test
-	public void createPolygon() {
-		Polygon p = Geometry.createUnitCirclePolygon(5, 0.5);
-		Mass m = p.createMass(1.0);
-		// the polygon mass should be the area * d
-		TestCase.assertEquals(0.594, m.getMass(), 1.0e-3);
-		TestCase.assertEquals(0.057, m.getInertia(), 1.0e-3);
-	}
-	
-	/**
-	 * Test case for the rectangle create method.
-	 */
-	@Test
-	public void createRectangle() {
-		Rectangle r = new Rectangle(1.0, 1.0);
-		Mass m = r.createMass(1.5);
-		// the mass of a rectangle should be h * w * d
-		TestCase.assertEquals(1.500, m.getMass(), 1.0e-3);
-		TestCase.assertEquals(0.250, m.getInertia(), 1.0e-3);
-	}
-	
-	/**
-	 * Test case for the segment create method.
-	 */
-	@Test
-	public void createSegment() {
-		Segment s = new Segment(new Vector2(-1.0, 0.0), new Vector2(1.0, 0.5));
-		Mass m = s.createMass(1.0);
-		// the mass of a segment should be l * d
-		TestCase.assertEquals(2.061, m.getMass(), 1.0e-3);
-		// the I of a segment should be 1 / 12 * l ^ 2 * m
-		TestCase.assertEquals(0.730, m.getInertia(), 1.0e-3);
-	}
-	
-	/**
 	 * Test the create method accepting an array of {@link Mass} objects.
 	 * <p>
 	 * Renamed from createArray

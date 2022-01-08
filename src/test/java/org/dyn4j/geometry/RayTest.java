@@ -26,6 +26,8 @@ package org.dyn4j.geometry;
 
 import org.junit.Test;
 
+import junit.framework.TestCase;
+
 /**
  * Test case for the {@link Ray} class.
  * @author William Bittle
@@ -62,6 +64,91 @@ public class RayTest {
 	 */
 	@Test
 	public void create() {
-		new Ray(new Vector2(), Math.toRadians(10));
+		Vector2 s = new Vector2(1.0, 2.0);
+		Ray r = new Ray(s, Math.toRadians(10));
+		
+		TestCase.assertSame(s, r.getStart());
+		TestCase.assertEquals(s.x, r.getStart().x, 1e-3);
+		TestCase.assertEquals(s.y, r.getStart().y, 1e-3);
+		TestCase.assertEquals(Math.toRadians(10), r.getDirection(), 1e-3);
+		TestCase.assertEquals(0.984, r.getDirectionVector().x, 1e-3);
+		TestCase.assertEquals(0.173, r.getDirectionVector().y, 1e-3);
+		TestCase.assertNotNull(r.toString());
+	}
+
+	/**
+	 * Tests the constructor.
+	 */
+	@Test
+	public void createFromOrigin() {
+		Ray r = new Ray(Math.toRadians(10));
+		
+		TestCase.assertEquals(0.0, r.getStart().x, 1e-3);
+		TestCase.assertEquals(0.0, r.getStart().y, 1e-3);
+		TestCase.assertEquals(Math.toRadians(10), r.getDirection(), 1e-3);
+		TestCase.assertEquals(0.984, r.getDirectionVector().x, 1e-3);
+		TestCase.assertEquals(0.173, r.getDirectionVector().y, 1e-3);
+		TestCase.assertNotNull(r.toString());
+	}
+
+	/**
+	 * Tests setting a null start.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setStartNull() {
+		Ray r = new Ray(Math.toRadians(30));
+		r.setStart(null);
+	}
+
+	/**
+	 * Tests setting a null direction.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void setDirectionNull() {
+		Ray r = new Ray(Math.toRadians(30));
+		r.setDirection(null);
+	}
+
+	/**
+	 * Tests setting a zero direction.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setDirectionZero() {
+		Ray r = new Ray(Math.toRadians(30));
+		r.setDirection(new Vector2());
+	}
+	
+	/**
+	 * Tests setting the direction vector of the ray.
+	 */
+	@Test
+	public void setDirection() {
+		Vector2 s = new Vector2(1.0, 2.0);
+		Ray r = new Ray(s, Math.toRadians(10));
+		
+		TestCase.assertSame(s, r.getStart());
+		TestCase.assertEquals(s.x, r.getStart().x, 1e-3);
+		TestCase.assertEquals(s.y, r.getStart().y, 1e-3);
+		TestCase.assertEquals(Math.toRadians(10), r.getDirection(), 1e-3);
+		TestCase.assertEquals(0.984, r.getDirectionVector().x, 1e-3);
+		TestCase.assertEquals(0.173, r.getDirectionVector().y, 1e-3);
+		
+		r.setDirection(Math.toRadians(30));
+		
+		TestCase.assertSame(s, r.getStart());
+		TestCase.assertEquals(s.x, r.getStart().x, 1e-3);
+		TestCase.assertEquals(s.y, r.getStart().y, 1e-3);
+		TestCase.assertEquals(Math.toRadians(30), r.getDirection(), 1e-3);
+		TestCase.assertEquals(0.866, r.getDirectionVector().x, 1e-3);
+		TestCase.assertEquals(0.499, r.getDirectionVector().y, 1e-3);
+		
+		r.setDirection(new Vector2(5, 7));
+		
+		TestCase.assertSame(s, r.getStart());
+		TestCase.assertEquals(s.x, r.getStart().x, 1e-3);
+		TestCase.assertEquals(s.y, r.getStart().y, 1e-3);
+		TestCase.assertEquals(0.950, r.getDirection(), 1e-3);
+		TestCase.assertEquals(5, r.getDirectionVector().x, 1e-3);
+		TestCase.assertEquals(7, r.getDirectionVector().y, 1e-3);
 	}
 }

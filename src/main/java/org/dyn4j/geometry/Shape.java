@@ -143,6 +143,13 @@ public interface Shape extends Transformable, DataContainer {
 	public abstract boolean contains(Vector2 point, Transform transform, boolean inclusive);
 	
 	/**
+	 * Returns the total area of the {@link Shape}.
+	 * @return double
+	 * @since 4.2.1
+	 */
+	public abstract double getArea();
+	
+	/**
 	 * Creates a {@link Mass} object using the geometric properties of
 	 * this {@link Shape} and the given density.
 	 * @param density the density in kg/m<sup>2</sup>

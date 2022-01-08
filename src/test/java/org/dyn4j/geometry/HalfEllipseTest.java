@@ -366,6 +366,15 @@ public class HalfEllipseTest {
 	}
 
 	/**
+	 * Tests the getArea method.
+	 */
+	@Test
+	public void getArea() {
+		HalfEllipse he = new HalfEllipse(1.0, 0.5);
+		TestCase.assertEquals(0.392, he.getArea(), 1e-3);
+	}
+
+	/**
 	 * Tests getting the radius.
 	 */
 	@Test

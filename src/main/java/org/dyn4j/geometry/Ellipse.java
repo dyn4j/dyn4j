@@ -290,6 +290,14 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 	}
 
 	/* (non-Javadoc)
+	 * @see org.dyn4j.geometry.Shape#getArea()
+	 */
+	@Override
+	public double getArea() {
+		return Math.PI * this.halfWidth * this.halfHeight;
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shape#getRadius(org.dyn4j.geometry.Vector2)
 	 */
 	@Override

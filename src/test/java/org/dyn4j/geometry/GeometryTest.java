@@ -1080,6 +1080,26 @@ public class GeometryTest {
 	public void reverseWindingNullArray() {
 		Geometry.reverseWinding((Vector2[]) null);
 	}
+
+	/**
+	 * Tests the reverse winding method passing an empty array or one element array.
+	 */
+	@Test
+	public void reverseWindingEmptyOrOneElement() {
+		Vector2[] array = new Vector2[] {};
+		Geometry.reverseWinding(array);
+		
+		array = new Vector2[] {
+			new Vector2(1.0, 1.0)
+		};
+		Geometry.reverseWinding(array);
+		
+		List<Vector2> list = new ArrayList<Vector2>();
+		Geometry.reverseWinding(list);
+		
+		list.add(new Vector2(1.0, 1.0));
+		Geometry.reverseWinding(list);
+	}
 	
 	/**
 	 * Tests the cleanse method passing a null list.
