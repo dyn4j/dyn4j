@@ -50,7 +50,7 @@ This creates a new simulation environment with default settings.  The default se
 Body body = new Body();
 body.addFixture(Geometry.createCircle(1.0));
 body.translate(1.0, 0.0);
-body.setMass(MassType.Normal);
+body.setMass(MassType.NORMAL);
 world.addBody(body);
 ```
 A body is the primary unit of simulation and completely rigid.  A body is comprised of many fixtures or shapes.  While the shapes of dyn4j are all convex (and must be), a collection of these shapes can be used to create a body that is not.  A body can be initially placed in a scene by translating or rotating it.  Once the shape(s) of a body is defined, it must be given a mass by calling a setMass method.  The mass type is typically MassType.NORMAL or MassType.INFINITE.  When set to NORMAL, the mass will be calculated based on the shapes.  An INFINITE mass body might represent a floor, ground, or something unmovable.
