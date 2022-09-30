@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,7 +34,7 @@ import org.junit.Test;
 /**
  * Tests the methods of the {@link Mass} class.
  * @author William Bittle
- * @version 3.1.5
+ * @version 4.2.2
  * @since 1.0.0
  */
 public class MassTest {
@@ -352,5 +352,32 @@ public class MassTest {
 		
 		TestCase.assertEquals(m1.mass, m2.mass, 1.0e-3);
 		TestCase.assertEquals(m1.inertia, m2.inertia, 1.0e-3);
+	}
+	
+	/**
+	 * Tests the equals method.
+	 * @since 4.2.2
+	 */
+	@Test
+	public void equals() {
+		Mass m1 = new Mass();
+		Mass m2 = new Mass();
+		
+		TestCase.assertEquals(m1, m2);
+		TestCase.assertEquals(m1.hashCode(), m2.hashCode());
+		TestCase.assertEquals(m1, m1);
+		TestCase.assertEquals(m1.hashCode(), m1.hashCode());
+		TestCase.assertEquals(m2, m2);
+		TestCase.assertEquals(m2.hashCode(), m2.hashCode());
+		TestCase.assertFalse(m1 == m2);
+		
+		Mass m3 = new Mass(new Vector2(), 5, 1);
+		TestCase.assertFalse(m1.equals(m3));
+		TestCase.assertFalse(m1.hashCode() == m3.hashCode());
+		TestCase.assertFalse(m1.equals((Mass)null));
+		TestCase.assertFalse(m1.equals((Object)null));
+		TestCase.assertFalse(m1.equals((Object)m3));
+		TestCase.assertTrue(m1.equals((Object)m1));
+		TestCase.assertFalse(m1.equals(new Object()));
 	}
 }

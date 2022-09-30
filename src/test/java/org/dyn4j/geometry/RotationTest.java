@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,6 +31,8 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link Rotation} class.
  * @author Manolis Tsamis
+ * @author William Bittle
+ * @version 4.2.2
  * @since 3.4.0
  */
 public class RotationTest {
@@ -43,6 +45,7 @@ public class RotationTest {
 		// should default to zero angle
 		TestCase.assertEquals(1.0, r1.cost, 1.0e-6);
 		TestCase.assertEquals(0.0, r1.sint, 1.0e-6);
+		TestCase.assertNotNull(r1.toString());
 		
 		Rotation r2 = new Rotation(Math.PI);
 		TestCase.assertEquals(-1.0, r2.cost, 1.0e-6);
@@ -63,6 +66,10 @@ public class RotationTest {
 		Rotation r6 = Rotation.of(2.5);
 		TestCase.assertEquals(Math.cos(2.5), r6.cost, 1.0e-6);
 		TestCase.assertEquals(Math.sin(2.5), r6.sint, 1.0e-6);
+		
+		Rotation r9 = Rotation.of(new Vector2());
+		TestCase.assertEquals(1.0, r9.cost, 1.0e-6);
+		TestCase.assertEquals(0.0, r9.sint, 1.0e-6);
 		
 		Vector2 v1 = new Vector2(5, -5);
 		
@@ -152,6 +159,9 @@ public class RotationTest {
 		TestCase.assertFalse(r.equals(new Rotation(1.0)));
 		TestCase.assertFalse(r.equals(new Object()));
 		TestCase.assertFalse(r.equals(null));
+		
+		TestCase.assertFalse(r.equals((Object)new Rotation(1.0)));
+		TestCase.assertFalse(r.equals((Object)null));
 		
 		TestCase.assertTrue(r.equals(r, 1.0e-4));
 		Rotation r2 = r.copy().rotate(5).rotate(-5);
@@ -460,11 +470,16 @@ public class RotationTest {
 		v2.multiply(0.75);
 		
 		TestCase.assertEquals(0, r1.compare(r1));
+		TestCase.assertEquals(r1.hashCode(), r1.hashCode());
 		
 		TestCase.assertEquals(0, r2.compare(r3));
+		TestCase.assertEquals(r2.hashCode(), r3.hashCode());
 		TestCase.assertEquals(1, r1.compare(r2));
+		TestCase.assertFalse(r1.hashCode() == r2.hashCode());
 		TestCase.assertEquals(1, r3.compare(r5));
+		TestCase.assertFalse(r3.hashCode() == r5.hashCode());
 		TestCase.assertEquals(-1, r1.compare(r4));
+		TestCase.assertFalse(r1.hashCode() == r4.hashCode());
 		
 		TestCase.assertEquals(1, r3.compare(v2));
 		TestCase.assertEquals(-1, r4.compare(v1));

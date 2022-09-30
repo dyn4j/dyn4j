@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.Epsilon;
 import org.junit.Test;
 
 import junit.framework.TestCase;
@@ -31,7 +32,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link Vector2} class.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.2.2
  * @since 1.0.0
  */
 public class Vector2Test {
@@ -145,6 +146,10 @@ public class Vector2Test {
 		
 		TestCase.assertFalse(v.equals(v.copy().set(2.0, 1.0)));
 		TestCase.assertFalse(v.equals(2.0, 2.0));
+		TestCase.assertFalse(v.equals(null));
+		
+		TestCase.assertFalse(v.equals(new Object()));
+		TestCase.assertTrue(v.equals((Object)new Vector2(1, 2)));
 	}
 	
 	/**
@@ -172,6 +177,17 @@ public class Vector2Test {
 		v.setMagnitude(3.0);
 		TestCase.assertEquals( 0.0, v.x, 1E-10);
 		TestCase.assertEquals( 3.0, v.y);
+		
+		v.set(-1.0, 0.0);
+		v.setMagnitude(0.0);
+		TestCase.assertEquals( 0.0, v.x);
+		TestCase.assertEquals( 0.0, v.y);
+		
+		v.set(-1.0, 0.0);
+		v.setMagnitude(Epsilon.E);
+		TestCase.assertEquals( 0.0, v.x);
+		TestCase.assertEquals( 0.0, v.y);
+		
 	}
 	
 	/**
@@ -372,6 +388,7 @@ public class Vector2Test {
 		TestCase.assertTrue(v1.isOrthogonal(1.0, -1.0));
 		TestCase.assertTrue(v1.isOrthogonal(-1.0, 1.0));
 		TestCase.assertFalse(v1.isOrthogonal(1.0, 1.0));
+		TestCase.assertTrue(v1.isOrthogonal(0.0, 0.0));
 	}
 	
 	/**
@@ -439,6 +456,32 @@ public class Vector2Test {
 		v.inverseRotate(Math.toRadians(90));
 		TestCase.assertEquals(2.0, v.x, 1.0e-3);
 		TestCase.assertEquals(1.0, v.y, 1.0e-3);
+		
+		// other rotate variants
+		v = new Vector2(2.0, 1.0);
+		v.rotate(new Rotation(Math.toRadians(90)), new Vector2(0.0, 0.0));
+		TestCase.assertEquals(-1.000, v.x, 1.0e-3);
+		TestCase.assertEquals( 2.000, v.y, 1.0e-3);
+		
+		v = new Vector2(2.0, 1.0);
+		v.rotate(Math.toRadians(90), new Vector2(0.0, 0.0));
+		TestCase.assertEquals(-1.000, v.x, 1.0e-3);
+		TestCase.assertEquals( 2.000, v.y, 1.0e-3);
+		
+		v = new Vector2(2.0, 1.0);
+		v.rotate(Math.toRadians(90), 0.0, 0.0);
+		TestCase.assertEquals(-1.000, v.x, 1.0e-3);
+		TestCase.assertEquals( 2.000, v.y, 1.0e-3);
+		
+		v = new Vector2(2.0, 1.0);
+		v.inverseRotate(Math.toRadians(90), new Vector2(0.0, 0.0));
+		TestCase.assertEquals( 1.000, v.x, 1.0e-3);
+		TestCase.assertEquals(-2.000, v.y, 1.0e-3);
+		
+		v = new Vector2(2.0, 1.0);
+		v.inverseRotate(Math.toRadians(90), 0.0, 0.0);
+		TestCase.assertEquals( 1.000, v.x, 1.0e-3);
+		TestCase.assertEquals(-2.000, v.y, 1.0e-3);
 	}
 	
 	/**
@@ -453,6 +496,12 @@ public class Vector2Test {
 		
 		TestCase.assertEquals( 0.600, r.x, 1.0e-3);
 		TestCase.assertEquals( 1.200, r.y, 1.0e-3);
+		
+		// test a zero direction vector
+		r = v1.project(new Vector2());
+		
+		TestCase.assertEquals( 0.000, r.x, 1.0e-3);
+		TestCase.assertEquals( 0.000, r.y, 1.0e-3);
 	}
 	
 	/**
@@ -501,6 +550,17 @@ public class Vector2Test {
 		Vector2 v2 = new Vector2(-2.0, -1.0);
 		
 		// this should return in the range of -pi,pi
-		TestCase.assertTrue(Math.PI >= Math.abs(v1.getAngleBetween(v2)));
+		TestCase.assertTrue(Math.abs(v1.getAngleBetween(v2)) <= Math.PI);
+		
+		v1 = new Vector2(1.0, 2.0);
+		v2 = new Vector2(-2.0, -1.0);
+		
+		// this should return in the range of -pi,pi
+		TestCase.assertTrue(Math.abs(v1.getAngleBetween(v2)) <= Math.PI);
+		
+		v1 = new Vector2(-1.0, -1.0);
+		double angle = Math.abs(v1.getAngleBetween(Math.toRadians(300)));
+		TestCase.assertEquals(Math.toRadians(75), angle, 1e-3);
+		TestCase.assertTrue(angle <= Math.PI);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Transform} object.
  * @author William Bittle
- * @version 3.4.0
+ * @version 4.2.2
  * @since 1.0.0
  */
 public class TransformTest {
@@ -75,6 +75,7 @@ public class TransformTest {
 		
 		t.rotate(Rotation.ofDegrees(50));
 		TestCase.assertEquals(Math.toRadians(80), t.getRotationAngle(), 1.0e-3);
+		TestCase.assertEquals(Math.toRadians(80), t.getRotation().toRadians(), 1.0e-3);
 		
 		t.identity();
 		
@@ -135,9 +136,23 @@ public class TransformTest {
 		Vector2 vt = t.getTransformed(v);
 		TestCase.assertEquals(1.967, vt.x, 1.0e-3);
 		TestCase.assertEquals(1.657, vt.y, 1.0e-3);
+		TestCase.assertEquals(1.967, t.getTransformedX(v), 1.0e-3);
+		TestCase.assertEquals(1.657, t.getTransformedY(v), 1.0e-3);
+		
+		vt.zero();
+		t.getTransformed(v, vt);
+		TestCase.assertEquals(1.967, vt.x, 1.0e-3);
+		TestCase.assertEquals(1.657, vt.y, 1.0e-3);
+		TestCase.assertEquals(1.967, t.getTransformedX(v), 1.0e-3);
+		TestCase.assertEquals(1.657, t.getTransformedY(v), 1.0e-3);
 		
 		// test inverse transformation
 		vt = t.getInverseTransformed(vt);
+		TestCase.assertEquals(1.000, vt.x, 1.0e-3);
+		TestCase.assertEquals(0.000, vt.y, 1.0e-3);
+		
+		Vector2 v2 = t.getTransformed(v);
+		t.getInverseTransformed(v2, vt);
 		TestCase.assertEquals(1.000, vt.x, 1.0e-3);
 		TestCase.assertEquals(0.000, vt.y, 1.0e-3);
 		
@@ -146,8 +161,17 @@ public class TransformTest {
 		TestCase.assertEquals(0.906, vt.x, 1.0e-3);
 		TestCase.assertEquals(0.422, vt.y, 1.0e-3);
 		
+		vt.zero();
+		t.getTransformedR(v, vt);
+		TestCase.assertEquals(0.906, vt.x, 1.0e-3);
+		TestCase.assertEquals(0.422, vt.y, 1.0e-3);
+		
 		// test inverse rotation transformation
 		vt = t.getInverseTransformedR(v);
+		vt = t.getTransformedR(vt);
+		TestCase.assertTrue(vt.equals(v));
+		
+		t.getInverseTransformedR(v, vt);
 		vt = t.getTransformedR(vt);
 		TestCase.assertTrue(vt.equals(v));
 	}
@@ -163,6 +187,16 @@ public class TransformTest {
 		t.rotate(Math.toRadians(25), 1.0, -1.0);
 		
 		Vector2 v = new Vector2(1.0, 0.0);
+
+		Vector2 v2 = v.copy();
+		t.transformX(v2);
+		TestCase.assertEquals(1.967, v2.x, 1.0e-3);
+		TestCase.assertEquals(0.0, v2.y, 1.0e-3);
+		
+		v2 = v.copy();
+		t.transformY(v2);
+		TestCase.assertEquals(1.0, v2.x, 1.0e-3);
+		TestCase.assertEquals(1.657, v2.y, 1.0e-3);
 		
 		// test transformation
 		t.transform(v);
@@ -231,6 +265,11 @@ public class TransformTest {
 		TestCase.assertEquals(2.0, tx.x);
 		TestCase.assertEquals(3.0, tx.y);
 		TestCase.assertEquals(Math.toRadians(45.000), tx.getRotationAngle(), 1.0e-3);
+		
+		tx.setTranslation(new Vector2(5, -7));
+		TestCase.assertEquals(5.0, tx.x);
+		TestCase.assertEquals(-7.0, tx.y);
+		TestCase.assertEquals(Math.toRadians(45.000), tx.getRotationAngle(), 1.0e-3);
 	}
 	
 	/**
@@ -244,6 +283,11 @@ public class TransformTest {
 		
 		tx.setRotation(Math.toRadians(30.0));
 		TestCase.assertEquals(30.000, Math.toDegrees(tx.getRotationAngle()), 1.0e-3);
+		TestCase.assertEquals(1.0, tx.x);
+		TestCase.assertEquals(0.0, tx.y);
+		
+		tx.setRotation(Rotation.rotation135());
+		TestCase.assertEquals(135.000, Math.toDegrees(tx.getRotationAngle()), 1.0e-3);
 		TestCase.assertEquals(1.0, tx.x);
 		TestCase.assertEquals(0.0, tx.y);
 	}
@@ -304,6 +348,13 @@ public class TransformTest {
 		
 		l = start.lerped(end, alpha);
 		TestCase.assertEquals(-0.034, l.getRotationAngle(), 1.0e-3);
+		
+		start.identity();
+		start.translate(1.0, 0.0);
+		start.lerp(new Vector2(1.0, 0.0), Math.toRadians(90), 0.5);
+		TestCase.assertEquals(Math.toRadians(45), start.getRotationAngle(), 1.0e-3);
+		TestCase.assertEquals(1.5, start.getTranslationX(), 1.0e-3);
+		TestCase.assertEquals(0.0, start.getTranslationY(), 1.0e-3);
 	}
 	
 	/**
@@ -323,5 +374,25 @@ public class TransformTest {
 		TestCase.assertEquals(1.0, values[4]);
 		TestCase.assertEquals(-1.0, values[5]);
 	}
-	
+
+	/**
+	 * Tests the getTranslation|RotationTransform method.
+	 * @since 4.2.2
+	 */
+	@Test
+	public void getTranslationRotationTransform() {
+		Transform t = new Transform();
+		t.rotate(Math.toRadians(30));
+		t.translate(2.0, -1.0);
+		
+		Transform t2 = t.getTranslationTransform();
+		TestCase.assertEquals( 2.0, t2.x);
+		TestCase.assertEquals(-1.0, t2.y);
+		TestCase.assertEquals(0.0, t2.getRotationAngle(), 1.0e-3);
+		
+		t2 = t.getRotationTransform();
+		TestCase.assertEquals( 0.0, t2.x);
+		TestCase.assertEquals( 0.0, t2.y);
+		TestCase.assertEquals( Math.toRadians(30), t2.getRotationAngle(), 1.0e-3);
+	}
 }

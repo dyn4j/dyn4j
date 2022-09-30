@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Rectangle} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 4.2.2
  * @since 1.0.0
  */
 public class RectangleTest {
@@ -72,6 +72,9 @@ public class RectangleTest {
 		
 		TestCase.assertEquals(-1.000, r.vertices[3].x, 1.0e-3);
 		TestCase.assertEquals( 1.000, r.vertices[3].y, 1.0e-3);
+		
+		// make sure tostring doesn't blow up
+		TestCase.assertNotNull(r.toString());
 	}
 	
 	/**
@@ -173,6 +176,9 @@ public class RectangleTest {
 		r.rotate(Math.toRadians(30));
 		
 		TestCase.assertEquals(30, Math.toDegrees(r.getRotationAngle()), 1.0e-3);
+		
+		Rotation rt = r.getRotation();
+		TestCase.assertEquals(30, rt.toDegrees(), 1.0e-3);
 	}
 
 	/**
@@ -185,10 +191,19 @@ public class RectangleTest {
 		// the mass of a rectangle should be h * w * d
 		TestCase.assertEquals(1.500, m.getMass(), 1.0e-3);
 		TestCase.assertEquals(0.250, m.getInertia(), 1.0e-3);
+		
+		m = r.createMass(0);
+		TestCase.assertEquals(0.000, m.getMass(), 1e-3);
+		TestCase.assertEquals(0.000, m.getInertia(), 1e-3);
+		TestCase.assertEquals(0.000, m.getInverseMass(), 1e-3);
+		TestCase.assertEquals(0.000, m.getInverseInertia(), 1e-3);
+		TestCase.assertEquals(0.000, m.getCenter().x, 1e-3);
+		TestCase.assertEquals(0.000, m.getCenter().y, 1e-3);
+		TestCase.assertEquals(MassType.INFINITE, m.getType());
 	}
 
 	/**
-	 * Test case for the rectangle createMass method.
+	 * Test case for the rectangle getArea method.
 	 */
 	@Test
 	public void getArea() {
@@ -197,5 +212,25 @@ public class RectangleTest {
 		
 		r = new Rectangle(2.5, 3.0);
 		TestCase.assertEquals(7.5, r.getArea(), 1.0e-3);
+	}
+
+	/**
+	 * Test case for the rectangle computeAABB method.
+	 */
+	@Test
+	public void computeAABB() {
+		Rectangle r = new Rectangle(1.0, 1.0);
+		AABB aabb = r.createAABB();
+		TestCase.assertEquals(0.5, aabb.maxX, 1e-8);
+		TestCase.assertEquals(0.5, aabb.maxY, 1e-8);
+		TestCase.assertEquals(-0.5, aabb.minX, 1e-8);
+		TestCase.assertEquals(-0.5, aabb.minY, 1e-8);
+		
+		r.rotate(Math.toRadians(45.0));
+		aabb = r.createAABB();
+		TestCase.assertEquals(0.707, aabb.maxX, 1e-3);
+		TestCase.assertEquals(0.707, aabb.maxY, 1e-3);
+		TestCase.assertEquals(-0.707, aabb.minX, 1e-3);
+		TestCase.assertEquals(-0.707, aabb.minY, 1e-3);
 	}
 }

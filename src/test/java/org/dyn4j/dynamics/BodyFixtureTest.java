@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -39,7 +39,7 @@ import junit.framework.TestCase;
  * <p>
  * Was FixtureTest.
  * @author William Bittle
- * @version 3.1.1
+ * @version 4.2.2
  * @since 3.1.1
  */
 public class BodyFixtureTest {
@@ -99,7 +99,7 @@ public class BodyFixtureTest {
 	/**
 	 * Tests setting the density to a zero value.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setZeroDensity() {
 		fixture.setDensity(0.0);
 	}
@@ -178,6 +178,13 @@ public class BodyFixtureTest {
 		TestCase.assertEquals(MassType.NORMAL, mass.getType());
 		TestCase.assertTrue(mass.getInertia() > 0);
 		TestCase.assertTrue(mass.getMass() > 0);
+		
+		fixture.setDensity(0);
+		mass = fixture.createMass();
+		TestCase.assertNotNull(mass);
+		TestCase.assertEquals(MassType.INFINITE, mass.getType());
+		TestCase.assertEquals(0.0, mass.getInertia());
+		TestCase.assertEquals(0.0, mass.getMass());
 	}
 	
 	/**

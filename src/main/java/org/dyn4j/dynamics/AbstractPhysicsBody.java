@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -47,7 +47,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Abstract implementation of the {@link PhysicsBody} interface.
  * @author William Bittle
- * @version 4.1.0
+ * @version 4.2.2
  * @since 4.0.0
  */
 public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixture> implements PhysicsBody, CollisionBody<BodyFixture>, Transformable, DataContainer, Ownable {
@@ -240,8 +240,12 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 			List<Mass> masses = new ArrayList<Mass>(size);
 			// create a mass object for each shape
 			for (int i = 0; i < size; i++) {
-				Mass mass = this.fixtures.get(i).createMass();
-				masses.add(mass);
+				// only include fixtures with density greater than zero
+				BodyFixture fixture = this.fixtures.get(i);
+				if (fixture.density > 0) {
+					Mass mass = fixture.createMass();
+					masses.add(mass);
+				}
 			}
 			this.mass = Mass.create(masses);
 		}

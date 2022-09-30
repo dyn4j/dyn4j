@@ -42,7 +42,7 @@ import org.dyn4j.resources.Messages;
  * This class also contains various helper methods for cleaning vector arrays and lists and performing
  * various operations on {@link Shape}s.
  * @author William Bittle
- * @version 4.2.1
+ * @version 4.2.2
  * @since 1.0.0
  */
 public final class Geometry {
@@ -1431,6 +1431,14 @@ public final class Geometry {
 	 * This method accepts any {@link Convex} {@link Wound} shape which basically means
 	 * {@link Polygon}s or {@link Segment}s.
 	 * <p>
+	 * This method will compute the minkowski sum based on the current position of the input
+	 * convex. This means that the polygon may not be positioned at a location that's expected.
+	 * There are two ways to solve this. The preferred approach is that both input {@link Convex}
+	 * are centered at the origin. This ensures the result will be positioned at the origin AND
+	 * helps with the numeric accuracy of the computation. The alternative is to leave the input
+	 * {@link Convex} as is and translate the resulting {@link Polygon} by the negative of it's
+	 * current position.
+	 * <p>
 	 * This method throws an IllegalArgumentException if two {@link Segment}s are supplied
 	 * that are colinear (in this case the resulting Minkowski Sum would be another segment
 	 * rather than a polygon).
@@ -1499,7 +1507,7 @@ public final class Geometry {
 		int n2 = c2 + j;
 		// the maximum number of vertices for the output shape is m + n
 		List<Vector2> sum = new ArrayList<Vector2>(c1 + c2);
-		for (; i <= n1 && j <= n2;) {
+		for (; i < n1 || j < n2;) {
 			// get the current edges
 			Vector2 v1s = p1v[i % c1];
 			Vector2 v1e = p1v[(i + 1) % c1];
@@ -1515,24 +1523,25 @@ public final class Geometry {
 			// on subsequent interations we can assume this is a correct
 			// one since the angle condition was used to increment the
 			// vertex index
-			sum.add(v1s.sum(v2s));
+			Vector2 v = v1s.sum(v2s);
+			sum.add(v);
 			
 			// compute the edge vectors
 			Vector2 e1 = v1s.to(v1e);
 			Vector2 e2 = v2s.to(v2e);
 			
-			// get the angles between the x-axis; in the range [-pi, pi]
-			double a1 = Vector2.X_AXIS.getAngleBetween(e1);
-			double a2 = Vector2.X_AXIS.getAngleBetween(e2);
+			// compare the polar angles between the edges
+			double a3 = e1.cross(e2);
 			
-			// put the angles in the range [0, 2pi]
-			if (a1 < 0) a1 += Geometry.TWO_PI;
-			if (a2 < 0) a2 += Geometry.TWO_PI;
+			// check for near parallel edges
+			if (Math.abs(a3) <= Epsilon.E) {
+				a3 = 0.0;
+			}
 			
 			// determine which vertex to use next
-			if (a1 < a2) {
+			if (a3 > 0) {
 				i++;
-			} else if (a1 > a2) {
+			} else if (a3 < 0) {
 				j++;
 			} else {
 				i++;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -37,7 +37,7 @@ import org.dyn4j.resources.Messages;
  * {@link BodyFixture} extends the {@link Fixture} class, adding physical features
  * like density and friction.
  * @author William Bittle
- * @version 4.2.0
+ * @version 4.2.2
  * @since 2.0.0
  * @see Fixture
  */
@@ -112,7 +112,7 @@ public class BodyFixture extends Fixture implements DataContainer {
 	 * @throws IllegalArgumentException if density is less than or equal to zero
 	 */
 	public void setDensity(double density) {
-		if (density <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidDensity"));
+		if (density < 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidDensity"));
 		this.density = density;
 	}
 	

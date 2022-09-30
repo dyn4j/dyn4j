@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,8 @@
  */
 package org.dyn4j.dynamics;
 
+import java.util.Arrays;
+
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
@@ -38,7 +40,7 @@ import junit.framework.TestCase;
 /**
  * Class to test the {@link AbstractPhysicsBody} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.2
  * @since 4.0.0
  */
 public class AbstractPhysicsBodyTest {
@@ -1095,9 +1097,22 @@ public class AbstractPhysicsBodyTest {
 		TestCase.assertFalse(m1.equals(b.mass));
 		TestCase.assertFalse(m2.equals(b.mass));
 
+		// test setting with multiple fixtures where one is zero density
+		// it should not be infinite and should not be
+		// equal to either shapes mass
+		BodyFixture f3 = b.addFixture(Geometry.createCircle(0.5));
+		f3.setDensity(0);
+		b.setMass(MassType.NORMAL);
+		TestCase.assertNotNull(b.mass);
+		TestCase.assertFalse(b.mass.isInfinite());
+		m1 = f1.createMass();
+		m2 = f2.createMass();
+		TestCase.assertFalse(m1.equals(b.mass));
+		TestCase.assertFalse(m2.equals(b.mass));
+		TestCase.assertEquals(Mass.create(Arrays.asList(m1, m2)), b.mass);
+		
 		// test setting the mass with a flag
-		// make sure the type of mass is correct but the
-		// values of the mass and 
+		// make sure the type of mass is correct
 		b.setMass(MassType.INFINITE);
 		TestCase.assertNotNull(b.mass);
 		TestCase.assertTrue(b.mass.isInfinite());
@@ -1137,7 +1152,7 @@ public class AbstractPhysicsBodyTest {
 		TestCase.assertEquals(1.094, b.mass.getMass(), 1e-3);
 		TestCase.assertEquals(0.105, b.mass.getInertia(), 1e-3);
 	}
-	
+
 	/**
 	 * Tests setting the mass type.
 	 * @since 2.2.3
