@@ -6,7 +6,7 @@
 ![Java](https://img.shields.io/badge/java-%3E%3D%206-orange)
 ![Maven Central](https://img.shields.io/maven-central/v/org.dyn4j/dyn4j)
 [![javadoc](https://javadoc.io/badge2/org.dyn4j/dyn4j/javadoc.svg?kill_cache=1)](https://javadoc.io/doc/org.dyn4j/dyn4j)
-![Code Coverage](https://img.shields.io/badge/coverage-93.9%25-brightgreen)
+![Code Coverage](https://img.shields.io/badge/coverage-96.7%25-brightgreen)
 
 ## Java Collision Detection and Physics Engine
 
@@ -32,7 +32,7 @@ Add dyn4j to your classpath by adding a Maven dependency from
 <dependency>
     <groupId>org.dyn4j</groupId>
     <artifactId>dyn4j</artifactId>
-    <version>4.2.1</version>
+    <version>4.2.2</version>
 </dependency>
 ```
 

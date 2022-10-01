@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Polygon} class.
  * @author William Bittle
- * @version 4.2.1
+ * @version 4.2.2
  * @since 1.0.0
  */
 public class PolygonTest {
@@ -524,6 +524,15 @@ public class PolygonTest {
 		// the polygon mass should be the area * d
 		TestCase.assertEquals(0.594, m.getMass(), 1.0e-3);
 		TestCase.assertEquals(0.057, m.getInertia(), 1.0e-3);
+		
+		m = p.createMass(0);
+		TestCase.assertEquals(0.000, m.getMass(), 1e-3);
+		TestCase.assertEquals(0.000, m.getInertia(), 1e-3);
+		TestCase.assertEquals(0.000, m.getInverseMass(), 1e-3);
+		TestCase.assertEquals(0.000, m.getInverseInertia(), 1e-3);
+		TestCase.assertEquals(0.000, m.getCenter().x, 1e-3);
+		TestCase.assertEquals(0.000, m.getCenter().y, 1e-3);
+		TestCase.assertEquals(MassType.INFINITE, m.getType());
 	}
 
 	/**

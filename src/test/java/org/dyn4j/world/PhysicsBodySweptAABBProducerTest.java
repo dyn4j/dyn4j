@@ -144,7 +144,6 @@ public class PhysicsBodySweptAABBProducerTest {
 		PhysicsBodySweptAABBProducer<Body> aabbProducer = new PhysicsBodySweptAABBProducer<Body>();
 		
 		Body b1 = new Body();
-		b1.setMass(MassType.NORMAL);
 		
 		AABB aabb = aabbProducer.compute(b1);
 		

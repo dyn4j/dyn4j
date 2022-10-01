@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,10 +31,46 @@ import org.junit.Test;
 /**
  * Test cases for the {@link Matrix22} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 4.2.2
  * @since 1.0.0
  */
 public class Matrix22Test {
+	/**
+	 * Test the creation method passing a null matrix.
+	 * @since 4.2.2
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createNullMatrix() {
+		new Matrix22((Matrix22)null);
+	}
+	
+	/**
+	 * Test the creation method passing a null array.
+	 * @since 4.2.2
+	 */
+	@Test(expected = NullPointerException.class)
+	public void createNullArray() {
+		new Matrix22((double[])null);
+	}
+	
+	/**
+	 * Test the creation method passing a incorrectly sized array.
+	 * @since 4.2.2
+	 */
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void createLessThanFourElements() {
+		new Matrix22(new double[] { 0.0, 1.0, 5.0 });
+	}
+
+	/**
+	 * Test the creation method passing a incorrectly sized array.
+	 * @since 4.2.2
+	 */
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void createMoreThanFourElements() {
+		new Matrix22(new double[] { 0.0, 1.0, 5.0, 4.0, 2.0 });
+	}
+	
 	/**
 	 * Test the creation method passing four doubles.
 	 */
@@ -46,6 +82,7 @@ public class Matrix22Test {
 		TestCase.assertEquals(2.0, m.m01);
 		TestCase.assertEquals(-3.0, m.m10);
 		TestCase.assertEquals(8.0, m.m11);
+		TestCase.assertNotNull(m.toString());
 	}
 	
 	/**
@@ -333,7 +370,20 @@ public class Matrix22Test {
 	public void invert() {
 		Matrix22 m1 = new Matrix22(1.0, 2.0, 
                                3.0, 4.0);
+		
 		m1.invert();
+		TestCase.assertEquals(-2.0, m1.m00);
+		TestCase.assertEquals(1.0, m1.m01);
+		TestCase.assertEquals(1.5, m1.m10);
+		TestCase.assertEquals(-0.5, m1.m11);
+		
+		Matrix22 m2 = new Matrix22();
+		m1.invert(m2);
+		TestCase.assertEquals(1.0, m2.m00);
+		TestCase.assertEquals(2.0, m2.m01);
+		TestCase.assertEquals(3.0, m2.m10);
+		TestCase.assertEquals(4.0, m2.m11);
+		
 		TestCase.assertEquals(-2.0, m1.m00);
 		TestCase.assertEquals(1.0, m1.m01);
 		TestCase.assertEquals(1.5, m1.m10);
@@ -367,5 +417,49 @@ public class Matrix22Test {
 		Vector2 x = A.solve(b);
 		TestCase.assertEquals(-1.0, x.x);
 		TestCase.assertEquals(-5.0, x.y);
+	}
+
+	/**
+	 * Tests the norm methods.
+	 * @since 4.2.2
+	 */
+	@Test
+	public void norm() {
+		Matrix22 A = new Matrix22(3.0, -1.0, 
+                			 -1.0, -1.0);
+		
+		double n1 = A.norm1();
+		TestCase.assertEquals(4.0, n1);
+		
+		double nf = A.normFrobenius();
+		TestCase.assertEquals(3.464, nf, 1e-3);
+		
+		double ni = A.normInfinity();
+		TestCase.assertEquals(4.0, ni);
+		
+		double nm = A.normMax();
+		TestCase.assertEquals(3.0, nm);
+	}
+
+	/**
+	 * Tests the equals methods.
+	 * @since 4.2.2
+	 */
+	@Test
+	public void equals() {
+		Matrix22 A = new Matrix22(3.0, -1.0, -1.0, -1.0);
+		Matrix22 B = new Matrix22(3, -1, -1, -1);
+		Matrix22 C = new Matrix22(4, 2, 5, 0);
+		
+		TestCase.assertEquals(A, B);
+		TestCase.assertEquals(A.hashCode(), B.hashCode());
+		TestCase.assertEquals(A, A);
+		TestCase.assertEquals(A.hashCode(), A.hashCode());
+		TestCase.assertFalse(A.equals(null));
+		TestCase.assertFalse(A.equals((Object)null));
+		TestCase.assertFalse(A.equals(C));
+		TestCase.assertFalse(A.hashCode() == C.hashCode());
+		TestCase.assertFalse(A.equals((Object)C));
+		TestCase.assertTrue(A.equals((Object)B));
 	}
 }

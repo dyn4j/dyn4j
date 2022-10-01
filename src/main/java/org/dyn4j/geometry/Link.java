@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -39,7 +39,7 @@ import org.dyn4j.DataContainer;
  * <p>
  * For ease of use, it's recommended to use the Geometry class to create chains of {@link Link}s.
  * @author William Bittle
- * @version 3.2.2
+ * @version 4.2.2
  * @since 3.2.2
  */
 public class Link extends Segment implements Convex, Wound, Shape, Transformable, DataContainer {
@@ -176,10 +176,12 @@ public class Link extends Segment implements Convex, Wound, Shape, Transformable
 		// the change in this link's vertices
 		if (this.next != null) {
 			this.next.vertices[0].set(this.vertices[1]);
+			updateNormals(this.next);
 			updateLength(this.next);
 		}
 		if (this.previous != null) {
 			this.previous.vertices[1].set(this.vertices[0]);
+			updateNormals(this.previous);
 			updateLength(this.previous);
 		}
 	}

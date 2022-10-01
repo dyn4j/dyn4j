@@ -1,3 +1,21 @@
+## v4.2.2 - October 1st, 2022
+
+[Milestone](https://github.com/dyn4j/dyn4j/milestone/14?closed=1) |
+[Tag](https://github.com/dyn4j/dyn4j/tree/4.2.2) |
+[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/4.2.2/bundle) |
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=4.2.2)
+
+Added the ability to set zero density on fixtures. Updated/added more JUnit tests and in doing so found and fixed a few bugs.
+
+**New Features:**
+- [#229](https://github.com/dyn4j/dyn4j/issues/229) Allow zero density `BodyFixture`s to allow fixtures to participate in collision detection/resolution, but not contribute to the mass or inertia of the body.
+
+**Bug Fixes**
+- [#230](https://github.com/dyn4j/dyn4j/issues/230) Fixed a bug in the `Geometry.minkowskiSum` method where it would compute the wrong sum or fail entirely.
+- [#231](https://github.com/dyn4j/dyn4j/issues/231) Fixed a bug in the `Link.translate` method where it wouldn't recompute the neighbor links normals.
+- [#235](https://github.com/dyn4j/dyn4j/issues/235) Fixed a bug in the `Mass.setType` method where it would allow a user to set the type to something inconsistent with the mass properties (mass and inertia). This could be a breaking change if code is relying on the `setType` method to always set the type (it's now ignored when given type is invalid).
+
+
 ## v4.2.1 - January 7th, 2022
 
 [Milestone](https://github.com/dyn4j/dyn4j/milestone/13?closed=1) |

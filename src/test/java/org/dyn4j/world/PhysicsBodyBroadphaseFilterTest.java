@@ -136,8 +136,8 @@ public class PhysicsBodyBroadphaseFilterTest {
 		BodyFixture f1 = b1.addFixture(Geometry.createCircle(0.5));
 		BodyFixture f2 = b2.addFixture(Geometry.createCircle(0.5));
 		
-		b1.setMassType(MassType.INFINITE);
-		b2.setMassType(MassType.NORMAL);
+		b1.setMass(MassType.INFINITE);
+		b2.setMass(MassType.NORMAL);
 		
 		world.addBody(b1);
 		world.addBody(b2);
@@ -176,8 +176,8 @@ public class PhysicsBodyBroadphaseFilterTest {
 		BodyFixture f1 = b1.addFixture(Geometry.createCircle(0.5));
 		BodyFixture f2 = b2.addFixture(Geometry.createCircle(0.5));
 		
-		b1.setMassType(MassType.NORMAL);
-		b2.setMassType(MassType.NORMAL);
+		b1.setMass(MassType.NORMAL);
+		b2.setMass(MassType.NORMAL);
 		
 		world.addBody(b1);
 		world.addBody(b2);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Vector3} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 4.2.2
  * @since 1.0.0
  */
 public class Vector3Test {
@@ -45,6 +45,7 @@ public class Vector3Test {
 		TestCase.assertEquals(0.0, v1.x);
 		TestCase.assertEquals(0.0, v1.y);
 		TestCase.assertEquals(0.0, v1.z);
+		TestCase.assertNotNull(v1.toString());
 		
 		Vector3 v2 = new Vector3(1.0, 2.0, 3.0);
 		TestCase.assertEquals(1.0, v2.x);
@@ -123,12 +124,23 @@ public class Vector3Test {
 		Vector3 v = new Vector3(1.0, 2.0, -1.0);
 		
 		TestCase.assertTrue(v.equals(v));
+		TestCase.assertEquals(v.hashCode(), v.hashCode());
 		TestCase.assertTrue(v.equals(v.copy()));
+		TestCase.assertEquals(v.hashCode(), v.copy().hashCode());
 		TestCase.assertTrue(v.equals(new Vector3(1.0, 2.0, -1.0)));
+		TestCase.assertEquals(v.hashCode(), new Vector3(1.0, 2.0, -1.0).hashCode());
 		TestCase.assertTrue(v.equals(1.0, 2.0, -1.0));
 		
 		TestCase.assertFalse(v.equals(v.copy().set(2.0, 1.0, -1.0)));
+		TestCase.assertFalse(v.hashCode() == new Vector3(2.0, 1.0, -1.0).hashCode());
 		TestCase.assertFalse(v.equals(2.0, 2.0, 3.0));
+		TestCase.assertFalse(v.hashCode() == new Vector3(2.0, 2.0, 3.0).hashCode());
+		
+		TestCase.assertFalse(v.equals(null));
+		TestCase.assertFalse(v.equals((Object)null));
+		TestCase.assertFalse(v.equals(new Object()));
+		TestCase.assertFalse(v.equals((Object)new Vector3(1, 1, 1)));
+		TestCase.assertTrue(v.equals((Object)new Vector3(1, 2, -1)));
 	}
 	
 	/**
@@ -153,6 +165,11 @@ public class Vector3Test {
 		
 		v.setMagnitude(3.0);
 		TestCase.assertEquals(-3.0, v.x, 1.0e-3);
+		TestCase.assertEquals( 0.0, v.y);
+		TestCase.assertEquals( 0.0, v.z);
+		
+		v.setMagnitude(0.0);
+		TestCase.assertEquals( 0.0, v.x, 1.0e-3);
 		TestCase.assertEquals( 0.0, v.y);
 		TestCase.assertEquals( 0.0, v.z);
 	}
@@ -192,6 +209,12 @@ public class Vector3Test {
 		TestCase.assertEquals( 0.666, v2.x, 1.0e-3);
 		TestCase.assertEquals( 0.333, v2.y, 1.0e-3);
 		TestCase.assertEquals(-0.666, v2.z, 1.0e-3);
+		
+		v.set(0.0,0.0,0.0);
+		v2 = v.getNormalized();
+		TestCase.assertEquals( 0.0, v2.x, 1.0e-3);
+		TestCase.assertEquals( 0.0, v2.y, 1.0e-3);
+		TestCase.assertEquals( 0.0, v2.z, 1.0e-3);
 	}
 	
 	/**
@@ -358,6 +381,7 @@ public class Vector3Test {
 		TestCase.assertTrue(v1.isOrthogonal(1.0, -1.0, 0.0));
 		TestCase.assertTrue(v1.isOrthogonal(-1.0, 1.0, 0.0));
 		TestCase.assertFalse(v1.isOrthogonal(1.0, 1.0, 0.0));
+		TestCase.assertTrue(v1.isOrthogonal(0.0, 0.0, 0.0));
 	}
 	
 	/**
@@ -421,6 +445,11 @@ public class Vector3Test {
 		TestCase.assertEquals( 0.333, r.x, 1.0e-3);
 		TestCase.assertEquals( 0.666, r.y, 1.0e-3);
 		TestCase.assertEquals( 0.666, r.z, 1.0e-3);
+		
+		r = v1.project(new Vector3());
+		TestCase.assertEquals( 0.0, r.x, 1.0e-3);
+		TestCase.assertEquals( 0.0, r.y, 1.0e-3);
+		TestCase.assertEquals( 0.0, r.z, 1.0e-3);
 	}
 	
 	/**

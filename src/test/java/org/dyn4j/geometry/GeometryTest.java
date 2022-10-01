@@ -36,7 +36,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link Geometry} class.
  * @author William Bittle
- * @version 4.2.1
+ * @version 4.2.2
  * @since 1.0.0
  */
 public class GeometryTest {
@@ -1767,6 +1767,11 @@ public class GeometryTest {
 		TestCase.assertEquals(25, p.vertices.length);
 		
 		// verify the generation of the polygon works
+		p = Geometry.minkowskiSum(Geometry.createCircle(0.2), Geometry.createUnitCirclePolygon(5, 0.5), 3);
+		// verify the new vertex count
+		TestCase.assertEquals(25, p.vertices.length);
+		
+		// verify the generation of the polygon works
 		p = Geometry.minkowskiSum(Geometry.createUnitCirclePolygon(5, 0.5), 0.2, 3);
 		// verify the new vertex count
 		TestCase.assertEquals(25, p.vertices.length);
@@ -1777,10 +1782,18 @@ public class GeometryTest {
 		
 		// verify the generation of the polygon works
 		p = Geometry.minkowskiSum(Geometry.createSegment(new Vector2(1.0, 0.0)), Geometry.createUnitCirclePolygon(5, 0.2));
-		TestCase.assertEquals(5, p.vertices.length);
+		TestCase.assertEquals(7, p.vertices.length);
 		
 		// verify the generation of the polygon works
 		p = Geometry.minkowskiSum(Geometry.createSegment(new Vector2(1.0, 0.0)), Geometry.createSegment(new Vector2(0.5, 0.5)));
+		TestCase.assertEquals(4, p.vertices.length);
+		
+		p = Geometry.minkowskiSum(Geometry.createSquare(1.0), Geometry.createSquare(0.5));
+		TestCase.assertEquals(4, p.vertices.length);
+		
+		Polygon s = Geometry.createSquare(1.0);
+		s.translate(1.0, 0.5);
+		p = Geometry.minkowskiSum(s, Geometry.createSquare(0.5));
 		TestCase.assertEquals(4, p.vertices.length);
 	}
 	
@@ -2706,5 +2719,76 @@ public class GeometryTest {
 		
 		TestCase.assertNotNull(result);
 		TestCase.assertSame(result, p2);
+	}
+
+	/**
+	 * Tests the getRotationRadius methods.
+	 * @since 4.2.2
+	 */
+	@Test
+	public void getRotationRadius() {
+		Polygon p1 = Geometry.createUnitCirclePolygon(5, 0.5);
+		
+		double r = Geometry.getRotationRadius(p1.vertices);
+		TestCase.assertEquals(0.500, r, 1e-3);
+		
+		r = Geometry.getRotationRadius(new Vector2(1.0, 0.0), new Vector2[] { new Vector2(-0.5, 0.0) });
+		TestCase.assertEquals(1.500, r, 1e-3);
+		
+		r = Geometry.getRotationRadius(new Vector2(-1.0, 0.0), p1.vertices);
+		TestCase.assertEquals(1.500, r, 1e-3);
+		
+		r = Geometry.getRotationRadius((Vector2[])null);
+		TestCase.assertEquals(0.000, r, 1e-3);
+		
+		r = Geometry.getRotationRadius(new Vector2[0]);
+		TestCase.assertEquals(0.000, r, 1e-3);
+		
+		r = Geometry.getRotationRadius(null, new Vector2[0]);
+		TestCase.assertEquals(0.000, r, 1e-3);
+		
+		r = Geometry.getRotationRadius(new Vector2(1.0, 0.0), new Vector2[] { new Vector2(), null, new Vector2() });
+		TestCase.assertEquals(1.000, r, 1e-3);
+	}
+	
+	/**
+	 * Tests the getCounterClockwiseEdgeNormals method.
+	 * @since 4.2.2
+	 */
+	@Test
+	public void getCounterClockwiseEdgeNormals() {
+		Polygon p1 = Geometry.createUnitCirclePolygon(4, 0.5);
+		
+		Vector2[] normals = Geometry.getCounterClockwiseEdgeNormals(p1.vertices);
+		
+		TestCase.assertEquals(0.707, normals[0].x, 1e-3);
+		TestCase.assertEquals(0.707, normals[0].y, 1e-3);
+		TestCase.assertEquals(-0.707, normals[1].x, 1e-3);
+		TestCase.assertEquals(0.707, normals[1].y, 1e-3);
+		TestCase.assertEquals(-0.707, normals[2].x, 1e-3);
+		TestCase.assertEquals(-0.707, normals[2].y, 1e-3);
+		TestCase.assertEquals(0.707, normals[3].x, 1e-3);
+		TestCase.assertEquals(-0.707, normals[3].y, 1e-3);
+		
+		normals = Geometry.getCounterClockwiseEdgeNormals((Vector2[])null);
+		TestCase.assertEquals(null, normals);
+		
+		normals = Geometry.getCounterClockwiseEdgeNormals(new Vector2[0]);
+		TestCase.assertEquals(null, normals);
+	}
+	
+	/**
+	 * Tests the getCounterClockwiseEdgeNormals method with a null element.
+	 * @since 4.2.2
+	 */
+	@Test(expected = NullPointerException.class)
+	public void getCounterClockwiseEdgeNormalsWithNullVertex() {
+		Geometry.getCounterClockwiseEdgeNormals(new Vector2[] {
+			new Vector2(1.0, 1.0),
+			new Vector2(2.0, 3.0),
+			new Vector2(),
+			null,
+			new Vector2(3.0, -1.0)
+		});
 	}
 }

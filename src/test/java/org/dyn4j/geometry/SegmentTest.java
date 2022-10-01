@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Segment} class.
  * @author William Bittle
- * @version 3.1.6
+ * @version 4.2.2
  * @since 1.0.0
  */
 public class SegmentTest {
@@ -727,6 +727,15 @@ public class SegmentTest {
 		TestCase.assertEquals(2.061, m.getMass(), 1.0e-3);
 		// the I of a segment should be 1 / 12 * l ^ 2 * m
 		TestCase.assertEquals(0.730, m.getInertia(), 1.0e-3);
+		
+		m = s.createMass(0);
+		TestCase.assertEquals(0.000, m.getMass(), 1e-3);
+		TestCase.assertEquals(0.000, m.getInertia(), 1e-3);
+		TestCase.assertEquals(0.000, m.getInverseMass(), 1e-3);
+		TestCase.assertEquals(0.000, m.getInverseInertia(), 1e-3);
+		TestCase.assertEquals(0.000, m.getCenter().x, 1e-3);
+		TestCase.assertEquals(0.250, m.getCenter().y, 1e-3);
+		TestCase.assertEquals(MassType.INFINITE, m.getType());
 	}
 
 	/**

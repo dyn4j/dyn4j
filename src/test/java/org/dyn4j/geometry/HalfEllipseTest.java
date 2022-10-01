@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link HalfEllipse} class.
  * @author William Bittle
- * @version 4.2.1
+ * @version 4.2.2
  * @since 3.1.5
  */
 public class HalfEllipseTest {
@@ -363,6 +363,15 @@ public class HalfEllipseTest {
 		TestCase.assertEquals(MassType.NORMAL, mass.getType());
 		TestCase.assertEquals(0.000, mass.getCenter().x, 1e-3);
 		TestCase.assertEquals(0.212, mass.getCenter().y, 1e-3);
+		
+		mass = he.createMass(0);
+		TestCase.assertEquals(0.000, mass.getMass(), 1e-3);
+		TestCase.assertEquals(0.000, mass.getInertia(), 1e-3);
+		TestCase.assertEquals(0.000, mass.getInverseMass(), 1e-3);
+		TestCase.assertEquals(0.000, mass.getInverseInertia(), 1e-3);
+		TestCase.assertEquals(0.000, mass.getCenter().x, 1e-3);
+		TestCase.assertEquals(0.212, mass.getCenter().y, 1e-3);
+		TestCase.assertEquals(MassType.INFINITE, mass.getType());
 	}
 
 	/**
