@@ -247,7 +247,13 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 					masses.add(mass);
 				}
 			}
-			this.mass = Mass.create(masses);
+			// the list of masses will be empty if all
+			// fixtures have zero density
+			if (masses.size() > 0) {
+				this.mass = Mass.create(masses);
+			} else {
+				this.mass = new Mass();
+			}
 		}
 		// set the type
 		this.mass.setType(type);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -44,7 +44,7 @@ import org.dyn4j.resources.Messages;
  * When the mass type is changed, the original mass and inertia values are not lost. This allows the
  * swapping of mass types without recomputing the mass.
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.2.2
  * @since 1.0.0
  * @see MassType
  */
@@ -292,11 +292,29 @@ public class Mass implements Copyable<Mass> {
 	
 	/**
 	 * Sets the mass type.
+	 * <p>
+	 * NOTE: This method will only set the MassType when it's valid to do so. The following logic describes this:
+	 * <ul>
+	 * <li>The given type is {@link MassType#NORMAL} and both the mass and inertia are non-zero</li>
+	 * <li>The given type is {@link MassType#FIXED_LINEAR_VELOCITY} and inertia is non-zero</li>
+	 * <li>The given type is {@link MassType#FIXED_ANGULAR_VELOCITY} and the mass is non-zero</li>
+	 * </ul>
+	 * Otherwise, the operation will be ignored and the current mass type left as is.
 	 * @param type the mass type
 	 * @throws NullPointerException if type is null
 	 */
 	public void setType(MassType type) {
 		if (type == null) throw new NullPointerException(Messages.getString("geometry.mass.nullMassType"));
+		
+		// don't allow incorrect mass type + mass/inertia combinations
+		if (type == MassType.NORMAL && (this.mass <= 0.0 || this.inertia <= 0.0)) {
+			return;
+		} else if (type == MassType.FIXED_LINEAR_VELOCITY && (this.inertia <= 0.0)) {
+			return;
+		} else if (type == MassType.FIXED_ANGULAR_VELOCITY && (this.mass <= 0.0)) {
+			return;
+		}
+		
 		this.type = type;
 	}
 	
@@ -318,6 +336,9 @@ public class Mass implements Copyable<Mass> {
 	
 	/**
 	 * Returns the mass.
+	 * <p>
+	 * NOTE: if this mass is type {@link MassType#INFINITE} or {@link MassType#FIXED_LINEAR_VELOCITY}
+	 * this method returns zero.
 	 * @return double
 	 */
 	public double getMass() {
@@ -330,6 +351,9 @@ public class Mass implements Copyable<Mass> {
 	
 	/**
 	 * Returns the inertia tensor.
+	 * <p>
+	 * NOTE: if this mass is type {@link MassType#INFINITE} or {@link MassType#FIXED_ANGULAR_VELOCITY}
+	 * this method returns zero.
 	 * @return double
 	 */
 	public double getInertia() {
@@ -342,6 +366,9 @@ public class Mass implements Copyable<Mass> {
 	
 	/**
 	 * Returns the inverse mass.
+	 * <p>
+	 * NOTE: if this mass is type {@link MassType#INFINITE} or {@link MassType#FIXED_LINEAR_VELOCITY}
+	 * this method returns zero.
 	 * @return double
 	 */
 	public double getInverseMass() {
@@ -354,6 +381,9 @@ public class Mass implements Copyable<Mass> {
 	
 	/**
 	 * Returns the inverse inertia tensor.
+	 * <p>
+	 * NOTE: if this mass is type {@link MassType#INFINITE} or {@link MassType#FIXED_ANGULAR_VELOCITY}
+	 * this method returns zero.
 	 * @return double
 	 */
 	public double getInverseInertia() {

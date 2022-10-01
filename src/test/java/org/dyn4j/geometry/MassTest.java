@@ -319,6 +319,52 @@ public class MassTest {
 		Mass m = new Mass();
 		m.setType(null);
 	}
+
+	/**
+	 * Tests setting the type of mass under special cases.
+	 * @since 4.2.2
+	 */
+	@Test
+	public void setTypeIgnored() {
+		Mass m = new Mass();
+		TestCase.assertEquals(MassType.INFINITE, m.getType());
+		
+		// you can't override the type of mass when it's already infinite
+		m.setType(MassType.NORMAL);
+		TestCase.assertEquals(MassType.INFINITE, m.getType());
+		m.setType(MassType.FIXED_ANGULAR_VELOCITY);
+		TestCase.assertEquals(MassType.INFINITE, m.getType());
+		m.setType(MassType.FIXED_LINEAR_VELOCITY);
+		TestCase.assertEquals(MassType.INFINITE, m.getType());
+		m.setType(MassType.INFINITE);
+		TestCase.assertEquals(MassType.INFINITE, m.getType());
+		
+		// you can't override the type of mass when it's fixed-linear-velocity
+		// except in the case of infinite
+		m = new Mass(new Vector2(), 0.0, 1.0);
+		TestCase.assertEquals(MassType.FIXED_LINEAR_VELOCITY, m.getType());
+		m.setType(MassType.NORMAL);
+		TestCase.assertEquals(MassType.FIXED_LINEAR_VELOCITY, m.getType());
+		m.setType(MassType.FIXED_ANGULAR_VELOCITY);
+		TestCase.assertEquals(MassType.FIXED_LINEAR_VELOCITY, m.getType());
+		m.setType(MassType.INFINITE);
+		TestCase.assertEquals(MassType.INFINITE, m.getType());
+		m.setType(MassType.FIXED_LINEAR_VELOCITY);
+		TestCase.assertEquals(MassType.FIXED_LINEAR_VELOCITY, m.getType());
+		
+		// you can't override the type of mass when it's fixed-angular-velocity
+		// except in the case of infinite
+		m = new Mass(new Vector2(), 1.0, 0.0);
+		TestCase.assertEquals(MassType.FIXED_ANGULAR_VELOCITY, m.getType());
+		m.setType(MassType.NORMAL);
+		TestCase.assertEquals(MassType.FIXED_ANGULAR_VELOCITY, m.getType());
+		m.setType(MassType.FIXED_LINEAR_VELOCITY);
+		TestCase.assertEquals(MassType.FIXED_ANGULAR_VELOCITY, m.getType());
+		m.setType(MassType.INFINITE);
+		TestCase.assertEquals(MassType.INFINITE, m.getType());
+		m.setType(MassType.FIXED_ANGULAR_VELOCITY);
+		TestCase.assertEquals(MassType.FIXED_ANGULAR_VELOCITY, m.getType());
+	}
 	
 	/**
 	 * Tests the inertia and COM calculations for polygon shapes.

@@ -1151,8 +1151,28 @@ public class AbstractPhysicsBodyTest {
 		TestCase.assertEquals(MassType.NORMAL, b.mass.getType());
 		TestCase.assertEquals(1.094, b.mass.getMass(), 1e-3);
 		TestCase.assertEquals(0.105, b.mass.getInertia(), 1e-3);
+		
+		// test all fixtures having zero density
+		b.removeAllFixtures();
+		b.addFixture(Geometry.createSquare(1.0), 0.0, 0.5, 0.0);
+		b.setMass(MassType.NORMAL);
+		TestCase.assertEquals(MassType.INFINITE, b.mass.getType());
+		TestCase.assertEquals(0.000, b.mass.getMass(), 1e-3);
+		TestCase.assertEquals(0.000, b.mass.getInertia(), 1e-3);
+		TestCase.assertEquals(0.000, b.mass.getCenter().x, 1e-3);
+		TestCase.assertEquals(0.000, b.mass.getCenter().y, 1e-3);
+		
+		// add more
+		b.addFixture(Geometry.createSquare(1.0), 0.0, 0.5, 0.0);
+		b.addFixture(Geometry.createSquare(1.0), 0.0, 0.5, 0.0);
+		b.setMass(MassType.NORMAL);
+		TestCase.assertEquals(MassType.INFINITE, b.mass.getType());
+		TestCase.assertEquals(0.000, b.mass.getMass(), 1e-3);
+		TestCase.assertEquals(0.000, b.mass.getInertia(), 1e-3);
+		TestCase.assertEquals(0.000, b.mass.getCenter().x, 1e-3);
+		TestCase.assertEquals(0.000, b.mass.getCenter().y, 1e-3);
 	}
-
+	
 	/**
 	 * Tests setting the mass type.
 	 * @since 2.2.3
