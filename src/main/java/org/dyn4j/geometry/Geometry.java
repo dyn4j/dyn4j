@@ -1432,7 +1432,7 @@ public final class Geometry {
 	 * {@link Polygon}s or {@link Segment}s.
 	 * <p>
 	 * This method will compute the minkowski sum based on the current position of the input
-	 * convex. This means that the polygon may not be positioned at a location that's expected.
+	 * convex. This means that the result polygon may not be positioned at a location that's expected.
 	 * There are two ways to solve this. The preferred approach is that both input {@link Convex}
 	 * are centered at the origin. This ensures the result will be positioned at the origin AND
 	 * helps with the numeric accuracy of the computation. The alternative is to leave the input
