@@ -3,7 +3,7 @@
 [Milestone](https://github.com/dyn4j/dyn4j/milestone/14?closed=1) |
 [Tag](https://github.com/dyn4j/dyn4j/tree/4.2.2) |
 [Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/4.2.2/bundle) |
-[GitHub Release](https://github.com/dyn4j/dyn4j/milestone/14)
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=4.2.2)
 
 Added the ability to set zero density on fixtures. Updated/added more JUnit tests and in doing so found and fixed a few bugs.
 
