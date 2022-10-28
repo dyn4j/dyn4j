@@ -68,7 +68,7 @@ for (int i = 0; i < 100; i++) {
     world.step(1);
 }
 ```
-Unlike this example, a GUI based application you would call the World.update(elapsedTime) method in it's render loop.  Either way, each time the world is advanced forward in time (which may or may not occur when using the World.update(elapsedTime) methods) the bodies added to it will be moved based on the world gravity (if any) and will interact with other bodies placed in the world.
+Unlike this example, a GUI based application you would call the World.update(elapsedTime) method in it's render loop.  Either way, each time the world is advanced forward in time (which may or may not occur when using the World.update(elapsedTime) methods) the bodies added to it will be moved based on the world gravity (if any) and will interact with other bodies placed in the world. After each step/update of the world each body's `transform` reflects the changes affected by the simulation.
 
 #### Next Steps
 From here you should take a look at the [dyn4j-samples](https://github.com/dyn4j/dyn4j-samples) sub project to get a jump start with a simple Java2D framework. You can also check out the [full getting started documentation](https://dyn4j.org/pages/getting-started).
