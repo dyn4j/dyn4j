@@ -68,7 +68,33 @@ for (int i = 0; i < 100; i++) {
     world.step(1);
 }
 ```
-Unlike this example, a GUI based application you would call the World.update(elapsedTime) method in it's render loop.  Either way, each time the world is advanced forward in time (which may or may not occur when using the World.update(elapsedTime) methods) the bodies added to it will be moved based on the world gravity (if any) and will interact with other bodies placed in the world. After each step/update of the world each body's `transform` reflects the changes affected by the simulation.
+Unlike this example, a GUI based application you would call the World.update(elapsedTime) method in it's render loop.  Either way, each time the world is advanced forward in time (which may or may not occur when using the World.update(elapsedTime) methods) the bodies added to it will be moved based on the world gravity (if any) and will interact with other bodies placed in the world. 
+
+#### Get output from the simulation
+After each step/update of the world each body's `transform` reflects the changes affected by the simulation.  For example:
+
+```java
+for (Body body : world.getBodies()) {
+    // get the updated body center
+    Vector2 xy = body.getWorldCenter();
+    
+    for (BodyFixture fixture : body.getFixtures()) {
+        Convex c = fixture.getShape();
+
+        // if your fixture shape has vertices
+        if (c instanceof Wound) {
+            Wound w = (Wound)c;
+            Vector2[] vertices = w.getVerticies();
+            for (int i = 0; i < vertices.length; i++) {
+                // get the update fixture vertices
+                xy = body.getWorldPoint(vertices[i]);
+                // or
+                // body.getTransform().getTransformed(vertices[i]);
+            }
+        }
+    }
+}
+```
 
 #### Next Steps
 From here you should take a look at the [dyn4j-samples](https://github.com/dyn4j/dyn4j-samples) sub project to get a jump start with a simple Java2D framework. You can also check out the [full getting started documentation](https://dyn4j.org/pages/getting-started).
