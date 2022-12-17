@@ -21,18 +21,18 @@
       http://www.mojohaus.org/versions-maven-plugin/
     -->
 
-    <dyn4j.maven-clean-plugin.version>3.1.0</dyn4j.maven-clean-plugin.version>
-    <dyn4j.maven-resources-plugin.version>3.0.0</dyn4j.maven-resources-plugin.version>
-    <dyn4j.maven-deploy-plugin.version>2.8.2</dyn4j.maven-deploy-plugin.version>
-    <dyn4j.maven-install-plugin.version>2.5.2</dyn4j.maven-install-plugin.version>
-    <dyn4j.maven-compiler-plugin.version>3.8.1</dyn4j.maven-compiler-plugin.version>
-    <dyn4j.maven-surefire-plugin.version>2.22.0</dyn4j.maven-surefire-plugin.version>
+    <dyn4j.maven-clean-plugin.version>3.2.0</dyn4j.maven-clean-plugin.version>
+    <dyn4j.maven-resources-plugin.version>3.3.0</dyn4j.maven-resources-plugin.version>
+    <dyn4j.maven-deploy-plugin.version>3.0.0</dyn4j.maven-deploy-plugin.version>
+    <dyn4j.maven-install-plugin.version>3.1.0</dyn4j.maven-install-plugin.version>
+    <dyn4j.maven-compiler-plugin.version>3.10.1</dyn4j.maven-compiler-plugin.version>
+    <dyn4j.maven-surefire-plugin.version>3.0.0-M7</dyn4j.maven-surefire-plugin.version>
     <dyn4j.maven-source-plugin.version>3.2.1</dyn4j.maven-source-plugin.version>
-    <dyn4j.maven-bundle-plugin.version>5.1.1</dyn4j.maven-bundle-plugin.version>
-    <dyn4j.maven-javadoc-plugin.version>3.2.0</dyn4j.maven-javadoc-plugin.version>
-    <dyn4j.nexus-staging-maven-plugin.version>1.6.8</dyn4j.nexus-staging-maven-plugin.version>
-    <dyn4j.maven-gpg-plugin.version>1.6</dyn4j.maven-gpg-plugin.version>
-    <dyn4j.maven-enforcer-plugin.version>3.0.0-M3</dyn4j.maven-enforcer-plugin.version>
+    <dyn4j.maven-bundle-plugin.version>5.1.8</dyn4j.maven-bundle-plugin.version>
+    <dyn4j.maven-javadoc-plugin.version>3.4.1</dyn4j.maven-javadoc-plugin.version>
+    <dyn4j.nexus-staging-maven-plugin.version>1.6.13</dyn4j.nexus-staging-maven-plugin.version>
+    <dyn4j.maven-gpg-plugin.version>3.0.1</dyn4j.maven-gpg-plugin.version>
+    <dyn4j.maven-enforcer-plugin.version>3.1.0</dyn4j.maven-enforcer-plugin.version>
   </properties>
 
   <organization>
