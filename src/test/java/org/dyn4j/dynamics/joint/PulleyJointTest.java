@@ -36,7 +36,7 @@ import junit.framework.TestCase;
  * @version 4.0.1
  * @since 2.1.0
  */
-public class PulleyJointTest extends AbstractJointTest {
+public class PulleyJointTest extends BaseJointTest {
 	/**
 	 * Tests the successful creation case.
 	 */

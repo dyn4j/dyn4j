@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,6 +26,7 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
+import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
@@ -51,31 +52,64 @@ import org.dyn4j.resources.Messages;
  * updated by calling {@link #setReferenceAngle(double)} method.  The bodies
  * are not required to be aligned in any particular way.
  * <p>
+ * The world space axis is fixed to the first body.  This means that when the
+ * first body rotates, the axis will rotate with it.  The axis represents the
+ * allowed linear motion between the bodies.
+ * <p>
  * The world space anchor point can be any point but is typically a point on
  * the axis of allowed motion, usually the world center of either of the joined
- * bodies.
+ * bodies.  The anchor point is used to track the separation of the bodies from
+ * the allowed axis of motion when drift occurs in the velocity solver.
  * <p>
- * The limits are linear limits along the axis.  The limits are checked against
- * the separation of the local anchor points, rather than the separation of the
- * bodies.  This can have the effect of offsetting the limit values.  The best
- * way to describe the effect is to examine the "0 to 0" limit case.  This case
- * specifies that the bodies should not move along the axis, forcing them to 
- * stay at their <em>initial location</em> along the axis.  So if the bodies 
- * were initially separated when they were joined, they will stay separated at
- * that initial distance.
+ * This joint also supports a linear spring, but is disabled by default. By 
+ * default the frequency and damping ratio are set to 8.0 and 0.0 respectively.  
+ * You can enable/disable the various spring-damper features using 
+ * {@link #setSpringEnabled(boolean)}, 
+ * {@link #setSpringDamperEnabled(boolean)}, 
+ * {@link #setMaximumSpringForceEnabled(boolean)} methods.  As with all spring
+ * -damper enabled joints, the spring must be enabled for the damper to be
+ * applied.  Also note that when the damper is disabled, the spring still 
+ * experiences "damping" aka energy loss - this is a side effect of the solver
+ * and intended behavior.  
+ * <p>
+ * This joint has an added spring feature called the rest offset.  Similar to
+ * the rest distance in the distance joint, but only applied when the spring
+ * is enabled.  When you build the joint, the default distance between the two
+ * bodies is their initial distance.  You can use the 
+ * {@link #setSpringRestOffset(double)} to raise or lower the distance between
+ * the bodies when the spring is active.
+ * <p>
+ * The joint also supports upper and lower limits. The limits represent the
+ * maximum displacement from the anchor point along the given axis.  This means
+ * that the limits are typically negative for the lower limit and positive for
+ * the upper limit.  The limits are solved relative to the given axis's
+ * direction.  The limits can be enabled separately using 
+ * {@link #setLowerLimitEnabled(boolean)} and
+ * {@link #setUpperLimitEnabled(boolean)}.  This also means that the limits
+ * are relative to the initial starting position of the bodies.
  * <p>
  * This joint also supports a motor.  The motor is a linear motor along the
  * axis.  The motor speed can be positive or negative to indicate motion along
  * or opposite the axis direction.  The maximum motor force must be greater 
- * than zero for the motor to apply any motion.
+ * than zero for the motor to apply any motion.  The motor must be enabled 
+ * using {@link #setMotorEnabled(boolean)}.
+ * <p>
+ * NOTE: The spring-damper and motor can be enabled at the same time, but
+ * since they operate on the same degree of freedom, the feature that has the
+ * highest maximum force will win.  It's recommended to only use one or the
+ * other.
+ * <p>
+ * NOTE: In versions of dyn4j before 5.0.0, the body arguments in the 
+ * constructor were reversed. It was changed to accept the frame first, then 
+ * the wheel to make things more natural.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 1.0.0
- * @see <a href="http://www.dyn4j.org/documentation/joints/#Prismatic_Joint" target="_blank">Documentation</a>
- * @see <a href="http://www.dyn4j.org/2011/03/prismatic-constraint/" target="_blank">Prismatic Constraint</a>
+ * @see <a href="https://www.dyn4j.org/pages/joints#Prismatic_Joint" target="_blank">Documentation</a>
+ * @see <a href="https://www.dyn4j.org/2011/03/prismatic-constraint/" target="_blank">Prismatic Constraint</a>
  * @param <T> the {@link PhysicsBody} type
  */
-public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
+public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T> implements LinearLimitsJoint, LinearMotorJoint, LinearSpringJoint, PairedBodyJoint<T>, Joint<T>, Shiftable, DataContainer, Ownable {
 	/** The local anchor point on the first {@link PhysicsBody} */
 	protected final Vector2 localAnchor1;
 	
@@ -83,23 +117,26 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 	protected final Vector2 localAnchor2;
 	
 	/** The axis representing the allowed line of motion */
-	private final Vector2 xAxis;
+	protected final Vector2 xAxis;
 	
 	/** The perpendicular axis of the line of motion */
-	private final Vector2 yAxis;
+	protected final Vector2 yAxis;
 
 	/** The initial angle between the two {@link PhysicsBody}s */
 	protected double referenceAngle;
 
 	// limits
 	
-	/** Whether the limit is enabled or not */
-	protected boolean limitEnabled;
+	/** True if the upper limit is enabled */
+	protected boolean upperLimitEnabled;
 	
-	/** The upper limit in meters */
+	/** True if the lower limit is enabled */
+	protected boolean lowerLimitEnabled;
+	
+	/** the upper limit in meters */
 	protected double upperLimit;
 	
-	/** The lower limit in meters */
+	/** the lower limit in meters */
 	protected double lowerLimit;
 	
 	// motor
@@ -110,35 +147,77 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 	/** The target velocity in meters / second */
 	protected double motorSpeed;
 	
+	/** True if the motor force should be limited */
+	protected boolean maximumMotorForceEnabled;
+	
 	/** The maximum force the motor can apply in newtons */
 	protected double maximumMotorForce;
 
+	// spring damper
+	
+	/** True if the spring is enabled */
+	protected boolean springEnabled;
+	
+	/** True if the spring-damper is enabled */
+	protected boolean springDamperEnabled;
+	
+	/** The spring mode (frequency or stiffness) */
+	protected int springMode;
+	
+	/** The oscillation frequency in hz */
+	protected double springFrequency;
+
+	/** The stiffness of the spring */
+	protected double springStiffness;
+	
+	/** The damping ratio */
+	protected double springDampingRatio;
+	
+	/** True if the spring maximum force is enabled */
+	protected boolean springMaximumForceEnabled;
+	
+	/** The maximum force the spring will apply */
+	protected double springMaximumForce;
+
+	/** The rest offset of the spring */
+	protected double springRestOffset;
+	
 	// current state
+
+	/** The damping coefficient */
+	private double damping;
+	
+	/** The bias for adding work to the constraint (simulating a spring) */
+	private double bias;
+	
+	/** The damping portion of the constraint */
+	private double gamma;
 	
 	/** The constraint mass; K = J * Minv * Jtrans */
 	private final Matrix22 K;
 	
 	/** The mass of the motor */
 	private double axialMass;
+
+	/** The spring/damper constraint mass */
+	private double springMass;
 	
-	// pre-computed values for J, recalculated each time step
-	
-	/** The world space yAxis  */
+	/** The world space yAxis from body1's transform */
 	private Vector2 perp;
 	
-	/** The world space xAxis */
+	/** The world space xAxis from body1's transform */
 	private Vector2 axis;
 	
-	/** s1 = (r1 + d).cross(perp) */
+	/** s1y = (r1 + d).cross(yaxis) */
 	private double s1;
-	
-	/** s2 = r2.cross(perp) */
+
+	/** s2y = r2.cross(yaxis) */
 	private double s2;
 	
-	/** a1 = (r1 + d).cross(axis) */
+	/** s1x = (r1 + d).cross(xaxis) */
 	private double a1;
 
-	/** a2 = r2.cross(axis) */
+	/** s2x = r2.cross(xaxis) */
 	private double a2;
 
 	/** The current translation */
@@ -148,15 +227,18 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 	
 	/** The accumulated impulse for warm starting */
 	private Vector2 impulse;
+
+	/** The impulse applied by the spring/damper */
+	private double springImpulse;
 	
 	/** The impulse applied by the motor */
 	private double motorImpulse;
 	
 	/** The impulse applied by the lower limit */
-	private double lowerImpulse;
+	private double lowerLimitImpulse;
 	
 	/** The impulse applied by the upper limit */
-	private double upperImpulse;
+	private double upperLimitImpulse;
 	
 	/**
 	 * Minimal constructor.
@@ -168,9 +250,7 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 	 * @throws IllegalArgumentException if body1 == body2
 	 */
 	public PrismaticJoint(T body1, T body2, Vector2 anchor, Vector2 axis) {
-		super(body1, body2, false);
-		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
+		super(body1, body2);
 		// check for a null anchor
 		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor"));
 		// check for a null axis
@@ -180,41 +260,55 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 		this.localAnchor1 = body1.getLocalPoint(anchor);
 		this.localAnchor2 = body2.getLocalPoint(anchor);
 		
+		// make sure the axis is normalized
+		Vector2 n = axis.getNormalized();
+		// get the axis in local coordinates
+		this.xAxis = body1.getLocalVector(n);
+		// get the perpendicular axis
+		this.yAxis = this.xAxis.getRightHandOrthogonalVector();
+		// get the initial rotation
+		this.referenceAngle = body2.getTransform().getRotationAngle() - body1.getTransform().getRotationAngle();
+		
+		// initialize
+		this.K = new Matrix22();
+
 		// limits
-		this.limitEnabled = false;
+		this.upperLimitEnabled = false;
+		this.lowerLimitEnabled = false;
 		this.lowerLimit = 0.0;
 		this.upperLimit = 0.0;
 		
 		// motor
 		this.motorEnabled = false;
 		this.motorSpeed = 0.0;
+		this.maximumMotorForceEnabled = false;
 		this.maximumMotorForce = 1000.0;
-		
-		// make sure the axis is normalized
-		Vector2 n = axis.getNormalized();
-		// get the axis in local coordinates
-		this.xAxis = body2.getLocalVector(n);
-		// get the perpendicular axis
-		this.yAxis = this.xAxis.getRightHandOrthogonalVector();
-		// get the initial rotation
-		this.referenceAngle = body1.getTransform().getRotationAngle() - body2.getTransform().getRotationAngle();
-		
-		// initialize
-		this.K = new Matrix22();
+
+		// spring
+		this.springMode = SPRING_MODE_FREQUENCY;
+		this.springEnabled = false;
+		this.springDamperEnabled = false;
+		this.springMaximumForce = 1000.0;
+		this.springMaximumForceEnabled = false;
+		this.springStiffness = 0.0;
+		this.springFrequency = 8.0;
+		this.springDampingRatio = 0.3;
 		
 		this.axialMass = 0.0;
+		
 		this.perp = null;
 		this.axis = null;
-		this.s1 = 0.0;
-		this.s2 = 0.0;
 		this.a1 = 0.0;
 		this.a2 = 0.0;
+		this.s2 = 0.0;
+		this.s1 = 0.0;
+		
 		this.translation = 0.0;
 		
 		this.impulse = new Vector2();
 		this.motorImpulse = 0.0;
-		this.lowerImpulse = 0.0;
-		this.upperImpulse = 0.0;
+		this.lowerLimitImpulse = 0.0;
+		this.upperLimitImpulse = 0.0;
 	}
 	
 	/* (non-Javadoc)
@@ -230,7 +324,8 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 		  .append("|MotorSpeed=").append(this.motorSpeed)
 		  .append("|MaximumMotorForce=").append(this.maximumMotorForce)
 		  .append("|ReferenceAngle=").append(this.referenceAngle)
-		  .append("|IsLimitEnabled=").append(this.limitEnabled)
+		  .append("|IsLowerLimitEnabled=").append(this.lowerLimitEnabled)
+		  .append("|IsUpperLimitEnabled=").append(this.upperLimitEnabled)
 		  .append("|LowerLimit=").append(this.lowerLimit)
 		  .append("|UpperLimit=").append(this.upperLimit)
 		  .append("]");
@@ -256,22 +351,29 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
-		Vector2 d = this.body1.getWorldCenter().sum(r1).subtract(this.body2.getWorldCenter().sum(r2));
+		// compute the vector between the two world space anchor points
+		Vector2 d = this.body2.getWorldCenter().sum(r2).subtract(this.body1.getWorldCenter().sum(r1));
 		
-		// axial (the allowed motion)
-		this.axis = this.body2.getWorldVector(this.xAxis);
-		this.a1 = r1.cross(this.axis);
-		this.a2 = r2.sum(d).cross(this.axis);
+		// get the world vectors of the axes
+		this.axis = this.body1.getWorldVector(this.xAxis);
+		this.perp = this.body1.getWorldVector(this.yAxis);
 		
-		this.axialMass = invM1 + invM2 + this.a1 * this.a1 * invI1 + this.a2 * this.a2 * invI2;
-		if (this.axialMass > Epsilon.E) {
-			this.axialMass = 1.0 / this.axialMass;
+		// s1y = (r1 + d).cross(yaxis)
+		this.s1 = r1.sum(d).cross(this.perp);
+		// s2y = r2.cross(yaxis)
+		this.s2 = r2.cross(this.perp);
+		
+		// s1x = (r1 + d).cross(xaxis)
+		this.a1 = r1.sum(d).cross(this.axis);
+		// s2x = r2.cross(xaxis)
+		this.a2 = r2.cross(this.axis);
+		
+		double invMass = invM1 + invM2 + this.a1 * this.a1 * invI1 + this.a2 * this.a2 * invI2;
+		if (invMass > Epsilon.E) {
+			this.axialMass = 1.0 / invMass;
+		} else {
+			this.axialMass = 0.0;
 		}
-		
-		// point on line
-		this.perp = this.body2.getWorldVector(this.yAxis);
-		this.s1 = r1.cross(this.perp);
-		this.s2 = r2.sum(d).cross(this.perp);
 		
 		this.K.m00 = invM1 + invM2 + this.s1 * this.s1 * invI1 + this.s2 * this.s2 * invI2;
 		this.K.m01 = this.s1 * invI1 + this.s2 * invI2;
@@ -283,12 +385,45 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 			this.K.m11 = 1.0;
 		}
 
+		// compute the spring mass for the spring constraint
+		if (this.springEnabled && invMass > 0.0) {
+			// recompute spring reduced mass (m), stiffness (k), and damping (d)
+			// since frequency, dampingRatio, or the masses of the joined bodies
+			// could change
+			this.updateSpringCoefficients();
+			
+			this.springMass = this.axialMass;
+			
+			// compute the current spring extension (we are solving for zero here)
+			// the spring extension is distance between the anchor points translated into
+			// world space.
+			double c = d.dot(this.axis) - this.springRestOffset;
+			// get the delta time
+			double dt = step.getDeltaTime();
+
+			this.gamma = getConstraintImpulseMixing(dt, this.springStiffness, this.damping);
+			double erp = getErrorReductionParameter(dt, this.springStiffness, this.damping);
+			
+			this.bias = c * erp;
+			
+			// compute the effective mass			
+			this.springMass = invMass + this.gamma;
+			// check for zero before inverting
+			if (this.springMass > Epsilon.E) {
+				this.springMass = 1.0 / this.springMass;
+			}
+		} else {
+			this.springMass = 0.0;
+			this.springImpulse = 0.0;
+			this.damping = 0.0;
+		}
+		
 		// check for the limit being enabled
-		if (this.limitEnabled) {
+		if (this.lowerLimitEnabled || this.upperLimitEnabled) {
 			this.translation = this.axis.dot(d);
 		} else {
-			this.lowerImpulse = 0.0;
-			this.upperImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
 		}
 		
 		// check if the motor is still enabled
@@ -302,12 +437,13 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 			// account for variable time step
 			double dtr = step.getDeltaTimeRatio();
 			this.impulse.multiply(dtr);
+			this.springImpulse *= dtr;
 			this.motorImpulse *= dtr;
-			this.lowerImpulse *= dtr;
-			this.upperImpulse *= dtr;
+			this.lowerLimitImpulse *= dtr;
+			this.upperLimitImpulse *= dtr;
 			
 			// the impulse along the axis
-			double axialImpulse = this.motorImpulse + this.lowerImpulse - this.upperImpulse;
+			double axialImpulse = this.springImpulse + this.motorImpulse + this.lowerLimitImpulse - this.upperLimitImpulse;
 			
 			// compute the applied impulses
 			// Pc = Jtrans * lambda
@@ -328,15 +464,16 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 			double l2 = this.impulse.x * this.s2 + this.impulse.y + axialImpulse * this.a2;
 			
 			// apply the impulses
-			this.body1.getLinearVelocity().add(P.product(invM1));
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * l1);
-			this.body2.getLinearVelocity().subtract(P.product(invM2));
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * l2);
+			this.body1.getLinearVelocity().subtract(P.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * l1);
+			this.body2.getLinearVelocity().add(P.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * l2);
 		} else {
 			this.impulse.zero();
 			this.motorImpulse = 0.0;
-			this.lowerImpulse = 0.0;
-			this.upperImpulse = 0.0;
+			this.springImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
 		}
 	}
 	
@@ -358,22 +495,103 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 		double w1 = this.body1.getAngularVelocity();
 		double w2 = this.body2.getAngularVelocity();
 		
+		// solve the spring constraint
+		if (this.springEnabled) {
+			double Cdt = this.axis.dot(v2.difference(v1)) + this.a2 * w2 - this.a1 * w1;
+			// compute the impulse
+			double stepImpulse = -this.springMass * (Cdt + this.bias + this.gamma * this.springImpulse);
+			
+			// clamp to max force (if enabled)
+			if (this.springMaximumForceEnabled) {
+				double currentAccumulatedImpulse = this.springImpulse;
+				double maxImpulse = step.getDeltaTime() * this.springMaximumForce;
+				// clamp the accumulated impulse
+				this.springImpulse = Interval.clamp(this.springImpulse + stepImpulse, -maxImpulse, maxImpulse);
+				// if we clamped, then override the step impulse with the difference
+				stepImpulse = this.springImpulse - currentAccumulatedImpulse;
+			} else {
+				// otherwise accumulate normally
+				this.springImpulse += stepImpulse;
+			}
+			
+			// compute the applied impulses
+			// Pc = Jtrans * lambda
+			Vector2 P = this.axis.product(stepImpulse);
+			double l1 = stepImpulse * this.a1;
+			double l2 = stepImpulse * this.a2;
+			
+			v1.subtract(P.product(invM1));
+			w1 -= l1 * invI1;
+			v2.add(P.product(invM2));
+			w2 += l2 * invI2;
+		}
+		
 		// solve the motor constraint
 		if (this.motorEnabled) {
 			// compute Jv + b
-			double Cdt = this.axis.dot(v1.difference(v2)) + this.a1 * w1 - this.a2 * w2;
+			double Cdt = this.axis.dot(v2.difference(v1)) + this.a2 * w2 - this.a1 * w1;
 			// compute lambda = Kinv * (Jv + b)
-			double impulse = this.axialMass * (this.motorSpeed - Cdt);
-			// clamp the impulse between the max force
-			double oldImpulse = this.motorImpulse;
-			double maxImpulse = this.maximumMotorForce * step.getDeltaTime();
-			this.motorImpulse = Interval.clamp(this.motorImpulse + impulse, -maxImpulse, maxImpulse);
-			impulse = this.motorImpulse - oldImpulse;
+			double stepImpulse = this.axialMass * (this.motorSpeed - Cdt);
+			
+			if (this.maximumMotorForceEnabled) {
+				// clamp the impulse between the max force
+				double currentAccumulatedImpulse = this.motorImpulse;
+				double maxImpulse = this.maximumMotorForce * step.getDeltaTime();
+				this.motorImpulse = Interval.clamp(this.motorImpulse + stepImpulse, -maxImpulse, maxImpulse);
+				stepImpulse = this.motorImpulse - currentAccumulatedImpulse;
+			} else {
+				this.motorImpulse += stepImpulse;
+			}
 			
 			// apply the impulse
-			Vector2 P = this.axis.product(impulse);
-			double l1 = impulse * this.a1;
-			double l2 = impulse * this.a2;
+			Vector2 P = this.axis.product(stepImpulse);
+			double l1 = stepImpulse * this.a1;
+			double l2 = stepImpulse * this.a2;
+			
+			v1.subtract(P.product(invM1));
+			w1 -= l1 * invI1;
+			v2.add(P.product(invM2));
+			w2 += l2 * invI2;
+		}
+		
+		double invdt = step.getInverseDeltaTime();
+		
+		// solve lower limit
+		if (this.lowerLimitEnabled) {
+			double C = this.translation - this.lowerLimit;
+			double Cdot = this.axis.dot(v2.difference(v1)) + this.a2 * w2 - this.a1 * w1;
+			double stepImpulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * invdt);
+			
+			// clamp
+			double currentAccumulatedImpulse = this.lowerLimitImpulse;
+			this.lowerLimitImpulse = Math.max(this.lowerLimitImpulse + stepImpulse, 0.0);
+			stepImpulse = this.lowerLimitImpulse - currentAccumulatedImpulse;
+			
+			// apply the impulse
+			Vector2 P = this.axis.product(stepImpulse);
+			double l1 = stepImpulse * this.a1;
+			double l2 = stepImpulse * this.a2;
+			
+			v1.subtract(P.product(invM1));
+			w1 -= l1 * invI1;
+			v2.add(P.product(invM2));
+			w2 += l2 * invI2;
+		}
+			
+		// solve upper limit
+		if (this.upperLimitEnabled) {
+			double C = this.upperLimit - this.translation;
+			double Cdot = this.axis.dot(v1.difference(v2)) + this.a1 * w1 - this.a2 * w2;
+			double stepImpulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * invdt);
+			
+			double currentAccumulatedImpulse = this.upperLimitImpulse;
+			this.upperLimitImpulse = Math.max(this.upperLimitImpulse + stepImpulse, 0.0);
+			stepImpulse = this.upperLimitImpulse - currentAccumulatedImpulse;
+			
+			// apply the impulse
+			Vector2 P = this.axis.product(stepImpulse);
+			double l1 = stepImpulse * this.a1;
+			double l2 = stepImpulse * this.a2;
 			
 			v1.add(P.product(invM1));
 			w1 += l1 * invI1;
@@ -381,55 +599,10 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 			w2 -= l2 * invI2;
 		}
 		
-		double invdt = step.getInverseDeltaTime();
-		
-		// is the limit enabled?
-		if (this.limitEnabled) {
-			// solve lower limit
-			{
-				double C = this.translation - this.lowerLimit;
-				double Cdot = this.axis.dot(v1.difference(v2)) + this.a1 * w1 - this.a2 * w2;
-				double impulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * invdt);
-				double oldImpulse = this.lowerImpulse;
-				this.lowerImpulse = Math.max(this.lowerImpulse + impulse, 0.0);
-				impulse = this.lowerImpulse - oldImpulse;
-				
-				// apply the impulse
-				Vector2 P = this.axis.product(impulse);
-				double l1 = impulse * this.a1;
-				double l2 = impulse * this.a2;
-				
-				v1.add(P.product(invM1));
-				w1 += l1 * invI1;
-				v2.subtract(P.product(invM2));
-				w2 -= l2 * invI2;
-			}
-			
-			// solve upper limit
-			{
-				double C = this.upperLimit - this.translation;
-				double Cdot = this.axis.dot(v2.difference(v1)) + this.a2 * w2 - this.a1 * w1;
-				double impulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * invdt);
-				double oldImpulse = this.upperImpulse;
-				this.upperImpulse = Math.max(this.upperImpulse + impulse, 0.0);
-				impulse = this.upperImpulse - oldImpulse;
-				
-				// apply the impulse
-				Vector2 P = this.axis.product(impulse);
-				double l1 = impulse * this.a1;
-				double l2 = impulse * this.a2;
-				
-				v1.subtract(P.product(invM1));
-				w1 -= l1 * invI1;
-				v2.add(P.product(invM2));
-				w2 += l2 * invI2;
-			}
-		}
-		
 		// solve the prismatic constraint
 		Vector2 Cdt = new Vector2();
-		Cdt.x = this.perp.dot(v1.difference(v2)) + this.s1 * w1 - this.s2 * w2;
-		Cdt.y = w1 - w2;
+		Cdt.x = this.perp.dot(v2.difference(v1)) + this.s2 * w2 - this.s1 * w1;
+		Cdt.y = w2 - w1;
 		
 		// otherwise just solve the linear and angular constraints
 		Vector2 f2r = this.K.solve(Cdt.negate());
@@ -442,10 +615,10 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 		double l1 = f2r.x * this.s1 + f2r.y;
 		double l2 = f2r.x * this.s2 + f2r.y;
 		
-		v1.add(P.product(invM1));
-		w1 += l1 * invI1;
-		v2.subtract(P.product(invM2));
-		w2 -= l2 * invI2;
+		v1.subtract(P.product(invM1));
+		w1 -= l1 * invI1;
+		v2.add(P.product(invM2));
+		w2 += l2 * invI2;
 		
 		// finally set the velocities
 		// NOTE we dont have to update v1 or v2 because they are references
@@ -478,15 +651,15 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
-		Vector2 d = c1.sum(r1).subtract(c2.sum(r2));
+		Vector2 d = c2.sum(r2).subtract(c1.sum(r1));
 		
-		Vector2 axis = this.body2.getWorldVector(this.xAxis);
-		double a1 = r1.cross(axis);
-		double a2 = r2.sum(d).cross(axis);
+		Vector2 axis = this.body1.getWorldVector(this.xAxis);
+		double a1 = r1.sum(d).cross(axis);
+		double a2 = r2.cross(axis);
 		
-		Vector2 perp = this.body2.getWorldVector(this.yAxis);
-		double s1 = r1.cross(perp);
-		double s2 = r2.sum(d).cross(perp);
+		Vector2 perp = this.body1.getWorldVector(this.yAxis);
+		double s1 = r1.sum(d).cross(perp);
+		double s2 = r2.cross(perp);
 		
 		Vector2 C = new Vector2();
 		C.x = perp.dot(d);
@@ -498,21 +671,21 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 		boolean limitActive = false;
 		
 		// check if the limit is enabled
-		if (this.limitEnabled) {
+		if (this.lowerLimitEnabled || this.upperLimitEnabled) {
 			// what's the current distance
 			double translation = axis.dot(d);
 			// check for equal limits
-			if (Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * linearTolerance) {
+			if (this.upperLimitEnabled && this.lowerLimitEnabled && Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * linearTolerance) {
 				// then apply the limit and clamp it
 				C2 = translation;
-				linearError = Math.abs(translation);
+				linearError = Math.max(linearError, Math.abs(translation));
 				limitActive = true;
-			} else if (translation <= this.lowerLimit) {
+			} else if (this.lowerLimitEnabled && translation <= this.lowerLimit) {
 				// if its less than the lower limit then attempt to correct it
 				C2 = Math.min(translation - this.lowerLimit, 0.0);
 				linearError = Math.max(linearError, this.lowerLimit - translation);
 				limitActive = true;
-			} else if (translation >= this.upperLimit) {
+			} else if (this.upperLimitEnabled && translation >= this.upperLimit) {
 				// if its less than the lower limit then attempt to correct it
 				C2 = Math.max(translation - this.upperLimit, 0.0);
 				linearError = Math.max(linearError, translation - this.upperLimit);
@@ -582,39 +755,66 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 		double l2 = impulse.x * s2 + impulse.y + impulse.z * a2;
 		
 		// apply the impulse
-		this.body1.translate(P.product(invM1));
-		this.body1.rotateAboutCenter(l1 * invI1);
+		this.body1.translate(P.product(-invM1));
+		this.body1.rotateAboutCenter(-l1 * invI1);
 		
-		this.body2.translate(P.product(-invM2));
-		this.body2.rotateAboutCenter(-l2 * invI2);
+		this.body2.translate(P.product(invM2));
+		this.body2.rotateAboutCenter(l2 * invI2);
 		
 		// return if we corrected the error enough
 		return linearError <= linearTolerance && angularError <= angularTolerance;
 	}
 
 	/**
+	 * Computes the spring coefficients from the current state of the joint.
+	 * <p>
+	 * This method is intended to set the springStiffness OR springFrequency and
+	 * damping for use during constraint solving.
+	 */
+	protected void updateSpringCoefficients() {
+		double lm = this.getReducedMass();
+		double nf = 0.0;
+		
+		if (this.springMode == SPRING_MODE_FREQUENCY) {
+			// compute the stiffness based on the frequency
+			nf = getNaturalFrequency(this.springFrequency);
+			this.springStiffness = getSpringStiffness(lm, nf);
+		} else if (this.springMode == SPRING_MODE_STIFFNESS) {
+			// compute the frequency based on the stiffness
+			nf = getNaturalFrequency(this.springStiffness, lm);
+			this.springFrequency = getFrequency(nf);
+		}
+		
+		if (this.springDamperEnabled) {
+			this.damping = getSpringDampingCoefficient(lm, nf, this.springDampingRatio);
+		} else {
+			this.damping = 0.0;
+		}
+	}
+	
+	/**
 	 * Returns the relative angle between the two bodies given the reference angle.
 	 * @return double
 	 */
 	private double getRelativeRotation() {
-		double rr = this.body1.getTransform().getRotationAngle() - this.body2.getTransform().getRotationAngle() - this.referenceAngle;
+		double rr = this.body2.getTransform().getRotationAngle() - this.body1.getTransform().getRotationAngle() - this.referenceAngle;
 		if (rr < -Math.PI) rr += Geometry.TWO_PI;
 		if (rr > Math.PI) rr -= Geometry.TWO_PI;
 		return rr;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor1()
+	/**
+	 * The original anchor point on body1 in world space.
+	 * @return {@link Vector2}
 	 */
-	@Override
 	public Vector2 getAnchor1() {
 		return this.body1.getWorldPoint(this.localAnchor1);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor2()
+	/**
+	 * The original anchor point on body2 in world space.
+	 * @return {@link Vector2}
 	 */
-	@Override
 	public Vector2 getAnchor2() {
 		return this.body2.getWorldPoint(this.localAnchor2);
 	}
@@ -626,8 +826,8 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 	public Vector2 getReactionForce(double invdt) {
 		Vector2 force = new Vector2();
 		// compute the impulse
-		force.x = this.impulse.x * this.perp.x + (this.motorImpulse + this.lowerImpulse - this.upperImpulse) * this.axis.x;
-		force.y = this.impulse.x * this.perp.y + (this.motorImpulse + this.lowerImpulse - this.upperImpulse) * this.axis.y;
+		force.x = this.impulse.x * this.perp.x + (this.springImpulse + this.motorImpulse + this.lowerLimitImpulse - this.upperLimitImpulse) * this.axis.x;
+		force.y = this.impulse.x * this.perp.y + (this.springImpulse + this.motorImpulse + this.lowerLimitImpulse - this.upperLimitImpulse) * this.axis.y;
 		// multiply by invdt to obtain the force
 		force.multiply(invdt);
 		return force;
@@ -652,53 +852,62 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 	
 	/**
 	 * Returns the current joint speed.
+	 * <p>
+	 * Renamed from getJointSpeed in 5.0.0
 	 * @return double
+	 * @since 5.0.0
 	 */
-	public double getJointSpeed() {
+	public double getLinearSpeed() {
 		Transform t1 = this.body1.getTransform();
 		Transform t2 = this.body2.getTransform();
-		
-		Vector2 c1 = this.body1.getWorldCenter();
-		Vector2 c2 = this.body2.getWorldCenter();
 		
 		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
-		Vector2 d = c1.sum(r1).subtract(c2.sum(r2));
-		Vector2 axis = this.body2.getWorldVector(this.xAxis);
+		// get the world vectors of the axis
+		Vector2 axis = this.body1.getWorldVector(this.xAxis);
 		
-		Vector2 v1 = this.body1.getLinearVelocity();
-		Vector2 v2 = this.body2.getLinearVelocity();
-		double w1 = this.body1.getAngularVelocity();
-		double w2 = this.body2.getAngularVelocity();
+		Vector2 p1 = this.body1.getWorldCenter().sum(r1);
+		Vector2 p2 = this.body2.getWorldCenter().sum(r2);
+		Vector2 d = p2.subtract(p1);
 		
-		double speed = d.dot(axis.cross(w2)) + axis.dot(v1.sum(r1.cross(w1)).subtract(v2.sum(r2.cross(w2))));
-		return speed;
+		// compute the velocities along the vectors pointing to the world space anchor points
+		Vector2 v1 = r1.cross(this.body1.getAngularVelocity()).add(this.body1.getLinearVelocity());
+		Vector2 v2 = r2.cross(this.body2.getAngularVelocity()).add(this.body2.getLinearVelocity());
+		
+		// compute the relative linear velocity along the axis
+		double te1 = axis.dot(v2.subtract(v1));
+		// compute the linear velocity along the separation of the anchor points
+		double te2 = d.dot(axis.cross(this.body1.getAngularVelocity()));
+		
+		// the sum is the linear velocity
+		return te1 + te2;
 	}
 	
 	/**
 	 * Returns the current joint translation.
+	 * <p>
+	 * Renamed from getJointTranslation in 5.0.0
 	 * @return double
+	 * @since 5.0.0
 	 */
-	public double getJointTranslation() {
+	public double getLinearTranslation() {
 		Vector2 p1 = this.body1.getWorldPoint(this.localAnchor1);
 		Vector2 p2 = this.body2.getWorldPoint(this.localAnchor2);
-		Vector2 d = p1.difference(p2);
-		Vector2 axis = this.body2.getWorldVector(this.xAxis);
+		Vector2 d = p2.difference(p1);
+		Vector2 axis = this.body1.getWorldVector(this.xAxis);
 		return d.dot(axis);
 	}
 	
-	/**
-	 * Returns true if the motor is enabled.
-	 * @return boolean
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearMotorJoint#isMotorEnabled()
 	 */
 	public boolean isMotorEnabled() {
 		return this.motorEnabled;
 	}
 	
-	/**
-	 * Enables or disables the motor.
-	 * @param motorEnabled true if the motor should be enabled
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearMotorJoint#setMotorEnabled(boolean)
 	 */
 	public void setMotorEnabled(boolean motorEnabled) {
 		// only wake the bodies if the enable flag changed
@@ -711,18 +920,15 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 		}
 	}
 	
-	/**
-	 * Returns the target motor speed in meters / second.
-	 * @return double
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearMotorJoint#getMotorSpeed()
 	 */
 	public double getMotorSpeed() {
 		return this.motorSpeed;
 	}
 	
-	/**
-	 * Sets the target motor speed.
-	 * @param motorSpeed the target motor speed in meters / second
-	 * @see #setMaximumMotorForce(double)
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearMotorJoint#setMotorSpeed(double)
 	 */
 	public void setMotorSpeed(double motorSpeed) {
 		// don't do anything if the motor speed isn't changing
@@ -733,180 +939,465 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 				this.body1.setAtRest(false);
 				this.body2.setAtRest(false);
 			}
+			
 			// set the new value
 			this.motorSpeed = motorSpeed;
 			this.motorImpulse = 0.0;
-			this.lowerImpulse = 0.0;
-			this.upperImpulse = 0.0;
 		}
 	}
 	
-	/**
-	 * Returns the maximum force the motor can apply to the joint
-	 * to achieve the target speed.
-	 * @return double
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearMotorJoint#getMotorMaximumForce()
 	 */
+	@Override
 	public double getMaximumMotorForce() {
 		return this.maximumMotorForce;
 	}
-	
-	/**
-	 * Sets the maximum force the motor can apply to the joint
-	 * to achieve the target speed.
-	 * @param maximumMotorForce the maximum force in newtons; must be greater than zero
-	 * @throws IllegalArgumentException if maxMotorForce is less than zero
-	 * @see #setMotorSpeed(double)
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearMotorJoint#setMotorMaximumForce(double)
 	 */
+	@Override
 	public void setMaximumMotorForce(double maximumMotorForce) {
 		// make sure its greater than or equal to zero
-		if (maximumMotorForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidMaximumMotorForce"));
-		// don't do anything if the max motor force isn't changing
+		if (maximumMotorForce <= 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidMaximumMotorForce"));
+		
 		if (this.maximumMotorForce != maximumMotorForce) {
-			if (this.motorEnabled) {
-				// wake up the joined bodies
+			this.maximumMotorForce = maximumMotorForce;
+			
+			if (this.motorEnabled && this.maximumMotorForceEnabled) {
 				this.body1.setAtRest(false);
 				this.body2.setAtRest(false);
 			}
-			// set the new value
-			this.maximumMotorForce = maximumMotorForce;
 		}
 	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearMotorJoint#setMotorMaximumForceEnabled(boolean)
+	 */
+	@Override
+	public void setMaximumMotorForceEnabled(boolean enabled) {
+		if (this.maximumMotorForceEnabled != enabled) {
+			this.maximumMotorForceEnabled = enabled;
+			
+			// only wake if necessary
+			if (this.motorEnabled) {
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearMotorJoint#isMotorMaximumForceEnabled()
+	 */
+	@Override
+	public boolean isMaximumMotorForceEnabled() {
+		return this.maximumMotorForceEnabled;
+	}
 	
-	/**
-	 * Returns the applied motor force.
-	 * @param invdt the inverse delta time
-	 * @return double
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearMotorJoint#getMotorForce(double)
 	 */
 	public double getMotorForce(double invdt) {
 		return this.motorImpulse * invdt;
 	}
 	
-	/**
-	 * Returns true if the limit is enabled.
-	 * @return boolean
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringDampingRatio()
 	 */
-	public boolean isLimitEnabled() {
-		return this.limitEnabled;
+	@Override
+	public double getSpringDampingRatio() {
+		return this.springDampingRatio;
 	}
 	
-	/**
-	 * Enables or disables the limits.
-	 * @param limitEnabled true if the limit should be enabled.
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#setSpringDampingRatio(double)
 	 */
-	public void setLimitEnabled(boolean limitEnabled) {
-		if (this.limitEnabled != limitEnabled) {
-			// wake up the joined bodies
+	@Override
+	public void setSpringDampingRatio(double dampingRatio) {
+		// make sure its within range
+		if (dampingRatio <= 0 || dampingRatio > 1) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidDampingRatio"));
+		// did it change?
+		if (this.springDampingRatio != dampingRatio) {
+			// set the damping ratio
+			this.springDampingRatio = dampingRatio;
+			// only wake if the damper would be applied
+			if (this.springEnabled && this.springDamperEnabled) {
+				// wake the bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringFrequency()
+	 */
+	@Override
+	public double getSpringFrequency() {
+		return this.springFrequency;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringStiffness()
+	 */
+	@Override
+	public double getSpringStiffness() {
+		return this.springStiffness;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#setSpringFrequency(double)
+	 */
+	@Override
+	public void setSpringFrequency(double frequency) {
+		// check for valid value
+		if (frequency <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
+		// set the spring mode
+		this.springMode = SPRING_MODE_FREQUENCY;
+		// check for change
+		if (this.springFrequency != frequency) {
+			// make the change
+			this.springFrequency = frequency;
+			// check if the spring is enabled
+			if (this.springEnabled) {
+				// wake the bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#setSpringStiffness(double)
+	 */
+	@Override
+	public void setSpringStiffness(double stiffness) {
+		// check for valid value
+		if (stiffness <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidStiffness"));
+		// set the spring mode
+		this.springMode = SPRING_MODE_STIFFNESS;
+		// only update if necessary
+		if (this.springStiffness != stiffness) {
+			this.springStiffness = stiffness;
+			// wake up the bodies
+			if (this.springEnabled) {
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringMaximumForce()
+	 */
+	@Override
+	public double getMaximumSpringForce() {
+		return this.springMaximumForce;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#setSpringMaximumForce(double)
+	 */
+	@Override
+	public void setMaximumSpringForce(double maximum) {
+		// check for valid value
+		if (maximum <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidSpringMaximumForce"));
+		// check if changed
+		if (this.springMaximumForce != maximum) {
+			this.springMaximumForce = maximum;
+			// wake up the bodies
+			if (this.springEnabled && this.springMaximumForceEnabled) {
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#isSpringMaximumForceEnabled()
+	 */
+	@Override
+	public boolean isMaximumSpringForceEnabled() {
+		return this.springMaximumForceEnabled;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#setSpringMaximumForceEnabled(boolean)
+	 */
+	@Override
+	public void setMaximumSpringForceEnabled(boolean enabled) {
+		if (this.springMaximumForceEnabled != enabled) {
+			this.springMaximumForceEnabled = enabled;
+			
+			if (this.springEnabled) {
+				// wake the bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#isSpringEnabled()
+	 */
+	public boolean isSpringEnabled() {
+		return this.springEnabled;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#setSpringEnabled(boolean)
+	 */
+	@Override
+	public void setSpringEnabled(boolean enabled) {
+		if (this.springEnabled != enabled) {
+			// update the flag
+			this.springEnabled = enabled;
+			// wake the bodies
 			this.body1.setAtRest(false);
 			this.body2.setAtRest(false);
-			// set the new value
-			this.limitEnabled = limitEnabled;
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#isSpringDamperEnabled()
+	 */
+	public boolean isSpringDamperEnabled() {
+		return this.springDamperEnabled;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#setSpringDamperEnabled(boolean)
+	 */
+	@Override
+	public void setSpringDamperEnabled(boolean enabled) {
+		if (this.springDamperEnabled != enabled) {
+			// update the flag
+			this.springDamperEnabled = enabled;
+			
+			if (this.springEnabled) {
+				// wake the bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringForce(double)
+	 */
+	@Override
+	public double getSpringForce(double invdt) {
+		return this.springImpulse * invdt;
+	}
+
+	/**
+	 * Set's the spring rest offset.
+	 * <p>
+	 * This can be any value and is used to offset the spring's rest
+	 * distance.  This is only applicable when the spring is enabled.
+	 * @param offset the offset
+	 * @since 5.0.0
+	 */
+	public void setSpringRestOffset(double offset) {
+		if (this.springRestOffset != offset) {
+			this.springRestOffset = offset;
+			
+			// wake if necessary
+			if (this.springEnabled) {
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
 		}
 	}
 	
 	/**
-	 * Returns the lower limit in meters.
+	 * Returns the spring's rest offset.
 	 * @return double
+	 * @since 5.0.0
+	 */
+	public double getSpringRestOffset() {
+		return this.springRestOffset;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#getUpperLimit()
+	 */
+	public double getUpperLimit() {
+		return this.upperLimit;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#setUpperLimit(double)
+	 */
+	public void setUpperLimit(double upperLimit) {
+		// make sure the minimum is less than or equal to the maximum
+		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
+		
+		if (this.upperLimit != upperLimit) {
+			// make sure its changed and enabled before waking the bodies
+			if (this.upperLimitEnabled) {
+				// wake up both bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+			// set the new target distance
+			this.upperLimit = upperLimit;
+			// clear the accumulated impulse
+			this.upperLimitImpulse = 0.0;
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#setUpperLimitEnabled(boolean)
+	 */
+	public void setUpperLimitEnabled(boolean flag) {
+		if (this.upperLimitEnabled != flag) {
+			// wake up both bodies
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
+			// set the flag
+			this.upperLimitEnabled = flag;
+			// clear the accumulated impulse
+			this.upperLimitImpulse = 0.0;
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#isUpperLimitEnabled()
+	 */
+	public boolean isUpperLimitEnabled() {
+		return this.upperLimitEnabled;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#getLowerLimit()
 	 */
 	public double getLowerLimit() {
 		return this.lowerLimit;
 	}
 	
-	/**
-	 * Sets the lower limit.
-	 * @param lowerLimit the lower limit in meters
-	 * @throws IllegalArgumentException if lowerLimit is greater than the current upper limit
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#setLowerLimit(double)
 	 */
 	public void setLowerLimit(double lowerLimit) {
-		// check for valid value
+		// make sure the minimum is less than or equal to the maximum
 		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
 		
 		if (this.lowerLimit != lowerLimit) {
-			// make sure the limits are enabled and that the limit has changed
-			if (this.limitEnabled) {
-				// wake up the joined bodies
+			// make sure its changed and enabled before waking the bodies
+			if (this.lowerLimitEnabled) {
+				// wake up both bodies
 				this.body1.setAtRest(false);
 				this.body2.setAtRest(false);
-				// reset the limit impulse
-				this.lowerImpulse = 0.0;
 			}
-			// set the new value
+			// set the new target distance
 			this.lowerLimit = lowerLimit;
+			// clear the accumulated impulse
+			this.lowerLimitImpulse = 0.0;
 		}
-	}
-	
-	/**
-	 * Returns the upper limit in meters.
-	 * @return double
-	 */
-	public double getUpperLimit() {
-		return this.upperLimit;
 	}
 
-	/**
-	 * Sets the upper limit.
-	 * @param upperLimit the upper limit in meters
-	 * @throws IllegalArgumentException if upperLimit is less than the current lower limit
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#setLowerLimitEnabled(boolean)
 	 */
-	public void setUpperLimit(double upperLimit) {
-		// check for valid value
-		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
-		
-		if (this.upperLimit != upperLimit) {
-			// make sure the limits are enabled and that the limit has changed
-			if (this.limitEnabled) {
-				// wake up the joined bodies
-				this.body1.setAtRest(false);
-				this.body2.setAtRest(false);
-				// reset the limit impulse
-				this.upperImpulse = 0.0;
-			}
-			// set the new value
-			this.upperLimit = upperLimit;
+	public void setLowerLimitEnabled(boolean flag) {
+		if (this.lowerLimitEnabled != flag) {
+			// wake up both bodies
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
+			// set the flag
+			this.lowerLimitEnabled = flag;
+			// clear the accumulated impulse
+			this.lowerLimitImpulse = 0.0;
 		}
 	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#isLowerLimitEnabled()
+	 */
+	public boolean isLowerLimitEnabled() {
+		return this.lowerLimitEnabled;
+	}
 	
-	/**
-	 * Sets the upper and lower limits.
-	 * <p>
-	 * The lower limit must be less than or equal to the upper limit.
-	 * @param lowerLimit the lower limit in meters
-	 * @param upperLimit the upper limit in meters
-	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#setLimits(double, double)
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
+		// make sure the min < max
 		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
-		// make sure the limits are enabled and that the limit has changed
+		
 		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
-			if (this.limitEnabled) {
+			// make sure one of the limits is enabled and has changed before waking the bodies
+			if (this.lowerLimitEnabled || this.upperLimitEnabled) {
 				// wake up the bodies
 				this.body1.setAtRest(false);
 				this.body2.setAtRest(false);
 			}
-			// reset the limit impulse
-			this.lowerImpulse = 0.0;
-			this.upperImpulse = 0.0;
-			// set the values
-			this.lowerLimit = lowerLimit;
+			// set the limits
 			this.upperLimit = upperLimit;
+			this.lowerLimit = lowerLimit;
+			// clear the accumulated impulse
+			this.upperLimitImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#setLimitsEnabled(double, double)
+	 */
+	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
+		// enable the limits
+		this.setLimitsEnabled(true);
+		// set the values
+		this.setLimits(lowerLimit, upperLimit);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#setLimitsEnabled(boolean)
+	 */
+	public void setLimitsEnabled(boolean flag) {
+		if (this.upperLimitEnabled != flag || this.lowerLimitEnabled != flag) {
+			this.upperLimitEnabled = flag;
+			this.lowerLimitEnabled = flag;
+			// wake up the bodies
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
+			// clear the accumulated impulse
+			this.upperLimitImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
 		}
 	}
 	
-	/**
-	 * Sets the upper and lower limits and enables the limits.
-	 * <p>
-	 * The lower limit must be less than or equal to the upper limit.
-	 * @param lowerLimit the lower limit in meters
-	 * @param upperLimit the upper limit in meters
-	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
-	 * @since 2.2.2
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#setLimits(double)
 	 */
-	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
-		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
+	public void setLimits(double limit) {
+		if (this.lowerLimit != limit || this.upperLimit != limit) {
+			// make sure one of the limits is enabled and has changed before waking the bodies
+			if (this.lowerLimitEnabled || this.upperLimitEnabled) {
+				// wake up the bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+			// set the limits
+			this.upperLimit = limit;
+			this.lowerLimit = limit;
+			// clear the accumulated impulse
+			this.upperLimitImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#setLimitsEnabled(double)
+	 */
+	public void setLimitsEnabled(double limit) {
 		// enable the limits
-		this.setLimitEnabled(true);
-		// set the limits
-		this.setLimits(lowerLimit, upperLimit);
-		// NOTE: one of these will wake the bodies
+		this.setLimitsEnabled(true);
+		// set the values
+		this.setLimits(limit);
 	}
 	
 	/**
@@ -915,7 +1406,7 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 	 * @since 3.0.0
 	 */
 	public Vector2 getAxis() {
-		return this.body2.getWorldVector(this.xAxis);
+		return this.body1.getWorldVector(this.xAxis);
 	}
 	
 	/**
@@ -944,6 +1435,14 @@ public class PrismaticJoint<T extends PhysicsBody> extends Joint<T> implements S
 	 * @since 3.0.1
 	 */
 	public void setReferenceAngle(double angle) {
-		this.referenceAngle = angle;
+		if (this.referenceAngle != angle) {
+			this.referenceAngle = angle;
+			
+			// the reference angle is intrinsic to the prismatic joint
+			// so if it changes we need to make sure both bodies are
+			// awake to resolve the change
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
+		}
 	}
 }

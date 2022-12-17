@@ -152,7 +152,7 @@ public class RevoluteJointSimulationTest {
 		TestCase.assertEquals(0.0, b.getAngularVelocity());
 		TestCase.assertEquals(0.0, rj.getJointAngle());
 		TestCase.assertEquals(0.0, b.getTransform().getRotationAngle());
-		TestCase.assertEquals(0.0, rj.getReferenceAngle());
+		TestCase.assertEquals(0.0, rj.getLimitsReferenceAngle());
 		
 		b.setAngularVelocity(Math.toRadians(10));
 		w.step(1);
@@ -221,6 +221,7 @@ public class RevoluteJointSimulationTest {
 		
 		// NOTE: that I've set the rest distance to more than the limits
 		rj.setMaximumMotorTorque(1000);
+		rj.setMaximumMotorTorqueEnabled(true);
 		rj.setMotorSpeed(Math.toRadians(20));
 		rj.setMotorEnabled(true);
 		w.addJoint(rj);

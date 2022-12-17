@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -22,21 +22,40 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.world;
+package org.dyn4j.dynamics.joint;
+
+import org.dyn4j.DataContainer;
+import org.dyn4j.Ownable;
+import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.dynamics.PhysicsBody;
+import org.dyn4j.geometry.Shiftable;
 
 /**
- * Interface used to customize the way friction and restitution coefficients are mixed.
- * <p>
- * The {@link #DEFAULT_MIXER} performs the following operations for friction and
- * restitution mixing respectively:
- * <pre> sqrt(friction1 * friction2)
- * max(restitution1, restitution2)</pre>
+ * Represents constrained motion between two {@link PhysicsBody}s.
  * @author William Bittle
- * @version 4.2.0
- * @since 1.0.0
- * @deprecated Deprecated in 4.2.0. Use the {@link ValueMixer} interface instead.
+ * @version 5.0.0
+ * @since 5.0.0
+ * @param <T> the {@link PhysicsBody} type
  */
-@Deprecated
-public interface CoefficientMixer extends ValueMixer {
+public interface PairedBodyJoint<T extends PhysicsBody> extends Joint<T>, Shiftable, DataContainer, Ownable {
+	/**
+	 * Returns the first body.
+	 * @return T
+	 */
+	public T getBody1();
+	
+	/**
+	 * Returns the second body.
+	 * @return T
+	 */
+	public T getBody2();
 
+	/**
+	 * Returns the body that does not match the given body.
+	 * <p>
+	 * If the given body is neither body1 or body2, null is returned.
+	 * @param body the body
+	 * @return T
+	 */
+	public T getOtherBody(CollisionBody<?> body);
 }

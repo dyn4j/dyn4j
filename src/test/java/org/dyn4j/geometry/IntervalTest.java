@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Interval} class.
  * @author William Bittle
- * @version 3.1.0
+ * @version 5.0.0
  * @since 1.0.0
  */
 public class IntervalTest {
@@ -156,15 +156,12 @@ public class IntervalTest {
 	/**
 	 * Tests the various contains methods.
 	 */
-	@SuppressWarnings("deprecation")
 	@Test
 	public void contains() {
 		Interval i1 = new Interval(-2.0, 5.0);
 		Interval i2 = new Interval(-1.0, 3.0);
 
 		// contains
-		TestCase.assertTrue(i1.contains(i2));
-		TestCase.assertFalse(i2.contains(i1));
 		TestCase.assertTrue(i1.containsExclusive(i2));
 		TestCase.assertFalse(i2.containsExclusive(i1));
 		TestCase.assertTrue(i1.containsInclusive(i2));
@@ -180,8 +177,6 @@ public class IntervalTest {
 		i2 = new Interval(-1.0, 3.0);
 
 		// contains should return false
-		TestCase.assertFalse(i1.contains(i2));
-		TestCase.assertFalse(i2.contains(i1));
 		TestCase.assertFalse(i1.containsExclusive(i2));
 		TestCase.assertFalse(i2.containsExclusive(i1));
 		TestCase.assertTrue(i1.containsInclusive(i2));
@@ -197,8 +192,6 @@ public class IntervalTest {
 		i2 = new Interval(-1.0, 5.0);
 
 		// contains should return false
-		TestCase.assertFalse(i1.contains(i2));
-		TestCase.assertFalse(i2.contains(i1));
 		TestCase.assertFalse(i1.containsExclusive(i2));
 		TestCase.assertFalse(i2.containsExclusive(i1));
 		TestCase.assertTrue(i1.containsInclusive(i2));
@@ -214,8 +207,6 @@ public class IntervalTest {
 		i2 = new Interval(-1.0, 5.0);
 
 		// contains should return false
-		TestCase.assertFalse(i1.contains(i2));
-		TestCase.assertFalse(i2.contains(i1));
 		TestCase.assertFalse(i1.containsExclusive(i2));
 		TestCase.assertFalse(i2.containsExclusive(i1));
 		TestCase.assertTrue(i1.containsInclusive(i2));

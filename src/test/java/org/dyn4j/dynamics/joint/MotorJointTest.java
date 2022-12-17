@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,20 +33,17 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link MotorJoint} class.
  * @author William Bittle
- * @version 4.0.1
+ * @version 5.0.0
  * @since 4.0.0
  */
-public class MotorJointTest extends AbstractJointTest {
+public class MotorJointTest extends BaseJointTest {
 	/**
 	 * Tests the successful creation case.
 	 */
 	@Test
 	public void createWithTwoDifferentBodies() {
 		MotorJoint<Body> mj = new MotorJoint<Body>(b1, b2);
-		
-		TestCase.assertEquals(b1.getWorldCenter(), mj.getAnchor1());
-		TestCase.assertEquals(b2.getWorldCenter(), mj.getAnchor2());
-		
+
 		TestCase.assertEquals(0.0, mj.getAngularTarget());
 		TestCase.assertEquals(b2.getWorldCenter(), mj.getLinearTarget());
 		
@@ -254,22 +251,4 @@ public class MotorJointTest extends AbstractJointTest {
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(1.0, mj.getAngularTarget());
 	}
-
-	/**
-	 * Tests the shift method.
-	 */
-	@Test
-	public void shift() {
-		MotorJoint<Body> mj = new MotorJoint<Body>(b1, b2);
-		
-		TestCase.assertEquals(b1.getWorldCenter(), mj.getAnchor1());
-		TestCase.assertEquals(b2.getWorldCenter(), mj.getAnchor2());
-		
-		mj.shift(new Vector2(1.0, 3.0));
-		
-		// nothing should have changed
-		TestCase.assertEquals(b1.getWorldCenter(), mj.getAnchor1());
-		TestCase.assertEquals(b2.getWorldCenter(), mj.getAnchor2());
-	}
-	
 }

@@ -24,7 +24,6 @@
  */
 package org.dyn4j.dynamics.joint;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,20 +34,17 @@ import org.junit.Test;
 import junit.framework.TestCase;
 
 /**
- * Tests the abstract joint's methods.
+ * Tests the abstract single-body joint's methods.
  * @author William Bittle
  * @version 5.0.0
  * @since 5.0.0
  */
-public class AbstractJointTest {
+public class AbstractSingleBodyJointTest {
 	/** The first body used for testing */
 	protected Body b1;
 	
-	/** The second body used for testing */
-	protected Body b2;
-	
 	/** The abstract joint */
-	protected AbstractJoint<Body> aj;
+	protected AbstractSingleBodyJoint<Body> aj;
 	
 	/**
 	 * Sets up the test.
@@ -56,8 +52,7 @@ public class AbstractJointTest {
 	@Before
 	public void setup() {
 		this.b1 = new Body();
-		this.b2 = new Body();
-		this.aj = new TestAbstractJoint(List.of(b1, b2));
+		this.aj = new TestAbstractSingleBodyJoint(this.b1);
 	}
 	
 	/**
@@ -65,7 +60,7 @@ public class AbstractJointTest {
 	 */
 	@Test
 	public void create() {
-		TestCase.assertEquals(2, aj.getBodyCount());
+		TestCase.assertEquals(1, aj.getBodyCount());
 		TestCase.assertNull(aj.owner);
 		TestCase.assertNull(aj.getOwner());
 		TestCase.assertNull(aj.userData);
@@ -73,7 +68,7 @@ public class AbstractJointTest {
 		TestCase.assertFalse(aj.collisionAllowed);
 		TestCase.assertFalse(aj.isCollisionAllowed());
 		TestCase.assertEquals(b1, aj.getBody(0));
-		TestCase.assertEquals(b2, aj.getBody(1));
+		TestCase.assertEquals(b1, aj.getBody());
 		TestCase.assertNotNull(aj.getBodies());
 		TestCase.assertNotNull(aj.getBodyIterator());
 		TestCase.assertNotNull(aj.toString());
@@ -83,28 +78,8 @@ public class AbstractJointTest {
 	 * Tests receiving an NPE when passing a null list.
 	 */
 	@Test(expected = NullPointerException.class)
-	public void createNullList() {
-		new TestAbstractJoint(null);
-	}
-	
-	/**
-	 * Tests receiving an NPE when passing a null list.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void createListWithNullElement() {
-		ArrayList<Body> list = new ArrayList<>();
-		list.add(new Body());
-		list.add(null);
-		new TestAbstractJoint(list);
-	}
-	
-	/**
-	 * Tests receiving an NPE when passing a null list.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void createEmptyList() {
-		ArrayList<Body> list = new ArrayList<>();
-		new TestAbstractJoint(list);
+	public void createNullBody() {
+		new TestAbstractSingleBodyJoint(null);
 	}
 	
 	/**
@@ -115,9 +90,8 @@ public class AbstractJointTest {
 		List<Body> bodies = aj.getBodies();
 		
 		TestCase.assertNotNull(bodies);
-		TestCase.assertEquals(2, bodies.size());
+		TestCase.assertEquals(1, bodies.size());
 		TestCase.assertEquals(b1, bodies.get(0));
-		TestCase.assertEquals(b2, bodies.get(1));
 	}
 	
 	/**
@@ -125,7 +99,7 @@ public class AbstractJointTest {
 	 */
 	@Test(expected = UnsupportedOperationException.class)
 	public void getBodiesAndAdd() {
-		AbstractJoint<Body> aj = new TestAbstractJoint(List.of(b1, b2));
+		AbstractSingleBodyJoint<Body> aj = new TestAbstractSingleBodyJoint(b1);
 		aj.getBodies().add(new Body());
 	}
 	
@@ -134,7 +108,7 @@ public class AbstractJointTest {
 	 */
 	@Test(expected = UnsupportedOperationException.class)
 	public void getBodiesAndRemove() {
-		AbstractJoint<Body> aj = new TestAbstractJoint(List.of(b1, b2));
+		AbstractSingleBodyJoint<Body> aj = new TestAbstractSingleBodyJoint(b1);
 		aj.getBodies().remove(0);
 	}
 	
@@ -144,7 +118,6 @@ public class AbstractJointTest {
 	@Test
 	public void getBodyAtValidIndex() {
 		TestCase.assertEquals(b1, aj.getBody(0));
-		TestCase.assertEquals(b2, aj.getBody(1));
 	}
 	
 	/**
@@ -160,7 +133,7 @@ public class AbstractJointTest {
 	 */
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void getBodyAtTooHighIndex() {
-		aj.getBody(2);
+		aj.getBody(1);
 	}
 	
 	/**
@@ -168,7 +141,7 @@ public class AbstractJointTest {
 	 */
 	@Test
 	public void getBodyCount() {
-		TestCase.assertEquals(2, aj.getBodyCount());
+		TestCase.assertEquals(1, aj.getBodyCount());
 	}
 	
 	/**
@@ -180,19 +153,15 @@ public class AbstractJointTest {
 		TestCase.assertNotNull(it);
 		
 		Body b1 = null;
-		Body b2 = null;
-		
 		
 		int n = 0;
 		while (it.hasNext()) {
 			if (n == 0) b1 = it.next();
-			if (n == 1) b2 = it.next();
 			n++;
 		}
 		
-		TestCase.assertEquals(2, n);
+		TestCase.assertEquals(1, n);
 		TestCase.assertEquals(this.b1, b1);
-		TestCase.assertEquals(this.b2, b2);
 	}
 	
 	/**
@@ -213,7 +182,6 @@ public class AbstractJointTest {
 	@Test
 	public void isMember() {
 		TestCase.assertTrue(aj.isMember(b1));
-		TestCase.assertTrue(aj.isMember(b2));
 		TestCase.assertFalse(aj.isMember(null));
 		TestCase.assertFalse(aj.isMember(new Body()));
 	}
@@ -229,117 +197,8 @@ public class AbstractJointTest {
 		
 		TestCase.assertFalse(aj.isEnabled());
 		
-		b2.setEnabled(false);
-		
-		TestCase.assertFalse(aj.isEnabled());
-		
 		b1.setEnabled(true);
-		b2.setEnabled(true);
 		
 		TestCase.assertTrue(aj.isEnabled());
-	}
-	
-	/**
-	 * Tests the get/set collision allowed methods.
-	 */
-	@Test
-	public void getSetCollisionAllowed() {
-		aj.setCollisionAllowed(false);
-		TestCase.assertEquals(false, aj.isCollisionAllowed());
-		
-		aj.setCollisionAllowed(true);
-		TestCase.assertEquals(true, aj.isCollisionAllowed());
-		
-		aj.setCollisionAllowed(false);
-		TestCase.assertEquals(false, aj.isCollisionAllowed());
-	}
-	
-	/**
-	 * Tests the get/set user data methods.
-	 */
-	@Test
-	public void getSetUserData() {
-		aj.setUserData(null);
-		TestCase.assertEquals(null, aj.getUserData());
-		
-		Object o = new Object();
-		aj.setUserData(o);
-		TestCase.assertEquals(o, aj.getUserData());
-		
-		aj.setUserData(null);
-		TestCase.assertEquals(null, aj.getUserData());
-	}
-
-	/**
-	 * Tests the get/set owner methods.
-	 */
-	@Test
-	public void getSetOwner() {
-		aj.setOwner(null);
-		TestCase.assertEquals(null, aj.getOwner());
-		
-		Object o = new Object();
-		aj.setOwner(o);
-		TestCase.assertEquals(o, aj.getOwner());
-		
-		aj.setOwner(null);
-		TestCase.assertEquals(null, aj.getOwner());
-	}
-	
-	/**
-	 * Tests the getConstraintImpulseMixing method.
-	 */
-	@Test
-	public void getConstraintImpulseMixing() {
-		double v = TestAbstractJoint.getConstraintImpulseMixing(2, 3, 4);
-		TestCase.assertEquals(1.0 / 20.0, v);
-	}
-	
-	/**
-	 * Tests the getErrorReductionParameter method.
-	 */
-	@Test
-	public void getErrorReductionParameter() {
-		double v = TestAbstractJoint.getErrorReductionParameter(2, 3, 4);
-		TestCase.assertEquals(0.3, v);
-	}
-	
-	/**
-	 * Tests the getFrequency method.
-	 */
-	@Test
-	public void getFrequency() {
-		double v = TestAbstractJoint.getFrequency(4);
-		TestCase.assertEquals(2.0 / Math.PI, v);
-	}
-	
-	/**
-	 * Tests the getSpringStiffness method.
-	 */
-	@Test
-	public void getSpringStiffness() {
-		double v = TestAbstractJoint.getSpringStiffness(2, 3);
-		TestCase.assertEquals(18.0, v);
-	}
-	
-	/**
-	 * Tests the getNaturalFrequency methods.
-	 */
-	@Test
-	public void getNaturalFrequency() {
-		double v = TestAbstractJoint.getNaturalFrequency(3);
-		TestCase.assertEquals(6.0 * Math.PI, v);
-		
-		v = TestAbstractJoint.getNaturalFrequency(8, 2);
-		TestCase.assertEquals(2.0, v);
-	}
-	
-	/**
-	 * Tests the getSpringDampingCoefficient method.
-	 */
-	@Test
-	public void getSpringDampingCoefficient() {
-		double v = TestAbstractJoint.getSpringDampingCoefficient(2, 3, 4);
-		TestCase.assertEquals(48.0, v);
 	}
 }

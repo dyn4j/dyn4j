@@ -353,14 +353,23 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// dont allow a joint that already is assigned to another world
 		if (joint.getOwner() != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldJoint"));
 		
-		// check the bodies
-		T body1 = joint.getBody1();
-		T body2 = joint.getBody2();
+//		// check the bodies
+//		T body1 = joint.getBody1();
+//		T body2 = joint.getBody2();
 		
 		// dont allow someone to add a joint to the world when the joined bodies dont exist yet
-		if (!this.constraintGraph.containsBody(body1) || !this.constraintGraph.containsBody(body2)) {
-			throw new IllegalArgumentException("dynamics.world.addJointWithoutBodies");
+		int bSize = joint.getBodyCount();
+		for (int i = 0; i < bSize; i++) {
+			T body = joint.getBody(i);
+			if (!this.constraintGraph.containsBody(body)) {
+				throw new IllegalArgumentException(Messages.getString("dynamics.world.addJointWithoutBodies"));
+			}
 		}
+		
+//		// dont allow someone to add a joint to the world when the joined bodies dont exist yet
+//		if (!this.constraintGraph.containsBody(body1) || !this.constraintGraph.containsBody(body2)) {
+//			throw new IllegalArgumentException("dynamics.world.addJointWithoutBodies");
+//		}
 		
 		// add the joint to the joint list
 		this.joints.add(joint);
@@ -460,12 +469,27 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		for (int j = 0; j < jSize; j++) {
 			Joint<T> joint = node.joints.get(j);
 			
+			int bSize = joint.getBodyCount();
+			for (int i = 0; i < bSize; i++) {
+				// get the other body
+				T other = joint.getBody(i);
+				
+				// no need to process the same body
+				if (other == body) {
+					continue;
+				}
+				
+				// wake up the other body
+				other.setAtRest(false);
+				// remove the joint from the constraint list of the other node
+				ConstraintGraphNode<T> otherNode = this.constraintGraph.getNode(other);
+				if (otherNode != null) {
+					otherNode.joints.remove(joint);
+				}
+			}
+			
 			// remove the ownership
 			joint.setOwner(null);
-			// get the other body
-			T other = joint.getOtherBody(body);
-			// wake up the other body
-			other.setAtRest(false);
 			
 			// notify of the destroyed joint
 			if (notify) {
@@ -476,12 +500,6 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			
 			// remove the joint from the world
 			this.joints.remove(joint);
-			
-			// remove the joint from the constraint list of the other node
-			ConstraintGraphNode<T> otherNode = this.constraintGraph.getNode(other);
-			if (otherNode != null) {
-				otherNode.joints.remove(joint);
-			}
 		}
 		
 		// clear the node's joints
@@ -620,10 +638,11 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			joint.setOwner(null);
 			
 			// wake the bodies
-			T b1 = joint.getBody1();
-			T b2 = joint.getBody2();
-			b1.setAtRest(false);
-			b2.setAtRest(false);
+			int bSize = joint.getBodyCount();
+			for (int i = 0; i < bSize; i++) {
+				T body = joint.getBody(i);
+				body.setAtRest(false);
+			}
 			
 			this.constraintGraph.removeJoint(joint);
 		}
@@ -721,11 +740,17 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// clear the owner
 			joint.setOwner(null);
 			
-			T b1 = joint.getBody1();
-			T b2 = joint.getBody2();
-			
-			b1.setAtRest(false);
-			b2.setAtRest(false);
+			// wake the bodies
+			int bSize = joint.getBodyCount();
+			for (int j = 0; j < bSize; j++) {
+				T body = joint.getBody(j);
+				body.setAtRest(false);
+			}
+//			T b1 = joint.getBody1();
+//			T b2 = joint.getBody2();
+//			
+//			b1.setAtRest(false);
+//			b2.setAtRest(false);
 
 			if (notify) {
 				for (DestructionListener<T> dl : this.destructionListeners) {
@@ -816,24 +841,6 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		return this.gravity;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.PhysicsWorld#getCoefficientMixer()
-	 */
-	@Override
-	@Deprecated
-	public CoefficientMixer getCoefficientMixer() {
-		return (CoefficientMixer)this.getValueMixer();
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.PhysicsWorld#setCoefficientMixer(org.dyn4j.world.CoefficientMixer)
-	 */
-	@Override
-	@Deprecated
-	public void setCoefficientMixer(CoefficientMixer coefficientMixer) {
-		this.setValueMixer(coefficientMixer);
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.PhysicsWorld#getValueMixer()
 	 */

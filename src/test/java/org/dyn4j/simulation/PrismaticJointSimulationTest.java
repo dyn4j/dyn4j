@@ -109,7 +109,7 @@ public class PrismaticJointSimulationTest {
 		TestCase.assertTrue(v2.x > 0.0);
 		TestCase.assertEquals(2.0, v2.y);
 		TestCase.assertEquals(0.0, b.getTransform().getRotationAngle());
-		TestCase.assertEquals(0.01047, dj.getReactionTorque(invdt), 1e-5);
+		TestCase.assertEquals(-0.52359, dj.getReactionTorque(invdt), 1e-5);
 	}
 	
 	/**
@@ -150,12 +150,12 @@ public class PrismaticJointSimulationTest {
 		Vector2 v2 = b.getWorldCenter();
 		TestCase.assertEquals(0.0, p.distance(v2));
 		
-		b.setLinearVelocity(16.0, 0.0);
+		b.setLinearVelocity(-16.0, 0.0);
 		w.step(1);
 		
 		double invdt = w.getTimeStep().getInverseDeltaTime();
 		
-		// since the bodies are already 2.0 units apparent, nothing should happen
+		// since the bodies are already 2.0 units apart, nothing should happen
 		v2 = b.getWorldCenter();
 		TestCase.assertEquals(0.26666, p.distance(v2), 1e-5);
 		TestCase.assertEquals(0.0, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
@@ -168,7 +168,7 @@ public class PrismaticJointSimulationTest {
 		TestCase.assertEquals(6.0, p.distance(v2), 1e-5);
 		TestCase.assertEquals(753.982, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
 		
-		b.setLinearVelocity(-16.0, 0.0);
+		b.setLinearVelocity(16.0, 0.0);
 		dj.setLimitsEnabled(1.0, 3.0);
 		w.step(1);
 		
@@ -177,7 +177,6 @@ public class PrismaticJointSimulationTest {
 		TestCase.assertEquals(3.0, p.distance(v2), 1e-5);
 		TestCase.assertEquals(753.982, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
 	}
-
 
 	/**
 	 * Tests the bodies with a motor
@@ -208,12 +207,13 @@ public class PrismaticJointSimulationTest {
 		w.addBody(b);
 		
 		Vector2 p = b.getWorldCenter();
-		PrismaticJoint<Body> dj = new PrismaticJoint<Body>(g, b, p, new Vector2(-1.0, 0.0));
+		PrismaticJoint<Body> dj = new PrismaticJoint<Body>(g, b, p, new Vector2(1.0, 0.0));
 		
 		// NOTE: that I've set the rest distance to more than the limits
 		dj.setMaximumMotorForce(1000);
 		dj.setMotorSpeed(10);
 		dj.setMotorEnabled(true);
+		dj.setMaximumMotorForceEnabled(true);
 		w.addJoint(dj);
 		
 		double invdt = w.getTimeStep().getInverseDeltaTime();
@@ -221,9 +221,9 @@ public class PrismaticJointSimulationTest {
 		Vector2 v2 = b.getWorldCenter();
 		Vector2 v = b.getLinearVelocity();
 		TestCase.assertEquals(0.0, p.distance(v2));
-		TestCase.assertEquals(0.0, dj.getJointTranslation());
+		TestCase.assertEquals(0.0, dj.getLinearTranslation());
 		TestCase.assertEquals(0.0, v.x);
-		TestCase.assertEquals(0.0000, dj.getJointSpeed(), 1e-5);
+		TestCase.assertEquals(0.0000, dj.getLinearSpeed(), 1e-5);
 		TestCase.assertEquals(0.0, dj.getMotorForce(invdt));
 		
 		w.step(1);
@@ -232,9 +232,9 @@ public class PrismaticJointSimulationTest {
 		v2 = b.getWorldCenter();
 		v = b.getLinearVelocity();
 		TestCase.assertEquals(0.16666, p.distance(v2), 1e-5);
-		TestCase.assertEquals(0.16666, dj.getJointTranslation(), 1e-5);
+		TestCase.assertEquals(0.16666, dj.getLinearTranslation(), 1e-5);
 		TestCase.assertEquals(10.0000, v.x, 1e-5);
-		TestCase.assertEquals(10.0000, dj.getJointSpeed(), 1e-5);
+		TestCase.assertEquals(10.0000, dj.getLinearSpeed(), 1e-5);
 		TestCase.assertEquals(471.238, dj.getMotorForce(invdt), 1e-3);
 		TestCase.assertEquals(471.238, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
 		
@@ -245,9 +245,9 @@ public class PrismaticJointSimulationTest {
 		v2 = b.getWorldCenter();
 		v = b.getLinearVelocity();
 		TestCase.assertEquals(6.0, p.distance(v2), 1e-5);
-		TestCase.assertEquals(6.0, dj.getJointTranslation(), 1e-5);
+		TestCase.assertEquals(6.0, dj.getLinearTranslation(), 1e-5);
 		TestCase.assertEquals(10.0000, v.x, 1e-5);
-		TestCase.assertEquals(10.0000, dj.getJointSpeed(), 1e-5);
+		TestCase.assertEquals(10.0000, dj.getLinearSpeed(), 1e-5);
 		TestCase.assertEquals(0.0000, dj.getMotorForce(invdt), 1e-3);
 		TestCase.assertEquals(0.0000, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
 
@@ -256,9 +256,9 @@ public class PrismaticJointSimulationTest {
 		v2 = b.getWorldCenter();
 		v = b.getLinearVelocity();
 		TestCase.assertEquals(7.0000, p.distance(v2), 1e-5);
-		TestCase.assertEquals(7.0000, dj.getJointTranslation(), 1e-5);
+		TestCase.assertEquals(7.0000, dj.getLinearTranslation(), 1e-5);
 		TestCase.assertEquals(0.0000, v.x, 1e-5);
-		TestCase.assertEquals(0.0000, dj.getJointSpeed(), 1e-5);
+		TestCase.assertEquals(0.0000, dj.getLinearSpeed(), 1e-5);
 		TestCase.assertEquals(1000.0, dj.getMotorForce(invdt), 1e-3);
 		TestCase.assertEquals(0.0000, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
 		
@@ -268,9 +268,9 @@ public class PrismaticJointSimulationTest {
 		v2 = b.getWorldCenter();
 		v = b.getLinearVelocity();
 		TestCase.assertEquals(6.83333, p.distance(v2), 1e-5);
-		TestCase.assertEquals(6.83333, dj.getJointTranslation(), 1e-5);
+		TestCase.assertEquals(6.83333, dj.getLinearTranslation(), 1e-5);
 		TestCase.assertEquals(-10.0000, v.x, 1e-5);
-		TestCase.assertEquals(-10.0000, dj.getJointSpeed(), 1e-5);
+		TestCase.assertEquals(-10.0000, dj.getLinearSpeed(), 1e-5);
 		TestCase.assertEquals(-471.238, dj.getMotorForce(invdt), 1e-3);
 		TestCase.assertEquals(471.238, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
 		
@@ -280,11 +280,75 @@ public class PrismaticJointSimulationTest {
 		v2 = b.getWorldCenter();
 		v = b.getLinearVelocity();
 		TestCase.assertEquals(6.0000, p.distance(v2), 1e-5);
-		TestCase.assertEquals(6.0000, dj.getJointTranslation(), 1e-5);
+		TestCase.assertEquals(6.0000, dj.getLinearTranslation(), 1e-5);
 		TestCase.assertEquals(0.0000, v.x, 1e-5);
-		TestCase.assertEquals(0.0000, dj.getJointSpeed(), 1e-5);
+		TestCase.assertEquals(0.0000, dj.getLinearSpeed(), 1e-5);
 		TestCase.assertEquals(-1000.0000, dj.getMotorForce(invdt), 1e-3);
 		TestCase.assertEquals(0.0000, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
+	}
+
+	/**
+	 * Tests the bodies with a spring-damper
+	 */
+	@Test
+	public void springOnly() {
+		World<Body> w = new World<Body>();
+		// take gravity out the picture
+		w.setGravity(World.ZERO_GRAVITY);
+		
+		// take friction and damping out of the picture
+		
+		Body g = new Body();
+		BodyFixture gf = g.addFixture(Geometry.createRectangle(10.0, 0.5));
+		gf.setFriction(0.0);
+		g.setMass(MassType.INFINITE);
+		g.setLinearDamping(0.0);
+		g.setAngularDamping(0.0);
+		w.addBody(g);
+		
+		Body b = new Body();
+		BodyFixture bf = b.addFixture(Geometry.createCircle(0.5));
+		bf.setFriction(0.0);
+		b.setMass(MassType.NORMAL);
+		b.translate(0.0, 2.0);
+		b.setLinearDamping(0.0);
+		b.setAngularDamping(0.0);
+		w.addBody(b);
+		
+		Vector2 p = b.getWorldCenter();
+		PrismaticJoint<Body> dj = new PrismaticJoint<Body>(g, b, p, new Vector2(1.0, 0.0));
+		
+		// NOTE: that I've set the rest distance to more than the limits
+		dj.setSpringEnabled(true);
+		dj.setSpringFrequency(8.0);
+		dj.setSpringDamperEnabled(true);
+		dj.setSpringDampingRatio(0.2);
+		dj.setMaximumSpringForceEnabled(true);
+		dj.setMaximumSpringForce(1000.0);
+		dj.setSpringRestOffset(2.0);
+		w.addJoint(dj);
+		
+		double invdt = w.getTimeStep().getInverseDeltaTime();
+		
+		Vector2 v2 = b.getWorldCenter();
+		Vector2 v = b.getLinearVelocity();
+		TestCase.assertEquals(0.0, p.distance(v2));
+		TestCase.assertEquals(0.0, dj.getLinearTranslation());
+		TestCase.assertEquals(0.0, v.x);
+		TestCase.assertEquals(0.0000, dj.getLinearSpeed(), 1e-5);
+		TestCase.assertEquals(0.0, dj.getMotorForce(invdt));
+		
+		w.step(1);
+		
+		// since we set the rest distance to a higher value, the spring should jump in and adjust
+		v2 = b.getWorldCenter();
+		v = b.getLinearVelocity();
+		TestCase.assertEquals(0.35367, p.distance(v2), 1e-5);
+		TestCase.assertEquals(0.35367, dj.getLinearTranslation(), 1e-5);
+		TestCase.assertEquals(21.22065, v.x, 1e-5);
+		TestCase.assertEquals(21.22065, dj.getLinearSpeed(), 1e-5);
+		TestCase.assertEquals(1000.0, dj.getSpringForce(invdt), 1e-3);
+		TestCase.assertEquals(1000.0, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
 	}
 	
 }

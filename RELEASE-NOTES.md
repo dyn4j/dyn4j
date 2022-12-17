@@ -1,3 +1,76 @@
+## v5.0.0 - 
+
+[Milestone](https://github.com/dyn4j/dyn4j/milestone/14?closed=1) |
+[Tag](https://github.com/dyn4j/dyn4j/tree/4.2.2) |
+[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/4.2.2/bundle) |
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=4.2.2)
+
+This major update includes an overhaul of the `org.dyn4j.dynamics.joint` package.  This release sees the class/interface hierarchy changes slightly for all joints.  This change allows the creation of new joints with an arbitrary number of bodies (whereas only one-body or two-body joints were possible before).  This release sees all joints inherit from standard interfaces for things like limits, motors, and springs with the intent to make the API surface identical among all the joints.
+
+A major change from previous versions are the settings for motors and springs.  Before, you would disable these features by setting their values to zero or some default value.  Now, these features are enabled using specific `setXXXEnabled` methods and the values associated with these features are now expecting non-default values - they'll throw `IllegalArgumentException`s.
+
+Another major change from the previous versions is on the WheelJoint and PrismaticJoint.  These joints have had their body arguments reversed so that the given axis of allowed motion is fixed to the first body rather than the second.  This shouldn't impact the code too much, but generally you'd need to reverse the first and second body and potentially negate the axis you had before.
+
+Apart from these breaking changes, many of the joints see new features to help reduce the number of two or more joint interactions.  For example, before you would need to use both a `WeldJoint` and a `RevoluteJoint` if you wanted an angular spring with limits - this is now possible with only a `WeldJoint`.  Another example is if you wanted a linear spring and prismatic motion, you'd need to use both a `PrismaticJoint` and a `DistanceJoint` - now you can just use the `PrismaticJoint`.
+
+Another goal of this release was the update all the documentation on each joint to help with usage.
+
+As always with a major release, all deprecated APIs have been removed.
+
+- DistanceJoint
+	- Added the ability to specify either a spring stiffness or frequency
+	- Added the ability to specify a maximum spring force
+	- Added specific methods to enable all features, lower limit, upper limit, spring, damper, spring max force
+	- An exception is thrown now if you set frequency to zero
+	- An exception is thrown now if you set dampingRatio to zero
+	
+- WheelJoint
+	- Reversed the constructor argument order to specify the frame first, then the wheel for a more natural construction
+	- Added the ability to specify either a spring stiffness or frequency
+	- Added the ability to specify a max spring force
+	- Added the ability to enable the upper and lower limits independently
+	- Added the ability to specify a rest offset for the spring
+	- Added specific methods to enable all features, lower limit, upper limit, spring, damper, spring max force, motor max torque
+	- An exception is thrown now if you set frequency to zero
+	- An exception is thrown now if you set dampingRatio to zero
+	- An exception is thrown now if you set maximumMotorTorque to zero
+	
+- PinJoint
+	- Removed the spring-damper constructor arguments - use the setters now instead
+	- Added the ability to specify either a spring stiffness or frequency
+	- Added specific methods to enable all features, spring, damper, spring max force
+	- Added the ability to disable the spring-damper
+	
+- PrismaticJoint
+	- Reversed the constructor argument order to specify the frame first, then the wheel for a more natural construction
+	- Added the ability to enable the upper and lower limits independently
+	- Added specific methods to enable all features, lower limit, upper limit, motor, motor max torque
+	- An exception is throw now if maximumMotorForce is zero
+	- Added an optional linear spring-damper system identical to the WheelJoint (use either the motor or spring, not both)
+	
+- RevoluteJoint
+	- Added a setMotorMaximumTorqueEnabled method
+	
+- WeldJoint
+	- Added the ability to set a maximum spring torque
+	- Added the ability to specify either a spring stiffness or frequency
+	- Added angular limits (only active when the spring is active)
+	- Added specific methods to enable all features, spring, damper, spring max force, limits
+	- 
+	
+TODO
+- remove the whole messages concept and just output hard coded english?  The nice thing is that they are centralized...
+- review every "throw new" statement
+- review what happens with all joints where both bodies are either infinite, fixed angular, or fixed linear mass
+
+**New Features:**
+- [#229](https://github.com/dyn4j/dyn4j/issues/229) Allow zero density `BodyFixture`s to allow fixtures to participate in collision detection/resolution, but not contribute to the mass or inertia of the body.
+
+**Bug Fixes**
+- [#230](https://github.com/dyn4j/dyn4j/issues/230) Fixed a bug in the `Geometry.minkowskiSum` method where it would compute the wrong sum or fail entirely.
+- [#231](https://github.com/dyn4j/dyn4j/issues/231) Fixed a bug in the `Link.translate` method where it wouldn't recompute the neighbor links normals.
+- [#235](https://github.com/dyn4j/dyn4j/issues/235) Fixed a bug in the `Mass.setType` method where it would allow a user to set the type to something inconsistent with the mass properties (mass and inertia). This could be a breaking change if code is relying on the `setType` method to always set the type (it's now ignored when given type is invalid).
+
 ## v4.2.2 - October 1st, 2022
 
 [Milestone](https://github.com/dyn4j/dyn4j/milestone/14?closed=1) |

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -73,7 +73,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link AbstractPhysicsWorld} class.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 4.0.0
  */
 public class AbstractPhysicsWorldTest {
@@ -942,29 +942,6 @@ public class AbstractPhysicsWorldTest {
 	}
 	
 	/**
-	 * Tests the get/set CoefficientMixer method.
-	 */
-	@Test
-	@Deprecated
-	public void getSetCoefficientMixer() {
-		TestWorld w = new TestWorld();
-		
-		TestCase.assertFalse(CoefficientMixer.class == w.getValueMixer().getClass());
-		
-		CoefficientMixer cm = new CoefficientMixer() {
-			@Override
-			public double mixRestitution(double restitution1, double restitution2) { return (restitution1 + restitution2) * 0.5; }
-			@Override
-			public double mixFriction(double friction1, double friction2) { return (friction1 + friction2) * 0.5; }
-			@Override
-			public double mixRestitutionVelocity(double restitutionVelocity1, double restitutionVelocity2) { return 0; }
-		};
-		w.setCoefficientMixer(cm);
-		
-		TestCase.assertEquals(cm, w.getCoefficientMixer());
-	}
-	
-	/**
 	 * Tests the get/set ValueMixer method.
 	 */
 	@Test
@@ -984,16 +961,6 @@ public class AbstractPhysicsWorldTest {
 		w.setValueMixer(cm);
 		
 		TestCase.assertEquals(cm, w.getValueMixer());
-	}
-	
-	/**
-	 * Tests the set coefficient mixer method passing a null value.
-	 */
-	@Test(expected = NullPointerException.class)
-	@Deprecated
-	public void setNullCoefficientMixer() {
-		TestWorld w = new TestWorld();
-		w.setCoefficientMixer(null);
 	}
 	
 	/**
@@ -1512,14 +1479,14 @@ public class AbstractPhysicsWorldTest {
 		w.addBody(b1);
 		w.addBody(b2);
 		
-		Joint<Body> joint = new PinJoint<Body>(b1, new Vector2(), 0.8, 0.2, 1000);
+		PinJoint<Body> joint = new PinJoint<Body>(b1, new Vector2());
 		
 		w.addJoint(joint);
 		
 		w.shift(new Vector2(5.0, 6.0));
 		
-		TestCase.assertEquals(5.0, joint.getAnchor1().x);
-		TestCase.assertEquals(6.0, joint.getAnchor1().y);
+		TestCase.assertEquals(5.0, joint.getAnchor().x);
+		TestCase.assertEquals(6.0, joint.getAnchor().y);
 	}
 	
 	/**

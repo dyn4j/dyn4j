@@ -85,10 +85,13 @@ public class MotorJointSimulationTest {
 		mj.setMaximumTorque(10.0);
 		
 		w.step(5);
+		double invdt = w.getTimeStep().getInverseDeltaTime();
 		
 		// The bodies should be approaching the linear/angular targets
 		TestCase.assertTrue(b.getWorldCenter().distance(g.getWorldCenter()) > 2.0);
 		TestCase.assertTrue(b.getTransform().getRotationAngle() > Math.toRadians(5));
+		TestCase.assertEquals(100.0, mj.getReactionForce(invdt).y);
+		TestCase.assertEquals(-10.0, mj.getReactionTorque(invdt));
 		
 		w.step(20);
 		

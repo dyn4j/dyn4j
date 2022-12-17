@@ -88,9 +88,17 @@ public class DistanceJointSimulationTest {
 		w.getSettings().setPositionConstraintSolverIterations(10);
 		w.step(4);
 		
+		double invdt = w.getTimeStep().getInverseDeltaTime();
+		
 		v1 = g.getWorldCenter();
 		v2 = b.getWorldCenter();
 		TestCase.assertEquals(v1.distance(v2), dj.getRestDistance(), 1e-5);	
+		// always zero
+		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt));
+		// position correction doesn't store impulses
+		TestCase.assertEquals(0.0, dj.getReactionForce(invdt).x, 1e-3);
+		TestCase.assertEquals(0.0, dj.getReactionForce(invdt).y, 1e-3);
+		TestCase.assertEquals(0.0, dj.getSpringForce(invdt), 1e-3);
 	}
 	
 	/**
@@ -209,8 +217,10 @@ public class DistanceJointSimulationTest {
 		// NOTE: that I've set the rest distance to more than the limits
 		dj.setRestDistance(10.0);
 		dj.setLimitsEnabled(1.0, 5.0);
-		dj.setFrequency(8.0);
-		dj.setDampingRatio(0.2);
+		dj.setSpringEnabled(true);
+		dj.setSpringFrequency(8.0);
+		dj.setSpringDamperEnabled(true);
+		dj.setSpringDampingRatio(0.2);
 		w.addJoint(dj);
 		
 		Vector2 v1 = g.getWorldCenter();
@@ -259,8 +269,10 @@ public class DistanceJointSimulationTest {
 		// NOTE: that I've set the rest distance to more than the limits
 		dj.setRestDistance(1.0);
 		dj.setLimitsEnabled(3.0, 5.0);
-		dj.setFrequency(8.0);
-		dj.setDampingRatio(0.2);
+		dj.setSpringEnabled(true);
+		dj.setSpringFrequency(8.0);
+		dj.setSpringDamperEnabled(true);
+		dj.setSpringDampingRatio(0.2);
 		w.addJoint(dj);
 		
 		Vector2 v1 = g.getWorldCenter();
@@ -309,8 +321,10 @@ public class DistanceJointSimulationTest {
 		// NOTE: that I've set the rest distance to more than the limits
 		dj.setRestDistance(3.0);
 		dj.setLimitsEnabled(1.0, 5.0);
-		dj.setFrequency(8.0);
-		dj.setDampingRatio(0.2);
+		dj.setSpringEnabled(true);
+		dj.setSpringFrequency(8.0);
+		dj.setSpringDamperEnabled(true);
+		dj.setSpringDampingRatio(0.2);
 		w.addJoint(dj);
 		
 		Vector2 v1 = g.getWorldCenter();
@@ -358,8 +372,10 @@ public class DistanceJointSimulationTest {
 		
 		// NOTE: that I've set the rest distance to more than the limits
 		dj.setRestDistance(3.0);
-		dj.setFrequency(8.0);
-		dj.setDampingRatio(0.2);
+		dj.setSpringEnabled(true);
+		dj.setSpringFrequency(8.0);
+		dj.setSpringDamperEnabled(true);
+		dj.setSpringDampingRatio(0.2);
 		w.addJoint(dj);
 		
 		Vector2 v1 = g.getWorldCenter();
@@ -368,10 +384,95 @@ public class DistanceJointSimulationTest {
 		
 		w.step(30);
 		
+		double invdt = w.getTimeStep().getInverseDeltaTime();
+		
 		// the spring, because the rest distance is 3, should push them to the
 		// 3.0 since it's between the upper and lower limit
 		v1 = g.getWorldCenter();
 		v2 = b.getWorldCenter();
 		TestCase.assertEquals(3.0, v1.distance(v2), 1e-3);
+		// always zero
+		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt));
+		// position correction doesn't store impulses
+		TestCase.assertEquals(0.0, dj.getReactionForce(invdt).x, 1e-3);
+		TestCase.assertEquals(-0.045, dj.getReactionForce(invdt).y, 1e-3);
+	}
+	
+
+	/**
+	 * Tests the body with a spring and maximum force.
+	 */
+	@Test
+	public void springWithMaxForce() {
+		World<Body> w = new World<Body>();
+		// take gravity out the picture
+		w.setGravity(World.ZERO_GRAVITY);
+		
+		// take friction and damping out of the picture
+		
+		Body g = new Body();
+		BodyFixture gf = g.addFixture(Geometry.createRectangle(10.0, 0.5));
+		gf.setFriction(0.0);
+		g.setMass(MassType.INFINITE);
+		g.setLinearDamping(0.0);
+		g.setAngularDamping(0.0);
+		w.addBody(g);
+		
+		Body b = new Body();
+		BodyFixture bf = b.addFixture(Geometry.createCircle(0.5));
+		bf.setFriction(0.0);
+		b.setMass(MassType.NORMAL);
+		b.translate(0.0, 2.0);
+		b.setLinearDamping(0.0);
+		b.setAngularDamping(0.0);
+		w.addBody(b);
+		
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(g, b, g.getWorldCenter(), b.getWorldCenter());
+		
+		// NOTE: that I've set the rest distance to more than the limits
+		dj.setRestDistance(3.0);
+		dj.setSpringEnabled(true);
+		dj.setSpringFrequency(8.0);
+		dj.setSpringDamperEnabled(true);
+		dj.setSpringDampingRatio(0.2);
+		dj.setMaximumSpringForceEnabled(true);
+		dj.setMaximumSpringForce(200.0);
+		w.addJoint(dj);
+		
+		Vector2 v1 = g.getWorldCenter();
+		Vector2 v2 = b.getWorldCenter();
+		TestCase.assertEquals(2.0, v1.distance(v2));
+		
+		w.step(1);
+		
+		double invdt = w.getTimeStep().getInverseDeltaTime();
+		
+		// the spring, because the rest distance is 3, should push them to the
+		// 3.0 since it's between the upper and lower limit
+		v1 = g.getWorldCenter();
+		v2 = b.getWorldCenter();
+		TestCase.assertTrue(v1.distance(v2) > 2.0);
+		// always zero
+		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt));
+		// position correction doesn't store impulses
+		TestCase.assertEquals(0.0, dj.getReactionForce(invdt).x, 1e-3);
+		TestCase.assertEquals(-200.0, dj.getReactionForce(invdt).y, 1e-3);
+		TestCase.assertEquals(200.0, dj.getSpringForce(invdt), 1e-3);
+		
+		
+		// apply limits and it should be the same
+		dj.setLimitsEnabled(0.0, 4.0);
+		w.step(1);
+		
+		// the spring, because the rest distance is 3, should push them to the
+		// 3.0 since it's between the upper and lower limit
+		v1 = g.getWorldCenter();
+		v2 = b.getWorldCenter();
+		TestCase.assertTrue(v1.distance(v2) > 2.0);
+		// always zero
+		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt));
+		// position correction doesn't store impulses
+		TestCase.assertEquals(0.0, dj.getReactionForce(invdt).x, 1e-3);
+		TestCase.assertEquals(-200.0, dj.getReactionForce(invdt).y, 1e-3);
 	}
 }

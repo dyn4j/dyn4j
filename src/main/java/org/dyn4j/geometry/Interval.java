@@ -29,7 +29,7 @@ import org.dyn4j.resources.Messages;
 /**
  * Represents a one dimensional numeric {@link Interval}.
  * @author William Bittle
- * @version 4.2.1
+ * @version 5.0.0
  * @since 1.0.0
  */
 public class Interval {
@@ -223,17 +223,6 @@ public class Interval {
 	 */
 	public boolean isDegenerate(double error) {
 		return Math.abs(this.max - this.min) <= error;
-	}
-	
-	/**
-	 * Returns true if the given {@link Interval} is contained in this {@link Interval} exclusively.
-	 * @param interval the {@link Interval}
-	 * @return boolean
-	 * @deprecated Deprecated in 4.2.1. Use {@link #containsExclusive(Interval)} instead.
-	 */
-	@Deprecated
-	public boolean contains(Interval interval) {
-		return interval.min > this.min && interval.max < this.max;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,6 +26,7 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
+import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
@@ -45,7 +46,7 @@ import org.dyn4j.resources.Messages;
  * By default the lower and upper limit angles are set to the current angle 
  * between the bodies.  When the lower and upper limits are equal, the bodies 
  * rotate together and are not allowed rotate relative to one another.  By
- * default the limits are disabled.
+ * default the limits are enabled.
  * <p>
  * If the lower and upper limits are set explicitly, the values must follow 
  * these restrictions:
@@ -55,9 +56,9 @@ import org.dyn4j.resources.Messages;
  * <li>upper limit &lt; 180</li>
  * </ul> 
  * To create a joint with limits outside of this range use the 
- * {@link #setReferenceAngle(double)} method.  This method sets the baseline 
- * angle for the joint, which represents 0 radians in the context of the 
- * limits.  For example:
+ * {@link #setLimitsReferenceAngle(double)} method.  This method sets the 
+ * baseline angle for the joint, which represents 0 radians in the context of
+ * the limits.  For example:
  * <pre>
  * // we would like the joint limits to be [30, 260]
  * // this is the same as the limits [-60, 170] if the reference angle is 90
@@ -65,28 +66,26 @@ import org.dyn4j.resources.Messages;
  * joint.setReferenceAngle(Math.toRadians(90));
  * </pre>
  * The angle joint also allows a ratio value that allow the bodies to rotate at
- * a specified value relative to the other.  This can be used to simulate gears.
+ * a specified value relative to the other.  This can be used to simulate 
+ * gears.
  * <p>
  * Since the AngleJoint class defaults the upper and lower limits to the same 
- * value and by default the limits are enabled, you will need to modify the 
- * limits, or disable the limit to see the effect of the ratio.
- * <p>
- * When the angle between the bodies reaches a limit, and limits are enabled, 
- * the ratio will be turned off.
- * <p>
- * NOTE: The {@link #getAnchor1()} and {@link #getAnchor2()} methods return
- * the world space center points for the joined bodies.  This constraint 
- * doesn't need anchor points.
+ * value and by default the limits are enabled, you will need to disable the 
+ * limit to see the effect of the ratio.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 2.2.2
- * @see <a href="http://www.dyn4j.org/documentation/joints/#Angle_Joint" target="_blank">Documentation</a>
- * @see <a href="http://www.dyn4j.org/2010/12/angle-constraint/" target="_blank">Angle Constraint</a>
+ * @see <a href="https://www.dyn4j.org/pages/joints#Angle_Joint" target="_blank">Documentation</a>
+ * @see <a href="https://www.dyn4j.org/2010/12/angle-constraint/" target="_blank">Angle Constraint</a>
  * @param <T> the {@link PhysicsBody} type
  */
-public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
+public class AngleJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T> implements AngularLimitsJoint, PairedBodyJoint<T>, Joint<T>, Shiftable, DataContainer, Ownable {
+	// gear constraint
+	
 	/** The angular velocity ratio */
 	protected double ratio;
+	
+	// limits
 	
 	/** The lower limit */
 	protected double lowerLimit;
@@ -95,7 +94,7 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	protected double upperLimit;
 	
 	/** Whether the limits are enabled */
-	protected boolean limitEnabled;
+	protected boolean limitsEnabled;
 	
 	/** The initial angle between the two bodies */
 	protected double referenceAngle;
@@ -131,9 +130,7 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	 */
 	public AngleJoint(T body1, T body2) {
 		// default no collision allowed
-		super(body1, body2, false);
-		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
+		super(body1, body2);
 		// initialize
 		this.ratio = 1.0;
 		this.impulse = 0.0;
@@ -143,7 +140,7 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		this.upperLimit = this.referenceAngle;
 		this.lowerLimit = this.referenceAngle;
 		// set enabled
-		this.limitEnabled = true;
+		this.limitsEnabled = true;
 		
 	}
 	
@@ -157,7 +154,7 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		  .append("|Ratio=").append(this.ratio)
 		  .append("|LowerLimit=").append(this.lowerLimit)
 		  .append("|UpperLimit=").append(this.upperLimit)
-		  .append("|IsLimitEnabled=").append(this.limitEnabled)
+		  .append("|IsLimitEnabled=").append(this.limitsEnabled)
 		  .append("|ReferenceAngle=").append(this.referenceAngle)
 		  .append("]");
 		return sb.toString();
@@ -185,13 +182,13 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		this.angle = this.getRelativeRotation();
 		
 		// handle no limits (or if the two bodies have fixed rotation)
-		if (!this.limitEnabled || this.fixedRotation) {
+		if (!this.limitsEnabled || this.fixedRotation) {
 			this.lowerImpulse = 0.0;
 			this.upperImpulse = 0.0;
 		}
 		
 		// handle the ratio changing or limits be activated
-		if (this.limitEnabled || this.ratio == 1.0) {
+		if (this.limitsEnabled || this.ratio == 1.0) {
 			this.impulse = 0.0;
 		}
 		
@@ -228,47 +225,49 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		double invI2 = m2.getInverseInertia();
 		
 		// check if the limit constraint is enabled
-		if (this.limitEnabled && !this.fixedRotation) {
+		if (this.limitsEnabled && !this.fixedRotation) {
 			// lower limit
 			{
 				double C = this.angle - this.lowerLimit;
 				double Cdot = this.body1.getAngularVelocity() - this.body2.getAngularVelocity();
-				double impulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * step.getInverseDeltaTime());
-				double oldImpulse = this.lowerImpulse;
-				this.lowerImpulse = Math.max(this.lowerImpulse + impulse, 0.0);
-				impulse = this.lowerImpulse - oldImpulse;
+				double stepImpulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * step.getInverseDeltaTime());
 				
-				this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * impulse);
-				this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * impulse);
+				double currentAccumulatedImpulse = this.lowerImpulse;
+				this.lowerImpulse = Math.max(this.lowerImpulse + stepImpulse, 0.0);
+				stepImpulse = this.lowerImpulse - currentAccumulatedImpulse;
+				
+				this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * stepImpulse);
+				this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * stepImpulse);
 			}
 			
 			// upper limit
 			{
 				double C = this.upperLimit - this.angle;
 				double Cdot = this.body2.getAngularVelocity() - this.body1.getAngularVelocity();
-				double impulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * step.getInverseDeltaTime());
-				double oldImpulse = this.upperImpulse;
-				this.upperImpulse = Math.max(this.upperImpulse + impulse, 0.0);
-				impulse = this.upperImpulse - oldImpulse;
+				double stepImpulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * step.getInverseDeltaTime());
 				
-				this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * impulse);
-				this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * impulse);
+				double currentAccumulatedImpulse = this.upperImpulse;
+				this.upperImpulse = Math.max(this.upperImpulse + stepImpulse, 0.0);
+				stepImpulse = this.upperImpulse - currentAccumulatedImpulse;
+				
+				this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * stepImpulse);
+				this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * stepImpulse);
 			}
 		}
 
 		// apply the ratio
-		if (!this.limitEnabled && this.ratio != 1.0) {
+		if (!this.limitsEnabled) {
 			// the limit is inactive and the ratio is not one
 			// get the relative velocity
 			double C = this.body1.getAngularVelocity() - this.ratio * this.body2.getAngularVelocity();
 			
 			// get the impulse required to obtain the speed
-			double impulse = this.axialMass * -C;
-			this.impulse += impulse;
+			double stepImpulse = this.axialMass * -C;
+			this.impulse += stepImpulse;
 			
 			// apply the impulse
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * impulse);
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * impulse * Math.signum(this.ratio));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * stepImpulse);
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * stepImpulse * Math.signum(this.ratio));
 		}
 	}
 	
@@ -278,7 +277,7 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	@Override
 	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
 		// solve position constraint for limits
-		if (this.limitEnabled && !this.fixedRotation) {
+		if (this.limitsEnabled && !this.fixedRotation) {
 			double angularTolerance = settings.getAngularTolerance();
 			double maxAngularCorrection = settings.getMaximumAngularCorrection();
 			
@@ -323,28 +322,6 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		if (rr < -Math.PI) rr += Geometry.TWO_PI;
 		if (rr > Math.PI) rr -= Geometry.TWO_PI;
 		return rr;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Not applicable to this joint. 
-	 * This method returns the first body's world center.
-	 */
-	@Override
-	public Vector2 getAnchor1() {
-		return this.body1.getWorldCenter();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Not applicable to this joint.
-	 * This method returns the second body's world center.
-	 */
-	@Override
-	public Vector2 getAnchor2() {
-		return this.body2.getWorldCenter();
 	}
 	
 	/**
@@ -412,50 +389,43 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		this.ratio = ratio;
 	}
 	
-	/**
-	 * Sets whether the angle limits are enabled.
-	 * @param flag true if the angle limits should be enforced
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimitEnabled(boolean)
 	 */
-	public void setLimitEnabled(boolean flag) {
+	public void setLimitsEnabled(boolean flag) {
 		// only wake the bodies if the flag changes
-		if (this.limitEnabled != flag) {
+		if (this.limitsEnabled != flag) {
 			// wake up both bodies
 			this.body1.setAtRest(false);
 			this.body2.setAtRest(false);
 			// set the flag
-			this.limitEnabled = flag;
+			this.limitsEnabled = flag;
 		}
 	}
 	
-	/**
-	 * Returns true if the limit is enabled.
-	 * @return boolean true if the limit is enabled
-	 * @since 3.0.1
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#isLimitEnabled()
 	 */
-	public boolean isLimitEnabled() {
-		return this.limitEnabled;
+	public boolean isLimitsEnabled() {
+		return this.limitsEnabled;
 	}
 	
-	/**
-	 * Returns the upper limit in radians.
-	 * @return double
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#getUpperLimit()
 	 */
 	public double getUpperLimit() {
 		return this.upperLimit;
 	}
 	
-	/**
-	 * Sets the upper limit in radians.
-	 * <p>
-	 * See the class documentation for more details on the limit ranges.
-	 * @param upperLimit the upper limit in radians
-	 * @throws IllegalArgumentException if upperLimit is less than the current lower limit
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setUpperLimit(double)
 	 */
 	public void setUpperLimit(double upperLimit) {
 		// make sure the minimum is less than or equal to the maximum
 		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
+		
 		if (this.upperLimit != upperLimit) {
-			if (this.limitEnabled) {
+			if (this.limitsEnabled) {
 				// wake up both bodies
 				this.body1.setAtRest(false);
 				this.body2.setAtRest(false);
@@ -467,26 +437,21 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		}
 	}
 	
-	/**
-	 * Returns the lower limit in radians.
-	 * @return double
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#getLowerLimit()
 	 */
 	public double getLowerLimit() {
 		return this.lowerLimit;
 	}
 	
-	/**
-	 * Sets the lower limit in radians.
-	 * <p>
-	 * See the class documentation for more details on the limit ranges.
-	 * @param lowerLimit the lower limit in radians
-	 * @throws IllegalArgumentException if lowerLimit is greater than the current upper limit
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLowerLimit(double)
 	 */
 	public void setLowerLimit(double lowerLimit) {
 		// make sure the minimum is less than or equal to the maximum
 		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
 		if (this.lowerLimit != lowerLimit) {
-			if (this.limitEnabled) {
+			if (this.limitsEnabled) {
 				// wake up both bodies
 				this.body1.setAtRest(false);
 				this.body2.setAtRest(false);
@@ -498,19 +463,14 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		}
 	}
 	
-	/**
-	 * Sets both the lower and upper limits.
-	 * <p>
-	 * See the class documentation for more details on the limit ranges.
-	 * @param lowerLimit the lower limit in radians
-	 * @param upperLimit the upper limit in radians
-	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimits(double, double)
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
 		// make sure the min < max
 		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
 		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
-			if (this.limitEnabled) {
+			if (this.limitsEnabled) {
 				// wake up the bodies
 				this.body1.setAtRest(false);
 				this.body2.setAtRest(false);
@@ -524,30 +484,22 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		}
 	}
 
-	/**
-	 * Sets both the lower and upper limits and enables them.
-	 * <p>
-	 * See the class documentation for more details on the limit ranges.
-	 * @param lowerLimit the lower limit in radians
-	 * @param upperLimit the upper limit in radians
-	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimitsEnabled(double, double)
 	 */
 	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
 		// enable the limits
-		this.setLimitEnabled(true);
+		this.setLimitsEnabled(true);
 		// set the values
 		this.setLimits(lowerLimit, upperLimit);
 	}
 	
-	/**
-	 * Sets both the lower and upper limits to the given limit.
-	 * <p>
-	 * See the class documentation for more details on the limit ranges.
-	 * @param limit the desired limit
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimits(double)
 	 */
 	public void setLimits(double limit) {
 		if (this.lowerLimit != limit || this.upperLimit != limit) {
-			if (this.limitEnabled) {
+			if (this.limitsEnabled) {
 				// wake up the bodies
 				this.body1.setAtRest(false);
 				this.body2.setAtRest(false);
@@ -561,42 +513,31 @@ public class AngleJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		}
 	}
 	
-	/**
-	 * Sets both the lower and upper limits to the given limit and enables them.
-	 * <p>
-	 * See the class documentation for more details on the limit ranges.
-	 * @param limit the desired limit
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimitsEnabled(double)
 	 */
 	public void setLimitsEnabled(double limit) {
 		this.setLimitsEnabled(limit, limit);
 	}
 	
-	/**
-	 * Returns the reference angle.
-	 * <p>
-	 * The reference angle is the angle calculated when the joint was created from the
-	 * two joined bodies.  The reference angle is the angular difference between the
-	 * bodies.
-	 * @return double
-	 * @since 3.0.1
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#getLimitsReferenceAngle()
 	 */
-	public double getReferenceAngle() {
+	public double getLimitsReferenceAngle() {
 		return this.referenceAngle;
 	}
 	
-	/**
-	 * Sets the reference angle.
-	 * <p>
-	 * This method can be used to set the reference angle to override the computed
-	 * reference angle from the constructor.  This is useful in recreating the joint
-	 * from a current state.
-	 * <p>
-	 * See the class documentation for more details.
-	 * @param angle the reference angle in radians
-	 * @see #getReferenceAngle()
-	 * @since 3.0.1
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimitsReferenceAngle(double)
 	 */
-	public void setReferenceAngle(double angle) {
-		this.referenceAngle = angle;
+	public void setLimitsReferenceAngle(double angle) {
+		if (this.referenceAngle != angle) {
+			this.referenceAngle = angle;
+			
+			if (this.limitsEnabled) {
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
 	}
 }

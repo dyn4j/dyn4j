@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,6 +26,7 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
+import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
@@ -69,12 +70,12 @@ import org.dyn4j.resources.Messages;
  * character body will move and rotate smoothly, participating in any collision
  * or with other joints to match the infinite mass body.
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.0
  * @since 3.1.0
- * @see <a href="http://www.dyn4j.org/documentation/joints/#Motor_Joint" target="_blank">Documentation</a>
+ * @see <a href="https://www.dyn4j.org/pages/joints#Motor_Joint" target="_blank">Documentation</a>
  * @param <T> the {@link PhysicsBody} type
  */
-public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
+public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T> implements PairedBodyJoint<T>, Joint<T>, Shiftable, DataContainer, Ownable {
 	/** The linear target distance from body1's world space center */
 	protected final Vector2 linearTarget;
 	
@@ -121,9 +122,7 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	 */
 	public MotorJoint(T body1, T body2) {
 		// default no collision allowed
-		super(body1, body2, false);
-		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
+		super(body1, body2);
 		// default the linear target to body2's position in body1's frame
 		this.linearTarget = body1.getLocalPoint(body2.getWorldCenter());
 		// get the angular target for the joint
@@ -291,28 +290,6 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		if (rr < -Math.PI) rr += Geometry.TWO_PI;
 		if (rr > Math.PI) rr -= Geometry.TWO_PI;
 		return rr;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Not applicable to this joint.
-	 * Returns the first body's world center.
-	 */
-	@Override
-	public Vector2 getAnchor1() {
-		return this.body1.getWorldCenter();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Not applicable to this joint.
-	 * Returns the second body's world center.
-	 */
-	@Override
-	public Vector2 getAnchor2() {
-		return this.body2.getWorldCenter();
 	}
 	
 	/* (non-Javadoc)

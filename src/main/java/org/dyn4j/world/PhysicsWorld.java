@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -50,7 +50,7 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * This interface also expands on the {@link CollisionWorld} adding other features like joints, gravity,
  * etc.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
@@ -465,15 +465,6 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	// algorithms
 	
 	/**
-	 * Returns the {@link CoefficientMixer}.
-	 * @return {@link CoefficientMixer}
-	 * @see #setCoefficientMixer(CoefficientMixer)
-	 * @deprecated Deprecated in 4.2.0. Replaced by {@link #getValueMixer()}
-	 */
-	@Deprecated
-	public CoefficientMixer getCoefficientMixer();
-	
-	/**
 	 * Returns the {@link ValueMixer}.
 	 * @return {@link ValueMixer}
 	 * @see #setValueMixer(ValueMixer) 
@@ -481,24 +472,6 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 */
 	public ValueMixer getValueMixer();
 	
-	/**
-	 * Sets the {@link CoefficientMixer}.
-	 * <p>
-	 * A {@link CoefficientMixer} is an implementation of mixing functions for various
-	 * coefficients used in contact solving.  Common coefficients are restitution and 
-	 * friction.  Since each {@link BodyFixture} can have it's own value for these 
-	 * coefficients, the {@link CoefficientMixer} is used to mathematically combine them
-	 * into one coefficient to be used in contact resolution.
-	 * <p>
-	 * {@link CoefficientMixer#DEFAULT_MIXER} is the default.
-	 * @param coefficientMixer the coefficient mixer
-	 * @throws NullPointerException if coefficientMixer is null
-	 * @see CoefficientMixer
-	 * @deprecated Deprecated in 4.2.0. Use {@link #setValueMixer(ValueMixer)} instead.
-	 */
-	@Deprecated
-	public void setCoefficientMixer(CoefficientMixer coefficientMixer);
-
 	/**
 	 * Sets the {@link ValueMixer}.
 	 * <p>

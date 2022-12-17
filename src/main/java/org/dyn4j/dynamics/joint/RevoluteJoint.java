@@ -26,6 +26,7 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
+import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
@@ -48,7 +49,8 @@ import org.dyn4j.resources.Messages;
  * By default the lower and upper limit angles are set to the current angle 
  * between the bodies.  When the lower and upper limits are equal, the bodies 
  * rotate together and are not allowed rotate relative to one another.  By
- * default the limits are disabled.
+ * default the limits are disabled.  If you want the lower and upper limit to
+ * be the same, use a {@link WeldJoint} instead.
  * <p>
  * If the lower and upper limits are set explicitly, the values must follow 
  * these restrictions:
@@ -58,9 +60,9 @@ import org.dyn4j.resources.Messages;
  * <li>upper limit &lt; 180</li>
  * </ul> 
  * To create a joint with limits outside of this range use the 
- * {@link #setReferenceAngle(double)} method.  This method sets the baseline 
- * angle for the joint, which represents 0 radians in the context of the 
- * limits.  For example:
+ * {@link #setLimitsReferenceAngle(double)} method.  This method sets the 
+ * baseline angle for the joint, which represents 0 radians in the context of
+ * the limits.  For example:
  * <pre>
  * // we would like the joint limits to be [30, 260]
  * // this is the same as the limits [-60, 170] if the reference angle is 90
@@ -70,34 +72,35 @@ import org.dyn4j.resources.Messages;
  * This joint also supports a motor.  The motor is an angular motor about the
  * anchor point.  The motor speed can be positive or negative to indicate a
  * clockwise or counter-clockwise rotation.  The maximum motor torque must be 
- * greater than zero for the motor to apply any motion.
+ * greater than zero for the motor to apply any motion, but can be disabled 
+ * or enabled using {@link #setMaximumMotorTorqueEnabled(boolean)}.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 1.0.0
- * @see <a href="http://www.dyn4j.org/documentation/joints/#Revolute_Joint" target="_blank">Documentation</a>
- * @see <a href="http://www.dyn4j.org/2010/07/point-to-point-constraint/" target="_blank">Point-to-Point Constraint</a>
+ * @see <a href="https://www.dyn4j.org/pages/joints#Revolute_Joint" target="_blank">Documentation</a>
+ * @see <a href="https://www.dyn4j.org/2010/07/point-to-point-constraint/" target="_blank">Point-to-Point Constraint</a>
  * @param <T> the {@link PhysicsBody} type
  */
-public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
+public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T> implements AngularLimitsJoint, AngularMotorJoint, PairedBodyJoint<T>, Joint<T>, Shiftable, DataContainer, Ownable {
 	/** The local anchor point on the first {@link PhysicsBody} */
 	protected final Vector2 localAnchor1;
 	
 	/** The local anchor point on the second {@link PhysicsBody} */
 	protected final Vector2 localAnchor2;
 
-	/** The initial angle between the two {@link PhysicsBody}s */
-	protected double referenceAngle;
-	
 	// limits
 	
 	/** Whether the {@link Joint} limits are enabled or not */
-	protected boolean limitEnabled;
+	protected boolean limitsEnabled;
 	
 	/** The upper limit of the {@link Joint} */
 	protected double upperLimit;
 	
 	/** The lower limit of the {@link Joint} */
 	protected double lowerLimit;
+
+	/** The initial angle between the two {@link PhysicsBody}s */
+	protected double referenceAngle;
 	
 	// motor
 	
@@ -107,8 +110,11 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	/** The target motor speed; in radians / second */
 	protected double motorSpeed;
 	
+	/** True if the motor maximum torque has been enabled */
+	protected boolean motorMaximumTorqueEnabled;
+	
 	/** The maximum torque the motor can apply */
-	protected double maximumMotorTorque;
+	protected double motorMaximumTorque;
 
 	// current state
 
@@ -139,10 +145,10 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	private double motorImpulse;
 	
 	/** The impulse applied by the lower limit */
-	private double lowerImpulse;
+	private double lowerLimitImpulse;
 	
 	/** The impulse applied by the upper limit */
-	private double upperImpulse;
+	private double upperLimitImpulse;
 
 	/**
 	 * Minimal constructor.
@@ -154,9 +160,7 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	 */
 	public RevoluteJoint(T body1, T body2, Vector2 anchor) {
 		// default to no collision allowed between the bodies
-		super(body1, body2, false);
-		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
+		super(body1, body2);
 		// make sure the anchor point is not null
 		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor"));
 		
@@ -170,12 +174,13 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		// default limits
 		this.lowerLimit = this.referenceAngle;
 		this.upperLimit = this.referenceAngle;
-		this.limitEnabled = false;
+		this.limitsEnabled = false;
 		
 		// motor defaults
 		this.motorSpeed = 0.0;
-		this.maximumMotorTorque = 1000.0;
+		this.motorMaximumTorque = 1000.0;
 		this.motorEnabled = false;
+		this.motorMaximumTorqueEnabled = false;
 		
 		this.axialMass = 0.0;
 		this.fixedRotation = false;
@@ -184,8 +189,8 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		this.angle = 0.0;
 		
 		this.impulse = new Vector2();
-		this.lowerImpulse = 0.0;
-		this.upperImpulse = 0.0;
+		this.lowerLimitImpulse = 0.0;
+		this.upperLimitImpulse = 0.0;
 		this.motorImpulse = 0.0;
 		
 		this.K = new Matrix22();
@@ -201,8 +206,8 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		  .append("|Anchor=").append(this.getAnchor1())
 		  .append("|IsMotorEnabled=").append(this.motorEnabled)
 		  .append("|MotorSpeed=").append(this.motorSpeed)
-		  .append("|MaximumMotorTorque=").append(this.maximumMotorTorque)
-		  .append("|IsLimitEnabled=").append(this.limitEnabled)
+		  .append("|MaximumMotorTorque=").append(this.motorMaximumTorque)
+		  .append("|IsLimitEnabled=").append(this.limitsEnabled)
 		  .append("|LowerLimit=").append(this.lowerLimit)
 		  .append("|UpperLimit=").append(this.upperLimit)
 		  .append("|ReferenceAngle=").append(this.referenceAngle)
@@ -264,9 +269,9 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		this.angle = this.getRelativeRotation();
 		
 		// handle no limits (or if the two bodies have fixed rotation)
-		if (!this.limitEnabled || this.fixedRotation) {
-			this.lowerImpulse = 0.0;
-			this.upperImpulse = 0.0;
+		if (!this.limitsEnabled || this.fixedRotation) {
+			this.lowerLimitImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
 		}
 		
 		// handle no motor (or if the two bodies have fixed rotation)
@@ -280,10 +285,10 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			
 			this.impulse.multiply(dtr);
 			this.motorImpulse *= dtr;
-			this.lowerImpulse *= dtr;
-			this.upperImpulse *= dtr;
+			this.lowerLimitImpulse *= dtr;
+			this.upperLimitImpulse *= dtr;
 			
-			double axialImpulse = this.motorImpulse + this.lowerImpulse - this.upperImpulse;
+			double axialImpulse = this.motorImpulse + this.lowerLimitImpulse - this.upperLimitImpulse;
 			
 			// warm start
 			Vector2 impulse = new Vector2(this.impulse.x, this.impulse.y);
@@ -294,8 +299,8 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		} else {
 			this.impulse.zero();
 			this.motorImpulse = 0.0;
-			this.lowerImpulse = 0.0;
-			this.upperImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
 		}
 	}
 	
@@ -317,46 +322,55 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			// get the relative velocity - the target motor speed
 			double C = this.body1.getAngularVelocity() - this.body2.getAngularVelocity() - this.motorSpeed;
 			// get the impulse required to obtain the speed
-			double impulse = this.axialMass * -C;
-			// clamp the impulse between the maximum torque
-			double oldImpulse = this.motorImpulse;
-			double maxImpulse = this.maximumMotorTorque * step.getDeltaTime();
-			this.motorImpulse = Interval.clamp(this.motorImpulse + impulse, -maxImpulse, maxImpulse);
-			// get the impulse we need to apply to the bodies
-			impulse = this.motorImpulse - oldImpulse;
+			double stepImpulse = this.axialMass * -C;
+			
+			if (this.motorMaximumTorqueEnabled) {
+				// clamp the impulse between the maximum torque
+				double currentAccumulatedImpulse = this.motorImpulse;
+				double maxImpulse = this.motorMaximumTorque * step.getDeltaTime();
+				this.motorImpulse = Interval.clamp(this.motorImpulse + stepImpulse, -maxImpulse, maxImpulse);
+				// get the impulse we need to apply to the bodies
+				stepImpulse = this.motorImpulse - currentAccumulatedImpulse;
+			} else {
+				this.motorImpulse += stepImpulse;
+			}
 			
 			// apply the impulse
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * impulse);
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * impulse);
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * stepImpulse);
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * stepImpulse);
         }
 		
 		// solve the limit constraints
 		// check if the limit constraint is enabled
-		if (this.limitEnabled && !this.fixedRotation) {
+		if (this.limitsEnabled && !this.fixedRotation) {
 			// lower limit
 			{
 				double C = this.angle - this.lowerLimit;
 				double Cdot = this.body1.getAngularVelocity() - this.body2.getAngularVelocity();
-				double impulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * step.getInverseDeltaTime());
-				double oldImpulse = this.lowerImpulse;
-				this.lowerImpulse = Math.max(this.lowerImpulse + impulse, 0.0);
-				impulse = this.lowerImpulse - oldImpulse;
+				double stepImpulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * step.getInverseDeltaTime());
 				
-				this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * impulse);
-				this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * impulse);
+				// clamp
+				double currentAccumulatedImpulse = this.lowerLimitImpulse;
+				this.lowerLimitImpulse = Math.max(this.lowerLimitImpulse + stepImpulse, 0.0);
+				stepImpulse = this.lowerLimitImpulse - currentAccumulatedImpulse;
+				
+				this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * stepImpulse);
+				this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * stepImpulse);
 			}
 			
 			// upper limit
 			{
 				double C = this.upperLimit - this.angle;
 				double Cdot = this.body2.getAngularVelocity() - this.body1.getAngularVelocity();
-				double impulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * step.getInverseDeltaTime());
-				double oldImpulse = this.upperImpulse;
-				this.upperImpulse = Math.max(this.upperImpulse + impulse, 0.0);
-				impulse = this.upperImpulse - oldImpulse;
+				double stepImpulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * step.getInverseDeltaTime());
 				
-				this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * impulse);
-				this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * impulse);
+				// clamp
+				double currentAccumulatedImpulse = this.upperLimitImpulse;
+				this.upperLimitImpulse = Math.max(this.upperLimitImpulse + stepImpulse, 0.0);
+				stepImpulse = this.upperLimitImpulse - currentAccumulatedImpulse;
+				
+				this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * stepImpulse);
+				this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * stepImpulse);
 			}
 		}
 
@@ -401,7 +415,7 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		double angularError = 0.0;
 
 		// solve position constraint for limits
-		if (this.limitEnabled && !this.fixedRotation) {
+		if (this.limitsEnabled && !this.fixedRotation) {
 			double angle = this.getRelativeRotation();
 			double C = 0.0;
 			
@@ -459,18 +473,18 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		return rr;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor1()
+	/**
+	 * The anchor point in world space on the first body.
+	 * @return {@link Vector2}
 	 */
-	@Override
 	public Vector2 getAnchor1() {
 		return this.body1.getWorldPoint(this.localAnchor1);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor2()
+	/**
+	 * The anchor point in world space on the second body.
+	 * @return {@link Vector2}
 	 */
-	@Override
 	public Vector2 getAnchor2() {
 		return this.body2.getWorldPoint(this.localAnchor2);
 	}
@@ -488,7 +502,7 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	 */
 	@Override
 	public double getReactionTorque(double invdt) {
-		return (this.motorImpulse + this.lowerImpulse - this.upperImpulse) * invdt;
+		return (this.motorImpulse + this.lowerLimitImpulse - this.upperLimitImpulse) * invdt;
 	}
 	
 	/* (non-Javadoc)
@@ -517,17 +531,15 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		return this.getRelativeRotation();
 	}
 	
-	/**
-	 * Returns true if this motor is enabled.
-	 * @return boolean
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularMotorJoint#isMotorEnabled()
 	 */
 	public boolean isMotorEnabled() {
 		return this.motorEnabled;
 	}
 	
-	/**
-	 * Sets whether the motor for this joint is enabled or not.
-	 * @param flag true if the motor should be enabled
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularMotorJoint#setMotorEnabled(boolean)
 	 */
 	public void setMotorEnabled(boolean flag) {
 		if (this.motorEnabled != flag) {
@@ -539,44 +551,60 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		}
 	}
 	
-	/**
-	 * Returns the maximum torque this motor will apply in newton-meters.
-	 * @return double
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularMotorJoint#getMotorMaximumTorque()
 	 */
 	public double getMaximumMotorTorque() {
-		return this.maximumMotorTorque;
+		return this.motorMaximumTorque;
 	}
 	
-	/**
-	 * Sets the maximum torque this motor will apply in newton-meters.
-	 * @param maximumMotorTorque the maximum motor torque in newton-meters; must be greater than or equal to zero
-	 * @throws IllegalArgumentException if maxMotorTorque is less than zero
-	 * @see #setMotorSpeed(double)
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularMotorJoint#setMotorMaximumTorque(double)
 	 */
 	public void setMaximumMotorTorque(double maximumMotorTorque) {
 		// make sure its positive
-		if (maximumMotorTorque < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidMaximumMotorTorque"));
-		if (this.maximumMotorTorque != maximumMotorTorque) {
+		if (maximumMotorTorque <= 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidMaximumMotorTorque"));
+		if (this.motorMaximumTorque != maximumMotorTorque) {
 			if (this.motorEnabled) {
 				this.body1.setAtRest(false);
 				this.body2.setAtRest(false);
 			}
-			this.maximumMotorTorque = maximumMotorTorque;
+			this.motorMaximumTorque = maximumMotorTorque;
 		}
 	}
 	
-	/**
-	 * Returns the desired motor speed in radians/second.
-	 * @return double
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularMotorJoint#setMotorMaximumTorqueEnabled(boolean)
+	 */
+	@Override
+	public void setMaximumMotorTorqueEnabled(boolean enabled) {
+		if (this.motorMaximumTorqueEnabled != enabled) {
+			this.motorMaximumTorqueEnabled = enabled;
+			
+			if (this.motorEnabled) {
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularMotorJoint#isMotorMaximumTorqueEnabled()
+	 */
+	@Override
+	public boolean isMaximumMotorTorqueEnabled() {
+		return this.motorMaximumTorqueEnabled;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularMotorJoint#getMotorSpeed()
 	 */
 	public double getMotorSpeed() {
 		return this.motorSpeed;
 	}
 	
-	/**
-	 * Sets the target motor speed in radians/second.
-	 * @param motorSpeed the motor speed desired in radians/second
-	 * @see #setMaximumMotorTorque(double)
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularMotorJoint#setMotorSpeed(double)
 	 */
 	public void setMotorSpeed(double motorSpeed) {
 		if (this.motorSpeed != motorSpeed) {
@@ -589,79 +617,57 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			// set the motor speed
 			this.motorSpeed = motorSpeed;
 			this.motorImpulse = 0.0;
-			this.lowerImpulse = 0.0;
-			this.upperImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
 		}
 	}
 	
-	/**
-	 * Returns the motor torque in newton-meters.
-	 * @return double
-	 * @deprecated Deprecated in 4.2.0. Use {@link #getMotorTorque(double)} instead.
-	 */
-	@Deprecated
-	public double getMotorTorque() {
-		return this.motorImpulse;
-	}
-	
-	/**
-	 * Returns the motor torque in newton-meters.
-	 * @param invdt the inverse delta time
-	 * @return double
-	 * @since 4.2.0 
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularMotorJoint#getMotorTorque(double)
 	 */
 	public double getMotorTorque(double invdt) {
 		return this.motorImpulse * invdt;
 	}
 	
-	/**
-	 * Returns true if the rotational limit is enabled.
-	 * @return boolean
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#isLimitsEnabled()
 	 */
-	public boolean isLimitEnabled() {
-		return this.limitEnabled;
+	public boolean isLimitsEnabled() {
+		return this.limitsEnabled;
 	}
 	
-	/**
-	 * Enables or disables the rotational limit.
-	 * @param flag true if the limit should be enabled
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimitsEnabled(boolean)
 	 */
-	public void setLimitEnabled(boolean flag) {
+	public void setLimitsEnabled(boolean flag) {
 		// check if its changing
-		if (this.limitEnabled != flag) {
+		if (this.limitsEnabled != flag) {
 			// wake up both bodies
 			this.body1.setAtRest(false);
 			this.body2.setAtRest(false);
 			// set the new value
-			this.limitEnabled = flag;
+			this.limitsEnabled = flag;
 			// clear the accumulated limit impulse
-			this.lowerImpulse = 0.0;
-			this.upperImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
 		}
 	}
 	
-	/**
-	 * Returns the upper rotational limit in radians.
-	 * @return double
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#getUpperLimit()
 	 */
 	public double getUpperLimit() {
 		return this.upperLimit;
 	}
 	
-	/**
-	 * Sets the upper rotational limit.
-	 * <p>
-	 * Must be greater than or equal to the lower rotational limit.
-	 * <p>
-	 * See the class documentation for more details on the limit ranges.
-	 * @param upperLimit the upper rotational limit in radians
-	 * @throws IllegalArgumentException if upperLimit is less than the current lower limit
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setUpperLimit(double)
 	 */
 	public void setUpperLimit(double upperLimit) {
 		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
 		if (this.upperLimit != upperLimit) {
 			// only wake the bodies if the motor is enabled and the limit has changed
-			if (this.limitEnabled) {
+			if (this.limitsEnabled) {
 				// wake up the bodies
 				this.body1.setAtRest(false);
 				this.body2.setAtRest(false);
@@ -669,32 +675,25 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			// set the new value
 			this.upperLimit = upperLimit;
 			// clear accumulated impulse
-			this.upperImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
 		}
 	}
 	
-	/**
-	 * Returns the lower rotational limit in radians.
-	 * @return double
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#getLowerLimit()
 	 */
 	public double getLowerLimit() {
 		return this.lowerLimit;
 	}
 	
-	/**
-	 * Sets the lower rotational limit.
-	 * <p>
-	 * Must be less than or equal to the upper rotational limit.
-	 * <p>
-	 * See the class documentation for more details on the limit ranges.
-	 * @param lowerLimit the lower rotational limit in radians
-	 * @throws IllegalArgumentException if lowerLimit is greater than the current upper limit
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLowerLimit(double)
 	 */
 	public void setLowerLimit(double lowerLimit) {
 		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
 		if (this.lowerLimit != lowerLimit) {
 			// only wake the bodies if the motor is enabled and the limit has changed
-			if (this.limitEnabled) {
+			if (this.limitsEnabled) {
 				// wake up the bodies
 				this.body1.setAtRest(false);
 				this.body2.setAtRest(false);
@@ -702,25 +701,18 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			// set the new value
 			this.lowerLimit = lowerLimit;
 			// clear accumulated impulse
-			this.lowerImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
 		}
 	}
 	
-	/**
-	 * Sets the upper and lower rotational limits.
-	 * <p>
-	 * The lower limit must be less than or equal to the upper limit.
-	 * <p>
-	 * See the class documentation for more details on the limit ranges.
-	 * @param lowerLimit the lower limit in radians
-	 * @param upperLimit the upper limit in radians
-	 * @throws IllegalArgumentException if the lowerLimit is greater than upperLimit
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimits(double, double)
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
 		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
 		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
 			// only wake the bodies if the motor is enabled and one of the limits has changed
-			if (this.limitEnabled) {
+			if (this.limitsEnabled) {
 				// wake up the bodies
 				this.body1.setAtRest(false);
 				this.body2.setAtRest(false);
@@ -729,48 +721,34 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			this.lowerLimit = lowerLimit;
 			this.upperLimit = upperLimit;
 			// clear accumulated impulse
-			this.lowerImpulse = 0.0;
-			this.upperImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
 		}
 	}
 	
-	/**
-	 * Sets both the lower and upper limits and enables them.
-	 * <p>
-	 * See the class documentation for more details on the limit ranges.
-	 * @param lowerLimit the lower limit in radians
-	 * @param upperLimit the upper limit in radians
-	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
-	 * @since 4.2.0
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimitsEnabled(double, double)
 	 */
 	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
 		// enable the limits
-		this.setLimitEnabled(true);
+		this.setLimitsEnabled(true);
 		// set the values
 		this.setLimits(lowerLimit, upperLimit);
 	}
 
-	/**
-	 * Sets both the lower and upper limits to the given limit and enables them.
-	 * <p>
-	 * See the class documentation for more details on the limit ranges.
-	 * @param limit the desired limit
-	 * @since 4.2.0
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimitsEnabled(double)
 	 */
 	public void setLimitsEnabled(double limit) {
 		this.setLimitsEnabled(limit, limit);
 	}
 	
-	/**
-	 * Sets both the lower and upper limits to the given limit.
-	 * <p>
-	 * See the class documentation for more details on the limit ranges.
-	 * @param limit the desired limit
-	 * @since 4.2.0
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimits(double)
 	 */
 	public void setLimits(double limit) {
 		if (this.lowerLimit != limit || this.upperLimit != limit) {
-			if (this.limitEnabled) {
+			if (this.limitsEnabled) {
 				// wake up the bodies
 				this.body1.setAtRest(false);
 				this.body2.setAtRest(false);
@@ -779,35 +757,31 @@ public class RevoluteJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			this.upperLimit = limit;
 			this.lowerLimit = limit;
 			// clear accumulated impulse
-			this.lowerImpulse = 0.0;
-			this.upperImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
 		}
 	}
 	
-	/**
-	 * Returns the reference angle.
-	 * <p>
-	 * The reference angle is the angle calculated when the joint was created from the
-	 * two joined bodies.  The reference angle is the angular difference between the
-	 * bodies.
-	 * @return double
-	 * @since 3.0.1
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#getLimitsReferenceAngle()
 	 */
-	public double getReferenceAngle() {
+	@Override
+	public double getLimitsReferenceAngle() {
 		return this.referenceAngle;
 	}
 	
-	/**
-	 * Sets the reference angle.
-	 * <p>
-	 * This method can be used to set the reference angle to override the computed
-	 * reference angle from the constructor.  This is useful in recreating the joint
-	 * from a current state.
-	 * @param angle the reference angle in radians
-	 * @see #getReferenceAngle()
-	 * @since 3.0.1
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimitsReferenceAngle(double)
 	 */
-	public void setReferenceAngle(double angle) {
-		this.referenceAngle = angle;
+	@Override
+	public void setLimitsReferenceAngle(double angle) {
+		if (this.referenceAngle != angle) {
+			this.referenceAngle = angle;
+			
+			if (this.limitsEnabled) {
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
 	}
 }

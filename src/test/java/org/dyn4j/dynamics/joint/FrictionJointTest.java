@@ -36,7 +36,7 @@ import junit.framework.TestCase;
  * @version 4.0.1
  * @since 1.0.2
  */
-public class FrictionJointTest extends AbstractJointTest {
+public class FrictionJointTest extends BaseJointTest {
 	/**
 	 * Tests the successful creation case.
 	 */

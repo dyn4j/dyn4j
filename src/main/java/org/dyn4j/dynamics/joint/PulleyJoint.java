@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,6 +26,7 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
+import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
@@ -64,13 +65,13 @@ import org.dyn4j.resources.Messages;
  * behave as if connected by flexible rope pass in <code>true</code> to the 
  * {@link #setSlackEnabled(boolean)} method.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 2.1.0
- * @see <a href="http://www.dyn4j.org/documentation/joints/#Pulley_Joint" target="_blank">Documentation</a>
- * @see <a href="http://www.dyn4j.org/2010/12/pulley-constraint/" target="_blank">Pulley Constraint</a>
+ * @see <a href="https://www.dyn4j.org/pages/joints#Pulley_Joint" target="_blank">Documentation</a>
+ * @see <a href="https://www.dyn4j.org/2010/12/pulley-constraint/" target="_blank">Pulley Constraint</a>
  * @param <T> the {@link PhysicsBody} type
  */
-public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
+public class PulleyJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T> implements PairedBodyJoint<T>, Joint<T>, Shiftable, DataContainer, Ownable {
 	/** The world space pulley anchor point for the first {@link PhysicsBody} */
 	protected final Vector2 pulleyAnchor1;
 	
@@ -125,9 +126,7 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 	 * @throws IllegalArgumentException if body1 == body2
 	 */
 	public PulleyJoint(T body1, T body2, Vector2 pulleyAnchor1, Vector2 pulleyAnchor2, Vector2 bodyAnchor1, Vector2 bodyAnchor2) {
-		super(body1, body2, false);
-		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
+		super(body1, body2);
 		// verify the pulley anchor points are not null
 		if (pulleyAnchor1 == null) throw new NullPointerException(Messages.getString("dynamics.joint.pulley.nullPulleyAnchor1"));
 		if (pulleyAnchor2 == null) throw new NullPointerException(Messages.getString("dynamics.joint.pulley.nullPulleyAnchor2"));
@@ -385,15 +384,17 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 		return true;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor1()
+	/**
+	 * Returns the world space anchor point on the first body.
+	 * @return {@link Vector2}
 	 */
 	public Vector2 getAnchor1() {
 		return body1.getWorldPoint(this.localAnchor1);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor2()
+	/**
+	 * Returns the world space anchor point on the second body.
+	 * @return {@link Vector2}
 	 */
 	public Vector2 getAnchor2() {
 		return body2.getWorldPoint(this.localAnchor2);
@@ -494,38 +495,6 @@ public class PulleyJoint<T extends PhysicsBody> extends Joint<T> implements Shif
 		}
 	}
 	
-	/**
-	 * Returns the current length from the first pulley anchor point to the
-	 * anchor point on the first {@link PhysicsBody}.
-	 * <p>
-	 * This is used, in conjunction with length2, to compute the total length
-	 * when the ratio is changed.
-	 * @return double
-	 * @deprecated Deprecated in 4.2.0. Use {@link #getCurrentLength1()} instead.
-	 */
-	@Deprecated
-	public double getLength1() {
-		// get the body anchor point in world space
-		Vector2 ba = this.body1.getWorldPoint(this.localAnchor1);
-		return this.pulleyAnchor1.distance(ba);
-	}
-
-	/**
-	 * Returns the current length from the second pulley anchor point to the
-	 * anchor point on the second {@link PhysicsBody}.
-	 * <p>
-	 * This is used, in conjunction with length1, to compute the total length
-	 * when the ratio is changed.
-	 * @return double
-	 * @deprecated Deprecated in 4.2.0. Use {@link #getCurrentLength2()} instead.
-	 */
-	@Deprecated
-	public double getLength2() {
-		// get the body anchor point in world space
-		Vector2 ba = this.body2.getWorldPoint(this.localAnchor2);
-		return this.pulleyAnchor2.distance(ba);
-	}
-
 	/**
 	 * Returns the current length from the first pulley anchor point to the
 	 * anchor point on the first {@link PhysicsBody}.
