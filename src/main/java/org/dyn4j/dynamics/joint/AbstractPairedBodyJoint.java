@@ -24,6 +24,7 @@
  */
 package org.dyn4j.dynamics.joint;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.dyn4j.DataContainer;
@@ -59,7 +60,7 @@ public abstract class AbstractPairedBodyJoint<T extends PhysicsBody> extends Abs
 	 * @throws IllegalArgumentException if body1 and body2 are the same object reference
 	 */
 	public AbstractPairedBodyJoint(T body1, T body2) {
-		super(List.of(body1, body2));
+		super(Arrays.asList(body1, body2));
 		
 		// verify the bodies are not the same instance
 		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
