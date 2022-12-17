@@ -2086,7 +2086,7 @@ public class GeometryTest {
 		Vector2 b = new Vector2(2.4, 0.0);
 		Vector2 c = new Vector2(2.4, 1.6);
 		Vector2 d = new Vector2(0.0, 1.6);
-		List<Link> links = Geometry.createLinks(List.of(a, b, c, d), true);
+		List<Link> links = Geometry.createLinks(Arrays.asList(a, b, c, d), true);
 		
 		TestCase.assertEquals(4, links.size());
 		TestCase.assertEquals(links.get(0).getPoint1(), a);

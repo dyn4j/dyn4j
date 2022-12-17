@@ -24,7 +24,7 @@
  */
 package org.dyn4j.dynamics.joint;
 
-import java.util.List;
+import java.util.Arrays;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Ownable;
@@ -50,7 +50,7 @@ public abstract class AbstractSingleBodyJoint<T extends PhysicsBody> extends Abs
 	 * @throws NullPointerException if body is null
 	 */
 	public AbstractSingleBodyJoint(T body) {
-		super(List.of(body));
+		super(Arrays.asList(body));
 		this.body = body;
 	}
 	

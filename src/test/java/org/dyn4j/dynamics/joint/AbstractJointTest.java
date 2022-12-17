@@ -25,6 +25,7 @@
 package org.dyn4j.dynamics.joint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -57,7 +58,7 @@ public class AbstractJointTest {
 	public void setup() {
 		this.b1 = new Body();
 		this.b2 = new Body();
-		this.aj = new TestAbstractJoint(List.of(b1, b2));
+		this.aj = new TestAbstractJoint(Arrays.asList(b1, b2));
 	}
 	
 	/**
@@ -125,7 +126,7 @@ public class AbstractJointTest {
 	 */
 	@Test(expected = UnsupportedOperationException.class)
 	public void getBodiesAndAdd() {
-		AbstractJoint<Body> aj = new TestAbstractJoint(List.of(b1, b2));
+		AbstractJoint<Body> aj = new TestAbstractJoint(Arrays.asList(b1, b2));
 		aj.getBodies().add(new Body());
 	}
 	
@@ -134,7 +135,7 @@ public class AbstractJointTest {
 	 */
 	@Test(expected = UnsupportedOperationException.class)
 	public void getBodiesAndRemove() {
-		AbstractJoint<Body> aj = new TestAbstractJoint(List.of(b1, b2));
+		AbstractJoint<Body> aj = new TestAbstractJoint(Arrays.asList(b1, b2));
 		aj.getBodies().remove(0);
 	}
 	

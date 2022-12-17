@@ -25,7 +25,6 @@
 package org.dyn4j.dynamics.joint;
 
 import java.util.Arrays;
-import java.util.List;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Ownable;
