@@ -21,8 +21,8 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
-          distribution: 'azul'
-          java-version: 17
+          distribution: 'zulu'
+          java-version: 11
       
       # release to GitHub packages
       # NOTE: this will fail with error 422 if the version in the pom is the same as an existing package
