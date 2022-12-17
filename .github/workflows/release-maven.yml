@@ -21,7 +21,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
-          distribution: 'azul'
+          distribution: 'zulu'
           java-version: 17
       
       # release to GitHub packages
