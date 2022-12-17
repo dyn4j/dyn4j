@@ -76,7 +76,7 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	protected final Vector2 target;
 	
 	/** The local anchor point for the body */
-	protected final Vector2 anchor;
+	protected final Vector2 localAnchor;
 	
 	// spring-damper constraint
 	
@@ -138,7 +138,7 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.pin.nullAnchor"));
 		
 		this.target = anchor.copy();
-		this.anchor = body.getLocalPoint(anchor);
+		this.localAnchor = body.getLocalPoint(anchor);
 		
 		this.springMode = SPRING_MODE_FREQUENCY;
 		this.springEnabled = true;
@@ -166,7 +166,7 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 		StringBuilder sb = new StringBuilder();
 		sb.append("PinJoint[").append(super.toString())
 		  .append("|Target=").append(this.target)
-		  .append("|Anchor=").append(this.anchor)
+		  .append("|Anchor=").append(this.localAnchor)
 		  .append("|Frequency=").append(this.springFrequency)
 		  .append("|DampingRatio=").append(this.springDampingRatio)
 		  .append("|MaximumForce=").append(this.springMaximumForce)
@@ -197,7 +197,7 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 		}
 
 		// compute the r vector
-		this.r = transform.getTransformedR(body.getLocalCenter().to(this.anchor));
+		this.r = transform.getTransformedR(body.getLocalCenter().to(this.localAnchor));
 		
 		// compute the K inverse matrix (point-to-point constraint)
 		this.K.m00 = invM + this.r.y * this.r.y * invI;
@@ -301,7 +301,7 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 			// always solve the point-to-point constraint
 	
 			// compute the r vector
-			Vector2 r = tx.getTransformedR(this.body.getLocalCenter().to(this.anchor));
+			Vector2 r = tx.getTransformedR(this.body.getLocalCenter().to(this.localAnchor));
 			Vector2 d = this.body.getWorldCenter().add(r).difference(this.target);
 			
 			linearError = d.getMagnitude();
@@ -369,7 +369,7 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	 * @return Vector2
 	 */
 	public Vector2 getAnchor() {
-		return this.body.getWorldPoint(this.anchor);
+		return this.body.getWorldPoint(this.localAnchor);
 	}
 
 	/**

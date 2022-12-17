@@ -141,7 +141,7 @@ public class DistanceJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 	// current state
 
 	/** The current distance as of constraint initialization */
-	protected double currentDistance;
+	private double currentDistance;
 
 	/** The damping coefficient of the spring-damper */
 	private double damping;
