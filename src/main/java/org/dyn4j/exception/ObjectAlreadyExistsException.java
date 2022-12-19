@@ -22,77 +22,24 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.dynamics.joint;
-
-import java.util.Arrays;
-
-import org.dyn4j.DataContainer;
-import org.dyn4j.Ownable;
-import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.dynamics.PhysicsBody;
-import org.dyn4j.exception.InvalidIndexException;
-import org.dyn4j.geometry.Shiftable;
+package org.dyn4j.exception;
 
 /**
- * Represents an abstract implementation of constrained motion with a single 
- * {@link PhysicsBody}.
+ * Represents an exception when an object has already been added to another object.
  * @author William Bittle
  * @version 5.0.0
  * @since 5.0.0
- * @param <T> the {@link PhysicsBody} type
  */
-public abstract class AbstractSingleBodyJoint<T extends PhysicsBody> extends AbstractJoint<T> implements SingleBodyJoint<T>, Joint<T>, Shiftable, DataContainer, Ownable {
-	/** The body */
-	protected final T body;
-	
+public class ObjectAlreadyExistsException extends IllegalArgumentException {
+	private static final long serialVersionUID = 3414084132509765709L;
+
 	/**
-	 * Default constructor.
-	 * @param body the body
-	 * @throws NullPointerException if body is null
+	 * Minimal constructor.
+	 * @param argumentName the name of the argument
+	 * @param object the object
+	 * @param owner the current owner of the object
 	 */
-	public AbstractSingleBodyJoint(T body) {
-		super(Arrays.asList(body));
-		this.body = body;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.UniaryJoint#getBody()
-	 */
-	@Override
-	public final T getBody() {
-		return this.body;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getBodyCount()
-	 */
-	@Override
-	public final int getBodyCount() {
-		return 1;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getBody(int)
-	 */
-	@Override
-	public final T getBody(int i) {
-		if (i == 0) return this.body;
-		throw new InvalidIndexException(i);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#isMember(org.dyn4j.collision.CollisionBody)
-	 */
-	@Override
-	public final boolean isMember(CollisionBody<?> body) {
-		return body == this.body;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#isEnabled()
-	 */
-	@Override
-	public final boolean isEnabled() {
-		return this.body.isEnabled();
+	public ObjectAlreadyExistsException(String argumentName, Object object, Object owner) {
+		super(String.format("%1$s is set to an object: %2$s that already exists in: %3$s", argumentName, object, owner));
 	}
 }

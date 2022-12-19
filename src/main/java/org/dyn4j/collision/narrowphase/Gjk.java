@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,6 +29,8 @@ import java.util.List;
 
 import org.dyn4j.Epsilon;
 import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Ray;
@@ -36,7 +38,6 @@ import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of the Gilbert-Johnson-Keerthi (GJK) algorithm for collision detection.
@@ -118,7 +119,7 @@ import org.dyn4j.resources.Messages;
  * {@link Shape}s.  Refer to {@link Gjk#distance(Convex, Transform, Convex, Transform, Separation)}
  * for details on the implementation.
  * @author William Bittle
- * @version 4.1.0
+ * @version 5.0.0
  * @since 1.0.0
  * @see Epa
  * @see <a href="http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/" target="_blank">GJK (Gilbert-Johnson-Keerthi)</a>
@@ -176,7 +177,9 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @throws NullPointerException if minkowskiPenetrationSolver is null
 	 */
 	public Gjk(MinkowskiPenetrationSolver minkowskiPenetrationSolver) {
-		if (minkowskiPenetrationSolver == null) throw new NullPointerException(Messages.getString("collision.narrowphase.gjk.nullMinkowskiPenetrationSolver"));
+		if (minkowskiPenetrationSolver == null) 
+			throw new ArgumentNullException("minkowskiPenetrationSolver");
+		
 		this.minkowskiPenetrationSolver = minkowskiPenetrationSolver;
 	}
 	
@@ -769,7 +772,9 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @since 3.3.0
 	 */
 	public void setMaxDetectIterations(int maxIterations) {
-		if (maxIterations < 5) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidMaximumIterations"));
+		if (maxIterations < 5) 
+			throw new ValueOutOfRangeException("maxIterations", maxIterations, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 5);
+		
 		this.maxDetectIterations = maxIterations;
 	}
 	
@@ -794,7 +799,9 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @since 3.3.0
 	 */
 	public void setMaxDistanceIterations(int maxIterations) {
-		if (maxIterations < 5) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidMaximumIterations"));
+		if (maxIterations < 5) 
+			throw new ValueOutOfRangeException("maxIterations", maxIterations, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 5);
+		
 		this.maxDistanceIterations = maxIterations;
 	}
 	
@@ -819,7 +826,9 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @since 3.3.0
 	 */
 	public void setMaxRaycastIterations(int maxIterations) {
-		if (maxIterations < 5) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidMaximumIterations"));
+		if (maxIterations < 5) 
+			throw new ValueOutOfRangeException("maxIterations", maxIterations, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 5);
+		
 		this.maxRaycastIterations = maxIterations;
 	}
 	
@@ -842,7 +851,9 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @since 3.3.0
 	 */
 	public void setDetectEpsilon(double detectEpsilon) {
-		if (detectEpsilon < 0) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidDetectEpsilon"));
+		if (detectEpsilon < 0) 
+			throw new ValueOutOfRangeException("detectEpsilon", detectEpsilon, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		this.detectEpsilon = detectEpsilon;
 	}
 
@@ -865,7 +876,9 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @since 3.3.0
 	 */
 	public void setRaycastEpsilon(double raycastEpsilon) {
-		if (raycastEpsilon <= 0) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidRaycastEpsilon"));
+		if (raycastEpsilon <= 0) 
+			throw new ValueOutOfRangeException("raycastEpsilon", raycastEpsilon, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		this.raycastEpsilon = raycastEpsilon;
 	}
 	
@@ -886,7 +899,9 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @throws IllegalArgumentException if distanceEpsilon is less than or equal to zero
 	 */
 	public void setDistanceEpsilon(double distanceEpsilon) {
-		if (distanceEpsilon <= 0) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.gjk.invalidDistanceEpsilon"));
+		if (distanceEpsilon <= 0) 
+			throw new ValueOutOfRangeException("distanceEpsilon", distanceEpsilon, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		this.distanceEpsilon = distanceEpsilon;
 	}
 	
@@ -906,7 +921,9 @@ public class Gjk implements NarrowphaseDetector, DistanceDetector, RaycastDetect
 	 * @throws NullPointerException if minkowskiPenetrationSolver is null
 	 */
 	public void setMinkowskiPenetrationSolver(MinkowskiPenetrationSolver minkowskiPenetrationSolver) {
-		if (minkowskiPenetrationSolver == null) throw new NullPointerException(Messages.getString("collision.narrowphase.gjk.nullMinkowskiPenetrationSolver"));
+		if (minkowskiPenetrationSolver == null) 
+			throw new ArgumentNullException("minkowskiPenetrationSolver");
+		
 		this.minkowskiPenetrationSolver = minkowskiPenetrationSolver;
 	}
 }

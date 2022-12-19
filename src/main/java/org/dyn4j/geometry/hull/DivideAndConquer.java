@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,8 +26,9 @@ package org.dyn4j.geometry.hull;
 
 import java.util.Arrays;
 
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.NullElementException;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of the Divide and Conquer convex hull algorithm.
@@ -37,7 +38,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This algorithm is O(n log n) where n is the number of input points.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 2.2.0
  */
 public class DivideAndConquer extends AbstractHullGenerator implements HullGenerator {
@@ -47,7 +48,8 @@ public class DivideAndConquer extends AbstractHullGenerator implements HullGener
 	@Override
 	public Vector2[] generate(Vector2... points) {
 		// check for a null array of points
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.hull.nullArray"));
+		if (points == null) 
+			throw new ArgumentNullException("points");
 		
 		// get the size
 		int size = points.length;
@@ -59,7 +61,7 @@ public class DivideAndConquer extends AbstractHullGenerator implements HullGener
 			Arrays.sort(points, new MinXYPointComparator());
 		} catch (NullPointerException e) {
 			// this will be hit if any of the points are null
-			throw new NullPointerException(Messages.getString("geometry.hull.nullPoints"));
+			throw new NullElementException("points");
 		}
 		
 		// No need to pre-process the input and remove coincident points

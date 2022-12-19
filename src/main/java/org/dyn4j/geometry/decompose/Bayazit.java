@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,11 +29,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.dyn4j.Epsilon;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of the Bayazit convex decomposition algorithm for simple polygons.
@@ -41,7 +42,7 @@ import org.dyn4j.resources.Messages;
  * This algorithm is a O(nr) complexity algorithm where n is the number of input vertices and r is the number of
  * output convex polygons.  This algorithm can achieve optimal decompositions, however this is not guaranteed.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 2.2.0
  * @see <a href="http://mnbayazit.com/406/bayazit" target="_blank">Bayazit</a>
  */
@@ -52,11 +53,15 @@ public class Bayazit extends AbstractDecomposer implements Decomposer {
 	@Override
 	public List<Convex> decompose(Vector2... points) {
 		// check for null array
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.decompose.nullArray"));
+		if (points == null) 
+			throw new ArgumentNullException("points");
+		
 		// get the number of points
 		int size = points.length;
+		
 		// check the size
-		if (size < 4) throw new IllegalArgumentException(Messages.getString("geometry.decompose.invalidSize"));
+		if (size < 4) 
+			throw new ValueOutOfRangeException("points.length", size, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 4);
 		
 		// get the winding order
 		double winding = Geometry.getWinding(points);
@@ -247,7 +252,7 @@ public class Bayazit extends AbstractDecomposer implements Decomposer {
 		// if we get here, we know the given polygon has 0 reflex vertices
 		// and is therefore convex, add it to the list of convex polygons
 		if (polygon.size() < 3) {
-			throw new IllegalArgumentException(Messages.getString("geometry.decompose.crossingEdges"));
+			throw new IllegalArgumentException("The given simple polygon has crossing edges and not supported");
 		}
 		Vector2[] vertices = new Vector2[polygon.size()];
 		polygon.toArray(vertices);

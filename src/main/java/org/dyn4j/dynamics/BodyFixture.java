@@ -26,10 +26,10 @@ package org.dyn4j.dynamics;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.collision.Fixture;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Shape;
-import org.dyn4j.resources.Messages;
 
 /**
  * Represents a piece of a {@link PhysicsBody}.
@@ -37,7 +37,7 @@ import org.dyn4j.resources.Messages;
  * {@link BodyFixture} extends the {@link Fixture} class, adding physical features
  * like density and friction.
  * @author William Bittle
- * @version 4.2.2
+ * @version 5.0.0
  * @since 2.0.0
  * @see Fixture
  */
@@ -108,11 +108,16 @@ public class BodyFixture extends Fixture implements DataContainer {
 	 * The density of an object is a number that represent how much matter is contained
 	 * in a given space.  Larger density values indicate a more massive object.  Larger
 	 * density objects resist changes in motion more than smaller objects.
+	 * <p>
+	 * A density equal to zero will make this shape participate in collision detection
+	 * and resolution, but will it will not contribute to the total mass of the body.
 	 * @param density the density in kg/m<sup>2</sup>
-	 * @throws IllegalArgumentException if density is less than or equal to zero
+	 * @throws IllegalArgumentException if density is less than zero
 	 */
 	public void setDensity(double density) {
-		if (density < 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidDensity"));
+		if (density < 0) 
+			throw new ValueOutOfRangeException("density", density, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		this.density = density;
 	}
 	
@@ -147,7 +152,9 @@ public class BodyFixture extends Fixture implements DataContainer {
 	 * @throws IllegalArgumentException if friction is less than zero
 	 */
 	public void setFriction(double friction) {
-		if (friction < 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidFriction"));
+		if (friction < 0) 
+			throw new ValueOutOfRangeException("friction", friction, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		this.friction = friction;
 	}
 	
@@ -174,7 +181,9 @@ public class BodyFixture extends Fixture implements DataContainer {
 	 * @throws IllegalArgumentException if restitution is less than zero
 	 */
 	public void setRestitution(double restitution) {
-		if (restitution < 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidRestitution"));
+		if (restitution < 0) 
+			throw new ValueOutOfRangeException("restitution", restitution, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		this.restitution = restitution;
 	}
 	

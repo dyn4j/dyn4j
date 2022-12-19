@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,6 +33,7 @@ module org.dyn4j
   exports org.dyn4j.dynamics.contact;
   exports org.dyn4j.dynamics.joint;
   exports org.dyn4j.dynamics;
+  exports org.dyn4j.exception;
   exports org.dyn4j.geometry.simplify;
   exports org.dyn4j.geometry.decompose;
   exports org.dyn4j.geometry.hull;

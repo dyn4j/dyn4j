@@ -30,12 +30,13 @@ import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of a pin joint.
@@ -134,8 +135,10 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	 */
 	public PinJoint(T body, Vector2 anchor) {
 		super(body);
+		
 		// check for a null anchor
-		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.pin.nullAnchor"));
+		if (anchor == null) 
+			throw new ArgumentNullException("anchor");
 		
 		this.target = anchor.copy();
 		this.localAnchor = body.getLocalPoint(anchor);
@@ -379,7 +382,9 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	 */
 	public void setTarget(Vector2 target) {
 		// make sure the target is non null
-		if (target == null) throw new NullPointerException(Messages.getString("dynamics.joint.pin.nullTarget"));
+		if (target == null) 
+			throw new ArgumentNullException("target");
+		
 		// only wake the body if the target has changed
 		if (!target.equals(this.target)) {
 			// wake up the body
@@ -448,7 +453,12 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	@Override
 	public void setSpringDampingRatio(double dampingRatio) {
 		// make sure its within range
-		if (dampingRatio <= 0 || dampingRatio > 1) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidDampingRatio"));
+		if (dampingRatio <= 0.0) 
+			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
+		if (dampingRatio > 1.0) 
+			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, 1.0);
+		
 		// did it change?
 		if (this.springDampingRatio != dampingRatio) {
 			// set the damping ratio
@@ -483,7 +493,9 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	@Override
 	public void setSpringFrequency(double frequency) {
 		// check for valid value
-		if (frequency <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
+		if (frequency <= 0)
+			throw new ValueOutOfRangeException("frequency", frequency, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		// set the spring mode
 		this.springMode = SPRING_MODE_FREQUENCY;
 		// check for change
@@ -504,7 +516,9 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	@Override
 	public void setSpringStiffness(double stiffness) {
 		// check for valid value
-		if (stiffness <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidStiffness"));
+		if (stiffness <= 0)
+			throw new ValueOutOfRangeException("stiffness", stiffness, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		// set the spring mode
 		this.springMode = SPRING_MODE_STIFFNESS;
 		// only update if necessary
@@ -531,7 +545,9 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	@Override
 	public void setMaximumSpringForce(double maximum) {
 		// check for valid value
-		if (maximum <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidSpringMaximumForce"));
+		if (maximum <= 0) 
+			throw new ValueOutOfRangeException("maximum", maximum, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		// check if changed
 		if (this.springMaximumForce != maximum) {
 			this.springMaximumForce = maximum;

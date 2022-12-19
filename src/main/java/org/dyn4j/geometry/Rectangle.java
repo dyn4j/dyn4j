@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,7 +25,7 @@
 package org.dyn4j.geometry;
 
 import org.dyn4j.DataContainer;
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ValueOutOfRangeException;
 
 /**
  * Implementation of a Rectangle {@link Convex} {@link Shape}.
@@ -34,7 +34,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * A {@link Rectangle} must have a width and height greater than zero.
  * @author William Bittle
- * @version 3.4.0
+ * @version 5.0.0
  * @since 1.0.0
  */
 public class Rectangle extends Polygon implements Convex, Wound, Shape, Transformable, DataContainer {
@@ -93,8 +93,11 @@ public class Rectangle extends Polygon implements Convex, Wound, Shape, Transfor
 	 * @throws IllegalArgumentException if width or height is less than or equal to zero
 	 */
 	private static final boolean validate(double width, double height) {
-		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.rectangle.invalidWidth"));
-		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.rectangle.invalidHeight"));
+		if (width <= 0) 
+			throw new ValueOutOfRangeException("width", width, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+			
+		if (height <= 0)
+			throw new ValueOutOfRangeException("height", height, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
 		
 		return true;
 	}

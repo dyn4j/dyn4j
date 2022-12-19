@@ -30,8 +30,9 @@ import org.dyn4j.DataContainer;
 import org.dyn4j.Ownable;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.dynamics.PhysicsBody;
+import org.dyn4j.exception.InvalidIndexException;
+import org.dyn4j.exception.SameObjectException;
 import org.dyn4j.geometry.Shiftable;
-import org.dyn4j.resources.Messages;
 
 /**
  * Represents an abstract implementation of constrained motion between two 
@@ -62,7 +63,8 @@ public abstract class AbstractPairedBodyJoint<T extends PhysicsBody> extends Abs
 		super(Arrays.asList(body1, body2));
 		
 		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
+		if (body1 == body2) 
+			throw new SameObjectException("body1", "body2", body1);
 		
 		this.body1 = body1;
 		this.body2 = body2;
@@ -125,7 +127,7 @@ public abstract class AbstractPairedBodyJoint<T extends PhysicsBody> extends Abs
 	public final T getBody(int i) {
 		if (i == 0) return this.body1;
 		if (i == 1) return this.body2;
-		throw new IndexOutOfBoundsException();
+		throw new InvalidIndexException(i);
 	}
 	
 	/* (non-Javadoc)

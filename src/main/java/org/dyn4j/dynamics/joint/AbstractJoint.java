@@ -33,6 +33,9 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.Ownable;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.dynamics.PhysicsBody;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.EmptyCollectionException;
+import org.dyn4j.exception.NullElementException;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Shiftable;
 
@@ -70,14 +73,16 @@ public abstract class AbstractJoint<T extends PhysicsBody> implements Joint<T>, 
 	 * @throws IllegalArgumentException when bodies is empty
 	 */
 	public AbstractJoint(List<T> bodies) {
-		// TODO error messages
-		if (bodies == null) throw new NullPointerException();
-		if (bodies.size() == 0) throw new IllegalArgumentException();
+		if (bodies == null) 
+			throw new ArgumentNullException("bodies");
+		
+		if (bodies.size() == 0) 
+			throw new EmptyCollectionException("bodies");
 		
 		int size = bodies.size();
 		for (int i = 0; i < size; i++) {
 			if (bodies.get(i) == null) {
-				throw new NullPointerException();
+				throw new NullElementException("bodies", i);
 			}
 		}
 		

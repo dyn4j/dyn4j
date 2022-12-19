@@ -30,13 +30,14 @@ import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of a friction joint.
@@ -103,8 +104,11 @@ public class FrictionJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 	public FrictionJoint(T body1, T body2, Vector2 anchor) {
 		// default no collision allowed
 		super(body1, body2);
+		
 		// verify the anchor point is non null
-		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor"));
+		if (anchor == null)
+			throw new ArgumentNullException("anchor");
+		
 		// put the anchor in local space
 		this.localAnchor1 = body1.getLocalPoint(anchor);
 		this.localAnchor2 = body2.getLocalPoint(anchor);
@@ -306,7 +310,9 @@ public class FrictionJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 	 */
 	public void setMaximumTorque(double maximumTorque) {
 		// make sure its greater than or equal to zero
-		if (maximumTorque < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.friction.invalidMaximumTorque"));
+		if (maximumTorque < 0.0) 
+			throw new ValueOutOfRangeException("maximumTorque", maximumTorque, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		// set the max
 		this.maximumTorque = maximumTorque;
 	}
@@ -326,7 +332,9 @@ public class FrictionJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 	 */
 	public void setMaximumForce(double maximumForce) {
 		// make sure its greater than or equal to zero
-		if (maximumForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.friction.invalidMaximumForce"));
+		if (maximumForce < 0.0) 
+			throw new ValueOutOfRangeException("maximumForce", maximumForce, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		// set the max
 		this.maximumForce = maximumForce;
 	}

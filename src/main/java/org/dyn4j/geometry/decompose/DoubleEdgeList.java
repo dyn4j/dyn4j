@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,7 +34,6 @@ import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Segment;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Highly specialized Doubly Connected Edge List (DCEL) used to store vertices of a simple polygon and then be used
@@ -54,7 +53,7 @@ import org.dyn4j.resources.Messages;
  * can be achieved since the indexing of the {@link #vertices} list is the same as the source {@link Vector2}[].
  * No check is performed to ensure that a pair of {@link DoubleEdgeListHalfEdge}s are added that already exist.
  * @author William Bittle
- * @version 3.4.0
+ * @version 5.0.0
  * @since 2.2.0
  */
 final class DoubleEdgeList {
@@ -394,7 +393,7 @@ final class DoubleEdgeList {
 			}
 			
 			if (vertices.length < 3) {
-				throw new IllegalArgumentException(Messages.getString("geometry.decompose.crossingEdges"));
+				throw new IllegalArgumentException("The given simple polygon has crossing edges and not supported");
 			}
 			
 			Polygon p = Geometry.createPolygon(vertices);
@@ -440,7 +439,7 @@ final class DoubleEdgeList {
 			
 			// the vertices should form a triangle
 			if (vertices.length != 3) {
-				throw new IllegalArgumentException(Messages.getString("geometry.decompose.crossingEdges"));
+				throw new IllegalArgumentException("The given simple polygon has crossing edges and not supported");
 			}
 			
 			// add the triangle

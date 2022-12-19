@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,8 +27,8 @@ package org.dyn4j.geometry.simplify;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Simple polygon (without holes) simplifier that reduces the number of vertices by 
@@ -57,7 +57,7 @@ import org.dyn4j.resources.Messages;
  * NOTE: This algorithm's result is highly dependent on the given cluster tolerance, epsilon
  * and the input polygon.  There's no guarantee that the result will have 3 or more vertices.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 4.2.0
  * @see <a href="https://bost.ocks.org/mike/simplify/">Vertex Cluster Reduction</a>
  */
@@ -74,7 +74,8 @@ public final class DouglasPeucker extends VertexClusterReduction implements Simp
 	public DouglasPeucker(double clusterTolerance, double epsilon) {
 		super(clusterTolerance);
 		
-		if (epsilon < 0) throw new IllegalArgumentException(Messages.getString("geometry.simplify.invalidEpsilon"));
+		if (epsilon < 0) 
+			throw new ValueOutOfRangeException("epsilon", epsilon, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0);
 		
 		this.epsilon = epsilon;
 	}

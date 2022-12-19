@@ -30,6 +30,7 @@ import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
@@ -37,7 +38,6 @@ import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation a motor joint.
@@ -382,7 +382,12 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	 * @param correctionFactor the correction factor in the range [0, 1]
 	 */
 	public void setCorrectionFactor(double correctionFactor) {
-		if (correctionFactor < 0.0 || correctionFactor > 1.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.motor.invalidCorrectionFactor"));
+		if (correctionFactor < 0.0) 
+			throw new ValueOutOfRangeException("correctionFactor", correctionFactor, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
+		if (correctionFactor > 1.0) 
+			throw new ValueOutOfRangeException("correctionFactor", correctionFactor, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, 1.0);
+		
 		this.correctionFactor = correctionFactor;
 	}
 	
@@ -401,7 +406,9 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	 */
 	public void setMaximumTorque(double maximumTorque) {
 		// make sure its greater than or equal to zero
-		if (maximumTorque < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.friction.invalidMaximumTorque"));
+		if (maximumTorque < 0.0) 
+			throw new ValueOutOfRangeException("maximumTorque", maximumTorque, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		// set the max
 		this.maximumTorque = maximumTorque;
 	}
@@ -421,7 +428,9 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	 */
 	public void setMaximumForce(double maximumForce) {
 		// make sure its greater than or equal to zero
-		if (maximumForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.friction.invalidMaximumForce"));
+		if (maximumForce < 0.0) 
+			throw new ValueOutOfRangeException("maximumForce", maximumForce, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		// set the max
 		this.maximumForce = maximumForce;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,11 +27,11 @@ package org.dyn4j.collision.narrowphase;
 import java.util.List;
 
 import org.dyn4j.Epsilon;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * {@link Epa}, or Expanding Polytope Algorithm, is used to find the 
@@ -62,7 +62,7 @@ import org.dyn4j.resources.Messages;
  * In the case that the {@link #distanceEpsilon} is too small, the {@link #maxIterations} will prevent the
  * algorithm from running forever.
  * @author William Bittle
- * @version 3.2.0
+ * @version 5.0.0
  * @since 1.0.0
  * @see Gjk
  * @see <a href="http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/" target="_blank">EPA (Expanding Polytope Algorithm)</a>
@@ -136,7 +136,9 @@ public class Epa implements MinkowskiPenetrationSolver {
 	 * @throws IllegalArgumentException if maxIterations is less than 5
 	 */
 	public void setMaxIterations(int maxIterations) {
-		if (maxIterations < 5) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.epa.invalidMaximumIterations"));
+		if (maxIterations < 5) 
+			throw new ValueOutOfRangeException("maxIterations", maxIterations, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 5);
+		
 		this.maxIterations = maxIterations;
 	}
 
@@ -159,7 +161,9 @@ public class Epa implements MinkowskiPenetrationSolver {
 	 * @throws IllegalArgumentException if distanceEpsilon is less than or equal to zero
 	 */
 	public void setDistanceEpsilon(double distanceEpsilon) {
-		if (distanceEpsilon <= 0) throw new IllegalArgumentException(Messages.getString("collision.narrowphase.epa.invalidDistanceEpsilon"));
+		if (distanceEpsilon <= 0) 
+			throw new ValueOutOfRangeException("distanceEpsilon", distanceEpsilon, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		this.distanceEpsilon = distanceEpsilon;
 	}
 }

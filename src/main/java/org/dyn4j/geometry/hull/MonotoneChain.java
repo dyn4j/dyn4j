@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,9 +28,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.NullElementException;
 import org.dyn4j.geometry.RobustGeometry;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of the Andrew's Monotone Chain convex hull algorithm.
@@ -40,7 +41,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This algorithm is O(n log n) worst case where n is the number of points.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 2.2.0
  */
 public class MonotoneChain extends AbstractHullGenerator implements HullGenerator {
@@ -50,7 +51,8 @@ public class MonotoneChain extends AbstractHullGenerator implements HullGenerato
 	@Override
 	public Vector2[] generate(Vector2... points) {
 		// check for a null array
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.hull.nullArray"));
+		if (points == null) 
+			throw new ArgumentNullException("points");
 		
 		// get the size
 		int size = points.length;
@@ -63,7 +65,7 @@ public class MonotoneChain extends AbstractHullGenerator implements HullGenerato
 		} catch (NullPointerException e) {
 			// if any comparison generates a null pointer exception
 			// throw a null pointer exception with a good message
-			throw new NullPointerException(Messages.getString("geometry.hull.nullPoints"));
+			throw new NullElementException("points");
 		}
 		
 		// This algorithm is very resilient to errors even with the vastly imprecise 

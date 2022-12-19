@@ -30,6 +30,8 @@ import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
@@ -39,7 +41,6 @@ import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.Vector3;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of a prismatic joint.
@@ -251,10 +252,14 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	 */
 	public PrismaticJoint(T body1, T body2, Vector2 anchor, Vector2 axis) {
 		super(body1, body2);
+		
 		// check for a null anchor
-		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor"));
+		if (anchor == null) 
+			throw new ArgumentNullException("anchor");
+		
 		// check for a null axis
-		if (axis == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAxis"));
+		if (axis == null) 
+			throw new ArgumentNullException("axis");
 		
 		// set the anchor point
 		this.localAnchor1 = body1.getLocalPoint(anchor);
@@ -960,7 +965,8 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	@Override
 	public void setMaximumMotorForce(double maximumMotorForce) {
 		// make sure its greater than or equal to zero
-		if (maximumMotorForce <= 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidMaximumMotorForce"));
+		if (maximumMotorForce <= 0.0) 
+			throw new ValueOutOfRangeException("maximumMotorForce", maximumMotorForce, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
 		
 		if (this.maximumMotorForce != maximumMotorForce) {
 			this.maximumMotorForce = maximumMotorForce;
@@ -1017,7 +1023,12 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	@Override
 	public void setSpringDampingRatio(double dampingRatio) {
 		// make sure its within range
-		if (dampingRatio <= 0 || dampingRatio > 1) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidDampingRatio"));
+		if (dampingRatio <= 0.0) 
+			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
+		if (dampingRatio > 1.0) 
+			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, 1.0);
+		
 		// did it change?
 		if (this.springDampingRatio != dampingRatio) {
 			// set the damping ratio
@@ -1053,7 +1064,9 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	@Override
 	public void setSpringFrequency(double frequency) {
 		// check for valid value
-		if (frequency <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
+		if (frequency <= 0) 
+			throw new ValueOutOfRangeException("frequency", frequency, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		// set the spring mode
 		this.springMode = SPRING_MODE_FREQUENCY;
 		// check for change
@@ -1075,7 +1088,9 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	@Override
 	public void setSpringStiffness(double stiffness) {
 		// check for valid value
-		if (stiffness <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidStiffness"));
+		if (stiffness <= 0)
+			throw new ValueOutOfRangeException("stiffness", stiffness, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		// set the spring mode
 		this.springMode = SPRING_MODE_STIFFNESS;
 		// only update if necessary
@@ -1103,7 +1118,9 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	@Override
 	public void setMaximumSpringForce(double maximum) {
 		// check for valid value
-		if (maximum <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidSpringMaximumForce"));
+		if (maximum <= 0) 
+			throw new ValueOutOfRangeException("maximum", maximum, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		// check if changed
 		if (this.springMaximumForce != maximum) {
 			this.springMaximumForce = maximum;
@@ -1233,7 +1250,8 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	 */
 	public void setUpperLimit(double upperLimit) {
 		// make sure the minimum is less than or equal to the maximum
-		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
+		if (upperLimit < this.lowerLimit) 
+			throw new ValueOutOfRangeException("upperLimit", upperLimit, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, "lowerLimit", this.lowerLimit);
 		
 		if (this.upperLimit != upperLimit) {
 			// make sure its changed and enabled before waking the bodies
@@ -1283,7 +1301,8 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	 */
 	public void setLowerLimit(double lowerLimit) {
 		// make sure the minimum is less than or equal to the maximum
-		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
+		if (lowerLimit > this.upperLimit) 
+			throw new ValueOutOfRangeException("lowerLimit", lowerLimit, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "upperLimit", this.upperLimit);
 		
 		if (this.lowerLimit != lowerLimit) {
 			// make sure its changed and enabled before waking the bodies
@@ -1326,7 +1345,8 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
 		// make sure the min < max
-		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
+		if (lowerLimit > upperLimit) 
+			throw new ValueOutOfRangeException("lowerLimit", lowerLimit, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "upperLimit", upperLimit);
 		
 		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
 			// make sure one of the limits is enabled and has changed before waking the bodies

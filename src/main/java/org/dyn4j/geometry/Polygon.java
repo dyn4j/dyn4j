@@ -28,7 +28,9 @@ import java.util.Iterator;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.NullElementException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 
 /**
  * Implementation of an arbitrary polygon {@link Convex} {@link Shape}.
@@ -38,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * A polygon cannot have coincident vertices.
  * @author William Bittle
- * @version 4.2.1
+ * @version 5.0.0
  * @since 1.0.0
  */
 public class Polygon extends AbstractShape implements Convex, Wound, Shape, Transformable, DataContainer {
@@ -105,14 +107,19 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 	 */
 	private static final boolean validate(Vector2... vertices) {
 		// check the vertex array
-		if (vertices == null) throw new NullPointerException(Messages.getString("geometry.polygon.nullArray"));
+		if (vertices == null) 
+			throw new ArgumentNullException("vertices");
+		
 		// get the size
 		int size = vertices.length;
 		// check the size
-		if (size < 3) throw new IllegalArgumentException(Messages.getString("geometry.polygon.lessThan3Vertices"));
+		
+		if (size < 3) 
+			throw new ValueOutOfRangeException("vertices.length", size, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 3);
+		
 		// check for null vertices
 		for (int i = 0; i < size; i++) {
-			if (vertices[i] == null) throw new NullPointerException(Messages.getString("geometry.polygon.nullVertices"));
+			if (vertices[i] == null) throw new NullElementException("vertices", i);
 		}
 		// check for convex
 		double area = 0.0;
@@ -123,7 +130,7 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			Vector2 p2 = (i + 1 == size) ? vertices[0] : vertices[i + 1];
 			// check for coincident vertices
 			if (p1.equals(p2)) {
-				throw new IllegalArgumentException(Messages.getString("geometry.polygon.coincidentVertices"));
+				throw new IllegalArgumentException("A polygon cannot have coincident vertices");
 			}
 			// check the cross product for CCW winding
 			double cross = p0.to(p1).cross(p1.to(p2));
@@ -133,18 +140,18 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 			if (Math.abs(cross) > Epsilon.E) {
 				// check for convexity
 				if (sign != 0.0 && tsign != sign) {
-					throw new IllegalArgumentException(Messages.getString("geometry.polygon.nonConvex"));
+					throw new IllegalArgumentException("A polygon must be convex");
 				}
 			}
 			sign = tsign;
 		}
 		// don't allow degenerate polygons
 		if (Math.abs(area) <= Epsilon.E) {
-			throw new IllegalArgumentException(Messages.getString("geometry.polygon.zeroArea"));
+			throw new IllegalArgumentException("The polygon has zero or near zero area");
 		}
 		// check for CCW
 		if (area < 0.0) {
-			throw new IllegalArgumentException(Messages.getString("geometry.polygon.invalidWinding"));
+			throw new IllegalArgumentException("The polygon must have counter-clockwise winding");
 		}
 		// if we've made it this far then continue;
 		return true;

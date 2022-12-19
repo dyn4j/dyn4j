@@ -26,7 +26,7 @@ package org.dyn4j.geometry;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ValueOutOfRangeException;
 
 /**
  * Implementation of a Capsule {@link Convex} {@link Shape}.
@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * A capsule's width and height must be larger than zero and cannot be equal.  A {@link Circle} should be used
  * instead of an equal width/height capsule for both performance and stability.
  * @author William Bittle
- * @version 4.2.1
+ * @version 5.0.0
  * @since 3.1.5
  */
 public class Capsule extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -139,11 +139,14 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 	 */
 	private static final boolean validate(double width, double height) {
 		// validate the width and height
-		if (width <= 0) throw new IllegalArgumentException(Messages.getString("geometry.capsule.invalidWidth"));
-		if (height <= 0) throw new IllegalArgumentException(Messages.getString("geometry.capsule.invalidHeight"));
+		if (width <= 0) 
+			throw new ValueOutOfRangeException("width", width, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+			
+		if (height <= 0)
+			throw new ValueOutOfRangeException("height", height, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
 		
 		// check for basically a circle
-		if (Math.abs(width - height) < Epsilon.E) throw new IllegalArgumentException(Messages.getString("geometry.capsule.degenerate"));
+		if (Math.abs(width - height) < Epsilon.E) throw new IllegalArgumentException("The width and height cannot be near equal - use a Circle instead.");
 		
 		return true;
 	}

@@ -33,6 +33,8 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.Ownable;
 import org.dyn4j.collision.AbstractCollisionBody;
 import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
@@ -42,12 +44,11 @@ import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Transformable;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Abstract implementation of the {@link PhysicsBody} interface.
  * @author William Bittle
- * @version 4.2.2
+ * @version 5.0.0
  * @since 4.0.0
  */
 public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixture> implements PhysicsBody, CollisionBody<BodyFixture>, Transformable, DataContainer, Ownable {
@@ -196,7 +197,9 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	@Override
 	public BodyFixture addFixture(Convex convex, double density, double friction, double restitution) {
 		// make sure the convex shape is not null
-		if (convex == null) throw new NullPointerException(Messages.getString("dynamics.body.addNullShape"));
+		if (convex == null) 
+			throw new ArgumentNullException("convex");
+		
 		// create the fixture
 		BodyFixture fixture = new BodyFixture(convex);
 		// set the properties
@@ -269,7 +272,9 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	@Override
 	public AbstractPhysicsBody setMass(Mass mass) {
 		// make sure the mass is not null
-		if (mass == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMass"));
+		if (mass == null) 
+			throw new ArgumentNullException("mass");
+		
 		// set the mass
 		this.mass = mass;
 		// compute the rotation disc radius
@@ -283,7 +288,9 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	@Override
 	public AbstractPhysicsBody setMassType(MassType type) {
 		// check for null type
-		if (type == null) throw new NullPointerException(Messages.getString("dynamics.body.nullMassType"));
+		if (type == null) 
+			throw new ArgumentNullException("type");
+		
 		// otherwise just set the type
 		this.mass.setType(type);
 		// return this body
@@ -304,7 +311,9 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	@Override
 	public AbstractPhysicsBody applyForce(Vector2 force) {
 		// check for null
-		if (force == null) throw new NullPointerException(Messages.getString("dynamics.body.nullForce"));
+		if (force == null) 
+			throw new ArgumentNullException("force");
+		
 		// check the linear mass of the body
 		if (this.mass.getMass() == 0.0) {
 			// this means that applying a force will do nothing
@@ -325,7 +334,9 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	@Override
 	public AbstractPhysicsBody applyForce(Force force) {
 		// check for null
-		if (force == null) throw new NullPointerException(Messages.getString("dynamics.body.nullForce"));
+		if (force == null) 
+			throw new ArgumentNullException("force");
+		
 		// check the linear mass of the body
 		if (this.mass.getMass() == 0.0) {
 			// this means that applying a force will do nothing
@@ -365,7 +376,9 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	@Override
 	public AbstractPhysicsBody applyTorque(Torque torque) {
 		// check for null
-		if (torque == null) throw new NullPointerException(Messages.getString("dynamics.body.nullTorque"));
+		if (torque == null) 
+			throw new ArgumentNullException("torque");
+		
 		// check the angular mass of the body
 		if (this.mass.getInertia() == 0.0) {
 			// this means that applying a torque will do nothing
@@ -386,8 +399,12 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	@Override
 	public AbstractPhysicsBody applyForce(Vector2 force, Vector2 point) {
 		// check for null
-		if (force == null) throw new NullPointerException(Messages.getString("dynamics.body.nullForceForTorque"));
-		if (point == null) throw new NullPointerException(Messages.getString("dynamics.body.nullPointForTorque"));
+		if (force == null) 
+			throw new ArgumentNullException("force");
+		
+		if (point == null) 
+			throw new ArgumentNullException("point");
+		
 		boolean awaken = false;
 		// check the linear mass of the body
 		if (this.mass.getMass() != 0.0) {
@@ -423,7 +440,9 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	@Override
 	public AbstractPhysicsBody applyImpulse(Vector2 impulse) {
 		// check for null
-		if (impulse == null) throw new NullPointerException(Messages.getString("dynamics.body.nullImpulse"));
+		if (impulse == null) 
+			throw new ArgumentNullException("impulse");
+		
 		// get the inverse linear mass
 		double invM = this.mass.getInverseMass();
 		// check the linear mass
@@ -466,8 +485,12 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	@Override
 	public AbstractPhysicsBody applyImpulse(Vector2 impulse, Vector2 point) {
 		// check for null
-		if (impulse == null) throw new NullPointerException(Messages.getString("dynamics.body.nullImpulse"));
-		if (point == null) throw new NullPointerException(Messages.getString("dynamics.body.nullPointForImpulse"));
+		if (impulse == null) 
+			throw new ArgumentNullException("impulse");
+		
+		if (point == null) 
+			throw new ArgumentNullException("point");
+		
 		boolean awaken = false;
 		// get the inverse mass
 		double invM = this.mass.getInverseMass();
@@ -987,7 +1010,9 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	 */
 	@Override
 	public void setLinearVelocity(Vector2 velocity) {
-		if (velocity == null) throw new NullPointerException(Messages.getString("dynamics.body.nullVelocity"));
+		if (velocity == null) 
+			throw new ArgumentNullException("velocity");
+		
 		this.linearVelocity.set(velocity);
 	}
 
@@ -1072,7 +1097,9 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	 */
 	@Override
 	public void setLinearDamping(double linearDamping) {
-		if (linearDamping < 0) throw new IllegalArgumentException(Messages.getString("dynamics.body.invalidLinearDamping"));
+		if (linearDamping < 0) 
+			throw new ValueOutOfRangeException("linearDamping", linearDamping, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		this.linearDamping = linearDamping;
 	}
 	
@@ -1089,7 +1116,9 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	 */
 	@Override
 	public void setAngularDamping(double angularDamping) {
-		if (angularDamping < 0) throw new IllegalArgumentException(Messages.getString("dynamics.body.invalidAngularDamping"));
+		if (angularDamping < 0) 
+			throw new ValueOutOfRangeException("angularDamping", angularDamping, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		this.angularDamping = angularDamping;
 	}
 	

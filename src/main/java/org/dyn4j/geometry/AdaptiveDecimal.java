@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,6 +27,8 @@ package org.dyn4j.geometry;
 import java.util.Arrays;
 
 import org.dyn4j.Copyable;
+import org.dyn4j.exception.InvalidIndexException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 
 /**
  * This is an implementation of multi-precision decimals based on the original work by Jonathan Richard Shewchuk,
@@ -48,7 +50,7 @@ import org.dyn4j.Copyable;
  * is the default and only model the Java specification describes.
  * 
  * @author Manolis Tsamis
- * @version 4.0.0
+ * @version 5.0.0
  * @since 3.4.0
  */
 class AdaptiveDecimal implements Copyable<AdaptiveDecimal> {
@@ -63,10 +65,11 @@ class AdaptiveDecimal implements Copyable<AdaptiveDecimal> {
 	 * The initial {@link AdaptiveDecimal} created does not contains any components.
 	 * 
 	 * @param length The maximum number of components this {@link AdaptiveDecimal} can store
+	 * @throws IllegalArgumentException if length is less than or equal to zero
 	 */
 	public AdaptiveDecimal(int length) {
 		if (length <= 0) {
-			throw new IllegalArgumentException();
+			throw new ValueOutOfRangeException("length", length, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0);
 		}
 		
 		this.components = new double[length];
@@ -132,7 +135,7 @@ class AdaptiveDecimal implements Copyable<AdaptiveDecimal> {
 	 */
 	public double get(int index) {
 		if (index < 0 || index >= this.size()) {
-			throw new IndexOutOfBoundsException();
+			throw new InvalidIndexException(index);
 		}
 		
 		return this.components[index];
@@ -147,7 +150,7 @@ class AdaptiveDecimal implements Copyable<AdaptiveDecimal> {
 	 */
 	public AdaptiveDecimal append(double value) {
 		if (this.size >= this.capacity()) {
-			throw new IndexOutOfBoundsException();
+			throw new InvalidIndexException(this.size);
 		}
 		
 		this.components[this.size++] = value;

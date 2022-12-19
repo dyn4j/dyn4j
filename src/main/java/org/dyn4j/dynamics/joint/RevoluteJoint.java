@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,6 +30,8 @@ import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
@@ -37,7 +39,6 @@ import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of a pivot joint.
@@ -161,8 +162,10 @@ public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 	public RevoluteJoint(T body1, T body2, Vector2 anchor) {
 		// default to no collision allowed between the bodies
 		super(body1, body2);
+		
 		// make sure the anchor point is not null
-		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor"));
+		if (anchor == null) 
+			throw new ArgumentNullException("anchor");
 		
 		// get the local space points
 		this.localAnchor1 = body1.getLocalPoint(anchor);
@@ -231,15 +234,16 @@ public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		// is the motor enabled?
-		if (this.motorEnabled) {
-			// compute the motor mass
-			if (invI1 <= 0.0 && invI2 <= 0.0) {
-				// cannot have a motor with two bodies
-				// who have fixed angular velocities
-				throw new IllegalStateException(Messages.getString("dynamics.joint.revolute.twoAngularFixedBodies"));
-			}
-		}
+		// TODO I don't think this is needed
+//		// is the motor enabled?
+//		if (this.motorEnabled) {
+//			// compute the motor mass
+//			if (invI1 <= 0.0 && invI2 <= 0.0) {
+//				// cannot have a motor with two bodies
+//				// who have fixed angular velocities
+//				throw new IllegalStateException(Messages.getString("dynamics.joint.revolute.twoAngularFixedBodies"));
+//			}
+//		}
 		
 		this.r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
 		this.r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
@@ -563,7 +567,9 @@ public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 	 */
 	public void setMaximumMotorTorque(double maximumMotorTorque) {
 		// make sure its positive
-		if (maximumMotorTorque <= 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidMaximumMotorTorque"));
+		if (maximumMotorTorque <= 0.0) 
+			throw new ValueOutOfRangeException("maximumMotorTorque", maximumMotorTorque, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		if (this.motorMaximumTorque != maximumMotorTorque) {
 			if (this.motorEnabled) {
 				this.body1.setAtRest(false);
@@ -664,7 +670,9 @@ public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setUpperLimit(double)
 	 */
 	public void setUpperLimit(double upperLimit) {
-		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
+		if (upperLimit < this.lowerLimit) 
+			throw new ValueOutOfRangeException("upperLimit", upperLimit, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, "lowerLimit", this.lowerLimit);
+		
 		if (this.upperLimit != upperLimit) {
 			// only wake the bodies if the motor is enabled and the limit has changed
 			if (this.limitsEnabled) {
@@ -690,7 +698,9 @@ public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLowerLimit(double)
 	 */
 	public void setLowerLimit(double lowerLimit) {
-		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
+		if (lowerLimit > this.upperLimit) 
+			throw new ValueOutOfRangeException("lowerLimit", lowerLimit, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "upperLimit", this.upperLimit);
+		
 		if (this.lowerLimit != lowerLimit) {
 			// only wake the bodies if the motor is enabled and the limit has changed
 			if (this.limitsEnabled) {
@@ -709,7 +719,9 @@ public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimits(double, double)
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
-		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
+		if (lowerLimit > upperLimit) 
+			throw new ValueOutOfRangeException("lowerLimit", lowerLimit, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "upperLimit", upperLimit);
+		
 		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
 			// only wake the bodies if the motor is enabled and one of the limits has changed
 			if (this.limitsEnabled) {

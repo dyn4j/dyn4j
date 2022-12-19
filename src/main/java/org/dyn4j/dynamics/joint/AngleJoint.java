@@ -30,12 +30,12 @@ import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of an angle joint.
@@ -385,7 +385,9 @@ public class AngleJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	 * @throws IllegalArgumentException if ratio is equal to zero
 	 */
 	public void setRatio(double ratio) {
-		if (ratio == 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.angle.invalidRaio"));
+		if (ratio == 0.0) 
+			throw new ValueOutOfRangeException("ratio", 0.0);
+		
 		this.ratio = ratio;
 	}
 	
@@ -422,7 +424,8 @@ public class AngleJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	 */
 	public void setUpperLimit(double upperLimit) {
 		// make sure the minimum is less than or equal to the maximum
-		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
+		if (upperLimit < this.lowerLimit) 
+			throw new ValueOutOfRangeException("upperLimit", upperLimit, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, "lowerLimit", this.lowerLimit);
 		
 		if (this.upperLimit != upperLimit) {
 			if (this.limitsEnabled) {
@@ -449,7 +452,9 @@ public class AngleJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	 */
 	public void setLowerLimit(double lowerLimit) {
 		// make sure the minimum is less than or equal to the maximum
-		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
+		if (lowerLimit > this.upperLimit) 
+			throw new ValueOutOfRangeException("lowerLimit", lowerLimit, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "upperLimit", this.upperLimit);
+			
 		if (this.lowerLimit != lowerLimit) {
 			if (this.limitsEnabled) {
 				// wake up both bodies
@@ -468,7 +473,9 @@ public class AngleJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
 		// make sure the min < max
-		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
+		if (lowerLimit > upperLimit) 
+			throw new ValueOutOfRangeException("lowerLimit", lowerLimit, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "upperLimit", upperLimit);
+			
 		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
 			if (this.limitsEnabled) {
 				// wake up the bodies

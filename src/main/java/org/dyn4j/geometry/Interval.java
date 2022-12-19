@@ -24,7 +24,7 @@
  */
 package org.dyn4j.geometry;
 
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ValueOutOfRangeException;
 
 /**
  * Represents a one dimensional numeric {@link Interval}.
@@ -46,7 +46,9 @@ public class Interval {
 	 * @throws IllegalArgumentException if min &gt; max
 	 */
 	public Interval(double min, double max) {
-		if (min > max) throw new IllegalArgumentException(Messages.getString("geometry.interval.invalid"));
+		if (min > max) 
+			throw new ValueOutOfRangeException("min", min, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "max", max);
+		
 		this.min = min;
 		this.max = max;
 	}
@@ -93,7 +95,9 @@ public class Interval {
 	 * @throws IllegalArgumentException if min &gt; max
 	 */
 	public void setMin(double min) {
-		if (min > this.max) throw new IllegalArgumentException(Messages.getString("geometry.interval.invalidMinimum"));
+		if (min > this.max) 
+			throw new ValueOutOfRangeException("min", min, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "max", this.max);
+		
 		this.min = min;
 	}
 	
@@ -103,7 +107,9 @@ public class Interval {
 	 * @throws IllegalArgumentException if max &lt; min
 	 */
 	public void setMax(double max) {
-		if (max < this.min) throw new IllegalArgumentException(Messages.getString("geometry.interval.invalidMaximum"));
+		if (max < this.min) 
+			throw new ValueOutOfRangeException("max", max, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, "min", this.min);
+		
 		this.max = max;
 	}
 

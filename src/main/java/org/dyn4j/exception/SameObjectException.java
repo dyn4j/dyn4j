@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -22,31 +22,24 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j;
-
-import org.dyn4j.resources.Messages;
-import org.junit.Test;
-
-import junit.framework.TestCase;
+package org.dyn4j.exception;
 
 /**
- * Test case for the {@link Messages} class.
+ * Represents an exception when two arguments are the same object.
  * @author William Bittle
- * @version 4.0.0
- * @since 4.0.0
+ * @version 5.0.0
+ * @since 5.0.0
  */
-public class MessagesTest {
+public class SameObjectException extends IllegalArgumentException {
+	private static final long serialVersionUID = -2844289260493601312L;
+
 	/**
-	 * Tests the get string method.
+	 * Minimal constructor.
+	 * @param argumentName1 the name of the first argument
+	 * @param argumentName2 the name of the second argument
+	 * @param object the object
 	 */
-	@Test
-	public void getString() {
-		String key = "geometry.circle.invalidRadius";
-		String str = Messages.getString(key);
-		TestCase.assertFalse(str.contains(key));
-		
-		key = "alkdjfaljdfljadlfjadf";
-		str = Messages.getString(key);
-		TestCase.assertTrue(str.contains(key));
+	public SameObjectException(String argumentName1, String argumentName2, Object object) {
+		super(String.format("%1$s and %2$s cannot be the same object. Both were: %3$s", argumentName1, argumentName2, object));
 	}
 }

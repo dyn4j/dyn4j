@@ -32,7 +32,7 @@ As always with a major release, all deprecated APIs have been removed.
 - [#254](https://github.com/dyn4j/dyn4j/issues/254) Allow the definition of joints with an arbitrary number of bodies
 
 **Bug Fixes**
-- The WeldJoint now considers the warm starting setting before warm starting
+- [#255](https://github.com/dyn4j/dyn4j/issues/255) Warm starting check missing in WeldJoint
 
 **Breaking Changes:**
 - All deprecated APIs have been removed

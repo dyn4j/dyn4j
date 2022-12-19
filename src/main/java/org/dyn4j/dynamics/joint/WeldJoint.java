@@ -30,6 +30,8 @@ import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
@@ -38,7 +40,6 @@ import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.Vector3;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of a weld joint.
@@ -193,8 +194,10 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	 */
 	public WeldJoint(T body1, T body2, Vector2 anchor) {
 		super(body1, body2);
+		
 		// check for a null anchor
-		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor"));
+		if (anchor == null) 
+			throw new ArgumentNullException("anchor");
 		
 		// set the anchor point
 		this.localAnchor1 = body1.getLocalPoint(anchor);
@@ -641,7 +644,12 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	@Override
 	public void setSpringDampingRatio(double dampingRatio) {
 		// make sure its within range
-		if (dampingRatio <= 0 || dampingRatio > 1) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidDampingRatio"));
+		if (dampingRatio <= 0.0) 
+			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
+		if (dampingRatio > 1.0) 
+			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, 1.0);
+		
 		// did it change?
 		if (this.springDampingRatio != dampingRatio) {
 			// set the damping ratio
@@ -677,7 +685,9 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	@Override
 	public void setSpringFrequency(double frequency) {
 		// check for valid value
-		if (frequency <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
+		if (frequency <= 0) 
+			throw new ValueOutOfRangeException("frequency", frequency, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		// set the spring mode
 		this.springMode = SPRING_MODE_FREQUENCY;
 		// check for change
@@ -699,7 +709,9 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	@Override
 	public void setSpringStiffness(double stiffness) {
 		// check for valid value
-		if (stiffness <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidStiffness"));
+		if (stiffness <= 0) 
+			throw new ValueOutOfRangeException("stiffness", stiffness, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		// set the spring mode
 		this.springMode = SPRING_MODE_STIFFNESS;
 		// only update if necessary
@@ -727,7 +739,9 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	@Override
 	public void setMaximumSpringTorque(double maximum) {
 		// check for valid value
-		if (maximum <= 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidSpringMaximumTorque"));
+		if (maximum <= 0) 
+			throw new ValueOutOfRangeException("maximum", maximum, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		// check if changed
 		if (this.springMaximumTorque != maximum) {
 			this.springMaximumTorque = maximum;
@@ -851,7 +865,9 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setUpperLimit(double)
 	 */
 	public void setUpperLimit(double upperLimit) {
-		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
+		if (upperLimit < this.lowerLimit) 
+			throw new ValueOutOfRangeException("upperLimit", upperLimit, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, "lowerLimit", this.lowerLimit);
+		
 		if (this.upperLimit != upperLimit) {
 			// only wake the bodies if the motor is enabled and the limit has changed
 			if (this.limitsEnabled) {
@@ -877,7 +893,9 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLowerLimit(double)
 	 */
 	public void setLowerLimit(double lowerLimit) {
-		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
+		if (lowerLimit > this.upperLimit) 
+			throw new ValueOutOfRangeException("lowerLimit", lowerLimit, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "upperLimit", this.upperLimit);
+		
 		if (this.lowerLimit != lowerLimit) {
 			// only wake the bodies if the motor is enabled and the limit has changed
 			if (this.limitsEnabled) {
@@ -896,7 +914,9 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimits(double, double)
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
-		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
+		if (lowerLimit > upperLimit)
+			throw new ValueOutOfRangeException("lowerLimit", lowerLimit, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "upperLimit", upperLimit);
+		
 		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
 			// only wake the bodies if the motor is enabled and one of the limits has changed
 			if (this.limitsEnabled) {

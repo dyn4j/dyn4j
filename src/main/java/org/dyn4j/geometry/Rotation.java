@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,7 +26,6 @@ package org.dyn4j.geometry;
 
 import org.dyn4j.Copyable;
 import org.dyn4j.Epsilon;
-import org.dyn4j.resources.Messages;
 
 /**
  * This class represents a rotation (in 2D space).
@@ -45,7 +44,7 @@ import org.dyn4j.resources.Messages;
  * The receiver of a Rotation object can be sure it always represents a valid rotation.
  * 
  * @author Manolis Tsamis
- * @version 4.0.0
+ * @version 5.0.0
  * @since 3.4.0
  */
 public class Rotation implements Copyable<Rotation> {
@@ -113,7 +112,7 @@ public class Rotation implements Copyable<Rotation> {
 		double magnitude = cost * cost + sint * sint;
 		
 		if (Math.abs(magnitude - 1) > Epsilon.E) {
-			throw new IllegalArgumentException(Messages.getString("geometry.rotation.invalidPoint"));
+			throw new IllegalArgumentException("The magnitude of the rotation is outside the unit circle.");
 		}
 		
 		return new Rotation(cost, sint);

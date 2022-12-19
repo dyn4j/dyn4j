@@ -22,77 +22,31 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j.dynamics.joint;
-
-import java.util.Arrays;
-
-import org.dyn4j.DataContainer;
-import org.dyn4j.Ownable;
-import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.dynamics.PhysicsBody;
-import org.dyn4j.exception.InvalidIndexException;
-import org.dyn4j.geometry.Shiftable;
+package org.dyn4j.exception;
 
 /**
- * Represents an abstract implementation of constrained motion with a single 
- * {@link PhysicsBody}.
+ * Represents an exception when a collection has a null element.
  * @author William Bittle
  * @version 5.0.0
  * @since 5.0.0
- * @param <T> the {@link PhysicsBody} type
  */
-public abstract class AbstractSingleBodyJoint<T extends PhysicsBody> extends AbstractJoint<T> implements SingleBodyJoint<T>, Joint<T>, Shiftable, DataContainer, Ownable {
-	/** The body */
-	protected final T body;
-	
+public class NullElementException extends NullPointerException {
+	private static final long serialVersionUID = 4560521220204618552L;
+
 	/**
-	 * Default constructor.
-	 * @param body the body
-	 * @throws NullPointerException if body is null
+	 * Constructor when the index is know.
+	 * @param argumentName the name of the argument that contains the null element
+	 * @param index the index of the null element
 	 */
-	public AbstractSingleBodyJoint(T body) {
-		super(Arrays.asList(body));
-		this.body = body;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.UniaryJoint#getBody()
-	 */
-	@Override
-	public final T getBody() {
-		return this.body;
+	public NullElementException(String argumentName, int index) {
+		super(String.format("%1$s contains a null element at index %2$d", argumentName, index));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getBodyCount()
+	/**
+	 * Minimal constructor.
+	 * @param argumentName the name of the argument that contains the null element
 	 */
-	@Override
-	public final int getBodyCount() {
-		return 1;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getBody(int)
-	 */
-	@Override
-	public final T getBody(int i) {
-		if (i == 0) return this.body;
-		throw new InvalidIndexException(i);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#isMember(org.dyn4j.collision.CollisionBody)
-	 */
-	@Override
-	public final boolean isMember(CollisionBody<?> body) {
-		return body == this.body;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#isEnabled()
-	 */
-	@Override
-	public final boolean isEnabled() {
-		return this.body.isEnabled();
+	public NullElementException(String argumentName) {
+		super(String.format("%1$s contains a null element", argumentName));
 	}
 }

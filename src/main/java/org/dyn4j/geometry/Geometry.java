@@ -30,7 +30,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.dyn4j.Epsilon;
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.EmptyCollectionException;
+import org.dyn4j.exception.NullElementException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 
 /**
  * Contains static methods to perform standard geometric operations.
@@ -42,7 +45,7 @@ import org.dyn4j.resources.Messages;
  * This class also contains various helper methods for cleaning vector arrays and lists and performing
  * various operations on {@link Shape}s.
  * @author William Bittle
- * @version 4.2.2
+ * @version 5.0.0
  * @since 1.0.0
  */
 public final class Geometry {
@@ -68,19 +71,30 @@ public final class Geometry {
 	 */
 	public static final double getWinding(List<Vector2> points) {
 		// check for a null list
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointList"));
+		if (points == null) 
+			throw new ArgumentNullException("points");
+		
 		// get the size
 		int size = points.size();
 		// the size must be larger than 1
-		if (size < 2) throw new IllegalArgumentException(Messages.getString("geometry.invalidSizePointList2"));
+		if (size < 2) 
+			throw new ValueOutOfRangeException("points.size", size, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 2);
+		
 		// determine the winding by computing a signed "area"
 		double area = 0.0;
 		for (int i = 0; i < size; i++) {
+			int j = i + 1 == size ? 0 : i + 1;
 			// get the current point and the next point
 			Vector2 p1 = points.get(i);
-			Vector2 p2 = points.get(i + 1 == size ? 0 : i + 1);
+			Vector2 p2 = points.get(j);
+			
 			// check for null
-			if (p1 == null || p2 == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
+			if (p1 == null)
+				throw new NullElementException("points", i);
+			
+			if (p2 == null)
+				throw new NullElementException("points", j);
+
 			// add the signed area
 			area += p1.cross(p2);
 		}
@@ -99,19 +113,31 @@ public final class Geometry {
 	 */
 	public static final double getWinding(Vector2... points) {
 		// check for a null list
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointArray"));
+		if (points == null) 
+			throw new ArgumentNullException("points");
+		
 		// get the size
 		int size = points.length;
 		// the size must be larger than 1
-		if (size < 2) throw new IllegalArgumentException(Messages.getString("geometry.invalidSizePointArray2"));
+		if (size < 2) 
+			throw new ValueOutOfRangeException("points.length", size, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 2);
+		
 		// determine the winding by computing a signed "area"
 		double area = 0.0;
 		for (int i = 0; i < size; i++) {
+			int j = i + 1 == size ? 0 : i + 1;
+			
 			// get the current point and the next point
 			Vector2 p1 = points[i];
-			Vector2 p2 = points[i + 1 == size ? 0 : i + 1];
+			Vector2 p2 = points[j];
+			
 			// check for null
-			if (p1 == null || p2 == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
+			if (p1 == null)
+				throw new NullElementException("points", i);
+			
+			if (p2 == null)
+				throw new NullElementException("points", j);
+			
 			// add the signed area
 			area += p1.cross(p2);
 		}
@@ -129,7 +155,9 @@ public final class Geometry {
 	 */
 	public static final void reverseWinding(Vector2... points) {
 		// check for a null list
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointArray"));
+		if (points == null) 
+			throw new ArgumentNullException("points");
+		
 		// get the length
 		int size = points.length;
 		// check for a length of 1
@@ -159,7 +187,9 @@ public final class Geometry {
 	 */
 	public static final void reverseWinding(List<Vector2> points) {
 		// check for a null list
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointList"));
+		if (points == null) 
+			throw new ArgumentNullException("points");
+		
 		// check for a length of 0 or 1
 		if (points.size() <= 1) return;
 		// otherwise reverse the list
@@ -175,16 +205,23 @@ public final class Geometry {
 	 */
 	public static final Vector2 getAverageCenter(List<Vector2> points) {
 		// check for null list
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointList"));
+		if (points == null) 
+			throw new ArgumentNullException("points");
+		
 		// check for empty list
-		if (points.isEmpty()) throw new IllegalArgumentException(Messages.getString("geometry.invalidSizePointList1"));
+		if (points.isEmpty()) 
+			throw new EmptyCollectionException("points");
+		
 		// get the size
 		int size = points.size();
 		// check for a list of one point
 		if (size == 1) {
 			Vector2 p = points.get(0);
+			
 			// make sure its not null
-			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
+			if (p == null) 
+				throw new NullElementException("points", 0);
+			
 			// return a copy
 			return p.copy();
 		}
@@ -193,8 +230,11 @@ public final class Geometry {
 		Vector2 ac = new Vector2();
 		for (int i = 0; i < size; i++) {
 			Vector2 point = points.get(i);
+			
 			// check for null
-			if (point == null) throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
+			if (point == null) 
+				throw new NullElementException("points", i);
+			
 			ac.add(point);
 		}
 		
@@ -211,16 +251,23 @@ public final class Geometry {
 	 */
 	public static final Vector2 getAverageCenter(Vector2... points) {
 		// check for null array
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointArray"));
+		if (points == null) 
+			throw new ArgumentNullException("points");
+		
 		// get the length
 		int size = points.length;
 		// check for empty
-		if (size == 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidSizePointArray1"));
+		if (size == 0) 
+			throw new EmptyCollectionException("points");
+		
 		// check for a list of one point
 		if (size == 1) {
 			Vector2 p = points[0];
+			
 			// check for null
-			if (p == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
+			if (p == null) 
+				throw new NullElementException("points", 0);
+			
 			return p.copy();
 		}
 		
@@ -228,8 +275,11 @@ public final class Geometry {
 		Vector2 ac = new Vector2();
 		for (int i = 0; i < size; i++) {
 			Vector2 point = points[i];
+			
 			// check for null
-			if (point == null) throw new NullPointerException(Messages.getString("geometry.nullPointArrayElements"));
+			if (point == null) 
+				throw new NullElementException("points", i);
+			
 			ac.add(point);
 		}
 		
@@ -447,7 +497,9 @@ public final class Geometry {
 	 */
 	public static final Polygon createPolygon(Vector2... vertices) {
 		// check the vertices array
-		if (vertices == null) throw new NullPointerException(Messages.getString("geometry.nullVerticesArray"));
+		if (vertices == null) 
+			throw new ArgumentNullException("vertices");
+		
 		// loop over the points an copy them
 		int size = vertices.length;
 		// check the size
@@ -458,7 +510,7 @@ public final class Geometry {
 			if (vertex != null) {
 				verts[i] = vertex.copy();
 			} else {
-				throw new NullPointerException(Messages.getString("geometry.nullPolygonPoint"));
+				throw new NullElementException("vertices", i);
 			}
 		}
 		return new Polygon(verts);
@@ -518,11 +570,6 @@ public final class Geometry {
 	 * @see #createPolygonalCircle(int, double, double)
 	 */
 	public static final Polygon createUnitCirclePolygon(int count, double radius, double theta) {
-		// check the count
-		if (count < 3) throw new IllegalArgumentException(Messages.getString("geometry.invalidVerticesSize"));
-		// check the radius
-		if (radius <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidRadius"));
-		// call the more efficient method here
 		return Geometry.createPolygonalCircle(count, radius, theta);
 	}
 	
@@ -535,7 +582,9 @@ public final class Geometry {
 	 */
 	public static final Rectangle createSquare(double size) {
 		// check the size
-		if (size <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidSize"));
+		if (size <= 0.0) 
+			throw new ValueOutOfRangeException("size", size, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0);
+		
 		return new Rectangle(size, size);
 	}
 	
@@ -564,7 +613,15 @@ public final class Geometry {
 	 * @see #createTriangleAtOrigin(Vector2, Vector2, Vector2) to create a new {@link Triangle} that is centered on the origin
 	 */
 	public static final Triangle createTriangle(Vector2 p1, Vector2 p2, Vector2 p3) {
-		if (p1 == null || p2 == null || p3 == null) throw new NullPointerException(Messages.getString("geometry.nullTrianglePoint"));
+		if (p1 == null)
+			throw new ArgumentNullException("p1");
+		
+		if (p2 == null)
+			throw new ArgumentNullException("p2");
+		
+		if (p3 == null)
+			throw new ArgumentNullException("p3");
+		
 		return new Triangle(p1.copy(), p2.copy(), p3.copy());
 	}
 	
@@ -606,9 +663,13 @@ public final class Geometry {
 	 */
 	public static final Triangle createRightTriangle(double width, double height, boolean mirror) {
 		// check the width
-		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidWidth"));
+		if (width <= 0.0) 
+			throw new ValueOutOfRangeException("width", width, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		// check the height
-		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidHeight"));
+		if (height <= 0.0)
+			throw new ValueOutOfRangeException("height", height, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		Vector2 top = new Vector2(0.0, height);
 		Vector2 left = new Vector2(0.0, 0.0);
 		Vector2 right = new Vector2(mirror ? -width : width, 0.0);
@@ -632,7 +693,9 @@ public final class Geometry {
 	 */
 	public static final Triangle createEquilateralTriangle(double height) {
 		// check the size
-		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidSize"));
+		if (height <= 0.0) 
+			throw new ValueOutOfRangeException("height", height, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		// compute a where height = a * sqrt(3) / 2.0 (a is the width of the base
 		double a = 2.0 * height * INV_SQRT_3;
 		// create the triangle
@@ -648,9 +711,13 @@ public final class Geometry {
 	 */
 	public static final Triangle createIsoscelesTriangle(double width, double height) {
 		// check the width
-		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidWidth"));
+		if (width <= 0.0) 
+			throw new ValueOutOfRangeException("width", width, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		// check the height
-		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidHeight"));
+		if (height <= 0.0)
+			throw new ValueOutOfRangeException("height", height, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		Vector2 top = new Vector2(0.0, height);
 		Vector2 left = new Vector2(-width * 0.5, 0.0);
 		Vector2 right = new Vector2(width * 0.5, 0.0);
@@ -674,7 +741,12 @@ public final class Geometry {
 	 * @see #createSegmentAtOrigin(Vector2, Vector2) to create a {@link Segment} centered on the origin
 	 */
 	public static final Segment createSegment(Vector2 p1, Vector2 p2) {
-		if (p1 == null || p2 == null) throw new NullPointerException(Messages.getString("geometry.nullSegmentPoint"));
+		if (p1 == null)
+			throw new ArgumentNullException("p1");
+		
+		if (p2 == null)
+			throw new ArgumentNullException("p2");
+
 		return new Segment(p1.copy(), p2.copy());
 	}
 	
@@ -720,7 +792,9 @@ public final class Geometry {
 	 */
 	public static final Segment createHorizontalSegment(double length) {
 		// check the length
-		if (length <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidLength"));
+		if (length <= 0.0)
+			throw new ValueOutOfRangeException("length", length, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+			
 		Vector2 start = new Vector2(-length * 0.5, 0.0);
 		Vector2 end = new Vector2(length * 0.5, 0.0);
 		return new Segment(start, end);
@@ -736,7 +810,9 @@ public final class Geometry {
 	 */
 	public static final Segment createVerticalSegment(double length) {
 		// check the length
-		if (length <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.invalidLength"));
+		if (length <= 0.0)
+			throw new ValueOutOfRangeException("length", length, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		Vector2 start = new Vector2(0.0, -length * 0.5);
 		Vector2 end = new Vector2(0.0, length * 0.5);
 		return new Segment(start, end);
@@ -879,8 +955,11 @@ public final class Geometry {
 	 */
 	public static final Polygon createPolygonalCircle(int count, double radius, double theta) {
 		// validate the input
-		if (count < 3) throw new IllegalArgumentException(Messages.getString("geometry.circleInvalidCount"));
-		if (radius <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.circleInvalidRadius"));
+		if (count < 3) 
+			throw new ValueOutOfRangeException("count", count, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 3);
+		
+		if (radius <= 0.0) 
+			throw new ValueOutOfRangeException("radius", radius, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
 		
 		// compute the angular increment
 		final double pin = Geometry.TWO_PI / count;
@@ -925,9 +1004,14 @@ public final class Geometry {
 	 */
 	public static final Polygon createPolygonalSlice(int count, double radius, double theta) {
 		// validate the input
-		if (count < 1) throw new IllegalArgumentException(Messages.getString("geometry.sliceInvalidCount"));
-		if (radius <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.sliceInvalidRadius"));
-		if (theta <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.sliceInvalidTheta"));
+		if (count < 1) 
+			throw new ValueOutOfRangeException("count", count, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 1);
+		
+		if (radius <= 0.0) 
+			throw new ValueOutOfRangeException("radius", radius, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
+		if (theta <= 0.0) 
+			throw new ValueOutOfRangeException("theta", theta, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
 		
 		// compute the angular increment
 		final double pin = theta / (count + 1);
@@ -994,9 +1078,16 @@ public final class Geometry {
 	 */
 	public static final Polygon createPolygonalEllipse(int count, double width, double height) {
 		// validate the input
-		if (count < 4) throw new IllegalArgumentException(Messages.getString("geometry.ellipseInvalidCount"));
-		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.ellipseInvalidWidth"));
-		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.ellipseInvalidHeight"));
+		if (count < 4) 
+			throw new ValueOutOfRangeException("count", count, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 4);
+
+		// check the width
+		if (width <= 0.0) 
+			throw new ValueOutOfRangeException("width", width, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
+		// check the height
+		if (height <= 0.0)
+			throw new ValueOutOfRangeException("height", height, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
 		
 		final double a = width * 0.5;
 		final double b = height * 0.5;
@@ -1044,9 +1135,16 @@ public final class Geometry {
 	 */
 	public static final Polygon createPolygonalHalfEllipse(int count, double width, double height) {
 		// validate the input
-		if (count < 1) throw new IllegalArgumentException(Messages.getString("geometry.halfEllipseInvalidCount"));
-		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.halfEllipseInvalidWidth"));
-		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.halfEllipseInvalidHeight"));
+		if (count < 4) 
+			throw new ValueOutOfRangeException("count", count, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 4);
+
+		// check the width
+		if (width <= 0.0) 
+			throw new ValueOutOfRangeException("width", width, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
+		// check the height
+		if (height <= 0.0)
+			throw new ValueOutOfRangeException("height", height, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
 		
 		final double a = width * 0.5;
 		final double b = height * 0.5;
@@ -1111,9 +1209,16 @@ public final class Geometry {
 	 */
 	public static final Polygon createPolygonalCapsule(int count, double width, double height) {
 		// validate the input
-		if (count < 1) throw new IllegalArgumentException(Messages.getString("geometry.capsuleInvalidCount"));
-		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.capsuleInvalidWidth"));
-		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.capsuleInvalidHeight"));
+		if (count < 1) 
+			throw new ValueOutOfRangeException("count", count, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 1);
+
+		// check the width
+		if (width <= 0.0) 
+			throw new ValueOutOfRangeException("width", width, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
+		// check the height
+		if (height <= 0.0)
+			throw new ValueOutOfRangeException("height", height, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
 		
 		// if the width and height are close enough to being equal, just return a circle
 		if (Math.abs(width - height) < Epsilon.E) {
@@ -1215,7 +1320,9 @@ public final class Geometry {
 	 */
 	public static final List<Vector2> cleanse(List<Vector2> points) {
 		// check for null list
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointList"));
+		if (points == null) 
+			throw new ArgumentNullException("points");
+		
 		// get the size of the points list
 		int size = points.size();
 		// check the size
@@ -1231,12 +1338,20 @@ public final class Geometry {
 			Vector2 point = points.get(i);
 			
 			// get the adjacent points
-			Vector2 prev = points.get(i - 1 < 0 ? size - 1 : i - 1);
-			Vector2 next = points.get(i + 1 == size ? 0 : i + 1);
+			int n = i - 1 < 0 ? size - 1 : i - 1;
+			int m = i + 1 == size ? 0 : i + 1;
+			Vector2 prev = points.get(n);
+			Vector2 next = points.get(m);
 			
 			// check for null
-			if (point == null || prev == null || next == null)
-				throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
+			if (point == null) 
+				throw new NullElementException("points", i);
+			
+			if (prev == null)
+				throw new NullElementException("points", n);
+			
+			if (next == null)
+				throw new NullElementException("points", m);
 			
 			// is this point equal to the next?
 			Vector2 diff = point.difference(next);
@@ -1289,7 +1404,9 @@ public final class Geometry {
 	 */
 	public static final Vector2[] cleanse(Vector2... points) {
 		// check for null
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.nullPointArray"));
+		if (points == null) 
+			throw new ArgumentNullException("points");
+		
 		// create a list from the array
 		List<Vector2> pointList = Arrays.asList(points);
 		// cleanse the list
@@ -1393,9 +1510,15 @@ public final class Geometry {
 	 */
 	public static final Polygon flip(Polygon polygon, Vector2 axis, Vector2 point) {
 		// check for valid input
-		if (polygon == null) throw new NullPointerException(Messages.getString("geometry.nullFlipPolygon"));
-		if (axis == null) throw new NullPointerException(Messages.getString("geometry.nullFlipAxis"));
-		if (axis.isZero()) throw new IllegalArgumentException(Messages.getString("geometry.zeroFlipAxis"));
+		if (polygon == null) 
+			throw new ArgumentNullException("polygon");
+		
+		if (axis == null) 
+			throw new ArgumentNullException("axis");
+		
+		if (axis.isZero()) 
+			throw new IllegalArgumentException("The axis cannot be a zero vector");
+		
 		// just use the center of the polygon if the given point is null
 		if (point == null) point = polygon.getCenter();
 		// flip about the axis and point
@@ -1451,8 +1574,11 @@ public final class Geometry {
 	 * @since 3.1.5
 	 */
 	public static final <E extends Wound & Convex> Polygon minkowskiSum(E convex1, E convex2) {
-		if (convex1 == null) throw new NullPointerException(Messages.getString("geometry.nullMinkowskiSumConvex"));
-		if (convex2 == null) throw new NullPointerException(Messages.getString("geometry.nullMinkowskiSumConvex"));
+		if (convex1 == null) 
+			throw new ArgumentNullException("convex1");
+		
+		if (convex2 == null) 
+			throw new ArgumentNullException("convex2");
 		
 		Vector2[] p1v = convex1.getVertices();
 		Vector2[] p2v = convex2.getVertices();
@@ -1463,7 +1589,7 @@ public final class Geometry {
 			Vector2 s1 = p1v[0].to(p1v[1]);
 			Vector2 s2 = p2v[0].to(p2v[1]);
 			if (s1.cross(s2) <= Epsilon.E) {
-				throw new IllegalArgumentException(Messages.getString("geometry.invalidMinkowskiSumSegments"));
+				throw new IllegalArgumentException("Two segments were given and they are colinear");
 			}
 		}
 		
@@ -1593,7 +1719,9 @@ public final class Geometry {
 	 * @see #minkowskiSum(Polygon, double, int)
 	 */
 	public static final Polygon minkowskiSum(Polygon polygon, Circle circle, int count) {
-		if (circle == null) throw new NullPointerException(Messages.getString("geometry.nullMinkowskiSumCircle"));
+		if (circle == null) 
+			throw new ArgumentNullException("circle");
+		
 		return Geometry.minkowskiSum(polygon, circle.radius, count);
 	}
 	
@@ -1617,9 +1745,14 @@ public final class Geometry {
 	 */
 	public static final Polygon minkowskiSum(Polygon polygon, double radius, int count) {
 		// check for valid input
-		if (polygon == null) throw new NullPointerException(Messages.getString("geometry.nullMinkowskiSumPolygon"));
-		if (radius <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidMinkowskiSumRadius"));
-		if (count <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidMinkowskiSumCount"));
+		if (polygon == null)
+			throw new ArgumentNullException("polygon");
+		
+		if (radius <= 0.0) 
+			throw new ValueOutOfRangeException("radius", radius, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+
+		if (count <= 0) 
+			throw new ValueOutOfRangeException("count", count, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
 		
 		Vector2[] vertices = polygon.vertices;
 		Vector2[] normals = polygon.normals;
@@ -1691,8 +1824,12 @@ public final class Geometry {
 	 * @since 3.1.5
 	 */
 	public static final Circle scale(Circle circle, double scale) {
-		if (circle == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
-		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
+		if (circle == null) 
+			throw new ArgumentNullException("circle");
+		
+		if (scale <= 0) 
+			throw new ValueOutOfRangeException("scale", scale, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		return new Circle(circle.radius * scale);
 	}
 	
@@ -1706,8 +1843,12 @@ public final class Geometry {
 	 * @since 3.1.5
 	 */
 	public static final Capsule scale(Capsule capsule, double scale) {
-		if (capsule == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
-		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
+		if (capsule == null) 
+			throw new ArgumentNullException("circle");
+		
+		if (scale <= 0) 
+			throw new ValueOutOfRangeException("scale", scale, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		return new Capsule(capsule.getLength() * scale, capsule.getCapRadius() * 2.0 * scale);
 	}
 	
@@ -1721,8 +1862,12 @@ public final class Geometry {
 	 * @since 3.1.5
 	 */
 	public static final Ellipse scale(Ellipse ellipse, double scale) {
-		if (ellipse == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
-		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
+		if (ellipse == null) 
+			throw new ArgumentNullException("circle");
+		
+		if (scale <= 0) 
+			throw new ValueOutOfRangeException("scale", scale, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		return new Ellipse(ellipse.getWidth() * scale, ellipse.getHeight() * scale);
 	}
 
@@ -1736,8 +1881,12 @@ public final class Geometry {
 	 * @since 3.1.5
 	 */
 	public static final HalfEllipse scale(HalfEllipse halfEllipse, double scale) {
-		if (halfEllipse == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
-		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
+		if (halfEllipse == null) 
+			throw new ArgumentNullException("circle");
+		
+		if (scale <= 0) 
+			throw new ValueOutOfRangeException("scale", scale, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		return new HalfEllipse(halfEllipse.getWidth() * scale, halfEllipse.getHeight() * scale);
 	}
 	
@@ -1751,8 +1900,12 @@ public final class Geometry {
 	 * @since 3.1.5
 	 */
 	public static final Slice scale(Slice slice, double scale) {
-		if (slice == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
-		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
+		if (slice == null) 
+			throw new ArgumentNullException("circle");
+		
+		if (scale <= 0) 
+			throw new ValueOutOfRangeException("scale", scale, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		return new Slice(slice.getSliceRadius() * scale, slice.getTheta());
 	}
 	
@@ -1766,8 +1919,11 @@ public final class Geometry {
 	 * @since 3.1.5
 	 */
 	public static final Polygon scale(Polygon polygon, double scale) {
-		if (polygon == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
-		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
+		if (polygon == null) 
+			throw new ArgumentNullException("circle");
+		
+		if (scale <= 0) 
+			throw new ValueOutOfRangeException("scale", scale, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
 		
 		Vector2[] oVertices = polygon.vertices;
 		int size = oVertices.length;
@@ -1791,8 +1947,11 @@ public final class Geometry {
 	 * @since 3.1.5
 	 */
 	public static final Segment scale(Segment segment, double scale) {
-		if (segment == null) throw new NullPointerException(Messages.getString("geometry.nullShape"));
-		if (scale <= 0) throw new IllegalArgumentException(Messages.getString("geometry.invalidScale"));
+		if (segment == null) 
+			throw new ArgumentNullException("circle");
+		
+		if (scale <= 0) 
+			throw new ValueOutOfRangeException("scale", scale, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
 		
 		final double length = segment.getLength() * scale * 0.5;
 		Vector2 n = segment.vertices[0].to(segment.vertices[1]);
@@ -1831,20 +1990,27 @@ public final class Geometry {
 	 */
 	public static final List<Link> createLinks(Vector2[] vertices, boolean closed) {
 		// check the vertex array
-		if (vertices == null) throw new NullPointerException(Messages.getString("geometry.nullPointArray"));
+		if (vertices == null) 
+			throw new ArgumentNullException("vertices");
+		
 		// get the vertex length
 		int size = vertices.length;
 		// the size must be larger than 1 (2 or more)
-		if (size < 2) throw new IllegalArgumentException(Messages.getString("geometry.invalidSizePointList2"));
+		if (size < 2)
+			throw new ValueOutOfRangeException("vertices.length", size, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 2);
+		
 		// generate the links
 		List<Link> links = new ArrayList<Link>();
 		for (int i = 0; i < size - 1; i++) {
 			Vector2 p1 = vertices[i];
 			Vector2 p2 = vertices[i + 1];
 			// check for null segment vertices
-			if (p1 == null || p2 == null)  {
-				throw new NullPointerException(Messages.getString("geometry.nullPointListElements"));
-			}
+			if (p1 == null)
+				throw new NullElementException("points", i);
+			
+			if (p2 == null)
+				throw new NullElementException("points", i + 1);
+			
 			Link link = new Link(p1.copy(), p2.copy());
 			// link up the previous and this link
 			if (i > 0) {

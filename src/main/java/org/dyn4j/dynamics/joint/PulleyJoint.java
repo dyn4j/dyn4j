@@ -30,11 +30,12 @@ import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of a pulley joint.
@@ -127,12 +128,21 @@ public class PulleyJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<
 	 */
 	public PulleyJoint(T body1, T body2, Vector2 pulleyAnchor1, Vector2 pulleyAnchor2, Vector2 bodyAnchor1, Vector2 bodyAnchor2) {
 		super(body1, body2);
+		
 		// verify the pulley anchor points are not null
-		if (pulleyAnchor1 == null) throw new NullPointerException(Messages.getString("dynamics.joint.pulley.nullPulleyAnchor1"));
-		if (pulleyAnchor2 == null) throw new NullPointerException(Messages.getString("dynamics.joint.pulley.nullPulleyAnchor2"));
+		if (pulleyAnchor1 == null) 
+			throw new ArgumentNullException("pulleyAnchor1");
+		
+		if (pulleyAnchor2 == null) 
+			throw new ArgumentNullException("pulleyAnchor2");
+		
 		// verify the body anchor points are not null
-		if (bodyAnchor1 == null) throw new NullPointerException(Messages.getString("dynamics.joint.pulley.nullBodyAnchor1"));
-		if (bodyAnchor2 == null) throw new NullPointerException(Messages.getString("dynamics.joint.pulley.nullBodyAnchor2"));
+		if (bodyAnchor1 == null) 
+			throw new ArgumentNullException("bodyAnchor1");
+		
+		if (bodyAnchor2 == null) 
+			throw new ArgumentNullException("bodyAnchor2");
+		
 		// set the pulley anchor points
 		this.pulleyAnchor1 = pulleyAnchor1.copy();
 		this.pulleyAnchor2 = pulleyAnchor2.copy();
@@ -482,11 +492,14 @@ public class PulleyJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<
 	 * Typically this is computed when the joint is created by adding the distance from the
 	 * first body anchor to the first pulley anchor with the distance from the second body anchor
 	 * to the second pulley anchor.
-	 * @param length the length
+	 * @param length the length; must be greater than or equal to zero
 	 * @since 3.2.1
+	 * @throws IllegalArgumentException if length is less than zero
 	 */
 	public void setLength(double length) {
-		if (length < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.pulley.invalidLength"));
+		if (length < 0.0)
+			throw new ValueOutOfRangeException("length", length, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		if (this.length != length) {
 			this.length = length;
 			// wake up both bodies
@@ -545,7 +558,9 @@ public class PulleyJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<
 	 * @throws IllegalArgumentException if ratio is less than or equal to zero
 	 */
 	public void setRatio(double ratio) {
-		if (ratio <= 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.pulley.invalidRatio"));
+		if (ratio <= 0.0) 
+			throw new ValueOutOfRangeException("ratio", ratio, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		// make sure the ratio changed
 		if (ratio != this.ratio) {
 			// set the new ratio

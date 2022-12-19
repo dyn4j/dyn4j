@@ -25,14 +25,14 @@
 package org.dyn4j.geometry;
 
 import org.dyn4j.DataContainer;
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ValueOutOfRangeException;
 
 /**
  * Implementation of a Circle {@link Convex} {@link Shape}.
  * <p>
  * A {@link Circle}'s radius must be greater than zero.
  * @author William Bittle
- * @version 4.2.1
+ * @version 5.0.0
  * @since 1.0.0
  */
 public class Circle extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -65,7 +65,9 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 	 * @throws IllegalArgumentException if the given radius is less than or equal to zero
 	 */
 	private static final boolean validate(double radius) {
-		if (radius <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.circle.invalidRadius"));
+		if (radius <= 0.0) 
+			throw new ValueOutOfRangeException("radius", radius, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		return true;
 	}
 	

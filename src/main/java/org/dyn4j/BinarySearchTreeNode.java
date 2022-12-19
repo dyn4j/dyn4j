@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,12 +24,12 @@
  */
 package org.dyn4j;
 
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ArgumentNullException;
 
 /**
  * Node class for the {@link BinarySearchTree}.
  * @author William Bittle
- * @version 3.1.9
+ * @version 5.0.0
  * @since 2.2.0
  * @param <E> the comparable type
  */
@@ -65,7 +65,9 @@ final class BinarySearchTreeNode<E extends Comparable<E>> implements Comparable<
 	 * @throws NullPointerException if comparable is null
 	 */
 	public BinarySearchTreeNode(E comparable, BinarySearchTreeNode<E> parent, BinarySearchTreeNode<E> left, BinarySearchTreeNode<E> right) {
-		if (comparable == null) throw new NullPointerException(Messages.getString("binarySearchTree.nullComparable"));
+		if (comparable == null) 
+			throw new ArgumentNullException("comparable");
+		
 		this.comparable = comparable;
 		this.parent = parent;
 		this.left = left;

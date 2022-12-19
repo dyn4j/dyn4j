@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,14 +24,14 @@
  */
 package org.dyn4j.dynamics;
 
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ValueOutOfRangeException;
 
 /**
  * Class encapsulating the timestep information.
  * <p>
  * A time step represents the elapsed time since the last update.
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.0
  * @since 1.0.0
  */
 public class TimeStep {
@@ -52,10 +52,13 @@ public class TimeStep {
 
 	/**
 	 * Default constructor.
-	 * @param dt the initial delta time in seconds; must be positive or zero
+	 * @param dt the initial delta time in seconds; must be greater than zero
+	 * @throws IllegalArgumentException if dt is less than or equal to zero
 	 */
 	public TimeStep(double dt) {
-		if (dt <= 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.step.invalidDeltaTime"));
+		if (dt <= 0.0) 
+			throw new ValueOutOfRangeException("dt", dt, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		this.dt = dt;
 		this.invdt = 1.0 / dt;
 		this.dt0 = this.dt;
@@ -80,10 +83,13 @@ public class TimeStep {
 	
 	/**
 	 * Updates the current {@link TimeStep} using the new elapsed time.
-	 * @param dt in delta time in seconds; must be positive or zero
+	 * @param dt in delta time in seconds; must be greater than zero
+	 * @throws IllegalArgumentException if dt is less than or equal to zero
 	 */
 	public void update(double dt) {
-		if (dt <= 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.step.invalidDeltaTime"));
+		if (dt <= 0.0)
+			throw new ValueOutOfRangeException("dt", dt, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		this.dt0 = this.dt;
 		this.invdt0 = this.invdt;
 		this.dt = dt;
