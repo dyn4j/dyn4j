@@ -3,7 +3,7 @@
 ![Actions Status](https://github.com/dyn4j/dyn4j/workflows/Maven%20CI/badge.svg)
 ![License](https://img.shields.io/github/license/dyn4j/dyn4j)
 ![Language](https://img.shields.io/github/languages/top/dyn4j/dyn4j)
-![Java](https://img.shields.io/badge/java-%3E%3D%206-orange)
+![Java](https://img.shields.io/badge/java-6+-orange)
 ![Maven Central](https://img.shields.io/maven-central/v/org.dyn4j/dyn4j)
 [![javadoc](https://javadoc.io/badge2/org.dyn4j/dyn4j/javadoc.svg?kill_cache=1)](https://javadoc.io/doc/org.dyn4j/dyn4j)
 ![Code Coverage](https://img.shields.io/badge/coverage-96.7%25-brightgreen)
