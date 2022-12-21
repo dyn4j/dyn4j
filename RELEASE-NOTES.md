@@ -1,17 +1,17 @@
-## v5.0.0 - 
+## v5.0.0 - December 23rd, 2022
 
-[Milestone](https://github.com/dyn4j/dyn4j/milestone/14?closed=1) |
-[Tag](https://github.com/dyn4j/dyn4j/tree/4.2.2) |
-[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/4.2.2/bundle) |
-[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=4.2.2)
+[Milestone](https://github.com/dyn4j/dyn4j/milestone/15?closed=1) |
+[Tag](https://github.com/dyn4j/dyn4j/tree/5.0.0) |
+[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/5.0.0/bundle) |
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=5.0.0)
 
-This major update includes an overhaul of the `org.dyn4j.dynamics.joint` package.  This update allows the creation of new joints with an arbitrary number of bodies (whereas only one-body or two-body joints were possible before).  This release sees all joints inherit from standard interfaces for things like limits, motors, and springs with the intent to make the API surface identical among all the joints.
+This major update overhauls the `org.dyn4j.dynamics.joint` package.  This update allows the creation of new joints with an arbitrary number of bodies (whereas only one-body or two-body joints were possible before).  This release sees all joints inherit from standard interfaces for things like limits, motors, and springs with the intent to make the API surface identical among all the joints.
 
-A major change from previous versions are the settings for motors and springs.  Before, you would disable these features by setting their values to zero or some default value.  Now, these features are enabled using specific `setXXXEnabled` methods and the values associated with these features are now expecting non-default values - they'll throw `IllegalArgumentException`s.
+A major change from previous versions are the settings for motors and springs.  Before, you would disable these features by setting their values to zero or some default value.  Now, these features are enabled using specific `setXXXEnabled` methods and the values associated with these features are now expecting non-default values - otherwise, they'll throw `IllegalArgumentException`s.
 
-Another major change from the previous versions is on the WheelJoint and PrismaticJoint.  These joints have had their body arguments reversed so that the given axis of allowed motion is fixed to the first body rather than the second.  This shouldn't impact your code too much, but generally you'd need to reverse the first and second body and potentially negate the axis you had before.
+Another major change from previous versions is on the WheelJoint and PrismaticJoint.  These joints have had their body arguments reversed so that the given axis of allowed motion is fixed to the first body rather than the second.  This shouldn't impact existing code too much, but generally you'd need to reverse the first and second body and potentially negate the axis you had before.
 
-Apart from these breaking changes, many of the joints see new features to help reduce the number of joints between bodies to achieve a desired effect.  For example, before you would need to use both a `WeldJoint` and a `RevoluteJoint` if you wanted an angular spring with limits - this is now possible with only a `WeldJoint`.  Another example is if you wanted a linear spring and prismatic motion, you'd need to use both a `PrismaticJoint` and a `DistanceJoint` - now you can just use the `PrismaticJoint`.
+Apart from these breaking changes, many of the joints see new features to help reduce the number of joints between bodies to achieve a desired effect.  For example, before you would need to use both a `WeldJoint` and a `RevoluteJoint` if you wanted an angular spring with limits - this is now possible with only a `WeldJoint`.  Another example is if you wanted a linear spring with prismatic motion, you'd need to use both a `PrismaticJoint` and a `DistanceJoint` - now you can just use the `PrismaticJoint`.
 
 The class documentation for all joints has been revised to be clearer and reflect all the changes described above.
 
@@ -32,19 +32,19 @@ As always with a major release, all deprecated APIs have been removed.
 - [#254](https://github.com/dyn4j/dyn4j/issues/254) Allow the definition of joints with an arbitrary number of bodies
 
 **Bug Fixes**
-- [#255](https://github.com/dyn4j/dyn4j/issues/255) Warm starting check missing in WeldJoint
+- [#256](https://github.com/dyn4j/dyn4j/issues/256) Warm starting check missing in WeldJoint
 
 **Breaking Changes:**
 - All deprecated APIs have been removed
 - [#249](https://github.com/dyn4j/dyn4j/issues/249) Some values that were valid in previous versions will throw `IllegalArgumentException`s
 - [#244](https://github.com/dyn4j/dyn4j/issues/244) Some of the spring, limits, and motor methods have been renamed to align across all joints
 - The getAnchor1/getAnchor2 methods have been dropped for a number of joints
-- A few other methods on the `Joint` classes have been renamed
+- A few methods on the `Joint` classes have been renamed
 
 **Other:**
 - [#255](https://github.com/dyn4j/dyn4j/issues/255) Remove the use of resource files for exception messages
 - All default spring and motor settings have been made the same (frequency, damping ratio, maximum force, maximum torque, etc.)
-- The motor joint has maximumTorque/Force set to 1000.0
+- The motor joint now has maximumTorque/Force set to 1000.0 by default
 
 ## v4.2.2 - October 1st, 2022
 
