@@ -202,9 +202,9 @@ public class DistanceJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 		this.localAnchor2 = body2.getLocalPoint(anchor2);
 		// compute the initial distance
 		this.restDistance = anchor1.distance(anchor2);
-		this.currentDistance = restDistance;
-		this.upperLimit = restDistance;
-		this.lowerLimit = restDistance;
+		this.currentDistance = this.restDistance;
+		this.upperLimit = this.restDistance;
+		this.lowerLimit = this.restDistance;
 		this.upperLimitEnabled = false;
 		this.lowerLimitEnabled = false;
 		
@@ -841,6 +841,14 @@ public class DistanceJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 			return this.impulse * invdt;
 		}
 		return 0.0;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringMode()
+	 */
+	@Override
+	public int getSpringMode() {
+		return this.springMode;
 	}
 	
 	/*

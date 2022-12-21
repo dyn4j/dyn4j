@@ -52,14 +52,16 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * By default the pin joint is setup with a linear spring-damper with a 
  * maximum force. The defaults are a frequency of 8.0, damping ratio of 0.3
- * and a maximum force of 1000.0. You can disable the spring-damper using
- * the {@link #setSpringEnabled(boolean)} method which will pin the body
- * to the specified point (similar to the RevoluteJoint).
+ * and a maximum force of 1000.0. 
  * <p>
- * NOTE: When the spring-damper system is disabled, the point constraint
- * is solved completely, so when using this joint for mouse control, you'll
- * see the connected body travel through immovable bodies.  Use caution when
- * enabling this mode.
+ * You can disable the spring-damper using the 
+ * {@link #setSpringEnabled(boolean)} method. This turns the joint into
+ * an unary {@link MotorJoint}.  You can use the 
+ * {@link #setCorrectionFactor(double)} method to set how quickly the
+ * constraint violation should be resolved and you can set the maximum
+ * force the correction should apply using the 
+ * {@link #setMaximumCorrectionForce(double)}. Both of these settings are
+ * only relevant when the spring-damper is disabled.
  * <p>
  * The {@link #getAnchor()} method returns the anchor point on body in world
  * space.  The {@link #getTarget()} returns the target point in world space.
@@ -105,6 +107,14 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	/** The maximum force the spring can apply */
 	protected double springMaximumForce;
 	
+	// "motor" constraint
+	
+	/** The correction factor in the range [0, 1] */
+	protected double correctionFactor;
+	
+	/** The maximum force the constraint can apply */
+	protected double correctionMaximumForce;
+	
 	// current state
 
 	/** The world-space vector from the local center to the local anchor point */
@@ -121,6 +131,9 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 
 	/** The constraint mass; K = J * Minv * Jtrans */
 	private final Matrix22 K;
+
+	/** The calculated linear error in the target distance */
+	private Vector2 linearError;
 	
 	// output
 	
@@ -151,6 +164,10 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 		this.springDampingRatio = 0.3;
 		this.springMaximumForceEnabled = true;
 		this.springMaximumForce = 1000.0;
+		
+		// "motor" joint
+		this.correctionFactor = 0.3;
+		this.correctionMaximumForce = 1000.0;
 		
 		// initialize
 		this.damping = 0.0;
@@ -184,21 +201,10 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	public void initializeConstraints(TimeStep step, Settings settings) {
 		T body = this.body;
 		Transform transform = body.getTransform();
-		
 		Mass mass = this.body.getMass();
-		
-		double m = mass.getMass();
 		double invM = mass.getInverseMass();
 		double invI = mass.getInverseInertia();
 		
-		// check if the mass is zero
-		if (m <= Epsilon.E) {
-			// if the mass is zero, use the inertia
-			// this will allow the pin joint to work with
-			// all mass types other than INFINITE
-			m = mass.getInertia();
-		}
-
 		// compute the r vector
 		this.r = transform.getTransformedR(body.getLocalCenter().to(this.localAnchor));
 		
@@ -218,10 +224,10 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 			double dt = step.getDeltaTime();
 			
 			// compute the CIM
-			this.gamma = AbstractJoint.getConstraintImpulseMixing(dt, this.springStiffness, this.damping);
+			this.gamma = getConstraintImpulseMixing(dt, this.springStiffness, this.damping);
 			
 			// compute the ERP
-			double erp = AbstractJoint.getErrorReductionParameter(dt, this.springStiffness, this.damping);
+			double erp = getErrorReductionParameter(dt, this.springStiffness, this.damping);
 			
 			// compute the bias = ERP where ERP = hk / (hk + d)
 			this.bias = body.getWorldCenter().add(this.r).difference(this.target);
@@ -231,8 +237,11 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 			this.K.m00 += this.gamma;
 			this.K.m11 += this.gamma;
 		} else {
-			this.bias.zero();
-			this.gamma = 0.0;
+			// otherwise enforce a "motor" constraint
+			Vector2 bp = this.r.sum(this.body.getWorldCenter());
+			// the linear error is the distance along the x/y 
+			// from the local anchor to the target
+			this.linearError = this.target.difference(bp);
 		}
 		
 		// warm start
@@ -252,37 +261,64 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	@Override
 	public void solveVelocityConstraints(TimeStep step, Settings settings) {
 		T body = this.body;
-		
 		Mass mass = this.body.getMass();
-		
 		double invM = mass.getInverseMass();
 		double invI = mass.getInverseInertia();
 		
-		// Cdot = v + cross(w, r)
-		Vector2 C = this.r.cross(body.getAngularVelocity()).add(body.getLinearVelocity());
-		// compute Jv + b
-		Vector2 jvb = C;
-		jvb.add(this.bias);
-		jvb.add(this.impulse.product(this.gamma));
-		jvb.negate();
-		Vector2 J = this.K.solve(jvb);
+		double invdt = step.getInverseDeltaTime();
+		double dt = step.getDeltaTime();
 		
-		if (this.springEnabled && this.springMaximumForceEnabled) {
-			// clamp using the maximum force
+		// compute the velocity
+		Vector2 rv = this.r.cross(body.getAngularVelocity()).add(body.getLinearVelocity());
+		
+		if (this.springEnabled) {
+			// soft point-to-point joint
+			
+			// compute Jv + b
+			Vector2 jvb = rv;
+			jvb.add(this.bias);
+			jvb.add(this.impulse.product(this.gamma));
+			jvb.negate();
+			Vector2 J = this.K.solve(jvb);
+			
+			// clamp the maximum force
+			if (this.springEnabled && this.springMaximumForceEnabled) {
+				// clamp using the maximum force
+				Vector2 currentAccumulatedImpulse = this.impulse.copy();
+				this.impulse.add(J);
+				double maxImpulse = step.getDeltaTime() * this.springMaximumForce;
+				if (this.impulse.getMagnitudeSquared() > maxImpulse * maxImpulse) {
+					this.impulse.normalize();
+					this.impulse.multiply(maxImpulse);
+				}
+				J = this.impulse.difference(currentAccumulatedImpulse);
+			} else {
+				this.impulse.add(J);
+			}
+			
+			body.getLinearVelocity().add(J.product(invM));
+			body.setAngularVelocity(body.getAngularVelocity() + invI * this.r.cross(J));
+		} else {
+			// motor joint
+			
+			// the "bias" for the motor constraint is the correction factor and linear error
+			Vector2 pivotV = rv.getNegative();
+			pivotV.add(this.linearError.product(this.correctionFactor * invdt));
+			Vector2 stepImpulse = this.K.solve(pivotV);
+			
+			// clamp by the maxforce
 			Vector2 currentAccumulatedImpulse = this.impulse.copy();
-			this.impulse.add(J);
-			double maxImpulse = step.getDeltaTime() * this.springMaximumForce;
+			this.impulse.add(stepImpulse);
+			double maxImpulse = this.correctionMaximumForce * dt;
 			if (this.impulse.getMagnitudeSquared() > maxImpulse * maxImpulse) {
 				this.impulse.normalize();
 				this.impulse.multiply(maxImpulse);
 			}
-			J = this.impulse.difference(currentAccumulatedImpulse);
-		} else {
-			this.impulse.add(J);
+			stepImpulse = this.impulse.difference(currentAccumulatedImpulse);
+			
+			this.body.getLinearVelocity().add(stepImpulse.product(invM));
+			this.body.setAngularVelocity(this.body.getAngularVelocity() + invI * this.r.cross(stepImpulse));
 		}
-		
-		body.getLinearVelocity().add(J.product(invM));
-		body.setAngularVelocity(body.getAngularVelocity() + invI * this.r.cross(J));
 	}
 	
 	/* (non-Javadoc)
@@ -290,42 +326,6 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	 */
 	@Override
 	public boolean solvePositionConstraints(TimeStep step, Settings settings) {
-		if (!this.springEnabled) {
-			double linearTolerance = settings.getLinearTolerance();
-			
-			Transform tx = this.body.getTransform();
-			
-			Mass m = this.body.getMass();
-			double invM = m.getInverseMass();
-			double invI = m.getInverseInertia();
-			
-			double linearError = 0.0;
-	
-			// always solve the point-to-point constraint
-	
-			// compute the r vector
-			Vector2 r = tx.getTransformedR(this.body.getLocalCenter().to(this.localAnchor));
-			Vector2 d = this.body.getWorldCenter().add(r).difference(this.target);
-			
-			linearError = d.getMagnitude();
-			
-			// compute the K matrix
-			Matrix22 K = new Matrix22();
-			K.m00 = invM + r.y * r.y * invI;
-			K.m01 = -invI * r.x * r.y; 
-			K.m10 = K.m01;
-			K.m11 = invM + r.x * r.x * invI;
-			
-			// solve for the impulse
-			Vector2 J = K.solve(d.negate());
-	
-			// translate and rotate the objects
-			this.body.translate(J.product(invM));
-			this.body.rotateAboutCenter(invI * r.cross(J));
-			
-			return linearError <= linearTolerance;
-		}
-		
 		// nothing to do here if spring is enabled
 		return true;
 	}
@@ -445,6 +445,79 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	@Override
 	public double getSpringDampingRatio() {
 		return this.springDampingRatio;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringMode()
+	 */
+	@Override
+	public int getSpringMode() {
+		return this.springMode;
+	}
+	
+	/**
+	 * Returns the correction factor.
+	 * @return double
+	 * @since 5.0.0
+	 */
+	public double getCorrectionFactor() {
+		return this.correctionFactor;
+	}
+	
+	/**
+	 * Sets the correction factor.
+	 * <p>
+	 * The correction factor controls the rate at which the bodies perform the
+	 * desired actions.  The default is 0.3.
+	 * <p>
+	 * A value of zero means that the bodies do not perform any action.
+	 * @param correctionFactor the correction factor in the range [0, 1]
+	 * @since 5.0.0
+	 */
+	public void setCorrectionFactor(double correctionFactor) {
+		if (correctionFactor < 0.0) 
+			throw new ValueOutOfRangeException("correctionFactor", correctionFactor, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
+		if (correctionFactor > 1.0) 
+			throw new ValueOutOfRangeException("correctionFactor", correctionFactor, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, 1.0);
+		
+		this.correctionFactor = correctionFactor;
+	}
+	
+	/**
+	 * Returns the maximum correction force this constraint will apply in newtons.
+	 * @return double
+	 * @since 5.0.0
+	 */
+	public double getMaximumCorrectionForce() {
+		return this.correctionMaximumForce;
+	}
+	
+	/**
+	 * Sets the maximum correction force this constraint will apply in newtons.
+	 * @param maximumForce the maximum force in newtons; in the range [0, &infin;]
+	 * @throws IllegalArgumentException if maxForce is less than zero
+	 * @since 5.0.0
+	 */
+	public void setMaximumCorrectionForce(double maximumForce) {
+		// make sure its greater than or equal to zero
+		if (maximumForce < 0.0) 
+			throw new ValueOutOfRangeException("maximumForce", maximumForce, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
+		// set the max
+		this.correctionMaximumForce = maximumForce;
+	}
+
+	/**
+	 * Returns the correction force from the last step.
+	 * @param invdt the inverse delta time
+	 * @return double
+	 */
+	public double getCorrectionForce(double invdt) {
+		if (!this.springEnabled) {
+			return this.impulse.getMagnitude() * invdt;
+		}
+		return 0.0;
 	}
 	
 	/* (non-Javadoc)
@@ -598,6 +671,8 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 			this.springEnabled = enabled;
 			// wake the bodies
 			this.body.setAtRest(false);
+			// clear the impulse from the last step
+			this.impulse.zero();
 		}
 	}
 

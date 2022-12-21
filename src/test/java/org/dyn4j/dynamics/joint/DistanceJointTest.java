@@ -60,7 +60,7 @@ public class DistanceJointTest extends BaseJointTest {
 		TestCase.assertEquals(8.0, dj.getSpringFrequency());
 		TestCase.assertEquals(1000.0, dj.getMaximumSpringForce());
 		TestCase.assertEquals(0.0, dj.getSpringStiffness());
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, dj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, dj.getSpringMode());
 		
 		TestCase.assertEquals(d, dj.getLowerLimit());
 		TestCase.assertEquals(d, dj.getUpperLimit());
@@ -300,7 +300,7 @@ public class DistanceJointTest extends BaseJointTest {
 		
 		dj.setSpringFrequency(0.001);
 		TestCase.assertEquals(0.001, dj.getSpringFrequency());
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, dj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, dj.getSpringMode());
 		
 		dj.setSpringFrequency(1.0);
 		TestCase.assertEquals(1.0, dj.getSpringFrequency());
@@ -353,11 +353,11 @@ public class DistanceJointTest extends BaseJointTest {
 	public void setSpringMode() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		// test mode swapping
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, dj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, dj.getSpringMode());
 		dj.setSpringStiffness(0.3);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, dj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, dj.getSpringMode());
 		dj.setSpringFrequency(0.5);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, dj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, dj.getSpringMode());
 	}
 	
 	/**
@@ -535,7 +535,7 @@ public class DistanceJointTest extends BaseJointTest {
 		
 		TestCase.assertEquals(8.0, dj.springFrequency);
 		TestCase.assertEquals(0.5, dj.springDampingRatio);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, dj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, dj.getSpringMode());
 		TestCase.assertEquals(3968.803, dj.springStiffness, 1e-3);
 		
 		dj.setSpringStiffness(1000.0);
@@ -543,7 +543,7 @@ public class DistanceJointTest extends BaseJointTest {
 		
 		TestCase.assertEquals(4.015, dj.springFrequency, 1e-3);
 		TestCase.assertEquals(0.5, dj.springDampingRatio);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, dj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, dj.getSpringMode());
 		TestCase.assertEquals(1000.0, dj.springStiffness, 1e-3);
 	}
 	

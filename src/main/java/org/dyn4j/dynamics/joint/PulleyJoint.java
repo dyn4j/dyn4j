@@ -262,6 +262,8 @@ public class PulleyJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<
 				this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J1));
 				this.body2.getLinearVelocity().add(J2.product(invM2));
 				this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(J2));
+			} else {
+				this.impulse = 0.0;
 			}
 		} else {
 			// clear the impulse and don't solve anything

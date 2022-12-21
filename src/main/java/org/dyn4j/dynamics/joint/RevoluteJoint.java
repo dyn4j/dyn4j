@@ -234,17 +234,6 @@ public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		// TODO I don't think this is needed
-//		// is the motor enabled?
-//		if (this.motorEnabled) {
-//			// compute the motor mass
-//			if (invI1 <= 0.0 && invI2 <= 0.0) {
-//				// cannot have a motor with two bodies
-//				// who have fixed angular velocities
-//				throw new IllegalStateException(Messages.getString("dynamics.joint.revolute.twoAngularFixedBodies"));
-//			}
-//		}
-		
 		this.r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
 		this.r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
 		
@@ -260,6 +249,7 @@ public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 			this.axialMass = 1.0 / this.axialMass;
 			this.fixedRotation = false;
 		} else {
+			this.axialMass = 0.0;
 			this.fixedRotation = true;
 		}
 		

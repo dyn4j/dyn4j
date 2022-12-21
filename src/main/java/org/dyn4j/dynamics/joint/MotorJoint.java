@@ -46,13 +46,13 @@ import org.dyn4j.geometry.Vector2;
  * bodies together.
  * <p>
  * The motor is limited by a maximum force and torque.  By default these are
- * zero and will need to be set before the joint will function properly.
- * Larger values will allow the motor to apply more force and torque to the
- * bodies.  This can have two effects.  The first is that the bodies will
- * move to their correct positions faster.  The second is that the bodies
+ * 1000 but must be set greater than zero before the joint will function 
+ * properly. Larger values will allow the motor to apply more force and torque
+ * to the bodies.  This can have two effects.  The first is that the bodies 
+ * will move to their correct positions faster.  The second is that the bodies
  * will be moving faster and may overshoot more causing more oscillation.
  * Use the {@link #setCorrectionFactor(double)} method to help reduce the
- * oscillation. 
+ * oscillation.
  * <p>
  * The linear and angular targets are the target distance and angle that the 
  * bodies should achieve relative to each other's position and rotation.  By 
@@ -93,6 +93,9 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	
 	// current state
 	
+	private Vector2 r1;
+	private Vector2 r2;
+	
 	/** The pivot mass; K = J * Minv * Jtrans */
 	private final Matrix22 K;
 	
@@ -129,7 +132,14 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		this.angularTarget = body2.getTransform().getRotationAngle() - body1.getTransform().getRotationAngle();
 		// initialize
 		this.correctionFactor = 0.3;
+		this.maximumForce = 1000.0;
+		this.maximumTorque = 1000.0;
+		
 		this.K = new Matrix22();
+		this.angularMass = 0.0;
+		this.linearError = new Vector2();
+		this.angularError = 0.0;
+		
 		this.linearImpulse = new Vector2();
 		this.angularImpulse = 0.0;
 	}
@@ -166,14 +176,14 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		Vector2 r1 = t1.getTransformedR(this.linearTarget.difference(this.body1.getLocalCenter()));
-		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().getNegative());
+		this.r1 = t1.getTransformedR(this.linearTarget.difference(this.body1.getLocalCenter()));
+		this.r2 = t2.getTransformedR(this.body2.getLocalCenter().getNegative());
 		
 		// compute the K inverse matrix
-		this.K.m00 = invM1 + invM2 + r1.y * r1.y * invI1 + r2.y * r2.y * invI2;
-		this.K.m01 = -invI1 * r1.x * r1.y - invI2 * r2.x * r2.y; 
+		this.K.m00 = invM1 + invM2 + this.r1.y * this.r1.y * invI1 + this.r2.y * this.r2.y * invI2;
+		this.K.m01 = -invI1 * this.r1.x * this.r1.y - invI2 * this.r2.x * this.r2.y; 
 		this.K.m10 = this.K.m01;
-		this.K.m11 = invM1 + invM2 + r1.x * r1.x * invI1 + r2.x * r2.x * invI2;
+		this.K.m11 = invM1 + invM2 + this.r1.x * this.r1.x * invI1 + this.r2.x * this.r2.x * invI2;
 		
 		this.K.invert();
 		
@@ -181,11 +191,13 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		this.angularMass = invI1 + invI2;
 		if (this.angularMass > Epsilon.E) {
 			this.angularMass = 1.0 / this.angularMass;
+		} else {
+			this.angularMass = 0.0;
 		}
 		
 		// compute the error in the linear and angular targets
-		Vector2 d1 = r1.sum(this.body1.getWorldCenter());
-		Vector2 d2 = r2.sum(this.body2.getWorldCenter());
+		Vector2 d1 = this.r1.sum(this.body1.getWorldCenter());
+		Vector2 d2 = this.r2.sum(this.body2.getWorldCenter());
 		this.linearError = d2.subtract(d1);
 		this.angularError = this.getAngularError();
 		
@@ -196,9 +208,9 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 			
 			// warm start
 			this.body1.getLinearVelocity().subtract(this.linearImpulse.product(invM1));
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * (r1.cross(this.linearImpulse) + this.angularImpulse));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * (this.r1.cross(this.linearImpulse) + this.angularImpulse));
 			this.body2.getLinearVelocity().add(this.linearImpulse.product(invM2));
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * (r2.cross(this.linearImpulse) + this.angularImpulse));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * (this.r2.cross(this.linearImpulse) + this.angularImpulse));
 		} else {
 			this.linearImpulse.zero();
 			this.angularImpulse = 0.0;
@@ -212,10 +224,7 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	public void solveVelocityConstraints(TimeStep step, Settings settings) {
 		double dt = step.getDeltaTime();
 		double invdt = step.getInverseDeltaTime();
-		
-		Transform t1 = this.body1.getTransform();
-		Transform t2 = this.body2.getTransform();
-		
+
 		Mass m1 = this.body1.getMass();
 		Mass m2 = this.body2.getMass();
 		
@@ -229,46 +238,44 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 			// get the relative velocity - the target motor speed
 			double C = this.body2.getAngularVelocity() - this.body1.getAngularVelocity() + invdt * this.correctionFactor * this.angularError;
 			// get the impulse required to obtain the speed
-			double impulse = this.angularMass * -C;
+			double stepImpulse = this.angularMass * -C;
+			
 			// clamp the impulse between the maximum torque
-			double oldImpulse = this.angularImpulse;
+			double currentAccumulatedImpulse = this.angularImpulse;
 			double maxImpulse = this.maximumTorque * dt;
-			this.angularImpulse = Interval.clamp(this.angularImpulse + impulse, -maxImpulse, maxImpulse);
+			this.angularImpulse = Interval.clamp(this.angularImpulse + stepImpulse, -maxImpulse, maxImpulse);
 			// get the impulse we need to apply to the bodies
-			impulse = this.angularImpulse - oldImpulse;
+			stepImpulse = this.angularImpulse - currentAccumulatedImpulse;
 			
 			// apply the impulse
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * impulse);
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * impulse);
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * stepImpulse);
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * stepImpulse);
 		}
 		
 		// solve the point-to-point constraint
-		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().getNegative());
-		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().getNegative());
-		
-		Vector2 v1 = this.body1.getLinearVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
-		Vector2 v2 = this.body2.getLinearVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
+		Vector2 v1 = this.body1.getLinearVelocity().sum(this.r1.cross(this.body1.getAngularVelocity()));
+		Vector2 v2 = this.body2.getLinearVelocity().sum(this.r2.cross(this.body2.getAngularVelocity()));
 		Vector2 pivotV = v2.subtract(v1);
 		
 		pivotV.add(this.linearError.product(this.correctionFactor * invdt));
 		
-		Vector2 impulse = this.K.multiply(pivotV);
-		impulse.negate();
+		Vector2 stepImpulse = this.K.multiply(pivotV);
+		stepImpulse.negate();
 		
 		// clamp by the maxforce
-		Vector2 oldImpulse = this.linearImpulse.copy();
-		this.linearImpulse.add(impulse);
+		Vector2 currentAccumulatedImpulse = this.linearImpulse.copy();
+		this.linearImpulse.add(stepImpulse);
 		double maxImpulse = this.maximumForce * dt;
 		if (this.linearImpulse.getMagnitudeSquared() > maxImpulse * maxImpulse) {
 			this.linearImpulse.normalize();
 			this.linearImpulse.multiply(maxImpulse);
 		}
-		impulse = this.linearImpulse.difference(oldImpulse);
+		stepImpulse = this.linearImpulse.difference(currentAccumulatedImpulse);
 		
-		this.body1.getLinearVelocity().subtract(impulse.product(invM1));
-		this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * r1.cross(impulse));
-		this.body2.getLinearVelocity().add(impulse.product(invM2));
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(impulse));
+		this.body1.getLinearVelocity().subtract(stepImpulse.product(invM1));
+		this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * this.r1.cross(stepImpulse));
+		this.body2.getLinearVelocity().add(stepImpulse.product(invM2));
+		this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * this.r2.cross(stepImpulse));
 	}
 	
 	/* (non-Javadoc)

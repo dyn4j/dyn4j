@@ -1148,7 +1148,7 @@ public class PrismaticJointTest extends BaseJointTest {
 		
 		pj.setSpringFrequency(0.001);
 		TestCase.assertEquals(0.001, pj.getSpringFrequency());
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.getSpringMode());
 		
 		pj.setSpringFrequency(1.0);
 		TestCase.assertEquals(1.0, pj.getSpringFrequency());
@@ -1203,11 +1203,11 @@ public class PrismaticJointTest extends BaseJointTest {
 	public void setSpringMode() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		// test mode swapping
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.getSpringMode());
 		pj.setSpringStiffness(0.3);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, pj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, pj.getSpringMode());
 		pj.setSpringFrequency(0.5);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.getSpringMode());
 	}
 	
 	/**
@@ -1392,7 +1392,7 @@ public class PrismaticJointTest extends BaseJointTest {
 		
 		TestCase.assertEquals(8.0, pj.springFrequency);
 		TestCase.assertEquals(0.5, pj.springDampingRatio);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.getSpringMode());
 		TestCase.assertEquals(3968.803, pj.springStiffness, 1e-3);
 		
 		pj.setSpringStiffness(1000.0);
@@ -1400,7 +1400,7 @@ public class PrismaticJointTest extends BaseJointTest {
 		
 		TestCase.assertEquals(4.015, pj.springFrequency, 1e-3);
 		TestCase.assertEquals(0.5, pj.springDampingRatio);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, pj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, pj.getSpringMode());
 		TestCase.assertEquals(1000.0, pj.springStiffness, 1e-3);
 	}
 	

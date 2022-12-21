@@ -238,7 +238,7 @@ public class WeldJointTest extends BaseJointTest {
 		
 		wj.setSpringFrequency(0.001);
 		TestCase.assertEquals(0.001, wj.getSpringFrequency());
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.getSpringMode());
 		
 		wj.setSpringFrequency(1.0);
 		TestCase.assertEquals(1.0, wj.getSpringFrequency());
@@ -293,11 +293,11 @@ public class WeldJointTest extends BaseJointTest {
 	public void setSpringMode() {
 		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
 		// test mode swapping
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.getSpringMode());
 		wj.setSpringStiffness(0.3);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, wj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, wj.getSpringMode());
 		wj.setSpringFrequency(0.5);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.getSpringMode());
 	}
 	
 	/**
@@ -479,15 +479,15 @@ public class WeldJointTest extends BaseJointTest {
 		
 		TestCase.assertEquals(8.0, wj.springFrequency);
 		TestCase.assertEquals(0.5, wj.springDampingRatio);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.springMode);
-		TestCase.assertEquals(3968.803, wj.springStiffness, 1e-3);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.getSpringMode());
+		TestCase.assertEquals(1984.401, wj.springStiffness, 1e-3);
 		
 		wj.setSpringStiffness(1000.0);
 		wj.updateSpringCoefficients();
 		
-		TestCase.assertEquals(4.015, wj.springFrequency, 1e-3);
+		TestCase.assertEquals(5.679, wj.springFrequency, 1e-3);
 		TestCase.assertEquals(0.5, wj.springDampingRatio);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, wj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, wj.getSpringMode());
 		TestCase.assertEquals(1000.0, wj.springStiffness, 1e-3);
 	}
 	

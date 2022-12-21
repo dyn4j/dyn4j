@@ -49,8 +49,8 @@ public class MotorJointTest extends BaseJointTest {
 		
 		TestCase.assertEquals(0.3, mj.getCorrectionFactor());
 		
-		TestCase.assertEquals(0.0, mj.getMaximumForce());
-		TestCase.assertEquals(0.0, mj.getMaximumTorque());
+		TestCase.assertEquals(1000.0, mj.getMaximumForce());
+		TestCase.assertEquals(1000.0, mj.getMaximumTorque());
 		
 		TestCase.assertEquals(b1, mj.getBody1());
 		TestCase.assertEquals(b2, mj.getBody2());

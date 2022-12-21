@@ -164,32 +164,32 @@ public class WeldJointSimulationTest {
 		
 		double invdt = w.getTimeStep().getInverseDeltaTime();
 		
-		TestCase.assertEquals(-0.05607, b.getAngularVelocity(), 1e-5);
-		TestCase.assertEquals(-0.00093, b.getTransform().getRotationAngle(), 1e-5);
-		TestCase.assertEquals(-1.85424, wj.getSpringTorque(invdt), 1e-5);
-		TestCase.assertEquals(-1.85424, wj.getReactionTorque(invdt), 1e-5);
-		TestCase.assertEquals( 4.05894, wj.getReactionForce(invdt).getMagnitude(), 1e-5);
+		TestCase.assertEquals(-0.17027, b.getAngularVelocity(), 1e-5);
+		TestCase.assertEquals(-0.00283, b.getTransform().getRotationAngle(), 1e-5);
+		TestCase.assertEquals(-0.64077, wj.getSpringTorque(invdt), 1e-5);
+		TestCase.assertEquals(-0.64077, wj.getReactionTorque(invdt), 1e-5);
+		TestCase.assertEquals( 2.34580, wj.getReactionForce(invdt).getMagnitude(), 1e-5);
 		
 		// after a few more simulations it should stabilize with rotation below the x-axis
 		w.step(20);
 		
-		TestCase.assertEquals(-0.00000, b.getAngularVelocity(), 1e-5);
-		TestCase.assertEquals(-0.00193, b.getTransform().getRotationAngle(), 1e-5);
-		TestCase.assertEquals(-2.44999, wj.getSpringTorque(invdt), 1e-5);
-		TestCase.assertEquals(-2.44999, wj.getReactionTorque(invdt), 1e-5);
-		TestCase.assertEquals(4.90000, wj.getReactionForce(invdt).getMagnitude(), 1e-5);
+		TestCase.assertEquals(-0.01916, b.getAngularVelocity(), 1e-5);
+		TestCase.assertEquals(-0.01883, b.getTransform().getRotationAngle(), 1e-5);
+		TestCase.assertEquals(-2.50894, wj.getSpringTorque(invdt), 1e-5);
+		TestCase.assertEquals(-2.50894, wj.getReactionTorque(invdt), 1e-5);
+		TestCase.assertEquals( 4.98379, wj.getReactionForce(invdt).getMagnitude(), 1e-5);
 		
 		// test the maximum torque setting
-		wj.setMaximumSpringTorque(10);
+		wj.setMaximumSpringTorque(5);
 		wj.setMaximumSpringTorqueEnabled(true);
 		b.applyForce(new Vector2(0.0, -10.0), new Vector2(0.5, 2.0));
 		w.step(1);
 		
-		TestCase.assertEquals(-0.23058, b.getAngularVelocity(), 1e-5);
-		TestCase.assertEquals(-0.00578, b.getTransform().getRotationAngle(), 1e-5);
-		TestCase.assertEquals(-10.0000, wj.getSpringTorque(invdt), 1e-5);
-		TestCase.assertEquals(-10.0000, wj.getReactionTorque(invdt), 1e-5);
-		TestCase.assertEquals(11.44119, wj.getReactionForce(invdt).getMagnitude(), 1e-5);
+		TestCase.assertEquals(-0.72029, b.getAngularVelocity(), 1e-5);
+		TestCase.assertEquals(-0.03084, b.getTransform().getRotationAngle(), 1e-5);
+		TestCase.assertEquals(-5.00000, wj.getSpringTorque(invdt), 1e-5);
+		TestCase.assertEquals(-5.00000, wj.getReactionTorque(invdt), 1e-5);
+		TestCase.assertEquals( 4.38931, wj.getReactionForce(invdt).getMagnitude(), 1e-5);
 	}
 
 	/**

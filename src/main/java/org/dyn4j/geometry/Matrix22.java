@@ -387,6 +387,8 @@ public class Matrix22 implements Copyable<Matrix22> {
 		// check for zero determinant
 		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
+		} else {
+			det = 0.0;
 		}
 		double a = this.m00;
 		double b = this.m01;
@@ -411,6 +413,8 @@ public class Matrix22 implements Copyable<Matrix22> {
 		// check for zero determinant
 		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
+		} else {
+			det = 0.0;
 		}
 		dest.m00 =  det * this.m11;
 		dest.m01 = -det * this.m01;
@@ -441,6 +445,8 @@ public class Matrix22 implements Copyable<Matrix22> {
 		// check for zero determinant
 		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
+		} else {
+			det = 0.0;
 		}
 		Vector2 r = new Vector2();
 		r.x = det * (this.m11 * b.x - this.m01 * b.y);

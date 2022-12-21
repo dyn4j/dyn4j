@@ -357,6 +357,8 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		// make sure we don't divide by zero
 		if (this.invK > Epsilon.E) {
 			this.invK = 1.0 / this.invK;
+		} else {
+			this.invK = 0.0;
 		}
 		
 		// s1x = (r1 + d).cross(xaxis)
@@ -369,10 +371,6 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		} else {
 			this.axialMass = 0.0;
 		}
-		
-		this.springMass = 0.0;
-		this.gamma = 0.0;
-		this.bias = 0.0;
 		
 		// compute the spring mass for the spring constraint
 		if (this.springEnabled && invMass > 0.0) {
@@ -404,13 +402,19 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		} else {
 			this.springMass = 0.0;
 			this.springImpulse = 0.0;
+			this.gamma = 0.0;
+			this.bias = 0.0;
 			this.damping = 0.0;
 		}
 		
 		if (this.lowerLimitEnabled || this.upperLimitEnabled) {
 			this.translation = this.wxAxis.dot(d);
-		} else {
+		}
+		
+		if (!this.lowerLimitEnabled) {
 			this.lowerLimitImpulse = 0.0;
+		}
+		if (!this.upperLimitEnabled) {
 			this.upperLimitImpulse = 0.0;
 		}
 		
@@ -1188,6 +1192,14 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	@Override
 	public double getSpringForce(double invdt) {
 		return this.springImpulse * invdt;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringMode()
+	 */
+	@Override
+	public int getSpringMode() {
+		return this.springMode;
 	}
 	
 	/* (non-Javadoc)

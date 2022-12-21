@@ -48,12 +48,6 @@ import org.dyn4j.geometry.Shiftable;
  * @param <T> the {@link PhysicsBody} type
  */
 public abstract class AbstractJoint<T extends PhysicsBody> implements Joint<T>, Shiftable, DataContainer, Ownable {
-	/** Mode indicating that the current frequency should be used to calculate the spring stiffness */
-	protected static final int SPRING_MODE_FREQUENCY = 1;
-	
-	/** Mode indicating that the current stiffness should be used to calculate the spring frequency */
-	protected static final int SPRING_MODE_STIFFNESS = 2;
-	
 	/** An unmodifiable list of the bodies */
 	protected final List<T> bodies;
 
@@ -158,6 +152,9 @@ public abstract class AbstractJoint<T extends PhysicsBody> implements Joint<T>, 
 	 * @return double
 	 */
 	protected static final double getNaturalFrequency(double stiffness, double mass) {
+		if (mass <= Epsilon.E)
+			return 0.0;
+		
 		return Math.sqrt(stiffness / mass);
 	}
 

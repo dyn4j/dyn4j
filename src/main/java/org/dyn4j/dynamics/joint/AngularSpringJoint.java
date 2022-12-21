@@ -144,4 +144,18 @@ public interface AngularSpringJoint {
 	 * @return double
 	 */
 	public double getSpringTorque(double invdt);
+	
+	/**
+	 * Returns the current spring mode.
+	 * <p>
+	 * NOTE: The spring mode is set automatically when you call either
+	 * {@link #setSpringFrequency(double)} or {@link #setSpringStiffness(double)}.
+	 * Use this method to store the spring mode when saving the simulation state
+	 * and use the value to call either {@link #setSpringFrequency(double)} or
+	 * {@link #setSpringStiffness(double)}.
+	 * @return int
+	 * @see Joint#SPRING_MODE_FREQUENCY
+	 * @see Joint#SPRING_MODE_STIFFNESS
+	 */
+	public int getSpringMode();
 }

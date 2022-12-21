@@ -292,6 +292,11 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 		} else {
 			this.axialMass = 0.0;
 		}
+		
+		if (!this.limitsEnabled) {
+			this.lowerLimitImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
+		}
 
 		if (this.springEnabled) {
 			// recompute spring reduced mass (m), stiffness (k), and damping (d)
@@ -557,7 +562,7 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	 * damping for use during constraint solving.
 	 */
 	protected void updateSpringCoefficients() {
-		double lm = this.getReducedMass();
+		double lm = this.getReducedInertia();
 		double nf = 0.0;
 		
 		if (this.springMode == SPRING_MODE_FREQUENCY) {
@@ -829,7 +834,15 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	public double getSpringTorque(double invdt) {
 		return this.springImpulse * invdt;
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringMode()
+	 */
+	@Override
+	public int getSpringMode() {
+		return this.springMode;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#isLimitsEnabled()
 	 */

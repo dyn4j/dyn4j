@@ -73,6 +73,8 @@ public class MotorJointSimulationTest {
 		MotorJoint<Body> mj = new MotorJoint<Body>(g, b);
 		mj.setLinearTarget(new Vector2(0.0, 3.0));
 		mj.setAngularTarget(Math.toRadians(30));
+		mj.setMaximumForce(0.0);
+		mj.setMaximumTorque(0.0);
 		w.addJoint(mj);
 		
 		w.step(25);

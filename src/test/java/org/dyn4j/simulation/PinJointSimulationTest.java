@@ -97,11 +97,13 @@ public class PinJointSimulationTest {
 		TestCase.assertEquals(0.0, body.getWorldCenter().y);
 		
 		double invdt = w.getTimeStep().getInverseDeltaTime();
-		w.step(1);
+		w.step(30);
 		
 		TestCase.assertTrue(pj.getReactionForce(invdt).getMagnitude() > 0);
-		TestCase.assertEquals(0.0, pj.getReactionTorque(invdt));
-		TestCase.assertEquals(0.7, body.getWorldCenter().x);
-		TestCase.assertEquals(0.5, body.getWorldCenter().y);
+		TestCase.assertEquals( 0.0, pj.getReactionTorque(invdt));
+		TestCase.assertEquals( 0.0, pj.getSpringForce(invdt));
+		TestCase.assertEquals(30.754, pj.getCorrectionForce(invdt), 1e-3);
+		TestCase.assertEquals( 0.699, body.getWorldCenter().x, 1e-3);
+		TestCase.assertEquals( 0.499, body.getWorldCenter().y, 1e-3);
 	}
 }

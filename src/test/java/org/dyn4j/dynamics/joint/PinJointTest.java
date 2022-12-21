@@ -54,7 +54,7 @@ public class PinJointTest extends BaseJointTest {
 		TestCase.assertTrue(pj.isSpringDamperEnabled());
 		TestCase.assertTrue(pj.isSpringEnabled());
 		TestCase.assertTrue(pj.isMaximumSpringForceEnabled());
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.getSpringMode());
 		
 		TestCase.assertEquals(b1, pj.getBody());
 		
@@ -250,7 +250,7 @@ public class PinJointTest extends BaseJointTest {
 		
 		pj.setSpringFrequency(0.001);
 		TestCase.assertEquals(0.001, pj.getSpringFrequency());
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.getSpringMode());
 		
 		pj.setSpringFrequency(1.0);
 		TestCase.assertEquals(1.0, pj.getSpringFrequency());
@@ -296,11 +296,11 @@ public class PinJointTest extends BaseJointTest {
 	public void setSpringMode() {
 		PinJoint<Body> pj = new PinJoint<Body>(b1, new Vector2());
 		// test mode swapping
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.getSpringMode());
 		pj.setSpringStiffness(0.3);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, pj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, pj.getSpringMode());
 		pj.setSpringFrequency(0.5);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.getSpringMode());
 	}
 	
 	/**
@@ -466,7 +466,7 @@ public class PinJointTest extends BaseJointTest {
 		
 		TestCase.assertEquals(8.0, pj.springFrequency);
 		TestCase.assertEquals(0.5, pj.springDampingRatio);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.getSpringMode());
 		TestCase.assertEquals(7937.606, pj.springStiffness, 1e-3);
 		
 		pj.setSpringStiffness(1000.0);
@@ -474,7 +474,7 @@ public class PinJointTest extends BaseJointTest {
 		
 		TestCase.assertEquals(2.839, pj.springFrequency, 1e-3);
 		TestCase.assertEquals(0.5, pj.springDampingRatio);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, pj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, pj.getSpringMode());
 		TestCase.assertEquals(1000.0, pj.springStiffness, 1e-3);
 	}
 	
@@ -524,5 +524,68 @@ public class PinJointTest extends BaseJointTest {
 		pj.setTarget(target);
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(target.equals(pj.getTarget()));
+	}
+	
+	/**
+	 * Tests get/set of the correction factor.
+	 */
+	@Test
+	public void getSetCorrectionFactor() {
+		PinJoint<Body> pj = new PinJoint<Body>(b1, new Vector2());
+		TestCase.assertEquals(0.3, pj.getCorrectionFactor());
+		
+		pj.setCorrectionFactor(0.0);
+		TestCase.assertEquals(0.0, pj.getCorrectionFactor());
+		
+		pj.setCorrectionFactor(0.3);
+		TestCase.assertEquals(0.3, pj.getCorrectionFactor());
+		
+		pj.setCorrectionFactor(1.0);
+		TestCase.assertEquals(1.0, pj.getCorrectionFactor());
+	}
+
+	/**
+	 * Tests a negative correction factor.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeCorrectionFactor() {
+		PinJoint<Body> pj = new PinJoint<Body>(b1, new Vector2());
+		pj.setCorrectionFactor(-1.0);
+	}
+	
+	/**
+	 * Tests a correction factor greater than 1.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setGreaterThan1CorrectionFactor() {
+		PinJoint<Body> pj = new PinJoint<Body>(b1, new Vector2());
+		pj.setCorrectionFactor(5.0);
+	}
+
+	/**
+	 * Tests a correction factor greater than 1.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setLessThanZeroCorrectionMaximumForce() {
+		PinJoint<Body> pj = new PinJoint<Body>(b1, new Vector2());
+		pj.setMaximumCorrectionForce(-1.0);
+	}
+
+	/**
+	 * Tests get/set of the correction maximum force.
+	 */
+	@Test
+	public void getSetCorrectionMaximumForce() {
+		PinJoint<Body> pj = new PinJoint<Body>(b1, new Vector2());
+		TestCase.assertEquals(1000.0, pj.getMaximumCorrectionForce());
+		
+		pj.setMaximumCorrectionForce(0.0);
+		TestCase.assertEquals(0.0, pj.getMaximumCorrectionForce());
+		
+		pj.setMaximumCorrectionForce(0.3);
+		TestCase.assertEquals(0.3, pj.getMaximumCorrectionForce());
+		
+		pj.setMaximumCorrectionForce(100.0);
+		TestCase.assertEquals(100.0, pj.getMaximumCorrectionForce());
 	}
 }

@@ -470,6 +470,8 @@ public class Matrix33 implements Copyable<Matrix33> {
 		// check for zero determinant
 		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
+		} else {
+			det = 0.0;
 		}
 		
 		// compute the cofactor determinants and apply the signs
@@ -517,7 +519,10 @@ public class Matrix33 implements Copyable<Matrix33> {
 		// check for zero determinant
 		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
+		} else {
+			det = 0.0;
 		}
+		
 		Vector3 r = new Vector3();
 		
 		double m00 =  this.m11 * this.m22 - this.m12 * this.m21;
@@ -553,7 +558,10 @@ public class Matrix33 implements Copyable<Matrix33> {
 		// check for zero determinant
 		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
+		} else {
+			det = 0.0;
 		}
+		
 		Vector2 r = new Vector2();
 		r.x = det * (this.m11 * b.x - this.m01 * b.y);
 		r.y = det * (this.m00 * b.y - this.m10 * b.x);

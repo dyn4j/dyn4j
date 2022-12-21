@@ -113,12 +113,11 @@ public class FrictionJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 		this.localAnchor1 = body1.getLocalPoint(anchor);
 		this.localAnchor2 = body2.getLocalPoint(anchor);
 		
-		// the maximum force in Newtons
 		this.maximumForce = 10;
-		// the maximum torque in Newton-Meters
 		this.maximumTorque = 0.25;
 		
 		this.K = new Matrix22();
+		this.angularMass = 0.0;
 		
 		this.linearImpulse = new Vector2();
 		this.angularImpulse = 0.0;
@@ -167,6 +166,8 @@ public class FrictionJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 		this.angularMass = invI1 + invI2;
 		if (this.angularMass > Epsilon.E) {
 			this.angularMass = 1.0 / this.angularMass;
+		} else {
+			this.angularMass = 0.0;
 		}
 		
 		if (settings.isWarmStartingEnabled()) {

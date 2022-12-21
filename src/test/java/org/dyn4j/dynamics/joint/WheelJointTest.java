@@ -276,7 +276,7 @@ public class WheelJointTest extends BaseJointTest {
 		
 		wj.setSpringFrequency(0.001);
 		TestCase.assertEquals(0.001, wj.getSpringFrequency());
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.getSpringMode());
 		
 		wj.setSpringFrequency(1.0);
 		TestCase.assertEquals(1.0, wj.getSpringFrequency());
@@ -331,11 +331,11 @@ public class WheelJointTest extends BaseJointTest {
 	public void setSpringMode() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		// test mode swapping
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.getSpringMode());
 		wj.setSpringStiffness(0.3);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, wj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, wj.getSpringMode());
 		wj.setSpringFrequency(0.5);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.getSpringMode());
 	}
 	
 	/**
@@ -517,7 +517,7 @@ public class WheelJointTest extends BaseJointTest {
 		
 		TestCase.assertEquals(8.0, wj.springFrequency);
 		TestCase.assertEquals(0.5, wj.springDampingRatio);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.getSpringMode());
 		TestCase.assertEquals(3968.803, wj.springStiffness, 1e-3);
 		
 		wj.setSpringStiffness(1000.0);
@@ -525,7 +525,7 @@ public class WheelJointTest extends BaseJointTest {
 		
 		TestCase.assertEquals(4.015, wj.springFrequency, 1e-3);
 		TestCase.assertEquals(0.5, wj.springDampingRatio);
-		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, wj.springMode);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, wj.getSpringMode());
 		TestCase.assertEquals(1000.0, wj.springStiffness, 1e-3);
 	}
 	

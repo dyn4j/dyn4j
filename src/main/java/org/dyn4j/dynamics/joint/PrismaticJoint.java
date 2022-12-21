@@ -397,8 +397,6 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 			// could change
 			this.updateSpringCoefficients();
 			
-			this.springMass = this.axialMass;
-			
 			// compute the current spring extension (we are solving for zero here)
 			// the spring extension is distance between the anchor points translated into
 			// world space.
@@ -426,8 +424,12 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 		// check for the limit being enabled
 		if (this.lowerLimitEnabled || this.upperLimitEnabled) {
 			this.translation = this.axis.dot(d);
-		} else {
+		}
+		
+		if (!this.lowerLimitEnabled) {
 			this.lowerLimitImpulse = 0.0;
+		}
+		if (!this.upperLimitEnabled) {
 			this.upperLimitImpulse = 0.0;
 		}
 		
@@ -1208,7 +1210,15 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	public double getSpringForce(double invdt) {
 		return this.springImpulse * invdt;
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringMode()
+	 */
+	@Override
+	public int getSpringMode() {
+		return this.springMode;
+	}
+	
 	/**
 	 * Set's the spring rest offset.
 	 * <p>

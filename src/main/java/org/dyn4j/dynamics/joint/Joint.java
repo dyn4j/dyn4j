@@ -44,6 +44,12 @@ import org.dyn4j.geometry.Vector2;
  * @param <T> the {@link PhysicsBody} type
  */
 public interface Joint<T extends PhysicsBody> extends Shiftable, DataContainer, Ownable {
+	/** Mode indicating that the current frequency should be used to calculate the spring stiffness */
+	public static final int SPRING_MODE_FREQUENCY = 1;
+	
+	/** Mode indicating that the current stiffness should be used to calculate the spring frequency */
+	public static final int SPRING_MODE_STIFFNESS = 2;
+	
 	/**
 	 * Returns an unmodifiable list of bodies involved in this joint.
 	 * @return List&lt;T&gt;

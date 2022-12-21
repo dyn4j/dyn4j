@@ -39,15 +39,12 @@ As always with a major release, all deprecated APIs have been removed.
 - [#249](https://github.com/dyn4j/dyn4j/issues/249) Some values that were valid in previous versions will throw `IllegalArgumentException`s
 - [#244](https://github.com/dyn4j/dyn4j/issues/244) Some of the spring, limits, and motor methods have been renamed to align across all joints
 - The getAnchor1/getAnchor2 methods have been dropped for a number of joints
-- A few other methods on the joints have been renamed
-- All spring and motor default settings have been made the same
+- A few other methods on the `Joint` classes have been renamed
 
 **Other:**
 - [#255](https://github.com/dyn4j/dyn4j/issues/255) Remove the use of resource files for exception messages
-
-TODO
-- review what happens with all joints where both bodies are either infinite, fixed angular, or fixed linear mass
-
+- All default spring and motor settings have been made the same (frequency, damping ratio, maximum force, maximum torque, etc.)
+- The motor joint has maximumTorque/Force set to 1000.0
 
 ## v4.2.2 - October 1st, 2022
 

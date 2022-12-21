@@ -133,7 +133,6 @@ public class AngleJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		super(body1, body2);
 		// initialize
 		this.ratio = 1.0;
-		this.impulse = 0.0;
 		// compute the reference angle
 		this.referenceAngle = body1.getTransform().getRotationAngle() - body2.getTransform().getRotationAngle();
 		// set both limits
@@ -141,6 +140,14 @@ public class AngleJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		this.lowerLimit = this.referenceAngle;
 		// set enabled
 		this.limitsEnabled = true;
+		
+		this.angle = 0.0;
+		this.axialMass = 0.0;
+		this.fixedRotation = false;
+		
+		this.impulse = 0.0;
+		this.lowerImpulse = 0.0;
+		this.upperImpulse = 0.0;
 		
 	}
 	
@@ -175,6 +182,7 @@ public class AngleJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		if (this.axialMass > Epsilon.E) {
 			this.axialMass = 1.0 / this.axialMass;
 		} else {
+			this.axialMass = 0.0;
 			this.fixedRotation = true;
 		}
 		
