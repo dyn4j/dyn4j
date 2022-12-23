@@ -248,7 +248,7 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	 * @param anchor the anchor point in world coordinates
 	 * @param axis the axis of allowed motion
 	 * @throws NullPointerException if body1, body2, anchor or axis is null
-	 * @throws IllegalArgumentException if body1 == body2
+	 * @throws IllegalArgumentException if body1 == body2 or axis is the zero vector
 	 */
 	public PrismaticJoint(T body1, T body2, Vector2 anchor, Vector2 axis) {
 		super(body1, body2);
@@ -260,6 +260,9 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 		// check for a null axis
 		if (axis == null) 
 			throw new ArgumentNullException("axis");
+		
+		if (axis.getMagnitude() <= Epsilon.E) 
+			throw new IllegalArgumentException("The axis cannot be a zero vector.");
 		
 		// set the anchor point
 		this.localAnchor1 = body1.getLocalPoint(anchor);
@@ -967,8 +970,8 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	@Override
 	public void setMaximumMotorForce(double maximumMotorForce) {
 		// make sure its greater than or equal to zero
-		if (maximumMotorForce <= 0.0) 
-			throw new ValueOutOfRangeException("maximumMotorForce", maximumMotorForce, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		if (maximumMotorForce < 0.0) 
+			throw new ValueOutOfRangeException("maximumMotorForce", maximumMotorForce, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		if (this.maximumMotorForce != maximumMotorForce) {
 			this.maximumMotorForce = maximumMotorForce;
@@ -1025,8 +1028,8 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	@Override
 	public void setSpringDampingRatio(double dampingRatio) {
 		// make sure its within range
-		if (dampingRatio <= 0.0) 
-			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		if (dampingRatio < 0.0) 
+			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		if (dampingRatio > 1.0) 
 			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, 1.0);
@@ -1066,8 +1069,8 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	@Override
 	public void setSpringFrequency(double frequency) {
 		// check for valid value
-		if (frequency <= 0) 
-			throw new ValueOutOfRangeException("frequency", frequency, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		if (frequency < 0) 
+			throw new ValueOutOfRangeException("frequency", frequency, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		// set the spring mode
 		this.springMode = SPRING_MODE_FREQUENCY;
@@ -1090,8 +1093,8 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	@Override
 	public void setSpringStiffness(double stiffness) {
 		// check for valid value
-		if (stiffness <= 0)
-			throw new ValueOutOfRangeException("stiffness", stiffness, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		if (stiffness < 0)
+			throw new ValueOutOfRangeException("stiffness", stiffness, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		// set the spring mode
 		this.springMode = SPRING_MODE_STIFFNESS;
@@ -1120,8 +1123,8 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	@Override
 	public void setMaximumSpringForce(double maximum) {
 		// check for valid value
-		if (maximum <= 0) 
-			throw new ValueOutOfRangeException("maximum", maximum, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		if (maximum < 0) 
+			throw new ValueOutOfRangeException("maximum", maximum, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		// check if changed
 		if (this.springMaximumForce != maximum) {

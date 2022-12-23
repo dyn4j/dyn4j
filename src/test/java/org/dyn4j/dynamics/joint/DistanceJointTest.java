@@ -226,6 +226,10 @@ public class DistanceJointTest extends BaseJointTest {
 	@Test
 	public void setSpringDampingRatio() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		dj.setSpringDampingRatio(0.0);
+		TestCase.assertEquals(0.0, dj.getSpringDampingRatio());
+		
 		dj.setSpringDampingRatio(0.001);
 		TestCase.assertEquals(0.001, dj.getSpringDampingRatio());
 		
@@ -265,15 +269,6 @@ public class DistanceJointTest extends BaseJointTest {
 	}
 	
 	/**
-	 * Tests a zero damping ratio value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setZeroDampingRatio() {
-		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		dj.setSpringDampingRatio(0.0);
-	}
-	
-	/**
 	 * Tests a negative damping ratio value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
@@ -297,6 +292,9 @@ public class DistanceJointTest extends BaseJointTest {
 	@Test
 	public void setSpringFrequency() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		dj.setSpringFrequency(0.0);
+		TestCase.assertEquals(0.0, dj.getSpringFrequency());
 		
 		dj.setSpringFrequency(0.001);
 		TestCase.assertEquals(0.001, dj.getSpringFrequency());
@@ -370,20 +368,14 @@ public class DistanceJointTest extends BaseJointTest {
 	}
 
 	/**
-	 * Tests a zero stiffness value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setSpringStiffnessZero() {
-		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		dj.setSpringStiffness(0.0);
-	}
-
-	/**
 	 * Tests valid frequency values.
 	 */
 	@Test
 	public void setSpringStiffness() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		dj.setSpringStiffness(0.0);
+		TestCase.assertEquals(0.0, dj.getSpringStiffness());
 		
 		dj.setSpringStiffness(0.001);
 		TestCase.assertEquals(0.001, dj.getSpringStiffness());
@@ -442,24 +434,6 @@ public class DistanceJointTest extends BaseJointTest {
 	}
 
 	/**
-	 * Tests a zero frequency value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setSpringFrequencyZero() {
-		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		dj.setSpringFrequency(0.0);
-	}
-
-	/**
-	 * Tests setting a zero maximum force.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setSpringMaximumForceZero() {
-		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		dj.setMaximumSpringForce(0.0);
-	}
-
-	/**
 	 * Tests setting a negative maximum force.
 	 */
 	@Test(expected = IllegalArgumentException.class)
@@ -474,6 +448,10 @@ public class DistanceJointTest extends BaseJointTest {
 	@Test
 	public void setSpringMaximumForce() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		dj.setMaximumSpringForce(0.0);
+		TestCase.assertEquals(0.0, dj.getMaximumSpringForce());
+		
 		dj.setMaximumSpringForce(0.001);
 		TestCase.assertEquals(0.001, dj.getMaximumSpringForce());
 		

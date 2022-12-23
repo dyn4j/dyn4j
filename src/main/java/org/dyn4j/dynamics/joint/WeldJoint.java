@@ -649,8 +649,8 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	@Override
 	public void setSpringDampingRatio(double dampingRatio) {
 		// make sure its within range
-		if (dampingRatio <= 0.0) 
-			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		if (dampingRatio < 0.0) 
+			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		if (dampingRatio > 1.0) 
 			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, 1.0);
@@ -690,8 +690,8 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	@Override
 	public void setSpringFrequency(double frequency) {
 		// check for valid value
-		if (frequency <= 0) 
-			throw new ValueOutOfRangeException("frequency", frequency, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		if (frequency < 0) 
+			throw new ValueOutOfRangeException("frequency", frequency, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		// set the spring mode
 		this.springMode = SPRING_MODE_FREQUENCY;
@@ -714,8 +714,8 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	@Override
 	public void setSpringStiffness(double stiffness) {
 		// check for valid value
-		if (stiffness <= 0) 
-			throw new ValueOutOfRangeException("stiffness", stiffness, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		if (stiffness < 0) 
+			throw new ValueOutOfRangeException("stiffness", stiffness, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		// set the spring mode
 		this.springMode = SPRING_MODE_STIFFNESS;
@@ -744,8 +744,8 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	@Override
 	public void setMaximumSpringTorque(double maximum) {
 		// check for valid value
-		if (maximum <= 0) 
-			throw new ValueOutOfRangeException("maximum", maximum, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		if (maximum < 0) 
+			throw new ValueOutOfRangeException("maximum", maximum, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		// check if changed
 		if (this.springMaximumTorque != maximum) {

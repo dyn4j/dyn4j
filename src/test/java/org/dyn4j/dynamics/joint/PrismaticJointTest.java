@@ -117,20 +117,14 @@ public class PrismaticJointTest extends BaseJointTest {
 	public void setMotorMaximumForce() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
+		pj.setMaximumMotorForce(0.0);
+		TestCase.assertEquals(0.0, pj.getMaximumMotorForce());
+		
 		pj.setMaximumMotorForce(10.0);
 		TestCase.assertEquals(10.0, pj.getMaximumMotorForce());
 		
 		pj.setMaximumMotorForce(2548.0);
 		TestCase.assertEquals(2548.0, pj.getMaximumMotorForce());
-	}
-	
-	/**
-	 * Tests a negative maximum force value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setZeroMaximumMotorForce() {
-		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
-		pj.setMaximumMotorForce(0.0);
 	}
 	
 	/**
@@ -1072,6 +1066,10 @@ public class PrismaticJointTest extends BaseJointTest {
 	@Test
 	public void setSpringDampingRatio() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		pj.setSpringDampingRatio(0.0);
+		TestCase.assertEquals(0.0, pj.getSpringDampingRatio());
+		
 		pj.setSpringDampingRatio(0.001);
 		TestCase.assertEquals(0.001, pj.getSpringDampingRatio());
 		
@@ -1113,15 +1111,6 @@ public class PrismaticJointTest extends BaseJointTest {
 	}
 	
 	/**
-	 * Tests a zero damping ratio value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setZeroDampingRatio() {
-		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
-		pj.setSpringDampingRatio(0.0);
-	}
-	
-	/**
 	 * Tests a negative damping ratio value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
@@ -1145,6 +1134,9 @@ public class PrismaticJointTest extends BaseJointTest {
 	@Test
 	public void setSpringFrequency() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		pj.setSpringFrequency(0.0);
+		TestCase.assertEquals(0.0, pj.getSpringFrequency());
 		
 		pj.setSpringFrequency(0.001);
 		TestCase.assertEquals(0.001, pj.getSpringFrequency());
@@ -1220,20 +1212,14 @@ public class PrismaticJointTest extends BaseJointTest {
 	}
 
 	/**
-	 * Tests a zero stiffness value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setSpringStiffnessZero() {
-		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
-		pj.setSpringStiffness(0.0);
-	}
-
-	/**
 	 * Tests valid frequency values.
 	 */
 	@Test
 	public void setSpringStiffness() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		pj.setSpringStiffness(0.0);
+		TestCase.assertEquals(0.0, pj.getSpringStiffness());
 		
 		pj.setSpringStiffness(0.001);
 		TestCase.assertEquals(0.001, pj.getSpringStiffness());
@@ -1293,24 +1279,6 @@ public class PrismaticJointTest extends BaseJointTest {
 	}
 
 	/**
-	 * Tests a zero frequency value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setSpringFrequencyZero() {
-		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
-		pj.setSpringFrequency(0.0);
-	}
-
-	/**
-	 * Tests setting a zero maximum force.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setSpringMaximumForceZero() {
-		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
-		pj.setMaximumSpringForce(0.0);
-	}
-
-	/**
 	 * Tests setting a negative maximum force.
 	 */
 	@Test(expected = IllegalArgumentException.class)
@@ -1325,6 +1293,10 @@ public class PrismaticJointTest extends BaseJointTest {
 	@Test
 	public void setSpringMaximumForce() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		pj.setMaximumSpringForce(0.0);
+		TestCase.assertEquals(0.0, pj.getMaximumSpringForce());
+		
 		pj.setMaximumSpringForce(0.001);
 		TestCase.assertEquals(0.001, pj.getMaximumSpringForce());
 		

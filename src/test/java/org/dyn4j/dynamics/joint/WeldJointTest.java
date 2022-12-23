@@ -162,6 +162,10 @@ public class WeldJointTest extends BaseJointTest {
 	@Test
 	public void setSpringDampingRatio() {
 		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
+		
+		wj.setSpringDampingRatio(0.0);
+		TestCase.assertEquals(0.0, wj.getSpringDampingRatio());
+		
 		wj.setSpringDampingRatio(0.001);
 		TestCase.assertEquals(0.001, wj.getSpringDampingRatio());
 		
@@ -203,15 +207,6 @@ public class WeldJointTest extends BaseJointTest {
 	}
 	
 	/**
-	 * Tests a zero damping ratio value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setZeroDampingRatio() {
-		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-		wj.setSpringDampingRatio(0.0);
-	}
-	
-	/**
 	 * Tests a negative damping ratio value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
@@ -235,6 +230,9 @@ public class WeldJointTest extends BaseJointTest {
 	@Test
 	public void setSpringFrequency() {
 		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
+		
+		wj.setSpringFrequency(0.0);
+		TestCase.assertEquals(0.0, wj.getSpringFrequency());
 		
 		wj.setSpringFrequency(0.001);
 		TestCase.assertEquals(0.001, wj.getSpringFrequency());
@@ -310,20 +308,14 @@ public class WeldJointTest extends BaseJointTest {
 	}
 
 	/**
-	 * Tests a zero stiffness value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setSpringStiffnessZero() {
-		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-		wj.setSpringStiffness(0.0);
-	}
-
-	/**
 	 * Tests valid frequency values.
 	 */
 	@Test
 	public void setSpringStiffness() {
 		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
+		
+		wj.setSpringStiffness(0.0);
+		TestCase.assertEquals(0.0, wj.getSpringStiffness());
 		
 		wj.setSpringStiffness(0.001);
 		TestCase.assertEquals(0.001, wj.getSpringStiffness());
@@ -383,24 +375,6 @@ public class WeldJointTest extends BaseJointTest {
 	}
 
 	/**
-	 * Tests a zero frequency value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setSpringFrequencyZero() {
-		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-		wj.setSpringFrequency(0.0);
-	}
-
-	/**
-	 * Tests setting a zero maximum force.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setSpringMaximumForceZero() {
-		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-		wj.setMaximumSpringTorque(0.0);
-	}
-
-	/**
 	 * Tests setting a negative maximum force.
 	 */
 	@Test(expected = IllegalArgumentException.class)
@@ -415,6 +389,10 @@ public class WeldJointTest extends BaseJointTest {
 	@Test
 	public void setSpringMaximumForce() {
 		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
+		
+		wj.setMaximumSpringTorque(0.0);
+		TestCase.assertEquals(0.0, wj.getMaximumSpringTorque());
+		
 		wj.setMaximumSpringTorque(0.001);
 		TestCase.assertEquals(0.001, wj.getMaximumSpringTorque());
 		

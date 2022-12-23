@@ -513,7 +513,7 @@ public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 	 * are rotating in radians/second.
 	 * @return double
 	 */
-	public double getJointSpeed() {
+	public double getAngularSpeed() {
 		return this.body2.getAngularVelocity() - this.body1.getAngularVelocity();
 	}
 	
@@ -521,7 +521,7 @@ public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 	 * Returns the relative angle between the two {@link PhysicsBody}s in radians in the range [-&pi;, &pi;].
 	 * @return double
 	 */
-	public double getJointAngle() {
+	public double getAngularTranslation() {
 		return this.getRelativeRotation();
 	}
 	
@@ -557,8 +557,8 @@ public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 	 */
 	public void setMaximumMotorTorque(double maximumMotorTorque) {
 		// make sure its positive
-		if (maximumMotorTorque <= 0.0) 
-			throw new ValueOutOfRangeException("maximumMotorTorque", maximumMotorTorque, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		if (maximumMotorTorque < 0.0) 
+			throw new ValueOutOfRangeException("maximumMotorTorque", maximumMotorTorque, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		if (this.motorMaximumTorque != maximumMotorTorque) {
 			if (this.motorEnabled) {

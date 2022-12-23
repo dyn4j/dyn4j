@@ -200,6 +200,10 @@ public class WheelJointTest extends BaseJointTest {
 	@Test
 	public void setSpringDampingRatio() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		wj.setSpringDampingRatio(0.0);
+		TestCase.assertEquals(0.0, wj.getSpringDampingRatio());
+		
 		wj.setSpringDampingRatio(0.001);
 		TestCase.assertEquals(0.001, wj.getSpringDampingRatio());
 		
@@ -241,15 +245,6 @@ public class WheelJointTest extends BaseJointTest {
 	}
 	
 	/**
-	 * Tests a zero damping ratio value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setZeroDampingRatio() {
-		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setSpringDampingRatio(0.0);
-	}
-	
-	/**
 	 * Tests a negative damping ratio value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
@@ -273,6 +268,9 @@ public class WheelJointTest extends BaseJointTest {
 	@Test
 	public void setSpringFrequency() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		wj.setSpringFrequency(0.0);
+		TestCase.assertEquals(0.0, wj.getSpringFrequency());
 		
 		wj.setSpringFrequency(0.001);
 		TestCase.assertEquals(0.001, wj.getSpringFrequency());
@@ -348,20 +346,14 @@ public class WheelJointTest extends BaseJointTest {
 	}
 
 	/**
-	 * Tests a zero stiffness value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setSpringStiffnessZero() {
-		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setSpringStiffness(0.0);
-	}
-
-	/**
 	 * Tests valid frequency values.
 	 */
 	@Test
 	public void setSpringStiffness() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		wj.setSpringStiffness(0.0);
+		TestCase.assertEquals(0.0, wj.getSpringStiffness());
 		
 		wj.setSpringStiffness(0.001);
 		TestCase.assertEquals(0.001, wj.getSpringStiffness());
@@ -421,24 +413,6 @@ public class WheelJointTest extends BaseJointTest {
 	}
 
 	/**
-	 * Tests a zero frequency value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setSpringFrequencyZero() {
-		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setSpringFrequency(0.0);
-	}
-
-	/**
-	 * Tests setting a zero maximum force.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setSpringMaximumForceZero() {
-		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setMaximumSpringForce(0.0);
-	}
-
-	/**
 	 * Tests setting a negative maximum force.
 	 */
 	@Test(expected = IllegalArgumentException.class)
@@ -453,6 +427,10 @@ public class WheelJointTest extends BaseJointTest {
 	@Test
 	public void setSpringMaximumForce() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		wj.setMaximumSpringForce(0.0);
+		TestCase.assertEquals(0.0, wj.getMaximumSpringForce());
+		
 		wj.setMaximumSpringForce(0.001);
 		TestCase.assertEquals(0.001, wj.getMaximumSpringForce());
 		
@@ -566,20 +544,14 @@ public class WheelJointTest extends BaseJointTest {
 	public void setMotorMaximumTorque() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
+		wj.setMaximumMotorTorque(0.0);
+		TestCase.assertEquals(0.0, wj.getMaximumMotorTorque());
+		
 		wj.setMaximumMotorTorque(10.0);
 		TestCase.assertEquals(10.0, wj.getMaximumMotorTorque());
 		
 		wj.setMaximumMotorTorque(2548.0);
 		TestCase.assertEquals(2548.0, wj.getMaximumMotorTorque());
-	}
-	
-	/**
-	 * Tests a negative maximum torque value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setMaximumMotorTorqueZero() {
-		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setMaximumMotorTorque(0.0);
 	}
 	
 	/**

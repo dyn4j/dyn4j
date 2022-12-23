@@ -180,6 +180,10 @@ public class PinJointTest extends BaseJointTest {
 	@Test
 	public void setSpringDampingRatio() {
 		PinJoint<Body> pj = new PinJoint<Body>(b1, new Vector2());
+		
+		pj.setSpringDampingRatio(0.0);
+		TestCase.assertEquals(0.0, pj.getSpringDampingRatio());
+		
 		pj.setSpringDampingRatio(0.001);
 		TestCase.assertEquals(0.001, pj.getSpringDampingRatio());
 		
@@ -215,15 +219,6 @@ public class PinJointTest extends BaseJointTest {
 	}
 	
 	/**
-	 * Tests a zero damping ratio value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setZeroDampingRatio() {
-		PinJoint<Body> pj = new PinJoint<Body>(b1, new Vector2());
-		pj.setSpringDampingRatio(0.0);
-	}
-	
-	/**
 	 * Tests a negative damping ratio value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
@@ -247,6 +242,9 @@ public class PinJointTest extends BaseJointTest {
 	@Test
 	public void setSpringFrequency() {
 		PinJoint<Body> pj = new PinJoint<Body>(b1, new Vector2());
+		
+		pj.setSpringFrequency(0.0);
+		TestCase.assertEquals(0.0, pj.getSpringFrequency());
 		
 		pj.setSpringFrequency(0.001);
 		TestCase.assertEquals(0.001, pj.getSpringFrequency());
@@ -313,20 +311,14 @@ public class PinJointTest extends BaseJointTest {
 	}
 
 	/**
-	 * Tests a zero stiffness value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setSpringStiffnessZero() {
-		PinJoint<Body> pj = new PinJoint<Body>(b1, new Vector2());
-		pj.setSpringStiffness(0.0);
-	}
-
-	/**
 	 * Tests valid frequency values.
 	 */
 	@Test
 	public void setSpringStiffness() {
 		PinJoint<Body> pj = new PinJoint<Body>(b1, new Vector2());
+		
+		pj.setSpringStiffness(0.0);
+		TestCase.assertEquals(0.0, pj.getSpringStiffness());
 		
 		pj.setSpringStiffness(0.001);
 		TestCase.assertEquals(0.001, pj.getSpringStiffness());
@@ -379,24 +371,6 @@ public class PinJointTest extends BaseJointTest {
 	}
 
 	/**
-	 * Tests a zero frequency value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setSpringFrequencyZero() {
-		PinJoint<Body> pj = new PinJoint<Body>(b1, new Vector2());
-		pj.setSpringFrequency(0.0);
-	}
-
-	/**
-	 * Tests setting a zero maximum force.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setSpringMaximumForceZero() {
-		PinJoint<Body> pj = new PinJoint<Body>(b1, new Vector2());
-		pj.setMaximumSpringForce(0.0);
-	}
-
-	/**
 	 * Tests setting a negative maximum force.
 	 */
 	@Test(expected = IllegalArgumentException.class)
@@ -411,6 +385,10 @@ public class PinJointTest extends BaseJointTest {
 	@Test
 	public void setSpringMaximumForce() {
 		PinJoint<Body> pj = new PinJoint<Body>(b1, new Vector2());
+		
+		pj.setMaximumSpringForce(0.0);
+		TestCase.assertEquals(0.0, pj.getMaximumSpringForce());
+		
 		pj.setMaximumSpringForce(0.001);
 		TestCase.assertEquals(0.001, pj.getMaximumSpringForce());
 		

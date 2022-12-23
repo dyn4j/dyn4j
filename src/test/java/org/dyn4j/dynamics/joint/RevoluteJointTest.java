@@ -51,7 +51,7 @@ public class RevoluteJointTest extends BaseJointTest {
 		TestCase.assertNotSame(p, rj.getAnchor1());
 		TestCase.assertNotSame(p, rj.getAnchor2());
 		
-		TestCase.assertEquals(0.0, rj.getJointAngle());
+		TestCase.assertEquals(0.0, rj.getAngularTranslation());
 		TestCase.assertEquals(1000.0, rj.getMaximumMotorTorque());
 		TestCase.assertEquals(0.0, rj.getMotorSpeed());
 		
@@ -113,6 +113,9 @@ public class RevoluteJointTest extends BaseJointTest {
 	public void setMaximumMotorTorque() {
 		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
 		
+		rj.setMaximumMotorTorque(0.0);
+		TestCase.assertEquals(0.0, rj.getMaximumMotorTorque());
+		
 		rj.setMaximumMotorTorque(10.0);
 		TestCase.assertEquals(10.0, rj.getMaximumMotorTorque());
 		
@@ -120,29 +123,6 @@ public class RevoluteJointTest extends BaseJointTest {
 		TestCase.assertEquals(2548.0, rj.getMaximumMotorTorque());
 	}
 
-	/**
-	 * Tests valid maximum torque values.
-	 */
-	@Test
-	public void setMotorMaximumTorque() {
-		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
-		
-		rj.setMaximumMotorTorque(10.0);
-		TestCase.assertEquals(10.0, rj.getMaximumMotorTorque());
-		
-		rj.setMaximumMotorTorque(2548.0);
-		TestCase.assertEquals(2548.0, rj.getMaximumMotorTorque());
-	}
-	
-	/**
-	 * Tests a negative maximum torque value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setMaximumMotorTorqueZero() {
-		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
-		rj.setMaximumMotorTorque(0.0);
-	}
-	
 	/**
 	 * Tests a negative maximum torque value.
 	 */

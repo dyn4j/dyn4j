@@ -93,7 +93,10 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	
 	// current state
 	
+	/** The world vector from body1's local center to the linear target */
 	private Vector2 r1;
+	
+	/** The world vector from body2's local center to the origin */
 	private Vector2 r2;
 	
 	/** The pivot mass; K = J * Minv * Jtrans */

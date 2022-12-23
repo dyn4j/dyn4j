@@ -245,6 +245,9 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		if (axis == null) 
 			throw new ArgumentNullException("axis");
 		
+		if (axis.getMagnitude() <= Epsilon.E) 
+			throw new IllegalArgumentException("The axis cannot be a zero vector.");
+		
 		// set the anchor point
 		this.localAnchor1 = frame.getLocalPoint(anchor);
 		this.localAnchor2 = wheel.getLocalPoint(anchor);
@@ -973,8 +976,8 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	 */
 	public void setMaximumMotorTorque(double maximumMotorTorque) {
 		// make sure its greater than or equal to zero
-		if (maximumMotorTorque <= 0) 
-			throw new ValueOutOfRangeException("maximumMotorTorque", maximumMotorTorque, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		if (maximumMotorTorque < 0) 
+			throw new ValueOutOfRangeException("maximumMotorTorque", maximumMotorTorque, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		if (this.motorMaximumTorque != maximumMotorTorque) {
 			if (this.motorEnabled) {
@@ -1008,8 +1011,8 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	@Override
 	public void setSpringDampingRatio(double dampingRatio) {
 		// make sure its within range
-		if (dampingRatio <= 0.0) 
-			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		if (dampingRatio < 0.0) 
+			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		if (dampingRatio > 1.0) 
 			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, 1.0);
@@ -1049,8 +1052,8 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	@Override
 	public void setSpringFrequency(double frequency) {
 		// check for valid value
-		if (frequency <= 0)
-			throw new ValueOutOfRangeException("frequency", frequency, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		if (frequency < 0)
+			throw new ValueOutOfRangeException("frequency", frequency, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		// set the spring mode
 		this.springMode = SPRING_MODE_FREQUENCY;
@@ -1073,8 +1076,8 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	@Override
 	public void setSpringStiffness(double stiffness) {
 		// check for valid value
-		if (stiffness <= 0)
-			throw new ValueOutOfRangeException("stiffness", stiffness, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		if (stiffness < 0)
+			throw new ValueOutOfRangeException("stiffness", stiffness, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		// set the spring mode
 		this.springMode = SPRING_MODE_STIFFNESS;
@@ -1103,8 +1106,8 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	@Override
 	public void setMaximumSpringForce(double maximum) {
 		// check for valid value
-		if (maximum <= 0)
-			throw new ValueOutOfRangeException("maximum", maximum, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		if (maximum < 0)
+			throw new ValueOutOfRangeException("maximum", maximum, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		// check if changed
 		if (this.springMaximumForce != maximum) {
