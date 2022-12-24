@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,57 +26,106 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
+import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ValueOutOfRangeException;
+import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
- * Implementation of a fixed length distance joint.
+ * Implementation of a fixed length distance joint with optional, spring-damper
+ * and limits.
  * <p>
- * Given the two world space anchor points a distance is computed and used
- * to constrain the attached {@link PhysicsBody}s at that distance.  The bodies can rotate
- * freely about the anchor points and the whole system can move and rotate freely, but
- * the distance between the two anchor points is fixed.
+ * Given the two world space anchor points a distance is computed and used to 
+ * constrain the attached {@link PhysicsBody}s at that distance.  The bodies 
+ * can rotate freely about the anchor points and the whole system can move and
+ * rotate freely, but the distance between the two anchor points is fixed.  
+ * The rest distance determines the fixed distance and can be changed using 
+ * {@link #setRestDistance(double)}.  The rest distance must be zero or 
+ * greater.
  * <p>
  * This joint doubles as a spring/damper distance joint where the length can
- * change but is constantly approaching the target distance.  Enable the
- * spring/damper by setting the frequency and damping ratio to values greater than
- * zero.  A good starting point is a frequency of 8.0 and damping ratio of 0.3
- * then adjust as necessary.
+ * change but is constantly approaching the rest distance.  Enable the spring-
+ * damper by setting the frequency and damping ratio values and using the 
+ * {@link #setSpringEnabled(boolean)} and 
+ * {@link #setSpringDamperEnabled(boolean)} methods.  A good starting point is
+ * a frequency of 8.0 and damping ratio of 0.3 then adjust as necessary.  You
+ * can also impose a maximum force the spring will apply by using 
+ * {@link #setMaximumSpringForce(double)}. The maximum force needs to be 
+ * enabled using {@link #setMaximumSpringForceEnabled(boolean)} method.  As 
+ * with all spring-damper enabled joints, the spring must be enabled for the 
+ * damper to be applied.  Also note that when the damper is disabled, the 
+ * spring still experiences "damping" aka energy loss - this is a side effect
+ * of the solver and intended behavior.
+ * <p>
+ * This joint also supports limits.  The joint will only accept positive limits
+ * (in contrast to other joints).  A lower limit of zero (the minimum valid 
+ * lower limit) means that the distance can reach zero, where the anchor points
+ * overlap.  Setting the limits to the same value will create a fixed length 
+ * distance joint, but this is not recommended as you will get a less stable 
+ * result - instead disable the limits and set the rest distance using the
+ * {@link #setRestDistance(double)} method.  You can enable the upper and lower
+ * limits independently using the {@link #setLowerLimitEnabled(boolean)} and 
+ * {@link #setUpperLimitEnabled(boolean)} methods.  When limits are enabled, 
+ * the rest distance is ignored.  You can combine limits and spring-damper by
+ * enabling as mentioned earlier.  In this case, the rest distance is used for
+ * the spring-damper and the limits control the maximum and minimum extension 
+ * of the spring.  The limit interval does not have to include the rest 
+ * distance.  If the lower and upper limits are equal or near equal (2 times
+ * the {@link Settings#getLinearTolerance()}) the joint will be treated as a
+ * fixed length joint.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0 
  * @since 1.0.0
- * @see <a href="http://www.dyn4j.org/documentation/joints/#Distance_Joint" target="_blank">Documentation</a>
- * @see <a href="http://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>
+ * @see <a href="https://www.dyn4j.org/pages/joints#Distance_Joint" target="_blank">Documentation</a>
+ * @see <a href="https://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>
  * @param <T> the {@link PhysicsBody} type
  */
-public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
+public class DistanceJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T> implements LinearLimitsJoint, LinearSpringJoint, PairedBodyJoint<T>, Joint<T>, Shiftable, DataContainer, Ownable {
 	/** The local anchor point on the first {@link PhysicsBody} */
 	protected final Vector2 localAnchor1;
 	
 	/** The local anchor point on the second {@link PhysicsBody} */
 	protected final Vector2 localAnchor2;
 	
-	/** 
-	 * The rest distance
-	 * @deprecated Deprecated in 4.2.0. Use {@link #restDistance} instead. 
-	 */
-	@Deprecated
-	protected double distance;
+	// distance constraint
 	
 	/** The rest distance */
 	protected double restDistance;
 	
+	// spring-damper constraint
+	
+	/** True if the spring is enabled */
+	protected boolean springEnabled;
+	
+	/** The current spring mode */
+	protected int springMode;
+	
 	/** The oscillation frequency in hz */
-	protected double frequency;
+	protected double springFrequency;
+
+	/** The stiffness (k) of the spring */
+	protected double springStiffness;
+	
+	/** True if the spring's damper is enabled */
+	protected boolean springDamperEnabled;
 	
 	/** The damping ratio */
-	protected double dampingRatio;
+	protected double springDampingRatio;
+	
+	/** True if the spring maximum force is enabled */
+	protected boolean springMaximumForceEnabled;
+	
+	/** The maximum force the spring can apply */
+	protected double springMaximumForce;
+	
+	// limit constraints
 	
 	/** The maximum distance between the two world space anchor points */
 	protected double upperLimit;
@@ -93,11 +142,8 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	// current state
 
 	/** The current distance as of constraint initialization */
-	protected double currentDistance;
+	private double currentDistance;
 
-	/** The stiffness (k) of the spring */
-	private double stiffness;
-	
 	/** The damping coefficient of the spring-damper */
 	private double damping;
 
@@ -122,11 +168,10 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	private double impulse;
 
 	/** The accumulated upper limit impulse */
-	private double upperImpulse;
+	private double upperLimitImpulse;
 	
 	/** The accumulated lower limit impulse */
-	private double lowerImpulse;
-	
+	private double lowerLimitImpulse;
 	
 	/**
 	 * Minimal constructor.
@@ -142,27 +187,36 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	 * @throws IllegalArgumentException if body1 == body2
 	 */
 	public DistanceJoint(T body1, T body2, Vector2 anchor1, Vector2 anchor2) {
-		super(body1, body2, false);
-		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
+		super(body1, body2);
+		
 		// verify the anchor points are not null
-		if (anchor1 == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor1"));
-		if (anchor2 == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor2"));
+		if (anchor1 == null) 
+			throw new ArgumentNullException("anchor1");
+		
+		if (anchor2 == null) 
+			throw new ArgumentNullException("anchor2");
+		
+		this.collisionAllowed = false;
 		// get the local anchor points
 		this.localAnchor1 = body1.getLocalPoint(anchor1);
 		this.localAnchor2 = body2.getLocalPoint(anchor2);
 		// compute the initial distance
-		this.restDistance = this.distance = anchor1.distance(anchor2);
-		this.currentDistance = restDistance;
-		this.upperLimit = restDistance;
-		this.lowerLimit = restDistance;
+		this.restDistance = anchor1.distance(anchor2);
+		this.currentDistance = this.restDistance;
+		this.upperLimit = this.restDistance;
+		this.lowerLimit = this.restDistance;
 		this.upperLimitEnabled = false;
 		this.lowerLimitEnabled = false;
 		
-		this.frequency = 0.0;
-		this.dampingRatio = 0.0;
+		this.springMode = SPRING_MODE_FREQUENCY;
+		this.springEnabled = false;
+		this.springFrequency = 8.0;
+		this.springStiffness = 0.0;
+		this.springDamperEnabled = false;
+		this.springDampingRatio = 0.3;
+		this.springMaximumForceEnabled = false;
+		this.springMaximumForce = 1000.0;
 		
-		this.stiffness = 0.0;
 		this.damping = 0.0;
 		this.n = null;
 		
@@ -170,8 +224,8 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		this.bias = 0.0;
 		this.mass = 0.0;
 		
-		this.lowerImpulse = 0.0;
-		this.upperImpulse = 0.0;
+		this.lowerLimitImpulse = 0.0;
+		this.upperLimitImpulse = 0.0;
 	}
 	
 	/* (non-Javadoc)
@@ -182,8 +236,8 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		sb.append("DistanceJoint[").append(super.toString())
 		  .append("|Anchor1=").append(this.getAnchor1())
 		  .append("|Anchor2=").append(this.getAnchor2())
-		  .append("|Frequency=").append(this.frequency)
-		  .append("|DampingRatio=").append(this.dampingRatio)
+		  .append("|Frequency=").append(this.springFrequency)
+		  .append("|DampingRatio=").append(this.springDampingRatio)
 		  .append("|RestDistance=").append(this.restDistance)
 		  .append("|LowerLimit=").append(this.lowerLimit)
 		  .append("|UpperLimit=").append(this.upperLimit)
@@ -220,8 +274,8 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		// check for the tolerance
 		if (this.currentDistance < linearTolerance) {
 			this.n.zero();
-			this.upperImpulse = 0.0;
-			this.lowerImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
 			return;
 		} else {
 			// normalize it
@@ -229,10 +283,10 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		}
 
 		if (!this.upperLimitEnabled) {
-			this.upperImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
 		}
 		if (!this.lowerLimitEnabled) {
-			this.lowerImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
 		}
 		
 		// compute K inverse
@@ -245,31 +299,22 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		// check for zero before inverting
 		this.mass = invMass <= Epsilon.E ? 0.0 : 1.0 / invMass;
 		
-		// recompute spring reduced mass (m), stiffness (k), and damping (d)
-		// since frequency, dampingRatio, or the masses of the joined bodies
-		// could change
-		if (this.frequency > 0.0) {
-			double lm = this.getReducedMass();
-			double nf = this.getNaturalFrequency(this.frequency);
-			
-			this.stiffness = this.getSpringStiffness(lm, nf);
-			this.damping = this.getSpringDampingCoefficient(lm, nf, this.dampingRatio);
-		} else {
-			this.stiffness = 0.0;
-			this.damping = 0.0;
-		}
-		
 		// see if we need to compute spring damping
-		if (this.stiffness > 0.0) {
+		if (this.springEnabled) {
+			// recompute spring reduced mass (m), stiffness (k), and damping (d)
+			// since frequency, dampingRatio, or the masses of the joined bodies
+			// could change
+			this.updateSpringCoefficients();
+			
 			double dt = step.getDeltaTime();
 			// get the current compression/extension of the spring
 			double x = this.currentDistance - this.restDistance;
 			
 			// compute the CIM
-			this.gamma = this.getConstraintImpulseMixing(dt, this.stiffness, this.damping);
+			this.gamma = getConstraintImpulseMixing(dt, this.springStiffness, this.damping);
 			
 			// compute the ERP
-			double erp = this.getErrorReductionParameter(dt, this.stiffness, this.damping);
+			double erp = getErrorReductionParameter(dt, this.springStiffness, this.damping);
 			
 			// compute the bias
 			// b = C * ERP
@@ -282,24 +327,25 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		} else {
 			this.gamma = 0.0;
 			this.bias = 0.0;
+			this.damping = 0.0;
 			this.softMass = this.mass;
 		}
 		
 		if (settings.isWarmStartingEnabled()) {
 			// warm start
 			this.impulse *= step.getDeltaTimeRatio();
-			this.upperImpulse *= step.getDeltaTimeRatio();
-			this.lowerImpulse *= step.getDeltaTimeRatio();
+			this.upperLimitImpulse *= step.getDeltaTimeRatio();
+			this.lowerLimitImpulse *= step.getDeltaTimeRatio();
 			
-			Vector2 J = this.n.product(this.impulse + this.lowerImpulse - this.upperImpulse);
+			Vector2 J = this.n.product(this.impulse + this.lowerLimitImpulse - this.upperLimitImpulse);
 			this.body1.getLinearVelocity().add(J.product(invM1));
 			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
 			this.body2.getLinearVelocity().subtract(J.product(invM2));
 			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(J));
 		} else {
 			this.impulse = 0.0;
-			this.upperImpulse = 0.0;
-			this.lowerImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
 		}
 	}
 	
@@ -328,16 +374,28 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 
 		double invdt = step.getInverseDeltaTime();		
 		if (this.lowerLimit < this.upperLimit) {
-			if (this.stiffness > 0.0) {
+			if (this.springEnabled) {
 				// compute Jv
 				double Jv = n.dot(v1.difference(v2));
 				
 				// compute lambda (the magnitude of the impulse)
-				double j = -this.softMass * (Jv + this.bias + this.gamma * this.impulse);
-				this.impulse += j;
+				double stepImpulse = -this.softMass * (Jv + this.bias + this.gamma * this.impulse);
+				
+				// clamp to max force (if enabled)
+				if (this.springMaximumForceEnabled) {
+					double currentAccumulatedImpulse = this.impulse;
+					double maxImpulse = step.getDeltaTime() * this.springMaximumForce;
+					// clamp the accumulated impulse
+					this.impulse = Interval.clamp(this.impulse + stepImpulse, -maxImpulse, maxImpulse);
+					// if we clamped, then override the step impulse with the difference
+					stepImpulse = this.impulse - currentAccumulatedImpulse;
+				} else {
+					// otherwise accumulate normally
+					this.impulse += stepImpulse;
+				}
 				
 				// apply the impulse
-				Vector2 J = this.n.product(j);
+				Vector2 J = this.n.product(stepImpulse);
 				this.body1.getLinearVelocity().add(J.product(invM1));
 				this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
 				this.body2.getLinearVelocity().subtract(J.product(invM2));
@@ -350,13 +408,13 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 				double Jv = this.n.dot(v1.difference(v2));
 				
 				// compute lambda (the magnitude of the impulse)
-				double impulse = -this.mass * (Jv + Math.max(d, 0.0) * invdt);
-				double oldImpulse = this.lowerImpulse;
-				this.lowerImpulse = Math.max(0.0, this.lowerImpulse + impulse);
-				impulse = this.lowerImpulse - oldImpulse;
+				double stepImpulse = -this.mass * (Jv + Math.max(d, 0.0) * invdt);
+				double currentAccumulatedImpulse = this.lowerLimitImpulse;
+				this.lowerLimitImpulse = Math.max(0.0, this.lowerLimitImpulse + stepImpulse);
+				stepImpulse = this.lowerLimitImpulse - currentAccumulatedImpulse;
 				
 				// apply the impulse
-				Vector2 J = this.n.product(impulse);
+				Vector2 J = this.n.product(stepImpulse);
 				this.body1.getLinearVelocity().add(J.product(invM1));
 				this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
 				this.body2.getLinearVelocity().subtract(J.product(invM2));
@@ -369,13 +427,13 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 				double Jv = this.n.dot(v2.difference(v1));
 				
 				// compute lambda (the magnitude of the impulse)
-				double impulse = -this.mass * (Jv + Math.max(d, 0.0) * invdt);
-				double oldImpulse = this.upperImpulse;
-				this.upperImpulse = Math.max(0.0, this.upperImpulse + impulse);
-				impulse = this.upperImpulse - oldImpulse;
+				double stepImpulse = -this.mass * (Jv + Math.max(d, 0.0) * invdt);
+				double currentAccumulatedImpulse = this.upperLimitImpulse;
+				this.upperLimitImpulse = Math.max(0.0, this.upperLimitImpulse + stepImpulse);
+				stepImpulse = this.upperLimitImpulse - currentAccumulatedImpulse;
 				
 				// apply the impulse
-				Vector2 J = this.n.product(impulse);
+				Vector2 J = this.n.product(stepImpulse);
 				this.body1.getLinearVelocity().subtract(J.product(invM1));
 				this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * r1.cross(J));
 				this.body2.getLinearVelocity().add(J.product(invM2));
@@ -386,11 +444,23 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			double Jv = n.dot(v1.difference(v2));
 			
 			// compute lambda (the magnitude of the impulse)
-			double j = -this.softMass * (Jv + this.bias + this.gamma * this.impulse);
-			this.impulse += j;
+			double stepImpulse = -this.softMass * (Jv + this.bias + this.gamma * this.impulse);
+			
+			// clamp to max force (if enabled)
+			if (this.springEnabled && this.springMaximumForceEnabled) {
+				double currentAccumulatedImpulse = this.impulse;
+				double maxImpulse = step.getDeltaTime() * this.springMaximumForce;
+				// clamp the accumulated impulse
+				this.impulse = Interval.clamp(this.impulse + stepImpulse, -maxImpulse, maxImpulse);
+				// if we clamped, then override the step impulse with the difference
+				stepImpulse = this.impulse - currentAccumulatedImpulse;
+			} else {
+				// otherwise accumulate normally
+				this.impulse += stepImpulse;
+			}
 			
 			// apply the impulse
-			Vector2 J = this.n.product(j);
+			Vector2 J = this.n.product(stepImpulse);
 			this.body1.getLinearVelocity().add(J.product(invM1));
 			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(J));
 			this.body2.getLinearVelocity().subtract(J.product(invM2));
@@ -426,8 +496,9 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		double l = this.n.normalize();
 		double C = 0.0;
 		
-		if (this.upperLimitEnabled && this.lowerLimitEnabled && this.upperLimit == this.lowerLimit) {
+		if (this.upperLimitEnabled && this.lowerLimitEnabled && Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * linearTolerance) {
 			// upper and lower limits enabled, but the same value
+			// treat it like a fixed length joint
 			C = l - this.lowerLimit;
 		} else if (this.lowerLimitEnabled && l < this.lowerLimit) {
 			// lower limit only
@@ -435,7 +506,7 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		} else if (this.upperLimitEnabled && l > this.upperLimit) {
 			// upper limit only
 			C = l - this.upperLimit;
-		} else if (!this.upperLimitEnabled && !this.lowerLimitEnabled && this.stiffness <= 0.0) {
+		} else if (!this.upperLimitEnabled && !this.lowerLimitEnabled && !this.springEnabled) {
 			// fixed length joint (no spring and no limits)
 			C = l - this.restDistance;
 		} else {
@@ -457,15 +528,44 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		return Math.abs(C) < linearTolerance;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor1()
+	/**
+	 * Computes the spring coefficients from the current state of the joint.
+	 * <p>
+	 * This method is intended to set the springStiffness OR springFrequency and
+	 * damping for use during constraint solving.
+	 */
+	protected void updateSpringCoefficients() {
+		double lm = this.getReducedMass();
+		double nf = 0.0;
+		
+		if (this.springMode == SPRING_MODE_FREQUENCY) {
+			// compute the stiffness based on the frequency
+			nf = getNaturalFrequency(this.springFrequency);
+			this.springStiffness = getSpringStiffness(lm, nf);
+		} else if (this.springMode == SPRING_MODE_STIFFNESS) {
+			// compute the frequency based on the stiffness
+			nf = getNaturalFrequency(this.springStiffness, lm);
+			this.springFrequency = getFrequency(nf);
+		}
+		
+		if (this.springDamperEnabled) {
+			this.damping = getSpringDampingCoefficient(lm, nf, this.springDampingRatio);
+		} else {
+			this.damping = 0.0;
+		}
+	}
+	
+	/**
+	 * Returns the world-space anchor point on the first body.
+	 * @return {@link Vector2}
 	 */
 	public Vector2 getAnchor1() {
 		return body1.getWorldPoint(this.localAnchor1);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor2()
+	/**
+	 * Returns the world-space anchor point on the second body.
+	 * @return {@link Vector2}
 	 */
 	public Vector2 getAnchor2() {
 		return body2.getWorldPoint(this.localAnchor2);
@@ -476,7 +576,7 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	 */
 	@Override
 	public Vector2 getReactionForce(double invdt) {
-		return this.n.product((this.impulse + this.lowerImpulse - this.upperImpulse) * invdt);
+		return this.n.product((this.impulse + this.lowerLimitImpulse - this.upperLimitImpulse) * invdt);
 	}
 	
 	/**
@@ -499,46 +599,6 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	}
 	
 	/**
-	 * Returns true if this distance joint is a spring distance joint.
-	 * @return boolean
-	 * @since 4.0.0
-	 */
-	public boolean isSpringEnabled() {
-		return this.frequency > 0.0;
-	}
-	
-	/**
-	 * Returns true if this distance joint is a spring distance joint
-	 * with damping.
-	 * @return boolean
-	 * @since 4.0.0
-	 */
-	public boolean isSpringDamperEnabled() {
-		return this.frequency > 0.0 && this.dampingRatio > 0.0;
-	}
-	
-	/**
-	 * Returns the rest distance between the two constrained {@link PhysicsBody}s in meters.
-	 * @return double
-	 * @deprecated Deprecated in 4.2.0. Use {@link #getRestDistance()} instead.
-	 */
-	@Deprecated
-	public double getDistance() {
-		return this.getRestDistance();
-	}
-	
-	/**
-	 * Sets the rest distance between the two constrained {@link PhysicsBody}s in meters.
-	 * @param distance the distance in meters
-	 * @throws IllegalArgumentException if distance is less than zero
-	 * @deprecated Deprecated in 4.2.0. Use {@link #setRestDistance(double)} instead.
-	 */
-	@Deprecated
-	public void setDistance(double distance) {
-		this.setRestDistance(distance);
-	}
-
-	/**
 	 * Returns the rest distance between the two constrained {@link PhysicsBody}s in meters.
 	 * @return double
 	 * @since 4.2.0
@@ -555,13 +615,15 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	 */
 	public void setRestDistance(double distance) {
 		// make sure the distance is greater than zero
-		if (distance < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.distance.invalidDistance"));
+		if (distance < 0.0) 
+			throw new ValueOutOfRangeException("distance", distance, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		if (this.restDistance != distance) {
 			// wake up both bodies
 			this.body1.setAtRest(false);
 			this.body2.setAtRest(false);
 			// set the new target distance
-			this.restDistance = this.distance = distance;
+			this.restDistance = distance;
 		}
 	}
 
@@ -578,70 +640,238 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		return p1.distance(p2);
 	}
 
-	/**
-	 * Returns the damping ratio.
-	 * @return double
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringDampingRatio()
 	 */
-	public double getDampingRatio() {
-		return this.dampingRatio;
+	@Override
+	public double getSpringDampingRatio() {
+		return this.springDampingRatio;
 	}
 	
-	/**
-	 * Sets the damping ratio.
-	 * <p>
-	 * Larger values reduce the oscillation of the spring.
-	 * @param dampingRatio the damping ratio; in the range [0, 1]
-	 * @throws IllegalArgumentException if damping ration is less than zero or greater than 1
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#setSpringDampingRatio(double)
 	 */
-	public void setDampingRatio(double dampingRatio) {
+	@Override
+	public void setSpringDampingRatio(double dampingRatio) {
 		// make sure its within range
-		if (dampingRatio < 0 || dampingRatio > 1) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidDampingRatio"));
-		// set the new value
-		this.dampingRatio = dampingRatio;
+		if (dampingRatio < 0.0) 
+			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
+		if (dampingRatio > 1.0) 
+			throw new ValueOutOfRangeException("dampingRatio", dampingRatio, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, 1.0);
+		
+		// did it change?
+		if (this.springDampingRatio != dampingRatio) {
+			// set the damping ratio
+			this.springDampingRatio = dampingRatio;
+			// only wake if the damper would be applied
+			if (this.springEnabled && this.springDamperEnabled) {
+				// wake the bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
 	}
 	
-	/**
-	 * Returns the spring frequency.
-	 * @return double
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringFrequency()
 	 */
-	public double getFrequency() {
-		return this.frequency;
+	@Override
+	public double getSpringFrequency() {
+		return this.springFrequency;
 	}
 	
-	/**
-	 * Sets the spring frequency.
-	 * <p>
-	 * Larger values increase the stiffness of the spring.
-	 * @param frequency the spring frequency in hz; must be greater than or equal to zero
-	 * @throws IllegalArgumentException if frequency is less than zero
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringStiffness()
 	 */
-	public void setFrequency(double frequency) {
+	@Override
+	public double getSpringStiffness() {
+		return this.springStiffness;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#setSpringFrequency(double)
+	 */
+	@Override
+	public void setSpringFrequency(double frequency) {
 		// check for valid value
-		if (frequency < 0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidFrequency"));
-		// set the new value
-		this.frequency = frequency;
+		if (frequency < 0.0) 
+			throw new ValueOutOfRangeException("frequency", frequency, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
+		// set the spring mode
+		this.springMode = SPRING_MODE_FREQUENCY;
+		// check for change
+		if (this.springFrequency != frequency) {
+			// make the change
+			this.springFrequency = frequency;
+			// check if the spring is enabled
+			if (this.springEnabled) {
+				// wake the bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#setSpringStiffness(double)
+	 */
+	@Override
+	public void setSpringStiffness(double stiffness) {
+		// check for valid value
+		if (stiffness < 0.0)
+			throw new ValueOutOfRangeException("stiffness", stiffness, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
+		// set the spring mode
+		this.springMode = SPRING_MODE_STIFFNESS;
+		// only update if necessary
+		if (this.springStiffness != stiffness) {
+			this.springStiffness = stiffness;
+			// wake up the bodies
+			if (this.springEnabled) {
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
 	}
 	
-	/**
-	 * Returns the upper limit in meters.
-	 * @return double
-	 * @since 4.2.0
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringMaximumForce()
+	 */
+	@Override
+	public double getMaximumSpringForce() {
+		return this.springMaximumForce;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#setSpringMaximumForce(double)
+	 */
+	@Override
+	public void setMaximumSpringForce(double maximum) {
+		// check for valid value
+		if (maximum < 0.0) 
+			throw new ValueOutOfRangeException("maximum", maximum, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
+		// check if changed
+		if (this.springMaximumForce != maximum) {
+			this.springMaximumForce = maximum;
+			// wake up the bodies
+			if (this.springEnabled && this.springMaximumForceEnabled) {
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#isSpringMaximumForceEnabled()
+	 */
+	@Override
+	public boolean isMaximumSpringForceEnabled() {
+		return this.springMaximumForceEnabled;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#setSpringMaximumForceEnabled(boolean)
+	 */
+	@Override
+	public void setMaximumSpringForceEnabled(boolean enabled) {
+		if (this.springMaximumForceEnabled != enabled) {
+			this.springMaximumForceEnabled = enabled;
+			
+			if (this.springEnabled) {
+				// wake the bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#isSpringEnabled()
+	 */
+	public boolean isSpringEnabled() {
+		return this.springEnabled;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#setSpringEnabled(boolean)
+	 */
+	@Override
+	public void setSpringEnabled(boolean enabled) {
+		if (this.springEnabled != enabled) {
+			// update the flag
+			this.springEnabled = enabled;
+			// wake the bodies
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#isSpringDamperEnabled()
+	 */
+	public boolean isSpringDamperEnabled() {
+		return this.springDamperEnabled;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#setSpringDamperEnabled(boolean)
+	 */
+	@Override
+	public void setSpringDamperEnabled(boolean enabled) {
+		if (this.springDamperEnabled != enabled) {
+			// update the flag
+			this.springDamperEnabled = enabled;
+			
+			if (this.springEnabled) {
+				// wake the bodies
+				this.body1.setAtRest(false);
+				this.body2.setAtRest(false);
+			}
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringForce(double)
+	 */
+	@Override
+	public double getSpringForce(double invdt) {
+		if (this.springEnabled) {
+			return this.impulse * invdt;
+		}
+		return 0.0;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearSpringJoint#getSpringMode()
+	 */
+	@Override
+	public int getSpringMode() {
+		return this.springMode;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#getUpperLimit()
 	 */
 	public double getUpperLimit() {
 		return this.upperLimit;
 	}
 	
 	/**
-	 * Sets the upper limit in meters.
-	 * @param upperLimit the upper limit in meters; must be greater than or equal to zero
-	 * @throws IllegalArgumentException if upperLimit is less than zero or less than the current lower limit
-	 * @since 4.2.0
+	 * {@inheritDoc}
+	 * @param upperLimit the upper limit in meters; must be zero or greater
+	 * @throws IllegalArgumentException if upperLimit is less than zero or upperLimit is less than the current lower limit
 	 */
 	public void setUpperLimit(double upperLimit) {
 		// make sure the distance is greater than zero
-		if (upperLimit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.lessThanZeroUpperLimit"));
+		if (upperLimit < 0.0) 
+			throw new ValueOutOfRangeException("upperLimit", upperLimit, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		// make sure the minimum is less than or equal to the maximum
-		if (upperLimit < this.lowerLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidUpperLimit"));
+		if (upperLimit < this.lowerLimit) 
+			throw new ValueOutOfRangeException("upperLimit", upperLimit, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, "lowerLimit", this.lowerLimit);
 		
 		if (this.upperLimit != upperLimit) {
 			// make sure its changed and enabled before waking the bodies
@@ -653,14 +883,12 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			// set the new target distance
 			this.upperLimit = upperLimit;
 			// clear the accumulated impulse
-			this.upperImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
 		}
 	}
 	
-	/**
-	 * Sets whether the upper limit is enabled.
-	 * @param flag true if the upper limit should be enabled
-	 * @since 4.2.0
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#setUpperLimitEnabled(boolean)
 	 */
 	public void setUpperLimitEnabled(boolean flag) {
 		if (this.upperLimitEnabled != flag) {
@@ -670,39 +898,37 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			// set the flag
 			this.upperLimitEnabled = flag;
 			// clear the accumulated impulse
-			this.upperImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
 		}
 	}
 	
-	/**
-	 * Returns true if the upper limit is enabled.
-	 * @return boolean true if the upper limit is enabled
-	 * @since 4.2.0
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#isUpperLimitEnabled()
 	 */
 	public boolean isUpperLimitEnabled() {
 		return this.upperLimitEnabled;
 	}
 	
-	/**
-	 * Returns the lower limit in meters.
-	 * @return double
-	 * @since 4.2.0
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#getLowerLimit()
 	 */
 	public double getLowerLimit() {
 		return this.lowerLimit;
 	}
 	
 	/**
-	 * Sets the lower limit in meters.
-	 * @param lowerLimit the lower limit in meters; must be greater than or equal to zero
-	 * @throws IllegalArgumentException if lowerLimit is less than zero or greater than the current upper limit
-	 * @since 4.2.0
+	 * {@inheritDoc}
+	 * @param lowerLimit the lower limit in meters; must be zero or greater
+	 * @throws IllegalArgumentException if lowerLimit is less than zero or lowerLimit is greater than the current upper limit
 	 */
 	public void setLowerLimit(double lowerLimit) {
 		// make sure the distance is greater than zero
-		if (lowerLimit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.lessThanZeroLowerLimit"));
+		if (lowerLimit < 0.0)
+			throw new ValueOutOfRangeException("lowerLimit", lowerLimit, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		// make sure the minimum is less than or equal to the maximum
-		if (lowerLimit > this.upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLowerLimit"));
+		if (lowerLimit > this.upperLimit) 
+			throw new ValueOutOfRangeException("lowerLimit", lowerLimit, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "upperLimit", this.upperLimit);
 		
 		if (this.lowerLimit != lowerLimit) {
 			// make sure its changed and enabled before waking the bodies
@@ -714,14 +940,12 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			// set the new target distance
 			this.lowerLimit = lowerLimit;
 			// clear the accumulated impulse
-			this.lowerImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
 		}
 	}
 
-	/**
-	 * Sets whether the lower limit is enabled.
-	 * @param flag true if the lower limit should be enabled
-	 * @since 4.2.0
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#setLowerLimitEnabled(boolean)
 	 */
 	public void setLowerLimitEnabled(boolean flag) {
 		if (this.lowerLimitEnabled != flag) {
@@ -731,33 +955,35 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			// set the flag
 			this.lowerLimitEnabled = flag;
 			// clear the accumulated impulse
-			this.lowerImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
 		}
 	}
 
-	/**
-	 * Returns true if the lower limit is enabled.
-	 * @return boolean true if the lower limit is enabled
-	 * @since 4.2.0
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#isLowerLimitEnabled()
 	 */
 	public boolean isLowerLimitEnabled() {
 		return this.lowerLimitEnabled;
 	}
 	
 	/**
-	 * Sets both the lower and upper limits.
-	 * @param lowerLimit the lower limit in meters; must be greater than or equal to zero
-	 * @param upperLimit the upper limit in meters; must be greater than or equal to zero
-	 * @throws IllegalArgumentException if lowerLimit is less than zero, upperLimit is less than zero, or lowerLimit is greater than upperLimit
-	 * @since 4.2.0
+	 * {@inheritDoc}
+	 * @param lowerLimit the lower limit in meters; must be zero or greater
+	 * @param upperLimit the upper limit in meters; must be zero or greater
+	 * @throws IllegalArgumentException if lowerLimit is less than zero, the upperLimit is less than zero, or lowerLimit is greater than the upperLimit
 	 */
 	public void setLimits(double lowerLimit, double upperLimit) {
 		// make sure the minimum distance is greater than zero
-		if (lowerLimit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.lessThanZeroLowerLimit"));
+		if (lowerLimit < 0.0) 
+			throw new ValueOutOfRangeException("lowerLimit", lowerLimit, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		// make sure the maximum distance is greater than zero
-		if (upperLimit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.lessThanZeroUpperLimit"));
+		if (upperLimit < 0.0) 
+			throw new ValueOutOfRangeException("upperLimit", upperLimit, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		// make sure the min < max
-		if (lowerLimit > upperLimit) throw new IllegalArgumentException(Messages.getString("dynamics.joint.invalidLimits"));
+		if (lowerLimit > upperLimit) 
+			throw new ValueOutOfRangeException("lowerLimit", lowerLimit, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "upperLimit", upperLimit);
 		
 		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
 			// make sure one of the limits is enabled and has changed before waking the bodies
@@ -770,17 +996,16 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			this.upperLimit = upperLimit;
 			this.lowerLimit = lowerLimit;
 			// clear the accumulated impulse
-			this.upperImpulse = 0.0;
-			this.lowerImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
 		}
 	}
 
 	/**
-	 * Sets both the lower and upper limits and enables both.
-	 * @param lowerLimit the lower limit in meters; must be greater than or equal to zero
-	 * @param upperLimit the upper limit in meters; must be greater than or equal to zero
-	 * @throws IllegalArgumentException if lowerLimit is less than zero, upperLimit is less than zero, or lowerLimit is greater than upperLimit
-	 * @since 4.2.0
+	 * {@inheritDoc}
+	 * @param lowerLimit the lower limit in meters; must be zero or greater
+	 * @param upperLimit the upper limit in meters; must be zero or greater
+	 * @throws IllegalArgumentException if lowerLimit is less than zero, the upperLimit is less than zero, or lowerLimit is greater than the upperLimit
 	 */
 	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
 		// enable the limits
@@ -789,10 +1014,8 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		this.setLimits(lowerLimit, upperLimit);
 	}
 	
-	/**
-	 * Enables or disables both the lower and upper limits.
-	 * @param flag true if both limits should be enabled
-	 * @since 4.2.0
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.joint.LinearLimitsJoint#setLimitsEnabled(boolean)
 	 */
 	public void setLimitsEnabled(boolean flag) {
 		if (this.upperLimitEnabled != flag || this.lowerLimitEnabled != flag) {
@@ -802,22 +1025,20 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			this.body1.setAtRest(false);
 			this.body2.setAtRest(false);
 			// clear the accumulated impulse
-			this.upperImpulse = 0.0;
-			this.lowerImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
 		}
 	}
 	
 	/**
-	 * Sets both the lower and upper limits to the given limit.
-	 * <p>
-	 * This makes the joint a fixed length joint.
-	 * @param limit the desired limit
+	 * {@inheritDoc}
+	 * @param limit the lower and upper limit in meters; must be zero or greater
 	 * @throws IllegalArgumentException if limit is less than zero
-	 * @since 4.2.0
 	 */
 	public void setLimits(double limit) {
 		// make sure the distance is greater than zero
-		if (limit < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.rope.invalidLimit"));
+		if (limit < 0.0) 
+			throw new ValueOutOfRangeException("limit", limit, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		if (this.lowerLimit != limit || this.upperLimit != limit) {
 			// make sure one of the limits is enabled and has changed before waking the bodies
@@ -830,19 +1051,15 @@ public class DistanceJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			this.upperLimit = limit;
 			this.lowerLimit = limit;
 			// clear the accumulated impulse
-			this.upperImpulse = 0.0;
-			this.lowerImpulse = 0.0;
+			this.upperLimitImpulse = 0.0;
+			this.lowerLimitImpulse = 0.0;
 		}
 	}
 	
 	/**
-	 * Sets both the lower and upper limits to the given limit and
-	 * enables both.
-	 * <p>
-	 * This makes the joint a fixed length joint.
-	 * @param limit the desired limit
+	 * {@inheritDoc}
+	 * @param limit the lower and upper limit in meters; must be zero or greater
 	 * @throws IllegalArgumentException if limit is less than zero
-	 * @since 4.2.0
 	 */
 	public void setLimitsEnabled(double limit) {
 		// enable the limits

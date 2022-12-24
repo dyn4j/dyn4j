@@ -25,7 +25,7 @@
 package org.dyn4j.geometry;
 
 import org.dyn4j.DataContainer;
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ValueOutOfRangeException;
 
 /**
  * Implementation of an Half-Ellipse {@link Convex} {@link Shape}.
@@ -40,7 +40,7 @@ import org.dyn4j.resources.Messages;
  * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
  * algorithm for this shape only and use SAT on others.
  * @author William Bittle
- * @version 4.2.1
+ * @version 5.0.0
  * @since 3.1.7
  */
 public class HalfEllipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -132,8 +132,11 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	 */
 	private static final boolean validate(double width, double height) {
 		// validate the width and height
-		if (width <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.halfEllipse.invalidWidth"));
-		if (height <= 0.0) throw new IllegalArgumentException(Messages.getString("geometry.halfEllipse.invalidHeight"));
+		if (width <= 0) 
+			throw new ValueOutOfRangeException("width", width, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+			
+		if (height <= 0)
+			throw new ValueOutOfRangeException("height", height, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
 		
 		return true;
 	}
@@ -160,7 +163,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	@Override
 	public Vector2[] getAxes(Vector2[] foci, Transform transform) {
 		// this shape is not supported by SAT
-		throw new UnsupportedOperationException(Messages.getString("geometry.halfEllipse.satNotSupported"));
+		throw new UnsupportedOperationException("SAT does not support the HalfEllipse shape.");
 	}
 
 	/**
@@ -172,7 +175,7 @@ public class HalfEllipse extends AbstractShape implements Convex, Shape, Transfo
 	@Override
 	public Vector2[] getFoci(Transform transform) {
 		// this shape is not supported by SAT
-		throw new UnsupportedOperationException(Messages.getString("geometry.halfEllipse.satNotSupported"));
+		throw new UnsupportedOperationException("SAT does not support the HalfEllipse shape.");
 	}
 	
 	/* (non-Javadoc)

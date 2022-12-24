@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,9 +26,11 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
+import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
@@ -36,7 +38,6 @@ import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation a motor joint.
@@ -45,13 +46,13 @@ import org.dyn4j.resources.Messages;
  * bodies together.
  * <p>
  * The motor is limited by a maximum force and torque.  By default these are
- * zero and will need to be set before the joint will function properly.
- * Larger values will allow the motor to apply more force and torque to the
- * bodies.  This can have two effects.  The first is that the bodies will
- * move to their correct positions faster.  The second is that the bodies
+ * 1000 but must be set greater than zero before the joint will function 
+ * properly. Larger values will allow the motor to apply more force and torque
+ * to the bodies.  This can have two effects.  The first is that the bodies 
+ * will move to their correct positions faster.  The second is that the bodies
  * will be moving faster and may overshoot more causing more oscillation.
  * Use the {@link #setCorrectionFactor(double)} method to help reduce the
- * oscillation. 
+ * oscillation.
  * <p>
  * The linear and angular targets are the target distance and angle that the 
  * bodies should achieve relative to each other's position and rotation.  By 
@@ -69,12 +70,12 @@ import org.dyn4j.resources.Messages;
  * character body will move and rotate smoothly, participating in any collision
  * or with other joints to match the infinite mass body.
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.0
  * @since 3.1.0
- * @see <a href="http://www.dyn4j.org/documentation/joints/#Motor_Joint" target="_blank">Documentation</a>
+ * @see <a href="https://www.dyn4j.org/pages/joints#Motor_Joint" target="_blank">Documentation</a>
  * @param <T> the {@link PhysicsBody} type
  */
-public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
+public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T> implements PairedBodyJoint<T>, Joint<T>, Shiftable, DataContainer, Ownable {
 	/** The linear target distance from body1's world space center */
 	protected final Vector2 linearTarget;
 	
@@ -91,6 +92,12 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	protected double maximumTorque;
 	
 	// current state
+	
+	/** The world vector from body1's local center to the linear target */
+	private Vector2 r1;
+	
+	/** The world vector from body2's local center to the origin */
+	private Vector2 r2;
 	
 	/** The pivot mass; K = J * Minv * Jtrans */
 	private final Matrix22 K;
@@ -121,16 +128,21 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	 */
 	public MotorJoint(T body1, T body2) {
 		// default no collision allowed
-		super(body1, body2, false);
-		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
+		super(body1, body2);
 		// default the linear target to body2's position in body1's frame
 		this.linearTarget = body1.getLocalPoint(body2.getWorldCenter());
 		// get the angular target for the joint
 		this.angularTarget = body2.getTransform().getRotationAngle() - body1.getTransform().getRotationAngle();
 		// initialize
 		this.correctionFactor = 0.3;
+		this.maximumForce = 1000.0;
+		this.maximumTorque = 1000.0;
+		
 		this.K = new Matrix22();
+		this.angularMass = 0.0;
+		this.linearError = new Vector2();
+		this.angularError = 0.0;
+		
 		this.linearImpulse = new Vector2();
 		this.angularImpulse = 0.0;
 	}
@@ -167,14 +179,14 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		Vector2 r1 = t1.getTransformedR(this.linearTarget.difference(this.body1.getLocalCenter()));
-		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().getNegative());
+		this.r1 = t1.getTransformedR(this.linearTarget.difference(this.body1.getLocalCenter()));
+		this.r2 = t2.getTransformedR(this.body2.getLocalCenter().getNegative());
 		
 		// compute the K inverse matrix
-		this.K.m00 = invM1 + invM2 + r1.y * r1.y * invI1 + r2.y * r2.y * invI2;
-		this.K.m01 = -invI1 * r1.x * r1.y - invI2 * r2.x * r2.y; 
+		this.K.m00 = invM1 + invM2 + this.r1.y * this.r1.y * invI1 + this.r2.y * this.r2.y * invI2;
+		this.K.m01 = -invI1 * this.r1.x * this.r1.y - invI2 * this.r2.x * this.r2.y; 
 		this.K.m10 = this.K.m01;
-		this.K.m11 = invM1 + invM2 + r1.x * r1.x * invI1 + r2.x * r2.x * invI2;
+		this.K.m11 = invM1 + invM2 + this.r1.x * this.r1.x * invI1 + this.r2.x * this.r2.x * invI2;
 		
 		this.K.invert();
 		
@@ -182,11 +194,13 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		this.angularMass = invI1 + invI2;
 		if (this.angularMass > Epsilon.E) {
 			this.angularMass = 1.0 / this.angularMass;
+		} else {
+			this.angularMass = 0.0;
 		}
 		
 		// compute the error in the linear and angular targets
-		Vector2 d1 = r1.sum(this.body1.getWorldCenter());
-		Vector2 d2 = r2.sum(this.body2.getWorldCenter());
+		Vector2 d1 = this.r1.sum(this.body1.getWorldCenter());
+		Vector2 d2 = this.r2.sum(this.body2.getWorldCenter());
 		this.linearError = d2.subtract(d1);
 		this.angularError = this.getAngularError();
 		
@@ -197,9 +211,9 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 			
 			// warm start
 			this.body1.getLinearVelocity().subtract(this.linearImpulse.product(invM1));
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * (r1.cross(this.linearImpulse) + this.angularImpulse));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * (this.r1.cross(this.linearImpulse) + this.angularImpulse));
 			this.body2.getLinearVelocity().add(this.linearImpulse.product(invM2));
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * (r2.cross(this.linearImpulse) + this.angularImpulse));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * (this.r2.cross(this.linearImpulse) + this.angularImpulse));
 		} else {
 			this.linearImpulse.zero();
 			this.angularImpulse = 0.0;
@@ -213,10 +227,7 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	public void solveVelocityConstraints(TimeStep step, Settings settings) {
 		double dt = step.getDeltaTime();
 		double invdt = step.getInverseDeltaTime();
-		
-		Transform t1 = this.body1.getTransform();
-		Transform t2 = this.body2.getTransform();
-		
+
 		Mass m1 = this.body1.getMass();
 		Mass m2 = this.body2.getMass();
 		
@@ -230,46 +241,44 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 			// get the relative velocity - the target motor speed
 			double C = this.body2.getAngularVelocity() - this.body1.getAngularVelocity() + invdt * this.correctionFactor * this.angularError;
 			// get the impulse required to obtain the speed
-			double impulse = this.angularMass * -C;
+			double stepImpulse = this.angularMass * -C;
+			
 			// clamp the impulse between the maximum torque
-			double oldImpulse = this.angularImpulse;
+			double currentAccumulatedImpulse = this.angularImpulse;
 			double maxImpulse = this.maximumTorque * dt;
-			this.angularImpulse = Interval.clamp(this.angularImpulse + impulse, -maxImpulse, maxImpulse);
+			this.angularImpulse = Interval.clamp(this.angularImpulse + stepImpulse, -maxImpulse, maxImpulse);
 			// get the impulse we need to apply to the bodies
-			impulse = this.angularImpulse - oldImpulse;
+			stepImpulse = this.angularImpulse - currentAccumulatedImpulse;
 			
 			// apply the impulse
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * impulse);
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * impulse);
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * stepImpulse);
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * stepImpulse);
 		}
 		
 		// solve the point-to-point constraint
-		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().getNegative());
-		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().getNegative());
-		
-		Vector2 v1 = this.body1.getLinearVelocity().sum(r1.cross(this.body1.getAngularVelocity()));
-		Vector2 v2 = this.body2.getLinearVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
+		Vector2 v1 = this.body1.getLinearVelocity().sum(this.r1.cross(this.body1.getAngularVelocity()));
+		Vector2 v2 = this.body2.getLinearVelocity().sum(this.r2.cross(this.body2.getAngularVelocity()));
 		Vector2 pivotV = v2.subtract(v1);
 		
 		pivotV.add(this.linearError.product(this.correctionFactor * invdt));
 		
-		Vector2 impulse = this.K.multiply(pivotV);
-		impulse.negate();
+		Vector2 stepImpulse = this.K.multiply(pivotV);
+		stepImpulse.negate();
 		
 		// clamp by the maxforce
-		Vector2 oldImpulse = this.linearImpulse.copy();
-		this.linearImpulse.add(impulse);
+		Vector2 currentAccumulatedImpulse = this.linearImpulse.copy();
+		this.linearImpulse.add(stepImpulse);
 		double maxImpulse = this.maximumForce * dt;
 		if (this.linearImpulse.getMagnitudeSquared() > maxImpulse * maxImpulse) {
 			this.linearImpulse.normalize();
 			this.linearImpulse.multiply(maxImpulse);
 		}
-		impulse = this.linearImpulse.difference(oldImpulse);
+		stepImpulse = this.linearImpulse.difference(currentAccumulatedImpulse);
 		
-		this.body1.getLinearVelocity().subtract(impulse.product(invM1));
-		this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * r1.cross(impulse));
-		this.body2.getLinearVelocity().add(impulse.product(invM2));
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * r2.cross(impulse));
+		this.body1.getLinearVelocity().subtract(stepImpulse.product(invM1));
+		this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * this.r1.cross(stepImpulse));
+		this.body2.getLinearVelocity().add(stepImpulse.product(invM2));
+		this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * this.r2.cross(stepImpulse));
 	}
 	
 	/* (non-Javadoc)
@@ -291,28 +300,6 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 		if (rr < -Math.PI) rr += Geometry.TWO_PI;
 		if (rr > Math.PI) rr -= Geometry.TWO_PI;
 		return rr;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Not applicable to this joint.
-	 * Returns the first body's world center.
-	 */
-	@Override
-	public Vector2 getAnchor1() {
-		return this.body1.getWorldCenter();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Not applicable to this joint.
-	 * Returns the second body's world center.
-	 */
-	@Override
-	public Vector2 getAnchor2() {
-		return this.body2.getWorldCenter();
 	}
 	
 	/* (non-Javadoc)
@@ -405,7 +392,12 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	 * @param correctionFactor the correction factor in the range [0, 1]
 	 */
 	public void setCorrectionFactor(double correctionFactor) {
-		if (correctionFactor < 0.0 || correctionFactor > 1.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.motor.invalidCorrectionFactor"));
+		if (correctionFactor < 0.0) 
+			throw new ValueOutOfRangeException("correctionFactor", correctionFactor, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
+		if (correctionFactor > 1.0) 
+			throw new ValueOutOfRangeException("correctionFactor", correctionFactor, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, 1.0);
+		
 		this.correctionFactor = correctionFactor;
 	}
 	
@@ -424,7 +416,9 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	 */
 	public void setMaximumTorque(double maximumTorque) {
 		// make sure its greater than or equal to zero
-		if (maximumTorque < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.friction.invalidMaximumTorque"));
+		if (maximumTorque < 0.0) 
+			throw new ValueOutOfRangeException("maximumTorque", maximumTorque, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		// set the max
 		this.maximumTorque = maximumTorque;
 	}
@@ -444,7 +438,9 @@ public class MotorJoint<T extends PhysicsBody> extends Joint<T> implements Shift
 	 */
 	public void setMaximumForce(double maximumForce) {
 		// make sure its greater than or equal to zero
-		if (maximumForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.friction.invalidMaximumForce"));
+		if (maximumForce < 0.0) 
+			throw new ValueOutOfRangeException("maximumForce", maximumForce, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		// set the max
 		this.maximumForce = maximumForce;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,14 +26,14 @@ package org.dyn4j.geometry;
 
 import org.dyn4j.Copyable;
 import org.dyn4j.Epsilon;
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ArgumentNullException;
 
 /**
  * Represents a 2x2 Matrix.
  * <p>
  * Used to solve 2x2 systems of equations.
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.0
  * @since 1.0.0
  */
 public class Matrix22 implements Copyable<Matrix22> {
@@ -75,11 +75,15 @@ public class Matrix22 implements Copyable<Matrix22> {
 	 * {@link #Matrix22(double, double, double, double)} constructor.
 	 * @param values the values array
 	 * @throws NullPointerException if values is null
-	 * @throws IllegalArgumentException if values is not of length 4
+	 * @throws IllegalArgumentException if the length of values is not 4
 	 */
 	public Matrix22(double[] values) {
-		if (values == null) throw new NullPointerException(Messages.getString("geometry.matrix.nullArray"));
-		if (values.length != 4) throw new IndexOutOfBoundsException(Messages.getString("geometry.matrix.invalidLength4"));
+		if (values == null) 
+			throw new ArgumentNullException("values");
+		
+		if (values.length != 4) 
+			throw new IndexOutOfBoundsException("The values array must have exactly 4 elements");
+		
 		this.m00 = values[0];
 		this.m01 = values[1];
 		this.m10 = values[2];
@@ -383,6 +387,8 @@ public class Matrix22 implements Copyable<Matrix22> {
 		// check for zero determinant
 		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
+		} else {
+			det = 0.0;
 		}
 		double a = this.m00;
 		double b = this.m01;
@@ -407,6 +413,8 @@ public class Matrix22 implements Copyable<Matrix22> {
 		// check for zero determinant
 		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
+		} else {
+			det = 0.0;
 		}
 		dest.m00 =  det * this.m11;
 		dest.m01 = -det * this.m01;
@@ -437,6 +445,8 @@ public class Matrix22 implements Copyable<Matrix22> {
 		// check for zero determinant
 		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
+		} else {
+			det = 0.0;
 		}
 		Vector2 r = new Vector2();
 		r.x = det * (this.m11 * b.x - this.m01 * b.y);

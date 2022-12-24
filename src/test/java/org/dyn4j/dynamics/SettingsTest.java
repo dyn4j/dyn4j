@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.junit.Test;
 /**
  * Tests the methods of the {@link Settings} class.
  * @author William Bittle
- * @version 4.1.0
+ * @version 5.0.0
  * @since 1.0.0
  */
 public class SettingsTest {
@@ -257,26 +257,6 @@ public class SettingsTest {
 		
 		settings.setWarmStartingEnabled(true);
 		TestCase.assertTrue(settings.isWarmStartingEnabled());
-	}
-	
-	/**
-	 * Tests the set restitution velocity method.
-	 */
-	@Test
-	@Deprecated
-	public void setValidRestitutionVelocity() {
-		settings.setRestitutionVelocity(3.0);
-		TestCase.assertEquals(3.0, settings.getRestitutionVelocity());
-		TestCase.assertEquals(9.0, settings.getRestitutionVelocitySquared());
-	}
-	
-	/**
-	 * Tests the set restitution velocity method passing a negative value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	@Deprecated
-	public void setNegativeRestitutionVelocity() {
-		settings.setRestitutionVelocity(-2.0);
 	}
 	
 	/**

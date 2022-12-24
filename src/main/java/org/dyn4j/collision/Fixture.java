@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,9 +25,9 @@
 package org.dyn4j.collision;
 
 import org.dyn4j.DataContainer;
+import org.dyn4j.exception.ArgumentNullException;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
-import org.dyn4j.resources.Messages;
 
 /**
  * Represents a geometric piece of a {@link CollisionBody}.
@@ -54,7 +54,7 @@ import org.dyn4j.resources.Messages;
  * A {@link Fixture} can be flagged as a sensor fixture to enable standard collision detection, but disable
  * collision resolution (response).
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.0
  * @since 2.0.0
  */
 public class Fixture implements DataContainer {
@@ -76,7 +76,9 @@ public class Fixture implements DataContainer {
 	 * @throws NullPointerException if shape is null
 	 */
 	public Fixture(Convex shape) {
-		if (shape == null) throw new NullPointerException(Messages.getString("collision.fixture.nullShape"));
+		if (shape == null) 
+			throw new ArgumentNullException("shape");
+		
 		this.shape = shape;
 		this.filter = Filter.DEFAULT_FILTER;
 		this.sensor = false;
@@ -119,7 +121,9 @@ public class Fixture implements DataContainer {
 	 */
 	public void setFilter(Filter filter) {
 		// check if the given filter is null
-		if (filter == null) throw new NullPointerException(Messages.getString("collision.fixture.nullFilter"));
+		if (filter == null) 
+			throw new ArgumentNullException("filter");
+		
 		// use the given filter
 		this.filter = filter;
 	}

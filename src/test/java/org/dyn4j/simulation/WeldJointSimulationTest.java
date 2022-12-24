@@ -119,7 +119,7 @@ public class WeldJointSimulationTest {
 	}
 	
 	/**
-	 * Tests the bodies not exceeding the limits
+	 * Tests the bodies with an angular spring
 	 */
 	@Test
 	public void softConstraint() {
@@ -149,8 +149,10 @@ public class WeldJointSimulationTest {
 		WeldJoint<Body> wj = new WeldJoint<Body>(g, b, p);
 		
 		// NOTE: that I've set the rest distance to more than the limits
-		wj.setDampingRatio(0.3);
-		wj.setFrequency(8.0);
+		wj.setSpringEnabled(true);
+		wj.setSpringDamperEnabled(true);
+		wj.setSpringDampingRatio(0.3);
+		wj.setSpringFrequency(8.0);
 		w.addJoint(wj);
 		
 		TestCase.assertEquals(0.0, b.getAngularVelocity());
@@ -164,15 +166,147 @@ public class WeldJointSimulationTest {
 		
 		TestCase.assertEquals(-0.17027, b.getAngularVelocity(), 1e-5);
 		TestCase.assertEquals(-0.00283, b.getTransform().getRotationAngle(), 1e-5);
+		TestCase.assertEquals(-0.64077, wj.getSpringTorque(invdt), 1e-5);
 		TestCase.assertEquals(-0.64077, wj.getReactionTorque(invdt), 1e-5);
-		TestCase.assertEquals(2.34580, wj.getReactionForce(invdt).getMagnitude(), 1e-5);
+		TestCase.assertEquals( 2.34580, wj.getReactionForce(invdt).getMagnitude(), 1e-5);
 		
 		// after a few more simulations it should stabilize with rotation below the x-axis
 		w.step(20);
 		
 		TestCase.assertEquals(-0.01916, b.getAngularVelocity(), 1e-5);
 		TestCase.assertEquals(-0.01883, b.getTransform().getRotationAngle(), 1e-5);
+		TestCase.assertEquals(-2.50894, wj.getSpringTorque(invdt), 1e-5);
 		TestCase.assertEquals(-2.50894, wj.getReactionTorque(invdt), 1e-5);
-		TestCase.assertEquals(4.98379, wj.getReactionForce(invdt).getMagnitude(), 1e-5);
+		TestCase.assertEquals( 4.98379, wj.getReactionForce(invdt).getMagnitude(), 1e-5);
+		
+		// test the maximum torque setting
+		wj.setMaximumSpringTorque(5);
+		wj.setMaximumSpringTorqueEnabled(true);
+		b.applyForce(new Vector2(0.0, -10.0), new Vector2(0.5, 2.0));
+		w.step(1);
+		
+		TestCase.assertEquals(-0.72029, b.getAngularVelocity(), 1e-5);
+		TestCase.assertEquals(-0.03084, b.getTransform().getRotationAngle(), 1e-5);
+		TestCase.assertEquals(-5.00000, wj.getSpringTorque(invdt), 1e-5);
+		TestCase.assertEquals(-5.00000, wj.getReactionTorque(invdt), 1e-5);
+		TestCase.assertEquals( 4.38931, wj.getReactionForce(invdt).getMagnitude(), 1e-5);
+	}
+
+	/**
+	 * Tests the bodies not exceeding the limits
+	 */
+	@Test
+	public void softConstraintWithLimitsLower() {
+		World<Body> w = new World<Body>();
+		// take gravity out the picture
+		
+		// take friction and damping out of the picture
+		
+		Body g = new Body();
+		BodyFixture gf = g.addFixture(Geometry.createRectangle(10.0, 0.5));
+		gf.setFriction(0.0);
+		g.setMass(MassType.INFINITE);
+		g.setLinearDamping(0.0);
+		g.setAngularDamping(0.0);
+		w.addBody(g);
+		
+		Body b = new Body();
+		BodyFixture bf = b.addFixture(Geometry.createRectangle(1.0, 0.5));
+		bf.setFriction(0.0);
+		b.setMass(MassType.NORMAL);
+		b.translate(0.0, 2.0);
+		b.setLinearDamping(0.0);
+		b.setAngularDamping(0.0);
+		w.addBody(b);
+		
+		Vector2 p = b.getWorldCenter().sum(-0.5, 0.0);
+		WeldJoint<Body> wj = new WeldJoint<Body>(g, b, p);
+		
+		// NOTE: that I've set the rest distance to more than the limits
+		wj.setSpringEnabled(true);
+		wj.setSpringDamperEnabled(true);
+		wj.setSpringDampingRatio(0.3);
+		wj.setSpringFrequency(8.0);
+		
+		double lim = Math.PI * 0.2;
+		wj.setLimitsEnabled(-lim, lim);
+		
+		w.addJoint(wj);
+		
+		TestCase.assertEquals(0.0, b.getAngularVelocity());
+		TestCase.assertEquals(0.0, b.getTransform().getRotationAngle(), 1e-5);
+
+		double invdt = w.getTimeStep().getInverseDeltaTime();
+		
+		// too weak to hold up the object, so it should rest on the limit
+		wj.setMaximumSpringTorque(1);
+		wj.setMaximumSpringTorqueEnabled(true);
+		b.applyForce(new Vector2(0.0, -10.0), new Vector2(0.5, 2.0));
+		w.step(50);
+		
+		TestCase.assertEquals( 0.00000, b.getAngularVelocity(), 1e-5);
+		TestCase.assertEquals(-lim, b.getTransform().getRotationAngle(), 1e-4);
+		TestCase.assertEquals(-1.00000, wj.getSpringTorque(invdt), 1e-5);
+		TestCase.assertEquals(-1.98201, wj.getReactionTorque(invdt), 1e-5);
+		TestCase.assertEquals( 4.89999, wj.getReactionForce(invdt).getMagnitude(), 1e-5);
+	}
+	
+	/**
+	 * Tests the bodies not exceeding the limits
+	 */
+	@Test
+	public void softConstraintWithLimitsUpper() {
+		World<Body> w = new World<Body>();
+		// take gravity out the picture
+		
+		// take friction and damping out of the picture
+		
+		Body g = new Body();
+		BodyFixture gf = g.addFixture(Geometry.createRectangle(10.0, 0.5));
+		gf.setFriction(0.0);
+		g.setMass(MassType.INFINITE);
+		g.setLinearDamping(0.0);
+		g.setAngularDamping(0.0);
+		w.addBody(g);
+		
+		Body b = new Body();
+		BodyFixture bf = b.addFixture(Geometry.createRectangle(1.0, 0.5));
+		bf.setFriction(0.0);
+		b.setMass(MassType.NORMAL);
+		b.translate(0.0, 2.0);
+		b.setLinearDamping(0.0);
+		b.setAngularDamping(0.0);
+		w.addBody(b);
+		
+		Vector2 p = b.getWorldCenter().sum(0.5, 0.0);
+		WeldJoint<Body> wj = new WeldJoint<Body>(g, b, p);
+		
+		// NOTE: that I've set the rest distance to more than the limits
+		wj.setSpringEnabled(true);
+		wj.setSpringDamperEnabled(true);
+		wj.setSpringDampingRatio(0.3);
+		wj.setSpringFrequency(8.0);
+		
+		double lim = Math.PI * 0.2;
+		wj.setLimitsEnabled(-lim, lim);
+		
+		w.addJoint(wj);
+		
+		TestCase.assertEquals(0.0, b.getAngularVelocity());
+		TestCase.assertEquals(0.0, b.getTransform().getRotationAngle(), 1e-5);
+
+		double invdt = w.getTimeStep().getInverseDeltaTime();
+		
+		// too weak to hold up the object, so it should rest on the limit
+		wj.setMaximumSpringTorque(1);
+		wj.setMaximumSpringTorqueEnabled(true);
+		b.applyForce(new Vector2(0.0, -10.0), new Vector2(-0.5, 2.0));
+		w.step(50);
+		
+		TestCase.assertEquals( 0.00000, b.getAngularVelocity(), 1e-5);
+		TestCase.assertEquals( lim, b.getTransform().getRotationAngle(), 1e-4);
+		TestCase.assertEquals( 1.00000, wj.getSpringTorque(invdt), 1e-5);
+		TestCase.assertEquals( 1.98201, wj.getReactionTorque(invdt), 1e-5);
+		TestCase.assertEquals( 4.89999, wj.getReactionForce(invdt).getMagnitude(), 1e-5);
 	}
 }

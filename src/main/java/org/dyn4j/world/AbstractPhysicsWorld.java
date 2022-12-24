@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -61,12 +61,14 @@ import org.dyn4j.dynamics.contact.SequentialImpulses;
 import org.dyn4j.dynamics.contact.SolvedContact;
 import org.dyn4j.dynamics.contact.TimeOfImpactSolver;
 import org.dyn4j.dynamics.joint.Joint;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ObjectAlreadyExistsException;
+import org.dyn4j.exception.ObjectAlreadyOwnedException;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 import org.dyn4j.world.listener.ContactListener;
 import org.dyn4j.world.listener.DestructionListener;
 import org.dyn4j.world.listener.StepListener;
@@ -89,7 +91,7 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * more than one world. Likewise, the {@link Joint#setOwner(Object)} method is used to handle
  * joints being added to the world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
- * @version 4.2.1
+ * @version 5.0.0
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
@@ -347,19 +349,24 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	@Override
 	public void addJoint(Joint<T> joint) {
 		// check for null joint
-		if (joint == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullJoint"));
-		// dont allow adding it twice
-		if (joint.getOwner() == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingJoint"));
-		// dont allow a joint that already is assigned to another world
-		if (joint.getOwner() != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldJoint"));
+		if (joint == null) 
+			throw new ArgumentNullException("joint");
 		
-		// check the bodies
-		T body1 = joint.getBody1();
-		T body2 = joint.getBody2();
+		// dont allow adding it twice
+		if (joint.getOwner() == this) 
+			throw new ObjectAlreadyExistsException("joint", joint, joint.getOwner());
+		
+		// dont allow a joint that already is assigned to another world
+		if (joint.getOwner() != null) 
+			throw new ObjectAlreadyOwnedException("joint", joint, joint.getOwner());
 		
 		// dont allow someone to add a joint to the world when the joined bodies dont exist yet
-		if (!this.constraintGraph.containsBody(body1) || !this.constraintGraph.containsBody(body2)) {
-			throw new IllegalArgumentException("dynamics.world.addJointWithoutBodies");
+		int bSize = joint.getBodyCount();
+		for (int i = 0; i < bSize; i++) {
+			T body = joint.getBody(i);
+			if (!this.constraintGraph.containsBody(body)) {
+				throw new IllegalArgumentException(String.format("All bodies must be added to the world before the joint is added. The body %1$s doesn't exist.", body));
+			}
 		}
 		
 		// add the joint to the joint list
@@ -460,12 +467,27 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		for (int j = 0; j < jSize; j++) {
 			Joint<T> joint = node.joints.get(j);
 			
+			int bSize = joint.getBodyCount();
+			for (int i = 0; i < bSize; i++) {
+				// get the other body
+				T other = joint.getBody(i);
+				
+				// no need to process the same body
+				if (other == body) {
+					continue;
+				}
+				
+				// wake up the other body
+				other.setAtRest(false);
+				// remove the joint from the constraint list of the other node
+				ConstraintGraphNode<T> otherNode = this.constraintGraph.getNode(other);
+				if (otherNode != null) {
+					otherNode.joints.remove(joint);
+				}
+			}
+			
 			// remove the ownership
 			joint.setOwner(null);
-			// get the other body
-			T other = joint.getOtherBody(body);
-			// wake up the other body
-			other.setAtRest(false);
 			
 			// notify of the destroyed joint
 			if (notify) {
@@ -476,12 +498,6 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			
 			// remove the joint from the world
 			this.joints.remove(joint);
-			
-			// remove the joint from the constraint list of the other node
-			ConstraintGraphNode<T> otherNode = this.constraintGraph.getNode(other);
-			if (otherNode != null) {
-				otherNode.joints.remove(joint);
-			}
 		}
 		
 		// clear the node's joints
@@ -620,10 +636,11 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			joint.setOwner(null);
 			
 			// wake the bodies
-			T b1 = joint.getBody1();
-			T b2 = joint.getBody2();
-			b1.setAtRest(false);
-			b2.setAtRest(false);
+			int bSize = joint.getBodyCount();
+			for (int i = 0; i < bSize; i++) {
+				T body = joint.getBody(i);
+				body.setAtRest(false);
+			}
 			
 			this.constraintGraph.removeJoint(joint);
 		}
@@ -721,11 +738,17 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// clear the owner
 			joint.setOwner(null);
 			
-			T b1 = joint.getBody1();
-			T b2 = joint.getBody2();
-			
-			b1.setAtRest(false);
-			b2.setAtRest(false);
+			// wake the bodies
+			int bSize = joint.getBodyCount();
+			for (int j = 0; j < bSize; j++) {
+				T body = joint.getBody(j);
+				body.setAtRest(false);
+			}
+//			T b1 = joint.getBody1();
+//			T b2 = joint.getBody2();
+//			
+//			b1.setAtRest(false);
+//			b2.setAtRest(false);
 
 			if (notify) {
 				for (DestructionListener<T> dl : this.destructionListeners) {
@@ -817,24 +840,6 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	}
 
 	/* (non-Javadoc)
-	 * @see org.dyn4j.world.PhysicsWorld#getCoefficientMixer()
-	 */
-	@Override
-	@Deprecated
-	public CoefficientMixer getCoefficientMixer() {
-		return (CoefficientMixer)this.getValueMixer();
-	}
-
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.PhysicsWorld#setCoefficientMixer(org.dyn4j.world.CoefficientMixer)
-	 */
-	@Override
-	@Deprecated
-	public void setCoefficientMixer(CoefficientMixer coefficientMixer) {
-		this.setValueMixer(coefficientMixer);
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dyn4j.world.PhysicsWorld#getValueMixer()
 	 */
 	@Override
@@ -847,7 +852,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public void setValueMixer(ValueMixer valueMixer) {
-		if (valueMixer == null) throw new NullPointerException(Messages.getString("dynamics.world.nullValueMixer"));
+		if (valueMixer == null) 
+			throw new ArgumentNullException("valueMixer");
+		
 		this.valueMixer = valueMixer;
 	}
 
@@ -856,7 +863,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public void setContactConstraintSolver(ContactConstraintSolver<T> constraintSolver) {
-		if (constraintSolver == null) throw new NullPointerException(Messages.getString("dynamics.world.nullContactConstraintSolver"));
+		if (constraintSolver == null) 
+			throw new ArgumentNullException("constraintSolver");
+		
 		this.contactConstraintSolver = constraintSolver;
 	}
 
@@ -882,7 +891,8 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	@Override
 	public void setContinuousCollisionDetectionBroadphaseDetector(BroadphaseDetector<T> broadphaseDetector) {
 		// check for null
-		if (broadphaseDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBroadphaseDetector"));
+		if (broadphaseDetector == null) 
+			throw new ArgumentNullException("broadphaseDetector");
 		
 		// set the new detector
 		this.ccdBroadphase = broadphaseDetector;
@@ -900,7 +910,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public void setTimeOfImpactSolver(TimeOfImpactSolver<T> timeOfImpactSolver) {
-		if (timeOfImpactSolver == null) throw new NullPointerException(Messages.getString("dynamics.world.nullTimeOfImpactSolver"));
+		if (timeOfImpactSolver == null) 
+			throw new ArgumentNullException("timeOfImpactSolver");
+		
 		this.timeOfImpactSolver = timeOfImpactSolver;
 	}
 	

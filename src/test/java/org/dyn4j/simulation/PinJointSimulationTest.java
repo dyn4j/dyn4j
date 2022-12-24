@@ -55,16 +55,55 @@ public class PinJointSimulationTest {
 		body.setMass(MassType.FIXED_LINEAR_VELOCITY);
 		w.addBody(body);
 		
-		PinJoint<Body> pj = new PinJoint<Body>(body, new Vector2(0.5, 0.0), 8.0, 0.3, 1000.0);
+		PinJoint<Body> pj = new PinJoint<Body>(body, new Vector2(0.5, 0.0));
 		w.addJoint(pj);
 		
-		pj.setTarget(new Vector2(0.7, -0.5));
+		pj.setTarget(new Vector2(0.7, 0.5));
 		
 		double invdt = w.getTimeStep().getInverseDeltaTime();
 		w.step(1);
 		
-		TestCase.assertTrue(pj.getReactionForce(w.getTimeStep().getInverseDeltaTime()).getMagnitude() > 0);
-		TestCase.assertTrue(body.getTransform().getRotationAngle() < 0);
+		TestCase.assertTrue(pj.getReactionForce(invdt).getMagnitude() > 0);
+		TestCase.assertTrue(pj.getSpringForce(invdt) > 0.0);
+		TestCase.assertTrue(body.getTransform().getRotationAngle() != 0.0);
 		TestCase.assertEquals(0.0, pj.getReactionTorque(invdt));
+	}
+	
+	/**
+	 * Tests the pin joint with the spring-damper disabled.
+	 */
+	@Test
+	public void noSpringDamper() {
+		World<Body> w = new World<Body>();
+		
+		Body body = new Body();
+		body.addFixture(Geometry.createCircle(1.0));
+		body.setMass(MassType.NORMAL);
+		w.addBody(body);
+		
+		TestCase.assertEquals(0.0, body.getWorldCenter().x);
+		TestCase.assertEquals(0.0, body.getWorldCenter().y);
+		
+		PinJoint<Body> pj = new PinJoint<Body>(body, new Vector2(0.0, 0.0));
+		pj.setSpringEnabled(false);
+		pj.setSpringDamperEnabled(false);
+		pj.setMaximumSpringForceEnabled(false);
+		
+		w.addJoint(pj);
+		
+		pj.setTarget(new Vector2(0.7, 0.5));
+		
+		TestCase.assertEquals(0.0, body.getWorldCenter().x);
+		TestCase.assertEquals(0.0, body.getWorldCenter().y);
+		
+		double invdt = w.getTimeStep().getInverseDeltaTime();
+		w.step(30);
+		
+		TestCase.assertTrue(pj.getReactionForce(invdt).getMagnitude() > 0);
+		TestCase.assertEquals( 0.0, pj.getReactionTorque(invdt));
+		TestCase.assertEquals( 0.0, pj.getSpringForce(invdt));
+		TestCase.assertEquals(30.754, pj.getCorrectionForce(invdt), 1e-3);
+		TestCase.assertEquals( 0.699, body.getWorldCenter().x, 1e-3);
+		TestCase.assertEquals( 0.499, body.getWorldCenter().y, 1e-3);
 	}
 }

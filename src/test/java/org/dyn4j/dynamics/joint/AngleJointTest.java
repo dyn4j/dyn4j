@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,24 +33,21 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link AngleJoint} class.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 2.2.2
  */
-public class AngleJointTest extends AbstractJointTest {
+public class AngleJointTest extends BaseJointTest {
 	/**
 	 * Tests the successful creation of an angle joint.
 	 */
 	@Test
-	public void createWithTwoDifferentBodies() {
+	public void create() {
 		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
-		
-		TestCase.assertEquals(b1.getWorldCenter(), aj.getAnchor1());
-		TestCase.assertEquals(b2.getWorldCenter(), aj.getAnchor2());
 		
 		TestCase.assertEquals(0.0, aj.getJointAngle());
 		TestCase.assertEquals(1.0, aj.getRatio());
 		
-		TestCase.assertEquals(0.0, aj.getReferenceAngle());
+		TestCase.assertEquals(0.0, aj.getLimitsReferenceAngle());
 		TestCase.assertEquals(0.0, aj.getLowerLimit());
 		TestCase.assertEquals(0.0, aj.getUpperLimit());
 		
@@ -62,33 +59,9 @@ public class AngleJointTest extends AbstractJointTest {
 		TestCase.assertEquals(b2, aj.getOtherBody(b1));
 		
 		TestCase.assertEquals(false, aj.isCollisionAllowed());
-		TestCase.assertEquals(true, aj.isLimitEnabled());
+		TestCase.assertEquals(true, aj.isLimitsEnabled());
 		
 		TestCase.assertNotNull(aj.toString());
-	}
-	
-	/**
-	 * Tests the failed creation of an angle joint.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void createWithNullBody1() {
-		new AngleJoint<Body>(null, b2);
-	}
-
-	/**
-	 * Tests the failed creation of an angle joint.
-	 */
-	@Test(expected = NullPointerException.class)
-	public void createWithNullBody2() {
-		new AngleJoint<Body>(b1, null);
-	}
-	
-	/**
-	 * Tests the failed creation of an angle joint.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void createWithSameBody() {
-		new AngleJoint<Body>(b1, b1);
 	}
 	
 	/**
@@ -168,14 +141,14 @@ public class AngleJointTest extends AbstractJointTest {
 	 * Tests the get/set for the reference angle.
 	 */
 	@Test
-	public void setReferenceAngle() {
+	public void setLimitsReferenceAngle() {
 		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
 		
-		TestCase.assertEquals(0.0, aj.getReferenceAngle());
+		TestCase.assertEquals(0.0, aj.getLimitsReferenceAngle());
 	
-		aj.setReferenceAngle(Math.toRadians(30.0));
+		aj.setLimitsReferenceAngle(Math.toRadians(30.0));
 		
-		TestCase.assertEquals(Math.toRadians(30.0), aj.getReferenceAngle());
+		TestCase.assertEquals(Math.toRadians(30.0), aj.getLimitsReferenceAngle());
 	}
 
 	/**
@@ -206,23 +179,6 @@ public class AngleJointTest extends AbstractJointTest {
 	}
 
 	/**
-	 * Tests the shift method.
-	 */
-	@Test
-	public void shift() {
-		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
-		
-		TestCase.assertEquals(b1.getWorldCenter(), aj.getAnchor1());
-		TestCase.assertEquals(b2.getWorldCenter(), aj.getAnchor2());
-		
-		aj.shift(new Vector2(1.0, 3.0));
-		
-		// nothing should have changed
-		TestCase.assertEquals(b1.getWorldCenter(), aj.getAnchor1());
-		TestCase.assertEquals(b2.getWorldCenter(), aj.getAnchor2());
-	}
-	
-	/**
 	 * Tests the sleep interaction when enabling/disabling the limits.
 	 */
 	@Test
@@ -230,11 +186,11 @@ public class AngleJointTest extends AbstractJointTest {
 		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
 		
 		// by default the limit is enabled
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		
 		// lets disable it first and ensure that the bodies are awake
-		aj.setLimitEnabled(false);
-		TestCase.assertFalse(aj.isLimitEnabled());
+		aj.setLimitsEnabled(false);
+		TestCase.assertFalse(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		
@@ -243,14 +199,14 @@ public class AngleJointTest extends AbstractJointTest {
 		b2.setAtRest(true);
 		
 		// if we disable it again, the bodies should not wake
-		aj.setLimitEnabled(false);
-		TestCase.assertFalse(aj.isLimitEnabled());
+		aj.setLimitsEnabled(false);
+		TestCase.assertFalse(aj.isLimitsEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		
 		// when we enable it, we should awake the bodies
-		aj.setLimitEnabled(true);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		aj.setLimitsEnabled(true);
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		
@@ -258,14 +214,14 @@ public class AngleJointTest extends AbstractJointTest {
 		// it should not wake the bodies
 		b1.setAtRest(true);
 		b2.setAtRest(true);
-		aj.setLimitEnabled(true);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		aj.setLimitsEnabled(true);
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		
 		// if we disable the limit, then the bodies should be reawakened
-		aj.setLimitEnabled(false);
-		TestCase.assertFalse(aj.isLimitEnabled());
+		aj.setLimitsEnabled(false);
+		TestCase.assertFalse(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 	}
@@ -278,7 +234,7 @@ public class AngleJointTest extends AbstractJointTest {
 		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
 		
 		// by default the limit is enabled
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = aj.getLowerLimit();
@@ -296,7 +252,7 @@ public class AngleJointTest extends AbstractJointTest {
 		// set the limits to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		aj.setLimits(defaultLowerLimit);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, aj.getLowerLimit());
@@ -304,7 +260,7 @@ public class AngleJointTest extends AbstractJointTest {
 		
 		// set the limits to a different value - the bodies should wake up
 		aj.setLimits(Math.PI);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(Math.PI, aj.getLowerLimit());
@@ -317,7 +273,7 @@ public class AngleJointTest extends AbstractJointTest {
 		b2.setAtRest(true);
 		
 		aj.setLimits(Math.PI);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(Math.PI, aj.getLowerLimit());
@@ -330,7 +286,7 @@ public class AngleJointTest extends AbstractJointTest {
 		b2.setAtRest(true);
 		
 		aj.setLimits(Math.PI);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(Math.PI, aj.getLowerLimit());
@@ -338,12 +294,12 @@ public class AngleJointTest extends AbstractJointTest {
 		
 		// now disable the limit, and the limits should change
 		// but the bodies should not wake
-		aj.setLimitEnabled(false);
+		aj.setLimitsEnabled(false);
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
 		aj.setLimits(-Math.PI);
-		TestCase.assertFalse(aj.isLimitEnabled());
+		TestCase.assertFalse(aj.isLimitsEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(-Math.PI, aj.getLowerLimit());
@@ -358,7 +314,7 @@ public class AngleJointTest extends AbstractJointTest {
 		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
 		
 		// by default the limit is enabled
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = aj.getLowerLimit();
@@ -376,7 +332,7 @@ public class AngleJointTest extends AbstractJointTest {
 		// set the limits to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		aj.setLimits(defaultLowerLimit, defaultUpperLimit);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, aj.getLowerLimit());
@@ -384,7 +340,7 @@ public class AngleJointTest extends AbstractJointTest {
 		
 		// set the limits to a different value - the bodies should wake up
 		aj.setLimits(-Math.PI, Math.PI);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(-Math.PI, aj.getLowerLimit());
@@ -397,7 +353,7 @@ public class AngleJointTest extends AbstractJointTest {
 		b2.setAtRest(true);
 		
 		aj.setLimits(-Math.PI, Math.PI);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(-Math.PI, aj.getLowerLimit());
@@ -410,7 +366,7 @@ public class AngleJointTest extends AbstractJointTest {
 		b2.setAtRest(true);
 		
 		aj.setLimits(-Math.PI, Math.PI);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(-Math.PI, aj.getLowerLimit());
@@ -418,12 +374,12 @@ public class AngleJointTest extends AbstractJointTest {
 		
 		// now disable the limit, and the limits should change
 		// but the bodies should not wake
-		aj.setLimitEnabled(false);
+		aj.setLimitsEnabled(false);
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
 		aj.setLimits(Math.PI, 2*Math.PI);
-		TestCase.assertFalse(aj.isLimitEnabled());
+		TestCase.assertFalse(aj.isLimitsEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(Math.PI, aj.getLowerLimit());
@@ -438,7 +394,7 @@ public class AngleJointTest extends AbstractJointTest {
 		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
 		
 		// by default the limit is enabled
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = aj.getLowerLimit();
@@ -455,7 +411,7 @@ public class AngleJointTest extends AbstractJointTest {
 		// set the lower limit to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		aj.setLowerLimit(defaultLowerLimit);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, aj.getLowerLimit());
@@ -463,7 +419,7 @@ public class AngleJointTest extends AbstractJointTest {
 		
 		// set the limit to a different value - the bodies should wake up
 		aj.setLowerLimit(-Math.PI);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(-Math.PI, aj.getLowerLimit());
@@ -471,7 +427,7 @@ public class AngleJointTest extends AbstractJointTest {
 		
 		// now disable the limit, and the lower limit should change
 		// but the bodies should not wake
-		aj.setLimitEnabled(false);
+		aj.setLimitsEnabled(false);
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
@@ -490,7 +446,7 @@ public class AngleJointTest extends AbstractJointTest {
 		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
 		
 		// by default the limit is enabled
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = aj.getLowerLimit();
@@ -507,7 +463,7 @@ public class AngleJointTest extends AbstractJointTest {
 		// set the upper limit to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		aj.setUpperLimit(defaultUpperLimit);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, aj.getLowerLimit());
@@ -515,7 +471,7 @@ public class AngleJointTest extends AbstractJointTest {
 		
 		// set the limit to a different value - the bodies should wake up
 		aj.setUpperLimit(Math.PI);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, aj.getLowerLimit());
@@ -523,7 +479,7 @@ public class AngleJointTest extends AbstractJointTest {
 		
 		// now disable the limit, and the upper limit should change
 		// but the bodies should not wake
-		aj.setLimitEnabled(false);
+		aj.setLimitsEnabled(false);
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
@@ -542,7 +498,7 @@ public class AngleJointTest extends AbstractJointTest {
 		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
 		
 		// by default the limit is enabled
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = aj.getLowerLimit();
@@ -560,7 +516,7 @@ public class AngleJointTest extends AbstractJointTest {
 		// the limit should already be enabled and the value isn't changing
 		// so the bodies should not wake
 		aj.setLimitsEnabled(defaultLowerLimit);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, aj.getLowerLimit());
@@ -569,7 +525,7 @@ public class AngleJointTest extends AbstractJointTest {
 		// the limit should already be enabled and the value is changing
 		// so the bodies should wake
 		aj.setLimitsEnabled(Math.PI);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(Math.PI, aj.getLowerLimit());
@@ -577,12 +533,12 @@ public class AngleJointTest extends AbstractJointTest {
 		
 		b1.setAtRest(true);
 		b2.setAtRest(true);
-		aj.setLimitEnabled(false);
+		aj.setLimitsEnabled(false);
 		
 		// the limit is not enabled but the value isn't changing
 		// so the bodies should still wake
 		aj.setLimitsEnabled(Math.PI);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(Math.PI, aj.getLowerLimit());
@@ -597,7 +553,7 @@ public class AngleJointTest extends AbstractJointTest {
 		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
 		
 		// by default the limit is enabled
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = aj.getLowerLimit();
@@ -615,7 +571,7 @@ public class AngleJointTest extends AbstractJointTest {
 		// set the limits to the current value - since the value hasn't changed
 		// and the limit is already enabled the bodies should remain asleep
 		aj.setLimitsEnabled(defaultLowerLimit, defaultUpperLimit);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, aj.getLowerLimit());
@@ -623,7 +579,7 @@ public class AngleJointTest extends AbstractJointTest {
 		
 		// set the limits to a different value - the bodies should wake up
 		aj.setLimitsEnabled(-Math.PI, Math.PI);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(-Math.PI, aj.getLowerLimit());
@@ -636,7 +592,7 @@ public class AngleJointTest extends AbstractJointTest {
 		b2.setAtRest(true);
 		
 		aj.setLimitsEnabled(-Math.PI, Math.PI);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(-Math.PI, aj.getLowerLimit());
@@ -649,7 +605,7 @@ public class AngleJointTest extends AbstractJointTest {
 		b2.setAtRest(true);
 		
 		aj.setLimitsEnabled(-Math.PI, Math.PI);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(-Math.PI, aj.getLowerLimit());
@@ -657,15 +613,32 @@ public class AngleJointTest extends AbstractJointTest {
 		
 		// now disable the limit and make sure they wake
 		// even though the limits don't change
-		aj.setLimitEnabled(false);
+		aj.setLimitsEnabled(false);
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
 		aj.setLimitsEnabled(-Math.PI, Math.PI);
-		TestCase.assertTrue(aj.isLimitEnabled());
+		TestCase.assertTrue(aj.isLimitsEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(-Math.PI, aj.getLowerLimit());
 		TestCase.assertEquals(Math.PI, aj.getUpperLimit());
+	}
+	
+	/**
+	 * Tests the shift method (nothing should happen).
+	 */
+	@Test
+	public void shift() {
+		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
+		
+		Vector2 p1 = b1.getWorldCenter();
+		Vector2 p2 = b2.getWorldCenter();
+		
+		aj.shift(new Vector2(1, 2));
+		
+		// there's nothing to check...
+		TestCase.assertEquals(p1, b1.getWorldCenter());
+		TestCase.assertEquals(p2, b2.getWorldCenter());
 	}
 }

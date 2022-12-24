@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,12 +24,12 @@
  */
 package org.dyn4j.dynamics;
 
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ArgumentNullException;
 
 /**
  * Represents a torque about the z-axis.
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.0
  * @since 1.0.0
  */
 public class Torque {
@@ -58,7 +58,9 @@ public class Torque {
 	 * @throws NullPointerException if torque is null
 	 */
 	public Torque(Torque torque) {
-		if (torque == null) throw new NullPointerException(Messages.getString("dynamics.torque.nullTorque"));
+		if (torque == null) 
+			throw new ArgumentNullException("torque");
+		
 		this.torque = torque.torque;
 	}
 	
@@ -76,7 +78,9 @@ public class Torque {
 	 * @throws NullPointerException if torque is null
 	 */
 	public void set(Torque torque) {
-		if (torque == null) throw new NullPointerException(Messages.getString("dynamics.torque.setNullTorque"));
+		if (torque == null) 
+			throw new ArgumentNullException("torque");
+		
 		this.torque = torque.torque;
 	}
 	

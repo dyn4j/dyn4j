@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -37,15 +37,15 @@ import org.dyn4j.collision.manifold.ManifoldPointId;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Represents a {@link SolvableContact} constraint for each {@link PhysicsBody} pair.  
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 1.0.0
  * @param <T> The {@link PhysicsBody} type
  */
@@ -416,7 +416,9 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * @since 3.0.2
 	 */
 	public void setFriction(double friction) {
-		if (friction < 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidFriction"));
+		if (friction < 0) 
+			throw new ValueOutOfRangeException("friction", friction, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		this.friction = friction;
 	}
 	
@@ -434,7 +436,9 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * @since 3.0.2
 	 */
 	public void setRestitution(double restitution) {
-		if (restitution < 0) throw new IllegalArgumentException(Messages.getString("dynamics.invalidRestitution"));
+		if (restitution < 0) 
+			throw new ValueOutOfRangeException("restitution", restitution, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		this.restitution = restitution;
 	}
 	

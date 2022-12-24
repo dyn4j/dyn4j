@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.dyn4j.DataContainer;
  * Represents a shape that is defined by vertices with line segment connections
  * with counter-clockwise winding.
  * @author William Bittle
- * @version 3.2.0
+ * @version 5.0.0
  * @since 1.0.0
  */
 public interface Wound extends Shape, Transformable, DataContainer {
@@ -68,8 +68,6 @@ public interface Wound extends Shape, Transformable, DataContainer {
 	 * For performance, this array may be the internal storage array of the shape.
 	 * Both the array elements and their properties should not be modified via this
 	 * method.
-	 * <p>
-	 * It's possible that this method will be deprecated and/or removed in later versions.
 	 * @return {@link Vector2}[]
 	 * @see #getVertexIterator()
 	 */
@@ -81,8 +79,6 @@ public interface Wound extends Shape, Transformable, DataContainer {
 	 * For performance, this array may be the internal storage array of the shape.
 	 * Both the array elements and their properties should not be modified via this
 	 * method.
-	 * <p>
-	 * It's possible that this method will be deprecated and/or removed in later versions.
 	 * @return {@link Vector2}[]
 	 * @see #getNormalIterator()
 	 */

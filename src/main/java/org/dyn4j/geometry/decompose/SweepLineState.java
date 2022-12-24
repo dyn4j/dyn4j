@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,6 @@ import java.util.PriorityQueue;
 import org.dyn4j.BinarySearchTree;
 import org.dyn4j.Reference;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Represents the current state of the SweepLine algorithm.
@@ -37,7 +36,7 @@ import org.dyn4j.resources.Messages;
  * The SweepLine algorithm maintains a DCEL to hold the triangulation, a binary tree for edge
  * searching and the current sweepline intercept value.
  * @author William Bittle
- * @version 3.2.0
+ * @version 5.0.0
  * @since 3.2.0
  */
 final class SweepLineState {
@@ -179,7 +178,7 @@ final class SweepLineState {
 		Vector2 v2 = point.to(point1);
 		
 		// check for coincident points
-		if (v1.isZero() || v2.isZero()) throw new IllegalArgumentException(Messages.getString("geometry.decompose.coincident"));
+		if (v1.isZero() || v2.isZero()) throw new IllegalArgumentException("The given simple polygon has coincident vertices");
 		
 		// get the angle between the two edges (we assume CCW winding)
 		double cross = v1.cross(v2);

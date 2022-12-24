@@ -36,7 +36,7 @@ import junit.framework.TestCase;
  * @version 4.2.0
  * @since 3.0.0
  */
-public class WheelJointTest extends AbstractJointTest {
+public class WheelJointTest extends BaseJointTest {
 	/**
 	 * Tests the successful creation case.
 	 */
@@ -45,41 +45,47 @@ public class WheelJointTest extends AbstractJointTest {
 		Vector2 p = new Vector2(1.0, 1.0);
 		Vector2 a = new Vector2(0.0, 1.0);
 		
-		WheelJoint<Body> dj = new WheelJoint<Body>(b1, b2, p, a);
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, p, a);
 		
-		TestCase.assertEquals(p, dj.getAnchor1());
-		TestCase.assertEquals(p, dj.getAnchor2());
-		TestCase.assertNotSame(p, dj.getAnchor1());
-		TestCase.assertNotSame(p, dj.getAnchor2());
-		TestCase.assertEquals(a, dj.getAxis());
+		TestCase.assertEquals(p, wj.getAnchor1());
+		TestCase.assertEquals(p, wj.getAnchor2());
+		TestCase.assertNotSame(p, wj.getAnchor1());
+		TestCase.assertNotSame(p, wj.getAnchor2());
+		TestCase.assertEquals(a, wj.getAxis());
 		
-		TestCase.assertEquals(0.0, dj.getAngularSpeed());
-		TestCase.assertEquals(0.0, dj.getAngularTranslation());
-		TestCase.assertEquals(0.0, dj.getLinearSpeed());
-		TestCase.assertEquals(0.0, dj.getLinearTranslation());
+		TestCase.assertEquals(0.0, wj.getAngularSpeed());
+		TestCase.assertEquals(0.0, wj.getAngularTranslation());
+		TestCase.assertEquals(0.0, wj.getLinearSpeed());
+		TestCase.assertEquals(0.0, wj.getLinearTranslation());
 		
-		TestCase.assertEquals(0.3, dj.getDampingRatio());
-		TestCase.assertEquals(8.0, dj.getFrequency());
-		TestCase.assertEquals(0.0, dj.getLowerLimit());
-		TestCase.assertEquals(0.0, dj.getUpperLimit());
+		TestCase.assertEquals(0.3, wj.getSpringDampingRatio());
+		TestCase.assertEquals(8.0, wj.getSpringFrequency());
+		TestCase.assertEquals(0.0, wj.getSpringStiffness());
+		TestCase.assertEquals(1000.0, wj.getMaximumSpringForce());
+		TestCase.assertEquals(0.0, wj.getSpringRestOffset());
+		TestCase.assertEquals(0.0, wj.getLowerLimit());
+		TestCase.assertEquals(0.0, wj.getUpperLimit());
 		
-		TestCase.assertEquals(1000.0, dj.getMaximumMotorTorque());
-		TestCase.assertEquals(0.0, dj.getMotorSpeed());
+		TestCase.assertEquals(1000.0, wj.getMaximumMotorTorque());
+		TestCase.assertEquals(0.0, wj.getMotorSpeed());
 		
-		TestCase.assertEquals(b1, dj.getBody1());
-		TestCase.assertEquals(b2, dj.getBody2());
+		TestCase.assertEquals(b1, wj.getBody1());
+		TestCase.assertEquals(b2, wj.getBody2());
 		
-		TestCase.assertEquals(null, dj.getOwner());
-		TestCase.assertEquals(null, dj.getUserData());
-		TestCase.assertEquals(b2, dj.getOtherBody(b1));
+		TestCase.assertEquals(null, wj.getOwner());
+		TestCase.assertEquals(null, wj.getUserData());
+		TestCase.assertEquals(b2, wj.getOtherBody(b1));
 		
-		TestCase.assertEquals(false, dj.isCollisionAllowed());
-		TestCase.assertEquals(false, dj.isLimitEnabled());
-		TestCase.assertEquals(false, dj.isMotorEnabled());
-		TestCase.assertEquals(true, dj.isSpringDamperEnabled());
-		TestCase.assertEquals(true, dj.isSpringEnabled());
+		TestCase.assertEquals(false, wj.isCollisionAllowed());
+		TestCase.assertEquals(false, wj.isLowerLimitEnabled());
+		TestCase.assertEquals(false, wj.isUpperLimitEnabled());
+		TestCase.assertEquals(false, wj.isMotorEnabled());
+		TestCase.assertEquals(false, wj.isMaximumMotorTorqueEnabled());
+		TestCase.assertEquals(true, wj.isSpringDamperEnabled());
+		TestCase.assertEquals(true, wj.isSpringEnabled());
+		TestCase.assertEquals(false, wj.isMaximumSpringForceEnabled());
 		
-		TestCase.assertNotNull(dj.toString());
+		TestCase.assertNotNull(wj.toString());
 	}
 
 	/**
@@ -115,31 +121,27 @@ public class WheelJointTest extends AbstractJointTest {
 	}
 	
 	/**
-	 * Tests the create method passing the same body.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void createWithSameBody() {
-		new WheelJoint<Body>(b1, b1, new Vector2(), new Vector2(0.0, 1.0));
-	}
-
-	/**
-	 * Tests the isSpring method.
+	 * Tests the isSpringEnabled method.
 	 */
 	@Test
 	public void isSpringEnabled() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		
-		// by default is a spring
 		TestCase.assertTrue(wj.isSpringEnabled());
 		
-		wj.setFrequency(1.0);
+		wj.setSpringFrequency(1.0);
 		TestCase.assertTrue(wj.isSpringEnabled());
 		
-		wj.setFrequency(15.24);
+		wj.setSpringFrequency(100.0);
 		TestCase.assertTrue(wj.isSpringEnabled());
 		
-		wj.setFrequency(0.0);
+		wj.setSpringEnabled(false);
 		TestCase.assertFalse(wj.isSpringEnabled());
+
+		wj.setSpringFrequency(50.0);
+		TestCase.assertFalse(wj.isSpringEnabled());
+		
+		wj.setSpringEnabled(true);
+		TestCase.assertTrue(wj.isSpringEnabled());
 	}
 
 	/**
@@ -150,48 +152,105 @@ public class WheelJointTest extends AbstractJointTest {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		TestCase.assertTrue(wj.isSpringDamperEnabled());
 		
-		wj.setDampingRatio(0.0);
-		wj.setFrequency(0.1);
-		TestCase.assertFalse(wj.isSpringDamperEnabled());
-		
-		wj.setFrequency(15.24);
-		TestCase.assertFalse(wj.isSpringDamperEnabled());
-		
-		wj.setDampingRatio(0.2);
+		wj.setSpringFrequency(1.0);
 		TestCase.assertTrue(wj.isSpringDamperEnabled());
 		
-		wj.setDampingRatio(0.0);
-		TestCase.assertFalse(wj.isSpringDamperEnabled());
+		wj.setSpringFrequency(100.0);
+		TestCase.assertTrue(wj.isSpringDamperEnabled());
 		
-		wj.setDampingRatio(0.4);
-		wj.setFrequency(0.0);
+		wj.setSpringDampingRatio(0.4);
+		TestCase.assertTrue(wj.isSpringDamperEnabled());
+		
+		wj.setSpringDampingRatio(1.0);
+		TestCase.assertTrue(wj.isSpringDamperEnabled());
+		
+		wj.setSpringEnabled(false);
+		wj.setSpringDamperEnabled(true);
+		TestCase.assertTrue(wj.isSpringDamperEnabled());
+		
+		wj.setSpringEnabled(true);
+		wj.setSpringDamperEnabled(true);
+		TestCase.assertTrue(wj.isSpringDamperEnabled());
+		
+		wj.setSpringEnabled(true);
+		wj.setSpringDamperEnabled(false);
 		TestCase.assertFalse(wj.isSpringDamperEnabled());
 	}
-
+	
+	/**
+	 * Tests valid distance values.
+	 */
+	@Test
+	public void setSpringRestOffset() {
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		wj.setSpringRestOffset(0.0);
+		TestCase.assertEquals(0.0, wj.getSpringRestOffset());
+		
+		wj.setSpringRestOffset(1.0);
+		TestCase.assertEquals(1.0, wj.getSpringRestOffset());
+		
+		wj.setSpringRestOffset(-1.0);
+		TestCase.assertEquals(-1.0, wj.getSpringRestOffset());
+	}
+	
 	/**
 	 * Tests valid damping ratio values.
 	 */
 	@Test
-	public void setDampingRatio() {
+	public void setSpringDampingRatio() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
-		wj.setDampingRatio(0.0);
-		TestCase.assertEquals(0.0, wj.getDampingRatio());
+		wj.setSpringDampingRatio(0.0);
+		TestCase.assertEquals(0.0, wj.getSpringDampingRatio());
 		
-		wj.setDampingRatio(1.0);
-		TestCase.assertEquals(1.0, wj.getDampingRatio());
+		wj.setSpringDampingRatio(0.001);
+		TestCase.assertEquals(0.001, wj.getSpringDampingRatio());
 		
-		wj.setDampingRatio(0.2);
-		TestCase.assertEquals(0.2, wj.getDampingRatio());
+		wj.setSpringDampingRatio(1.0);
+		TestCase.assertEquals(1.0, wj.getSpringDampingRatio());
+		
+		wj.setSpringDampingRatio(0.2);
+		TestCase.assertEquals(0.2, wj.getSpringDampingRatio());
+
+		wj.setSpringEnabled(false);
+		wj.setSpringDamperEnabled(false);
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// this won't wake them because its not enabled
+		wj.setSpringDampingRatio(0.5);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+
+		// this won't wake the bodies because the spring isn't enabled
+		wj.setSpringDamperEnabled(true);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+
+		// enable the spring
+		wj.setSpringEnabled(true);
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// this won't wake the bodies because it's the same value
+		wj.setSpringDampingRatio(0.5);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// this should wake them
+		wj.setSpringDampingRatio(0.6);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
 	}
 	
 	/**
 	 * Tests a negative damping ratio value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setDampingRatioNegative() {
+	public void setNegativeDampingRatio() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setDampingRatio(-1.0);
+		wj.setSpringDampingRatio(-1.0);
 	}
 	
 	/**
@@ -200,40 +259,289 @@ public class WheelJointTest extends AbstractJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setDampingRatioGreaterThan1() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setDampingRatio(2.0);
+		wj.setSpringDampingRatio(2.0);
 	}
 	
 	/**
 	 * Tests valid frequency values.
 	 */
 	@Test
-	public void setFrequency() {
+	public void setSpringFrequency() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		wj.setSpringFrequency(0.0);
+		TestCase.assertEquals(0.0, wj.getSpringFrequency());
+		
+		wj.setSpringFrequency(0.001);
+		TestCase.assertEquals(0.001, wj.getSpringFrequency());
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.getSpringMode());
+		
+		wj.setSpringFrequency(1.0);
+		TestCase.assertEquals(1.0, wj.getSpringFrequency());
+		
+		wj.setSpringFrequency(29.0);
+		TestCase.assertEquals(29.0, wj.getSpringFrequency());
+		
+		// at rest testing
+		
+		wj.setSpringEnabled(false);
+		wj.setSpringDamperEnabled(false);
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// the spring isn't enabled so it shouldn't wake the bodies
+		wj.setSpringFrequency(3.0);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// enabling the spring should wake the bodies
+		wj.setSpringEnabled(true);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
 
-		wj.setFrequency(0.0);
-		TestCase.assertEquals(0.0, wj.getFrequency());
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+
+		// if the spring frequency doesn't change, then the bodies should
+		// state at rest
+		wj.setSpringFrequency(3.0);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
 		
-		wj.setFrequency(1.0);
-		TestCase.assertEquals(1.0, wj.getFrequency());
+		// the frequency is changing, they should wake
+		wj.setSpringFrequency(5.0);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
 		
-		wj.setFrequency(29.0);
-		TestCase.assertEquals(29.0, wj.getFrequency());
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+
+		// this should wake the bodies
+		wj.setSpringDamperEnabled(true);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+	}
+	
+	/**
+	 * Tests the spring mode changing.
+	 */
+	@Test
+	public void setSpringMode() {
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		// test mode swapping
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.getSpringMode());
+		wj.setSpringStiffness(0.3);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, wj.getSpringMode());
+		wj.setSpringFrequency(0.5);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.getSpringMode());
+	}
+	
+	/**
+	 * Tests a negative stiffness value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setSpringStiffnessNegative() {
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		wj.setSpringStiffness(-0.3);
+	}
+
+	/**
+	 * Tests valid frequency values.
+	 */
+	@Test
+	public void setSpringStiffness() {
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		wj.setSpringStiffness(0.0);
+		TestCase.assertEquals(0.0, wj.getSpringStiffness());
+		
+		wj.setSpringStiffness(0.001);
+		TestCase.assertEquals(0.001, wj.getSpringStiffness());
+		
+		wj.setSpringStiffness(1.0);
+		TestCase.assertEquals(1.0, wj.getSpringStiffness());
+		
+		wj.setSpringStiffness(29.0);
+		TestCase.assertEquals(29.0, wj.getSpringStiffness());
+		
+		// at rest testing
+		wj.setSpringEnabled(false);
+		wj.setSpringDamperEnabled(false);
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// the spring isn't enabled so it shouldn't wake the bodies
+		wj.setSpringStiffness(3.0);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// enabling the spring should wake the bodies
+		wj.setSpringEnabled(true);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+
+		// if the spring frequency doesn't change, then the bodies should
+		// state at rest
+		wj.setSpringStiffness(3.0);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// the frequency is changing, they should wake
+		wj.setSpringStiffness(5.0);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+		
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+
+		// this should wake the bodies
+		wj.setSpringDamperEnabled(true);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
 	}
 	
 	/**
 	 * Tests a negative frequency value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setFrequencyNegative() {
+	public void setSpringFrequencyNegative() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setFrequency(-0.3);
+		wj.setSpringFrequency(-0.3);
 	}
 
+	/**
+	 * Tests setting a negative maximum force.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setSpringMaximumForceNegative() {
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		wj.setMaximumSpringForce(-1.0);
+	}
+	
+	/**
+	 * Tests setting the maximum force.
+	 */
+	@Test
+	public void setSpringMaximumForce() {
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		wj.setMaximumSpringForce(0.0);
+		TestCase.assertEquals(0.0, wj.getMaximumSpringForce());
+		
+		wj.setMaximumSpringForce(0.001);
+		TestCase.assertEquals(0.001, wj.getMaximumSpringForce());
+		
+		wj.setMaximumSpringForce(1.0);
+		TestCase.assertEquals(1.0, wj.getMaximumSpringForce());
+		
+		wj.setMaximumSpringForce(1000);
+		TestCase.assertEquals(1000.0, wj.getMaximumSpringForce());
+
+		wj.setSpringEnabled(false);
+		wj.setMaximumSpringForceEnabled(false);
+		
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// this won't wake them because its not enabled
+		wj.setMaximumSpringForce(0.5);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+
+		// this won't wake the bodies because the spring isn't enabled
+		wj.setMaximumSpringForceEnabled(true);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+
+		// enable the spring
+		wj.setSpringEnabled(true);
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// this won't wake the bodies because it's the same value
+		wj.setMaximumSpringForce(0.5);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// this should wake them
+		wj.setMaximumSpringForce(0.6);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+		
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// this should wake them
+		wj.setMaximumSpringForceEnabled(false);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+	}
+
+	/**
+	 * Tests spring stiffness/frequency calculations
+	 */
+	@Test
+	public void computeSpringStiffnessFrequency() {
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		wj.setSpringEnabled(true);
+		wj.setSpringDamperEnabled(true);
+		wj.setSpringFrequency(8.0);
+		wj.setSpringDampingRatio(0.5);
+		
+		wj.updateSpringCoefficients();
+		
+		TestCase.assertEquals(8.0, wj.springFrequency);
+		TestCase.assertEquals(0.5, wj.springDampingRatio);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, wj.getSpringMode());
+		TestCase.assertEquals(3968.803, wj.springStiffness, 1e-3);
+		
+		wj.setSpringStiffness(1000.0);
+		wj.updateSpringCoefficients();
+		
+		TestCase.assertEquals(4.015, wj.springFrequency, 1e-3);
+		TestCase.assertEquals(0.5, wj.springDampingRatio);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, wj.getSpringMode());
+		TestCase.assertEquals(1000.0, wj.springStiffness, 1e-3);
+	}
+	
+	/**
+	 * Tests the body's sleep state when changing the distance.
+	 */
+	@Test
+	public void setSpringRestOffsetAtRest() {
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		double distance = wj.getSpringRestOffset();
+		
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
+		TestCase.assertEquals(distance, wj.getSpringRestOffset());
+		
+		b1.setAtRest(true);
+		b2.setAtRest(true);
+		
+		// set the distance to the same value
+		wj.setSpringRestOffset(distance);
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
+		TestCase.assertEquals(distance, wj.getSpringRestOffset());
+		
+		// set the distance to a different value and make
+		// sure the bodies are awakened
+		wj.setSpringRestOffset(10);
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
+		TestCase.assertEquals(10.0, wj.getSpringRestOffset());
+	}
+	
 	/**
 	 * Tests valid maximum torque values.
 	 */
 	@Test
-	public void setMaximumMotorTorque() {
+	public void setMotorMaximumTorque() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
 		wj.setMaximumMotorTorque(0.0);
@@ -273,7 +581,7 @@ public class WheelJointTest extends AbstractJointTest {
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		// don't change the max force
+		// don't change the max torque
 		wj.setMaximumMotorTorque(1000.0);
 		TestCase.assertEquals(1000.0, wj.getMaximumMotorTorque());
 		TestCase.assertTrue(b1.isAtRest());
@@ -293,6 +601,50 @@ public class WheelJointTest extends AbstractJointTest {
 		
 		wj.setMaximumMotorTorque(1.0);
 		TestCase.assertEquals(1.0, wj.getMaximumMotorTorque());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
+	}
+
+	/**
+	 * Tests the setting the maximum motor torque wrt. sleeping.
+	 */
+	@Test
+	public void setMaximumMotorTorqueEnabledSleep() {
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		TestCase.assertFalse(wj.isMotorEnabled());
+		TestCase.assertEquals(1000.0, wj.getMaximumMotorTorque());
+		TestCase.assertFalse(wj.isMaximumMotorTorqueEnabled());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
+		
+		wj.setMotorEnabled(true);
+		wj.setMaximumMotorTorqueEnabled(true);
+
+		// then put the bodies to sleep
+		b1.setAtRest(true);
+		b2.setAtRest(true);
+		
+		// don't change the flag
+		wj.setMaximumMotorTorqueEnabled(true);
+		TestCase.assertTrue(wj.isMaximumMotorTorqueEnabled());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
+		
+		// disable it
+		wj.setMaximumMotorTorqueEnabled(false);
+		TestCase.assertFalse(wj.isMaximumMotorTorqueEnabled());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
+		
+		// disable the motor and change the value
+		// the bodies shouldn't wake up
+		wj.setMotorEnabled(false);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
+		
+		wj.setMaximumMotorTorqueEnabled(true);
+		TestCase.assertTrue(wj.isMaximumMotorTorqueEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 	}
@@ -416,93 +768,165 @@ public class WheelJointTest extends AbstractJointTest {
 	}
 
 	/**
-	 * Tests the successful setting of the maximum angle.
+	 * Tests the successful setting of the upper limit.
 	 */
 	@Test
 	public void setUpperLimitSuccess() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setUpperLimit(10);
+		wj.setLowerLimit(-5.0);
 		
-		TestCase.assertEquals(10, wj.getUpperLimit(), 1e-6);
+		TestCase.assertEquals(0.0, wj.getUpperLimit());
+		
+		wj.setUpperLimit(2.0);
+		TestCase.assertEquals(2.0, wj.getUpperLimit(), 1e-6);
+		
+		wj.setUpperLimit(-2.0);
+		TestCase.assertEquals(-2.0, wj.getUpperLimit(), 1e-6);
+		
+		wj.setUpperLimit(0.0);
+		TestCase.assertEquals(0.0, wj.getUpperLimit(), 1e-6);
 	}
 	
 	/**
-	 * Tests the failed setting of the maximum angle.
+	 * Tests the failed setting of the upper limit because it would be less than the lower.
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setUpperLimitInvalid() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setUpperLimit(Math.toRadians(-10));
+		
+		TestCase.assertEquals(0.0, wj.getUpperLimit());
+		
+		wj.setUpperLimit(-0.5);
 	}
 	
 	/**
-	 * Tests the successful setting of the minimum angle.
+	 * Tests the successful setting of the lower limit.
 	 */
 	@Test
 	public void setLowerLimit() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setLowerLimit(Math.toRadians(-10));
+		wj.setUpperLimit(5.0);
 		
-		TestCase.assertEquals(Math.toRadians(-10), wj.getLowerLimit(), 1e-6);
+		TestCase.assertEquals(0.0, wj.getLowerLimit());
+		
+		wj.setLowerLimit(-1.0);
+		TestCase.assertEquals(-1.0, wj.getLowerLimit(), 1e-6);
+		
+		wj.setLowerLimit(0.0);
+		TestCase.assertEquals(0.0, wj.getLowerLimit(), 1e-6);
+		
+		wj.setLowerLimit(2.0);
+		TestCase.assertEquals(2.0, wj.getLowerLimit(), 1e-6);
 	}
 	
 	/**
-	 * Tests the failed setting of the maximum angle.
+	 * Tests the failed setting of the lower limit because it would be higher than the upper.
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setLowerLimitInvalid() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setLowerLimit(Math.toRadians(10));
+		
+		TestCase.assertEquals(0.0, wj.getLowerLimit());
+		
+		wj.setLowerLimit(1.5);
 	}
 	
 	/**
-	 * Tests the successful setting of the minimum and maximum angle.
+	 * Tests the successful setting of the lower and upper limits.
 	 */
 	@Test
 	public void setUpperAndLowerLimits() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setLimits(Math.toRadians(-30), Math.toRadians(20));
 		
-		TestCase.assertEquals(Math.toRadians(-30), wj.getLowerLimit(), 1e-6);
-		TestCase.assertEquals(Math.toRadians(20), wj.getUpperLimit(), 1e-6);
+		TestCase.assertEquals(0.0, wj.getLowerLimit());
+		TestCase.assertEquals(0.0, wj.getUpperLimit());
+		
+		wj.setLimits(0.0, 1.0);		
+		TestCase.assertEquals(0.0, wj.getLowerLimit(), 1e-6);
+		TestCase.assertEquals(1.0, wj.getUpperLimit(), 1e-6);
+		
+		wj.setLimits(-1.0, 2.0);		
+		TestCase.assertEquals(-1.0, wj.getLowerLimit(), 1e-6);
+		TestCase.assertEquals(2.0, wj.getUpperLimit(), 1e-6);
+		
+		wj.setLimits(-1.0, -1.0);
+		TestCase.assertEquals(-1.0, wj.getLowerLimit());
+		TestCase.assertEquals(-1.0, wj.getUpperLimit());
+		
+		wj.setLimits(-4.0, -1.0);
+		TestCase.assertEquals(-4.0, wj.getLowerLimit());
+		TestCase.assertEquals(-1.0, wj.getUpperLimit());
+		
+		wj.setLimits(3.0, 5.0);
+		TestCase.assertEquals(3.0, wj.getLowerLimit());
+		TestCase.assertEquals(5.0, wj.getUpperLimit());
 	}
 	
 	/**
-	 * Tests the failed setting of the minimum and maximum angle.
+	 * Tests the failed setting of the lower and upper limits.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setUpperAndLowerLimitsInvalid() {
+	public void setUpperAndLowerLimitsInvalid1() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setLimits(Math.toRadians(30), Math.toRadians(20));
+		
+		TestCase.assertEquals(0.0, wj.getLowerLimit());
+		TestCase.assertEquals(0.0, wj.getUpperLimit());
+		
+		wj.setLimits(1.0, 0.0);
+	}
+
+	/**
+	 * Tests the failed setting of the lower and upper limits.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setUpperAndLowerLimitsInvalid2() {
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		TestCase.assertEquals(0.0, wj.getLowerLimit());
+		TestCase.assertEquals(0.0, wj.getUpperLimit());
+		
+		wj.setLimits(0.0, -1.0);
 	}
 	
 	/**
-	 * Tests the successful setting of the minimum and maximum angle.
+	 * Tests the successful setting of the lower and upper limits.
 	 */
 	@Test
-	public void setUpperAndLowerLimitsToSameValue() {
+	public void setSameLimitValid() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setLimits(Math.toRadians(30), Math.toRadians(30));
 		
-		TestCase.assertEquals(Math.toRadians(30), wj.getLowerLimit(), 1e-6);
-		TestCase.assertEquals(Math.toRadians(30), wj.getUpperLimit(), 1e-6);
+		TestCase.assertEquals(0.0, wj.getLowerLimit());
+		TestCase.assertEquals(0.0, wj.getUpperLimit());
+		
+		wj.setLimits(2.0);
+		TestCase.assertEquals(2.0, wj.getLowerLimit());
+		TestCase.assertEquals(2.0, wj.getUpperLimit());
+		
+		wj.setLimits(-2.0);
+		TestCase.assertEquals(-2.0, wj.getLowerLimit());
+		TestCase.assertEquals(-2.0, wj.getUpperLimit());
 	}
 	
 	/**
 	 * Tests the sleep interaction when enabling/disabling the limits.
 	 */
 	@Test
-	public void setLimitEnabledSleep() {
+	public void setLimitsEnabledSleep() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
-		// by default the limit is enabled
-		TestCase.assertFalse(wj.isLimitEnabled());
+		wj.setLowerLimitEnabled(true);
+		wj.setUpperLimitEnabled(true);
 		
-		wj.setLimitEnabled(true);
+		// by default the limit is enabled
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		
 		// lets disable it first and ensure that the bodies are awake
-		wj.setLimitEnabled(false);
-		TestCase.assertFalse(wj.isLimitEnabled());
+		wj.setLimitsEnabled(false);
+		TestCase.assertFalse(wj.isUpperLimitEnabled());
+		TestCase.assertFalse(wj.isLowerLimitEnabled());
+
+		// the bodies should be initially awake
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		
@@ -511,14 +935,16 @@ public class WheelJointTest extends AbstractJointTest {
 		b2.setAtRest(true);
 		
 		// if we disable it again, the bodies should not wake
-		wj.setLimitEnabled(false);
-		TestCase.assertFalse(wj.isLimitEnabled());
+		wj.setLimitsEnabled(false);
+		TestCase.assertFalse(wj.isUpperLimitEnabled());
+		TestCase.assertFalse(wj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		
 		// when we enable it, we should awake the bodies
-		wj.setLimitEnabled(true);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		wj.setLimitsEnabled(true);
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		
@@ -526,14 +952,16 @@ public class WheelJointTest extends AbstractJointTest {
 		// it should not wake the bodies
 		b1.setAtRest(true);
 		b2.setAtRest(true);
-		wj.setLimitEnabled(true);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		wj.setLimitsEnabled(true);
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		
 		// if we disable the limit, then the bodies should be reawakened
-		wj.setLimitEnabled(false);
-		TestCase.assertFalse(wj.isLimitEnabled());
+		wj.setLimitsEnabled(false);
+		TestCase.assertFalse(wj.isUpperLimitEnabled());
+		TestCase.assertFalse(wj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 	}
@@ -545,10 +973,12 @@ public class WheelJointTest extends AbstractJointTest {
 	public void setLimitsSameSleep() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
-		// by default the limit is enabled
-		TestCase.assertFalse(wj.isLimitEnabled());
+		wj.setLowerLimitEnabled(true);
+		wj.setUpperLimitEnabled(true);
 		
-		wj.setLimitEnabled(true);
+		// by default the limit is enabled
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = wj.getLowerLimit();
@@ -566,58 +996,63 @@ public class WheelJointTest extends AbstractJointTest {
 		// set the limits to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		wj.setLimits(defaultLowerLimit, defaultUpperLimit);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, wj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, wj.getUpperLimit());
 		
 		// set the limits to a different value - the bodies should wake up
-		wj.setLimits(Math.PI, Math.PI);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		wj.setLimits(2.0);
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(Math.PI, wj.getLowerLimit());
-		TestCase.assertEquals(Math.PI, wj.getUpperLimit());
+		TestCase.assertEquals(2.0, wj.getLowerLimit());
+		TestCase.assertEquals(2.0, wj.getUpperLimit());
 		
 		// test the scenario where only the lower limit value changes
-		wj.setLowerLimit(-Math.PI);
-		TestCase.assertEquals(-Math.PI, wj.getLowerLimit());
+		wj.setLowerLimit(0.0);
+		TestCase.assertEquals(0.0, wj.getLowerLimit());
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-//		wj.setLimits(Math.PI);
-//		TestCase.assertTrue(wj.isLimitEnabled());
-//		TestCase.assertFalse(b1.isAtRest());
-//		TestCase.assertFalse(b2.isAtRest());
-//		TestCase.assertEquals(Math.PI, wj.getLowerLimit());
-//		TestCase.assertEquals(Math.PI, wj.getUpperLimit());
+		wj.setLimits(2.0);
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
+		TestCase.assertEquals(2.0, wj.getLowerLimit());
+		TestCase.assertEquals(2.0, wj.getUpperLimit());
 		
 		// test the scenario where only the upper limit value changes
-		wj.setUpperLimit(2*Math.PI);
-		TestCase.assertEquals(2*Math.PI, wj.getUpperLimit());
+		wj.setUpperLimit(3.0);
+		TestCase.assertEquals(3.0, wj.getUpperLimit());
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-//		wj.setLimitsEnabled(Math.PI);
-//		TestCase.assertTrue(wj.isLimitEnabled());
-//		TestCase.assertFalse(b1.isAtRest());
-//		TestCase.assertFalse(b2.isAtRest());
-//		TestCase.assertEquals(Math.PI, wj.getLowerLimit());
-//		TestCase.assertEquals(Math.PI, wj.getUpperLimit());
+		wj.setLimits(2.0);
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
+		TestCase.assertEquals(2.0, wj.getLowerLimit());
+		TestCase.assertEquals(2.0, wj.getUpperLimit());
 		
 		// now disable the limit, and the limits should change
 		// but the bodies should not wake
-		wj.setLimitEnabled(false);
+		wj.setLimitsEnabled(false);
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		wj.setLimits(-Math.PI, -Math.PI);
-		TestCase.assertFalse(wj.isLimitEnabled());
+		wj.setLimits(1.0);
+		TestCase.assertFalse(wj.isUpperLimitEnabled());
+		TestCase.assertFalse(wj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
-		TestCase.assertEquals(-Math.PI, wj.getLowerLimit());
-		TestCase.assertEquals(-Math.PI, wj.getUpperLimit());
+		TestCase.assertEquals(1.0, wj.getLowerLimit());
+		TestCase.assertEquals(1.0, wj.getUpperLimit());
 	}
 	
 	/**
@@ -627,10 +1062,12 @@ public class WheelJointTest extends AbstractJointTest {
 	public void setLimitsDifferentSleep() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
-		// by default the limit is enabled
-		TestCase.assertFalse(wj.isLimitEnabled());
+		wj.setLowerLimitEnabled(true);
+		wj.setUpperLimitEnabled(true);
 		
-		wj.setLimitEnabled(true);
+		// by default the limit is enabled
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = wj.getLowerLimit();
@@ -648,58 +1085,63 @@ public class WheelJointTest extends AbstractJointTest {
 		// set the limits to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		wj.setLimits(defaultLowerLimit, defaultUpperLimit);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, wj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, wj.getUpperLimit());
 		
 		// set the limits to a different value - the bodies should wake up
-		wj.setLimits(-Math.PI, Math.PI);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		wj.setLimits(2.0, 3.0);
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-Math.PI, wj.getLowerLimit());
-		TestCase.assertEquals(Math.PI, wj.getUpperLimit());
+		TestCase.assertEquals(2.0, wj.getLowerLimit());
+		TestCase.assertEquals(3.0, wj.getUpperLimit());
 		
 		// test the scenario where only the lower limit value changes
-		wj.setLowerLimit(-2*Math.PI);
-		TestCase.assertEquals(-2*Math.PI, wj.getLowerLimit());
+		wj.setLowerLimit(1.0);
+		TestCase.assertEquals(1.0, wj.getLowerLimit());
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		wj.setLimits(-Math.PI, Math.PI);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		wj.setLimits(0.0, 3.0);
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-Math.PI, wj.getLowerLimit());
-		TestCase.assertEquals(Math.PI, wj.getUpperLimit());
+		TestCase.assertEquals(0.0, wj.getLowerLimit());
+		TestCase.assertEquals(3.0, wj.getUpperLimit());
 		
 		// test the scenario where only the upper limit value changes
-		wj.setUpperLimit(2*Math.PI);
-		TestCase.assertEquals(2*Math.PI, wj.getUpperLimit());
+		wj.setUpperLimit(2.0);
+		TestCase.assertEquals(2.0, wj.getUpperLimit());
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		wj.setLimits(-Math.PI, Math.PI);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		wj.setLimits(0.0, 1.0);
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-Math.PI, wj.getLowerLimit());
-		TestCase.assertEquals(Math.PI, wj.getUpperLimit());
+		TestCase.assertEquals(0.0, wj.getLowerLimit());
+		TestCase.assertEquals(1.0, wj.getUpperLimit());
 		
 		// now disable the limit, and the limits should change
 		// but the bodies should not wake
-		wj.setLimitEnabled(false);
+		wj.setLimitsEnabled(false);
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		wj.setLimits(Math.PI, 2*Math.PI);
-		TestCase.assertFalse(wj.isLimitEnabled());
+		wj.setLimits(1.0, 2.0);
+		TestCase.assertFalse(wj.isUpperLimitEnabled());
+		TestCase.assertFalse(wj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
-		TestCase.assertEquals(Math.PI, wj.getLowerLimit());
-		TestCase.assertEquals(2*Math.PI, wj.getUpperLimit());
+		TestCase.assertEquals(1.0, wj.getLowerLimit());
+		TestCase.assertEquals(2.0, wj.getUpperLimit());
 	}
 	
 	/**
@@ -709,10 +1151,11 @@ public class WheelJointTest extends AbstractJointTest {
 	public void setLowerLimitSleep() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
-		// by default the limit is enabled
-		TestCase.assertFalse(wj.isLimitEnabled());
+		wj.setLowerLimitEnabled(true);
+		wj.setUpperLimitEnabled(true);
 		
-		wj.setLimitEnabled(true);
+		// by default the limit is enabled
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = wj.getLowerLimit();
@@ -729,30 +1172,30 @@ public class WheelJointTest extends AbstractJointTest {
 		// set the lower limit to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		wj.setLowerLimit(defaultLowerLimit);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, wj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, wj.getUpperLimit());
 		
 		// set the limit to a different value - the bodies should wake up
-		wj.setLowerLimit(-Math.PI);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		wj.setLowerLimit(-0.5);
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-Math.PI, wj.getLowerLimit());
+		TestCase.assertEquals(-0.5, wj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, wj.getUpperLimit());
 		
 		// now disable the limit, and the lower limit should change
 		// but the bodies should not wake
-		wj.setLimitEnabled(false);
+		wj.setLimitsEnabled(false);
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		wj.setLowerLimit(-2*Math.PI);
+		wj.setLowerLimit(-0.2);
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
-		TestCase.assertEquals(-2*Math.PI, wj.getLowerLimit());
+		TestCase.assertEquals(-0.2, wj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, wj.getUpperLimit());
 	}
 
@@ -763,10 +1206,11 @@ public class WheelJointTest extends AbstractJointTest {
 	public void setUpperLimitSleep() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
-		// by default the limit is enabled
-		TestCase.assertFalse(wj.isLimitEnabled());
+		wj.setLowerLimitEnabled(true);
+		wj.setUpperLimitEnabled(true);
 		
-		wj.setLimitEnabled(true);
+		// by default the limit is enabled
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = wj.getLowerLimit();
@@ -783,33 +1227,33 @@ public class WheelJointTest extends AbstractJointTest {
 		// set the upper limit to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		wj.setUpperLimit(defaultUpperLimit);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, wj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, wj.getUpperLimit());
 		
 		// set the limit to a different value - the bodies should wake up
-		wj.setUpperLimit(Math.PI);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		wj.setUpperLimit(2.0);
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, wj.getLowerLimit());
-		TestCase.assertEquals(Math.PI, wj.getUpperLimit());
+		TestCase.assertEquals(2.0, wj.getUpperLimit());
 		
 		// now disable the limit, and the upper limit should change
 		// but the bodies should not wake
-		wj.setLimitEnabled(false);
+		wj.setLimitsEnabled(false);
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		wj.setUpperLimit(2*Math.PI);
+		wj.setUpperLimit(3.0);
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, wj.getLowerLimit());
-		TestCase.assertEquals(2*Math.PI, wj.getUpperLimit());
+		TestCase.assertEquals(3.0, wj.getUpperLimit());
 	}
-
+	
 	/**
 	 * Tests the sleep interaction when changing the limits and enabling them.
 	 */
@@ -817,10 +1261,12 @@ public class WheelJointTest extends AbstractJointTest {
 	public void setLimitsEnabledSameSleep() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
-		// by default the limit is enabled
-		TestCase.assertFalse(wj.isLimitEnabled());
+		wj.setLowerLimitEnabled(true);
+		wj.setUpperLimitEnabled(true);
 		
-		wj.setLimitEnabled(true);
+		// by default the limit is enabled
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = wj.getLowerLimit();
@@ -838,7 +1284,8 @@ public class WheelJointTest extends AbstractJointTest {
 		// the limit should already be enabled and the value isn't changing
 		// so the bodies should not wake
 		wj.setLimitsEnabled(defaultLowerLimit, defaultUpperLimit);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, wj.getLowerLimit());
@@ -846,21 +1293,23 @@ public class WheelJointTest extends AbstractJointTest {
 		
 		// the limit should already be enabled and the value is changing
 		// so the bodies should wake
-		wj.setLimitsEnabled(1.0, 1.0);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		wj.setLimitsEnabled(2.0);
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(1.0, wj.getLowerLimit());
-		TestCase.assertEquals(1.0, wj.getUpperLimit());
+		TestCase.assertEquals(2.0, wj.getLowerLimit());
+		TestCase.assertEquals(2.0, wj.getUpperLimit());
 		
 		b1.setAtRest(true);
 		b2.setAtRest(true);
-		wj.setLimitEnabled(false);
+		wj.setLimitsEnabled(false);
 		
 		// the limit is not enabled but the value isn't changing
 		// so the bodies should still wake
-		wj.setLimitsEnabled(1.0, 1.0);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		wj.setLimitsEnabled(1.0);
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(1.0, wj.getLowerLimit());
@@ -874,10 +1323,12 @@ public class WheelJointTest extends AbstractJointTest {
 	public void setLimitsEnabledDifferentSleep() {
 		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
-		// by default the limit is enabled
-		TestCase.assertFalse(wj.isLimitEnabled());
+		wj.setLowerLimitEnabled(true);
+		wj.setUpperLimitEnabled(true);
 		
-		wj.setLimitEnabled(true);
+		// by default the limit is enabled
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = wj.getLowerLimit();
@@ -895,67 +1346,63 @@ public class WheelJointTest extends AbstractJointTest {
 		// set the limits to the current value - since the value hasn't changed
 		// and the limit is already enabled the bodies should remain asleep
 		wj.setLimitsEnabled(defaultLowerLimit, defaultUpperLimit);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, wj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, wj.getUpperLimit());
 		
 		// set the limits to a different value - the bodies should wake up
-		wj.setLimitsEnabled(-1.0, 1.0);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		wj.setLimitsEnabled(0.0, 2.0);
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-1.0, wj.getLowerLimit());
-		TestCase.assertEquals(1.0, wj.getUpperLimit());
+		TestCase.assertEquals(0.0, wj.getLowerLimit());
+		TestCase.assertEquals(2.0, wj.getUpperLimit());
 		
 		// test the scenario where only the lower limit value changes
-		wj.setLowerLimit(-2.0);
-		TestCase.assertEquals(-2.0, wj.getLowerLimit());
+		wj.setLowerLimit(0.5);
+		TestCase.assertEquals(0.5, wj.getLowerLimit());
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		wj.setLimitsEnabled(-1.0, 1.0);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		wj.setLimitsEnabled(0.0, 2.0);
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-1.0, wj.getLowerLimit());
-		TestCase.assertEquals(1.0, wj.getUpperLimit());
+		TestCase.assertEquals(0.0, wj.getLowerLimit());
+		TestCase.assertEquals(2.0, wj.getUpperLimit());
 		
 		// test the scenario where only the upper limit value changes
-		wj.setUpperLimit(2.0);
-		TestCase.assertEquals(2.0, wj.getUpperLimit());
+		wj.setUpperLimit(3.0);
+		TestCase.assertEquals(3.0, wj.getUpperLimit());
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		wj.setLimitsEnabled(-1.0, 1.0);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		wj.setLimitsEnabled(0.0, 2.0);
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-1.0, wj.getLowerLimit());
-		TestCase.assertEquals(1.0, wj.getUpperLimit());
+		TestCase.assertEquals(0.0, wj.getLowerLimit());
+		TestCase.assertEquals(2.0, wj.getUpperLimit());
 		
 		// now disable the limit and make sure they wake
 		// even though the limits don't change
-		wj.setLimitEnabled(false);
+		wj.setLimitsEnabled(false);
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		wj.setLimitsEnabled(-1.0, 1.0);
-		TestCase.assertTrue(wj.isLimitEnabled());
+		wj.setLimitsEnabled(0.5, 4.0);
+		TestCase.assertTrue(wj.isUpperLimitEnabled());
+		TestCase.assertTrue(wj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-1.0, wj.getLowerLimit());
-		TestCase.assertEquals(1.0, wj.getUpperLimit());
-	}
-	
-	/**
-	 * Tests invalid limits.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void invalidLimits() {
-		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		wj.setLimitsEnabled(5, 0);
+		TestCase.assertEquals(0.5, wj.getLowerLimit());
+		TestCase.assertEquals(4.0, wj.getUpperLimit());
 	}
 	
 	/**

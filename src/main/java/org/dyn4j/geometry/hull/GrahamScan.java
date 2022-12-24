@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,9 +28,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.NullElementException;
 import org.dyn4j.geometry.RobustGeometry;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of the Graham Scan convex hull algorithm.
@@ -40,7 +41,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This algorithm is O(n log n) where n is the number of input points.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 2.2.0
  */
 public class GrahamScan extends AbstractHullGenerator implements HullGenerator {
@@ -50,7 +51,8 @@ public class GrahamScan extends AbstractHullGenerator implements HullGenerator {
 	@Override
 	public Vector2[] generate(Vector2... points) {
 		// check for null points array
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.hull.nullArray"));
+		if (points == null) 
+			throw new ArgumentNullException("points");
 		
 		// get the size
 		int size = points.length;
@@ -61,8 +63,11 @@ public class GrahamScan extends AbstractHullGenerator implements HullGenerator {
 		Vector2 minY = points[0];
 		for (int i = 1; i < size; i++) {
 			Vector2 p = points[i];
+			
 			// make sure the point is not null
-			if (p == null) throw new NullPointerException(Messages.getString("geometry.hull.nullPoints"));
+			if (p == null) 
+				throw new NullElementException("points", i);
+			
 			if (p.y < minY.y) {
 				minY = p;
 			} else if (p.y == minY.y) {

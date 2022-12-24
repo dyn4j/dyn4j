@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -67,6 +67,9 @@ import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.collision.narrowphase.Raycast;
 import org.dyn4j.collision.narrowphase.RaycastDetector;
 import org.dyn4j.dynamics.Body;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ObjectAlreadyExistsException;
+import org.dyn4j.exception.ObjectAlreadyOwnedException;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Link;
@@ -74,7 +77,6 @@ import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 import org.dyn4j.world.listener.BoundsListener;
 import org.dyn4j.world.listener.CollisionListener;
 import org.dyn4j.world.result.ConvexCastResult;
@@ -108,7 +110,7 @@ import org.dyn4j.world.result.RaycastResult;
  * methods to handle certain scenarios like fixture removal on a body or bodies added to
  * more than one world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
- * @version 4.2.1
+ * @version 5.0.0
  * @since 4.0.0
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
@@ -235,11 +237,17 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	@Override
 	public void addBody(T body) {
 		// check for null body
-		if (body == null) throw new NullPointerException(Messages.getString("dynamics.world.addNullBody"));
+		if (body == null) 
+			throw new ArgumentNullException("body");
+		
 		// dont allow adding it twice
-		if (body.getOwner() == this) throw new IllegalArgumentException(Messages.getString("dynamics.world.addExistingBody"));
+		if (body.getOwner() == this) 
+			throw new ObjectAlreadyExistsException("body", body, body.getOwner());
+		
 		// dont allow a body that already is assigned to another world
-		if (body.getOwner() != null) throw new IllegalArgumentException(Messages.getString("dynamics.world.addOtherWorldBody"));
+		if (body.getOwner() != null) 
+			throw new ObjectAlreadyOwnedException("body", body, body.getOwner());
+		
 		// add it to the world
 		this.bodies.add(body);
 		// set the world property on the body
@@ -373,7 +381,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 */
 	@Override
 	public void setBroadphaseDetector(CollisionItemBroadphaseDetector<T, E> broadphaseDetector) {
-		if (broadphaseDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBroadphaseDetector"));
+		if (broadphaseDetector == null) 
+			throw new ArgumentNullException("broadphaseDetector");
+		
 		// set the new broadphase
 		this.broadphaseDetector = broadphaseDetector;
 		
@@ -406,7 +416,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 */
 	@Override
 	public void setBroadphaseCollisionDataFilter(BroadphaseCollisionDataFilter<T, E> filter) {
-		if (filter == null) throw new NullPointerException(Messages.getString("dynamics.world.nullBroadphaseFilter"));
+		if (filter == null) 
+			throw new ArgumentNullException("filter");
+		
 		this.broadphaseFilter = filter;
 	}
 	
@@ -415,7 +427,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 */
 	@Override
 	public void setNarrowphaseDetector(NarrowphaseDetector narrowphaseDetector) {
-		if (narrowphaseDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullNarrowphaseDetector"));
+		if (narrowphaseDetector == null) 
+			throw new ArgumentNullException("narrowphaseDetector");
+		
 		this.narrowphaseDetector = narrowphaseDetector;
 	}
 	
@@ -432,7 +446,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 */
 	@Override
 	public void setNarrowphasePostProcessor(NarrowphasePostProcessor narrowphasePostProcessor) {
-		if (narrowphasePostProcessor == null) throw new NullPointerException(Messages.getString("dynamics.world.nullNarrowphasePostProcessor"));
+		if (narrowphasePostProcessor == null) 
+			throw new ArgumentNullException("narrowphasePostProcessor");
+		
 		this.narrowphasePostProcessor = narrowphasePostProcessor;
 	}
 	
@@ -449,7 +465,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 */
 	@Override
 	public void setManifoldSolver(ManifoldSolver manifoldSolver) {
-		if (manifoldSolver == null) throw new NullPointerException(Messages.getString("dynamics.world.nullManifoldSolver"));
+		if (manifoldSolver == null) 
+			throw new ArgumentNullException("manifoldSolver");
+		
 		this.manifoldSolver = manifoldSolver;
 	}
 	
@@ -466,7 +484,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 */
 	@Override
 	public void setRaycastDetector(RaycastDetector raycastDetector) {
-		if (raycastDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullRaycastDetector"));
+		if (raycastDetector == null) 
+			throw new ArgumentNullException("raycastDetector");
+		
 		this.raycastDetector = raycastDetector;
 	}
 	
@@ -483,7 +503,9 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 	 */
 	@Override
 	public void setTimeOfImpactDetector(TimeOfImpactDetector timeOfImpactDetector) {
-		if (timeOfImpactDetector == null) throw new NullPointerException(Messages.getString("dynamics.world.nullTimeOfImpactDetector"));
+		if (timeOfImpactDetector == null) 
+			throw new ArgumentNullException("timeOfImpactDetector");
+		
 		this.timeOfImpactDetector = timeOfImpactDetector;
 	}
 

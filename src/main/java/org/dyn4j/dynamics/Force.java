@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,13 +24,13 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.exception.ArgumentNullException;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Represents a force.
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.0
  * @since 1.0.0
  */
 public class Force {
@@ -59,7 +59,7 @@ public class Force {
 	 * @throws NullPointerException if force is null
 	 */
 	public Force(Vector2 force) {
-		if (force == null) throw new NullPointerException(Messages.getString("dynamics.force.nullVector"));
+		if (force == null) throw new ArgumentNullException("force");
 		this.force = force;
 	}
 	
@@ -69,7 +69,7 @@ public class Force {
 	 * @throws NullPointerException if force is null
 	 */
 	public Force(Force force) {
-		if (force == null) throw new NullPointerException(Messages.getString("dynamics.force.nullForce"));
+		if (force == null) throw new ArgumentNullException("force");
 		this.force = force.force.copy();
 	}
 	
@@ -88,7 +88,7 @@ public class Force {
 	 * @throws NullPointerException if force is null
 	 */
 	public void set(Vector2 force) {
-		if (force == null) throw new NullPointerException(Messages.getString("dynamics.force.setNullVector"));
+		if (force == null) throw new ArgumentNullException("force");
 		this.force.set(force);
 	}
 	
@@ -98,7 +98,7 @@ public class Force {
 	 * @throws NullPointerException if force is null
 	 */
 	public void set(Force force) {
-		if (force == null) throw new NullPointerException(Messages.getString("dynamics.force.setNullForce"));
+		if (force == null) throw new ArgumentNullException("force");
 		this.force.set(force.force);
 	}
 	

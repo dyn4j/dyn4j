@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,11 +24,11 @@
  */
 package org.dyn4j.collision;
 
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Translatable;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Represents a bounding region that is an Axis-Aligned bounding box.
@@ -36,7 +36,7 @@ import org.dyn4j.resources.Messages;
  * This class compares its AABB with the AABB of the given body and returns true
  * if they do not overlap.
  * @author William Bittle
- * @version 4.2.1
+ * @version 5.0.0
  * @since 3.1.1
  */
 public final class AxisAlignedBounds extends AbstractBounds implements Bounds, Translatable {
@@ -50,7 +50,12 @@ public final class AxisAlignedBounds extends AbstractBounds implements Bounds, T
 	 * @throws IllegalArgumentException if either width or height are less than or equal to zero
 	 */
 	public AxisAlignedBounds(double width, double height) {
-		if (width <= 0.0 || height <= 0.0) throw new IllegalArgumentException(Messages.getString("collision.bounds.axisAligned.invalidArgument"));
+		if (width <= 0.0) 
+			throw new ValueOutOfRangeException("width", width, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
+		if (height <= 0.0) 
+			throw new ValueOutOfRangeException("height", height, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		double w2 = width * 0.5;
 		double h2 = height * 0.5;
 		this.aabb = new AABB(-w2, -h2, w2, h2);

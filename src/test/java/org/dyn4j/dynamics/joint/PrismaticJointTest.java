@@ -36,7 +36,7 @@ import junit.framework.TestCase;
  * @version 4.0.1
  * @since 1.0.2
  */
-public class PrismaticJointTest extends AbstractJointTest {
+public class PrismaticJointTest extends BaseJointTest {
 	/**
 	 * Tests the successful creation case.
 	 */
@@ -70,8 +70,10 @@ public class PrismaticJointTest extends AbstractJointTest {
 		TestCase.assertEquals(b2, pj.getOtherBody(b1));
 		
 		TestCase.assertEquals(false, pj.isCollisionAllowed());
-		TestCase.assertEquals(false, pj.isLimitEnabled());
+		TestCase.assertEquals(false, pj.isLowerLimitEnabled());
+		TestCase.assertEquals(false, pj.isUpperLimitEnabled());
 		TestCase.assertEquals(false, pj.isMotorEnabled());
+		TestCase.assertEquals(false, pj.isMaximumMotorForceEnabled());
 		
 		TestCase.assertNotNull(pj.toString());
 	}
@@ -109,18 +111,10 @@ public class PrismaticJointTest extends AbstractJointTest {
 	}
 	
 	/**
-	 * Tests the create method passing the same body.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void createWithSameBody() {
-		new PrismaticJoint<Body>(b1, b1, new Vector2(), new Vector2(0.0, 1.0));
-	}
-
-	/**
 	 * Tests valid maximum force values.
 	 */
 	@Test
-	public void setMaximumMotorForce() {
+	public void setMotorMaximumForce() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
 		pj.setMaximumMotorForce(0.0);
@@ -146,11 +140,12 @@ public class PrismaticJointTest extends AbstractJointTest {
 	 * Tests the setting the maximum motor force wrt. sleeping.
 	 */
 	@Test
-	public void setMaximumMotorForceSleep() {
+	public void setMotorMaximumForceSleep() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
 		TestCase.assertFalse(pj.isMotorEnabled());
 		TestCase.assertEquals(1000.0, pj.getMaximumMotorForce());
+		TestCase.assertFalse(pj.isMaximumMotorForceEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		
@@ -169,6 +164,23 @@ public class PrismaticJointTest extends AbstractJointTest {
 		// change the max force
 		pj.setMaximumMotorForce(2.0);
 		TestCase.assertEquals(2.0, pj.getMaximumMotorForce());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
+		
+		pj.setMaximumMotorForceEnabled(true);
+		b1.setAtRest(true);
+		b2.setAtRest(true);
+		
+		// change the max force
+		pj.setMaximumMotorForce(2.0);
+		TestCase.assertEquals(2.0, pj.getMaximumMotorForce());
+		TestCase.assertTrue(pj.isMaximumMotorForceEnabled());
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
+		
+		// change the max force
+		pj.setMaximumMotorForce(4.0);
+		TestCase.assertEquals(4.0, pj.getMaximumMotorForce());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		
@@ -343,16 +355,22 @@ public class PrismaticJointTest extends AbstractJointTest {
 	@Test
 	public void setUpperLimitSuccess() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		pj.setLowerLimit(-5.0);
 		
 		TestCase.assertEquals(0.0, pj.getUpperLimit());
 		
-		pj.setUpperLimit(1.0);
+		pj.setUpperLimit(2.0);
+		TestCase.assertEquals(2.0, pj.getUpperLimit(), 1e-6);
 		
-		TestCase.assertEquals(1.0, pj.getUpperLimit(), 1e-6);
+		pj.setUpperLimit(-2.0);
+		TestCase.assertEquals(-2.0, pj.getUpperLimit(), 1e-6);
+		
+		pj.setUpperLimit(0.0);
+		TestCase.assertEquals(0.0, pj.getUpperLimit(), 1e-6);
 	}
 	
 	/**
-	 * Tests the failed setting of the upper limit.
+	 * Tests the failed setting of the upper limit because it would be less than the lower.
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setUpperLimitInvalid() {
@@ -360,7 +378,7 @@ public class PrismaticJointTest extends AbstractJointTest {
 		
 		TestCase.assertEquals(0.0, pj.getUpperLimit());
 		
-		pj.setUpperLimit(-1.0);
+		pj.setUpperLimit(-0.5);
 	}
 	
 	/**
@@ -369,16 +387,22 @@ public class PrismaticJointTest extends AbstractJointTest {
 	@Test
 	public void setLowerLimit() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		pj.setUpperLimit(5.0);
 		
 		TestCase.assertEquals(0.0, pj.getLowerLimit());
 		
 		pj.setLowerLimit(-1.0);
-		
 		TestCase.assertEquals(-1.0, pj.getLowerLimit(), 1e-6);
+		
+		pj.setLowerLimit(0.0);
+		TestCase.assertEquals(0.0, pj.getLowerLimit(), 1e-6);
+		
+		pj.setLowerLimit(2.0);
+		TestCase.assertEquals(2.0, pj.getLowerLimit(), 1e-6);
 	}
 	
 	/**
-	 * Tests the failed setting of the lower limit.
+	 * Tests the failed setting of the lower limit because it would be higher than the upper.
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void setLowerLimitInvalid() {
@@ -386,7 +410,7 @@ public class PrismaticJointTest extends AbstractJointTest {
 		
 		TestCase.assertEquals(0.0, pj.getLowerLimit());
 		
-		pj.setLowerLimit(1.0);
+		pj.setLowerLimit(1.5);
 	}
 	
 	/**
@@ -403,20 +427,28 @@ public class PrismaticJointTest extends AbstractJointTest {
 		TestCase.assertEquals(0.0, pj.getLowerLimit(), 1e-6);
 		TestCase.assertEquals(1.0, pj.getUpperLimit(), 1e-6);
 		
-		pj.setLimits(-2.0, -1.0);		
-		TestCase.assertEquals(-2.0, pj.getLowerLimit(), 1e-6);
-		TestCase.assertEquals(-1.0, pj.getUpperLimit(), 1e-6);
+		pj.setLimits(-1.0, 2.0);		
+		TestCase.assertEquals(-1.0, pj.getLowerLimit(), 1e-6);
+		TestCase.assertEquals(2.0, pj.getUpperLimit(), 1e-6);
 		
-		pj.setLimits(1.0, 1.0);
-		TestCase.assertEquals(1.0, pj.getLowerLimit());
-		TestCase.assertEquals(1.0, pj.getUpperLimit());
+		pj.setLimits(-1.0, -1.0);
+		TestCase.assertEquals(-1.0, pj.getLowerLimit());
+		TestCase.assertEquals(-1.0, pj.getUpperLimit());
+		
+		pj.setLimits(-4.0, -1.0);
+		TestCase.assertEquals(-4.0, pj.getLowerLimit());
+		TestCase.assertEquals(-1.0, pj.getUpperLimit());
+		
+		pj.setLimits(3.0, 5.0);
+		TestCase.assertEquals(3.0, pj.getLowerLimit());
+		TestCase.assertEquals(5.0, pj.getUpperLimit());
 	}
 	
 	/**
 	 * Tests the failed setting of the lower and upper limits.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setUpperAndLowerLimitsInvalid() {
+	public void setUpperAndLowerLimitsInvalid1() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
 		TestCase.assertEquals(0.0, pj.getLowerLimit());
@@ -424,35 +456,59 @@ public class PrismaticJointTest extends AbstractJointTest {
 		
 		pj.setLimits(1.0, 0.0);
 	}
-	
+
 	/**
 	 * Tests the failed setting of the lower and upper limits.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setUpperAndLowerLimitsEnabledInvalid() {
+	public void setUpperAndLowerLimitsInvalid2() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
 		TestCase.assertEquals(0.0, pj.getLowerLimit());
 		TestCase.assertEquals(0.0, pj.getUpperLimit());
 		
-		pj.setLimitsEnabled(1.0, 0.0);
+		pj.setLimits(0.0, -1.0);
+	}
+	
+	/**
+	 * Tests the successful setting of the lower and upper limits.
+	 */
+	@Test
+	public void setSameLimitValid() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		TestCase.assertEquals(0.0, pj.getLowerLimit());
+		TestCase.assertEquals(0.0, pj.getUpperLimit());
+		
+		pj.setLimits(2.0);
+		TestCase.assertEquals(2.0, pj.getLowerLimit());
+		TestCase.assertEquals(2.0, pj.getUpperLimit());
+		
+		pj.setLimits(-2.0);
+		TestCase.assertEquals(-2.0, pj.getLowerLimit());
+		TestCase.assertEquals(-2.0, pj.getUpperLimit());
 	}
 	
 	/**
 	 * Tests the sleep interaction when enabling/disabling the limits.
 	 */
 	@Test
-	public void setLimitEnabledSleep() {
+	public void setLimitsEnabledSleep() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
-		// by default the limit is enabled
-		TestCase.assertFalse(pj.isLimitEnabled());
+		pj.setLowerLimitEnabled(true);
+		pj.setUpperLimitEnabled(true);
 		
-		pj.setLimitEnabled(true);
+		// by default the limit is enabled
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		
 		// lets disable it first and ensure that the bodies are awake
-		pj.setLimitEnabled(false);
-		TestCase.assertFalse(pj.isLimitEnabled());
+		pj.setLimitsEnabled(false);
+		TestCase.assertFalse(pj.isUpperLimitEnabled());
+		TestCase.assertFalse(pj.isLowerLimitEnabled());
+
+		// the bodies should be initially awake
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		
@@ -461,14 +517,16 @@ public class PrismaticJointTest extends AbstractJointTest {
 		b2.setAtRest(true);
 		
 		// if we disable it again, the bodies should not wake
-		pj.setLimitEnabled(false);
-		TestCase.assertFalse(pj.isLimitEnabled());
+		pj.setLimitsEnabled(false);
+		TestCase.assertFalse(pj.isUpperLimitEnabled());
+		TestCase.assertFalse(pj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		
 		// when we enable it, we should awake the bodies
-		pj.setLimitEnabled(true);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setLimitsEnabled(true);
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		
@@ -476,14 +534,16 @@ public class PrismaticJointTest extends AbstractJointTest {
 		// it should not wake the bodies
 		b1.setAtRest(true);
 		b2.setAtRest(true);
-		pj.setLimitEnabled(true);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setLimitsEnabled(true);
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		
 		// if we disable the limit, then the bodies should be reawakened
-		pj.setLimitEnabled(false);
-		TestCase.assertFalse(pj.isLimitEnabled());
+		pj.setLimitsEnabled(false);
+		TestCase.assertFalse(pj.isUpperLimitEnabled());
+		TestCase.assertFalse(pj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 	}
@@ -495,10 +555,12 @@ public class PrismaticJointTest extends AbstractJointTest {
 	public void setLimitsSameSleep() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
-		// by default the limit is enabled
-		TestCase.assertFalse(pj.isLimitEnabled());
+		pj.setLowerLimitEnabled(true);
+		pj.setUpperLimitEnabled(true);
 		
-		pj.setLimitEnabled(true);
+		// by default the limit is enabled
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = pj.getLowerLimit();
@@ -516,58 +578,63 @@ public class PrismaticJointTest extends AbstractJointTest {
 		// set the limits to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		pj.setLimits(defaultLowerLimit, defaultUpperLimit);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, pj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, pj.getUpperLimit());
 		
 		// set the limits to a different value - the bodies should wake up
-		pj.setLimits(1.0, 1.0);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setLimits(2.0);
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(1.0, pj.getLowerLimit());
-		TestCase.assertEquals(1.0, pj.getUpperLimit());
+		TestCase.assertEquals(2.0, pj.getLowerLimit());
+		TestCase.assertEquals(2.0, pj.getUpperLimit());
 		
 		// test the scenario where only the lower limit value changes
-		pj.setLowerLimit(-1.0);
-		TestCase.assertEquals(-1.0, pj.getLowerLimit());
+		pj.setLowerLimit(0.0);
+		TestCase.assertEquals(0.0, pj.getLowerLimit());
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		pj.setLimits(1.0, 1.0);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setLimits(2.0);
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(1.0, pj.getLowerLimit());
-		TestCase.assertEquals(1.0, pj.getUpperLimit());
+		TestCase.assertEquals(2.0, pj.getLowerLimit());
+		TestCase.assertEquals(2.0, pj.getUpperLimit());
 		
 		// test the scenario where only the upper limit value changes
-		pj.setUpperLimit(2.0);
-		TestCase.assertEquals(2.0, pj.getUpperLimit());
+		pj.setUpperLimit(3.0);
+		TestCase.assertEquals(3.0, pj.getUpperLimit());
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		pj.setLimits(1.0, 1.0);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setLimits(2.0);
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(1.0, pj.getLowerLimit());
-		TestCase.assertEquals(1.0, pj.getUpperLimit());
+		TestCase.assertEquals(2.0, pj.getLowerLimit());
+		TestCase.assertEquals(2.0, pj.getUpperLimit());
 		
 		// now disable the limit, and the limits should change
 		// but the bodies should not wake
-		pj.setLimitEnabled(false);
+		pj.setLimitsEnabled(false);
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		pj.setLimits(-1.0, -1.0);
-		TestCase.assertFalse(pj.isLimitEnabled());
+		pj.setLimits(1.0);
+		TestCase.assertFalse(pj.isUpperLimitEnabled());
+		TestCase.assertFalse(pj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
-		TestCase.assertEquals(-1.0, pj.getLowerLimit());
-		TestCase.assertEquals(-1.0, pj.getUpperLimit());
+		TestCase.assertEquals(1.0, pj.getLowerLimit());
+		TestCase.assertEquals(1.0, pj.getUpperLimit());
 	}
 	
 	/**
@@ -577,10 +644,12 @@ public class PrismaticJointTest extends AbstractJointTest {
 	public void setLimitsDifferentSleep() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
-		// by default the limit is enabled
-		TestCase.assertFalse(pj.isLimitEnabled());
+		pj.setLowerLimitEnabled(true);
+		pj.setUpperLimitEnabled(true);
 		
-		pj.setLimitEnabled(true);
+		// by default the limit is enabled
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = pj.getLowerLimit();
@@ -598,32 +667,35 @@ public class PrismaticJointTest extends AbstractJointTest {
 		// set the limits to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		pj.setLimits(defaultLowerLimit, defaultUpperLimit);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, pj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, pj.getUpperLimit());
 		
 		// set the limits to a different value - the bodies should wake up
-		pj.setLimits(-1.0, 1.0);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setLimits(2.0, 3.0);
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-1.0, pj.getLowerLimit());
-		TestCase.assertEquals(1.0, pj.getUpperLimit());
+		TestCase.assertEquals(2.0, pj.getLowerLimit());
+		TestCase.assertEquals(3.0, pj.getUpperLimit());
 		
 		// test the scenario where only the lower limit value changes
-		pj.setLowerLimit(-2.0);
-		TestCase.assertEquals(-2.0, pj.getLowerLimit());
+		pj.setLowerLimit(1.0);
+		TestCase.assertEquals(1.0, pj.getLowerLimit());
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		pj.setLimits(-1.0, 1.0);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setLimits(0.0, 3.0);
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-1.0, pj.getLowerLimit());
-		TestCase.assertEquals(1.0, pj.getUpperLimit());
+		TestCase.assertEquals(0.0, pj.getLowerLimit());
+		TestCase.assertEquals(3.0, pj.getUpperLimit());
 		
 		// test the scenario where only the upper limit value changes
 		pj.setUpperLimit(2.0);
@@ -631,21 +703,23 @@ public class PrismaticJointTest extends AbstractJointTest {
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		pj.setLimits(-1.0, 1.0);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setLimits(0.0, 1.0);
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-1.0, pj.getLowerLimit());
+		TestCase.assertEquals(0.0, pj.getLowerLimit());
 		TestCase.assertEquals(1.0, pj.getUpperLimit());
 		
 		// now disable the limit, and the limits should change
 		// but the bodies should not wake
-		pj.setLimitEnabled(false);
+		pj.setLimitsEnabled(false);
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
 		pj.setLimits(1.0, 2.0);
-		TestCase.assertFalse(pj.isLimitEnabled());
+		TestCase.assertFalse(pj.isUpperLimitEnabled());
+		TestCase.assertFalse(pj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(1.0, pj.getLowerLimit());
@@ -659,10 +733,11 @@ public class PrismaticJointTest extends AbstractJointTest {
 	public void setLowerLimitSleep() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
-		// by default the limit is enabled
-		TestCase.assertFalse(pj.isLimitEnabled());
+		pj.setLowerLimitEnabled(true);
+		pj.setUpperLimitEnabled(true);
 		
-		pj.setLimitEnabled(true);
+		// by default the limit is enabled
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = pj.getLowerLimit();
@@ -679,30 +754,30 @@ public class PrismaticJointTest extends AbstractJointTest {
 		// set the lower limit to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		pj.setLowerLimit(defaultLowerLimit);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, pj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, pj.getUpperLimit());
 		
 		// set the limit to a different value - the bodies should wake up
-		pj.setLowerLimit(-1.0);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setLowerLimit(-0.5);
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-1.0, pj.getLowerLimit());
+		TestCase.assertEquals(-0.5, pj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, pj.getUpperLimit());
 		
 		// now disable the limit, and the lower limit should change
 		// but the bodies should not wake
-		pj.setLimitEnabled(false);
+		pj.setLimitsEnabled(false);
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		pj.setLowerLimit(-2.0);
+		pj.setLowerLimit(-0.2);
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
-		TestCase.assertEquals(-2.0, pj.getLowerLimit());
+		TestCase.assertEquals(-0.2, pj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, pj.getUpperLimit());
 	}
 
@@ -713,10 +788,11 @@ public class PrismaticJointTest extends AbstractJointTest {
 	public void setUpperLimitSleep() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
-		// by default the limit is enabled
-		TestCase.assertFalse(pj.isLimitEnabled());
+		pj.setLowerLimitEnabled(true);
+		pj.setUpperLimitEnabled(true);
 		
-		pj.setLimitEnabled(true);
+		// by default the limit is enabled
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = pj.getLowerLimit();
@@ -733,31 +809,31 @@ public class PrismaticJointTest extends AbstractJointTest {
 		// set the upper limit to the current value - since the value hasn't changed
 		// the bodies should remain asleep
 		pj.setUpperLimit(defaultUpperLimit);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, pj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, pj.getUpperLimit());
 		
 		// set the limit to a different value - the bodies should wake up
-		pj.setUpperLimit(1.0);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setUpperLimit(2.0);
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, pj.getLowerLimit());
-		TestCase.assertEquals(1.0, pj.getUpperLimit());
+		TestCase.assertEquals(2.0, pj.getUpperLimit());
 		
 		// now disable the limit, and the upper limit should change
 		// but the bodies should not wake
-		pj.setLimitEnabled(false);
+		pj.setLimitsEnabled(false);
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		pj.setUpperLimit(2.0);
+		pj.setUpperLimit(3.0);
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, pj.getLowerLimit());
-		TestCase.assertEquals(2.0, pj.getUpperLimit());
+		TestCase.assertEquals(3.0, pj.getUpperLimit());
 	}
 	
 	/**
@@ -767,10 +843,12 @@ public class PrismaticJointTest extends AbstractJointTest {
 	public void setLimitsEnabledSameSleep() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
-		// by default the limit is enabled
-		TestCase.assertFalse(pj.isLimitEnabled());
+		pj.setLowerLimitEnabled(true);
+		pj.setUpperLimitEnabled(true);
 		
-		pj.setLimitEnabled(true);
+		// by default the limit is enabled
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = pj.getLowerLimit();
@@ -788,7 +866,8 @@ public class PrismaticJointTest extends AbstractJointTest {
 		// the limit should already be enabled and the value isn't changing
 		// so the bodies should not wake
 		pj.setLimitsEnabled(defaultLowerLimit, defaultUpperLimit);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, pj.getLowerLimit());
@@ -796,21 +875,23 @@ public class PrismaticJointTest extends AbstractJointTest {
 		
 		// the limit should already be enabled and the value is changing
 		// so the bodies should wake
-		pj.setLimitsEnabled(1.0, 1.0);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setLimitsEnabled(2.0);
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(1.0, pj.getLowerLimit());
-		TestCase.assertEquals(1.0, pj.getUpperLimit());
+		TestCase.assertEquals(2.0, pj.getLowerLimit());
+		TestCase.assertEquals(2.0, pj.getUpperLimit());
 		
 		b1.setAtRest(true);
 		b2.setAtRest(true);
-		pj.setLimitEnabled(false);
+		pj.setLimitsEnabled(false);
 		
 		// the limit is not enabled but the value isn't changing
 		// so the bodies should still wake
-		pj.setLimitsEnabled(1.0, 1.0);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setLimitsEnabled(1.0);
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(1.0, pj.getLowerLimit());
@@ -824,10 +905,12 @@ public class PrismaticJointTest extends AbstractJointTest {
 	public void setLimitsEnabledDifferentSleep() {
 		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
 		
-		// by default the limit is enabled
-		TestCase.assertFalse(pj.isLimitEnabled());
+		pj.setLowerLimitEnabled(true);
+		pj.setUpperLimitEnabled(true);
 		
-		pj.setLimitEnabled(true);
+		// by default the limit is enabled
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		
 		// the default upper and lower limits should be equal
 		double defaultLowerLimit = pj.getLowerLimit();
@@ -845,57 +928,484 @@ public class PrismaticJointTest extends AbstractJointTest {
 		// set the limits to the current value - since the value hasn't changed
 		// and the limit is already enabled the bodies should remain asleep
 		pj.setLimitsEnabled(defaultLowerLimit, defaultUpperLimit);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(defaultLowerLimit, pj.getLowerLimit());
 		TestCase.assertEquals(defaultUpperLimit, pj.getUpperLimit());
 		
 		// set the limits to a different value - the bodies should wake up
-		pj.setLimitsEnabled(-1.0, 1.0);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setLimitsEnabled(0.0, 2.0);
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-1.0, pj.getLowerLimit());
-		TestCase.assertEquals(1.0, pj.getUpperLimit());
+		TestCase.assertEquals(0.0, pj.getLowerLimit());
+		TestCase.assertEquals(2.0, pj.getUpperLimit());
 		
 		// test the scenario where only the lower limit value changes
-		pj.setLowerLimit(-2.0);
-		TestCase.assertEquals(-2.0, pj.getLowerLimit());
+		pj.setLowerLimit(0.5);
+		TestCase.assertEquals(0.5, pj.getLowerLimit());
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		pj.setLimitsEnabled(-1.0, 1.0);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setLimitsEnabled(0.0, 2.0);
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-1.0, pj.getLowerLimit());
-		TestCase.assertEquals(1.0, pj.getUpperLimit());
+		TestCase.assertEquals(0.0, pj.getLowerLimit());
+		TestCase.assertEquals(2.0, pj.getUpperLimit());
 		
 		// test the scenario where only the upper limit value changes
-		pj.setUpperLimit(2.0);
-		TestCase.assertEquals(2.0, pj.getUpperLimit());
+		pj.setUpperLimit(3.0);
+		TestCase.assertEquals(3.0, pj.getUpperLimit());
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		pj.setLimitsEnabled(-1.0, 1.0);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setLimitsEnabled(0.0, 2.0);
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-1.0, pj.getLowerLimit());
-		TestCase.assertEquals(1.0, pj.getUpperLimit());
+		TestCase.assertEquals(0.0, pj.getLowerLimit());
+		TestCase.assertEquals(2.0, pj.getUpperLimit());
 		
 		// now disable the limit and make sure they wake
 		// even though the limits don't change
-		pj.setLimitEnabled(false);
+		pj.setLimitsEnabled(false);
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
-		pj.setLimitsEnabled(-1.0, 1.0);
-		TestCase.assertTrue(pj.isLimitEnabled());
+		pj.setLimitsEnabled(0.5, 4.0);
+		TestCase.assertTrue(pj.isUpperLimitEnabled());
+		TestCase.assertTrue(pj.isLowerLimitEnabled());
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
-		TestCase.assertEquals(-1.0, pj.getLowerLimit());
-		TestCase.assertEquals(1.0, pj.getUpperLimit());
+		TestCase.assertEquals(0.5, pj.getLowerLimit());
+		TestCase.assertEquals(4.0, pj.getUpperLimit());
 	}
+	
+
+	/**
+	 * Tests the isSpringEnabled method.
+	 */
+	@Test
+	public void isSpringEnabled() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		TestCase.assertFalse(pj.isSpringEnabled());
+		
+		pj.setSpringFrequency(1.0);
+		TestCase.assertFalse(pj.isSpringEnabled());
+		
+		pj.setSpringFrequency(100.0);
+		TestCase.assertFalse(pj.isSpringEnabled());
+		
+		pj.setSpringEnabled(true);
+		TestCase.assertTrue(pj.isSpringEnabled());
+
+		pj.setSpringFrequency(50.0);
+		TestCase.assertTrue(pj.isSpringEnabled());
+		
+		pj.setSpringEnabled(false);
+		TestCase.assertFalse(pj.isSpringEnabled());
+	}
+
+	/**
+	 * Tests the isSpringDamperEnabled method.
+	 */
+	@Test
+	public void isSpringDamperEnabled() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		TestCase.assertFalse(pj.isSpringDamperEnabled());
+		
+		pj.setSpringFrequency(1.0);
+		TestCase.assertFalse(pj.isSpringDamperEnabled());
+		
+		pj.setSpringFrequency(100.0);
+		TestCase.assertFalse(pj.isSpringDamperEnabled());
+		
+		pj.setSpringDampingRatio(0.4);
+		TestCase.assertFalse(pj.isSpringDamperEnabled());
+		
+		pj.setSpringDampingRatio(1.0);
+		TestCase.assertFalse(pj.isSpringDamperEnabled());
+		
+		pj.setSpringEnabled(true);
+		pj.setSpringDamperEnabled(false);
+		TestCase.assertFalse(pj.isSpringDamperEnabled());
+		
+		pj.setSpringDamperEnabled(true);
+		TestCase.assertTrue(pj.isSpringDamperEnabled());
+		
+		pj.setSpringEnabled(false);
+		TestCase.assertTrue(pj.isSpringDamperEnabled());
+	}
+	
+	/**
+	 * Tests valid distance values.
+	 */
+	@Test
+	public void setSpringRestOffset() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		pj.setSpringRestOffset(0.0);
+		TestCase.assertEquals(0.0, pj.getSpringRestOffset());
+		
+		pj.setSpringRestOffset(1.0);
+		TestCase.assertEquals(1.0, pj.getSpringRestOffset());
+		
+		pj.setSpringRestOffset(-1.0);
+		TestCase.assertEquals(-1.0, pj.getSpringRestOffset());
+	}
+	
+	/**
+	 * Tests valid damping ratio values.
+	 */
+	@Test
+	public void setSpringDampingRatio() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		pj.setSpringDampingRatio(0.0);
+		TestCase.assertEquals(0.0, pj.getSpringDampingRatio());
+		
+		pj.setSpringDampingRatio(0.001);
+		TestCase.assertEquals(0.001, pj.getSpringDampingRatio());
+		
+		pj.setSpringDampingRatio(1.0);
+		TestCase.assertEquals(1.0, pj.getSpringDampingRatio());
+		
+		pj.setSpringDampingRatio(0.2);
+		TestCase.assertEquals(0.2, pj.getSpringDampingRatio());
+
+		pj.setSpringEnabled(false);
+		pj.setSpringDamperEnabled(false);
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// this won't wake them because its not enabled
+		pj.setSpringDampingRatio(0.5);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+
+		// this won't wake the bodies because the spring isn't enabled
+		pj.setSpringDamperEnabled(true);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+
+		// enable the spring
+		pj.setSpringEnabled(true);
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// this won't wake the bodies because it's the same value
+		pj.setSpringDampingRatio(0.5);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// this should wake them
+		pj.setSpringDampingRatio(0.6);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+	}
+	
+	/**
+	 * Tests a negative damping ratio value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setNegativeDampingRatio() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		pj.setSpringDampingRatio(-1.0);
+	}
+	
+	/**
+	 * Tests a greater than one damping ratio value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setDampingRatioGreaterThan1() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		pj.setSpringDampingRatio(2.0);
+	}
+	
+	/**
+	 * Tests valid frequency values.
+	 */
+	@Test
+	public void setSpringFrequency() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		pj.setSpringFrequency(0.0);
+		TestCase.assertEquals(0.0, pj.getSpringFrequency());
+		
+		pj.setSpringFrequency(0.001);
+		TestCase.assertEquals(0.001, pj.getSpringFrequency());
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.getSpringMode());
+		
+		pj.setSpringFrequency(1.0);
+		TestCase.assertEquals(1.0, pj.getSpringFrequency());
+		
+		pj.setSpringFrequency(29.0);
+		TestCase.assertEquals(29.0, pj.getSpringFrequency());
+		
+		// at rest testing
+		
+		pj.setSpringEnabled(false);
+		pj.setSpringDamperEnabled(false);
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// the spring isn't enabled so it shouldn't wake the bodies
+		pj.setSpringFrequency(3.0);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// enabling the spring should wake the bodies
+		pj.setSpringEnabled(true);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+
+		// if the spring frequency doesn't change, then the bodies should
+		// state at rest
+		pj.setSpringFrequency(3.0);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// the frequency is changing, they should wake
+		pj.setSpringFrequency(5.0);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+		
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+
+		// this should wake the bodies
+		pj.setSpringDamperEnabled(true);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+	}
+	
+	/**
+	 * Tests the spring mode changing.
+	 */
+	@Test
+	public void setSpringMode() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		// test mode swapping
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.getSpringMode());
+		pj.setSpringStiffness(0.3);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, pj.getSpringMode());
+		pj.setSpringFrequency(0.5);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.getSpringMode());
+	}
+	
+	/**
+	 * Tests a negative stiffness value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setSpringStiffnessNegative() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		pj.setSpringStiffness(-0.3);
+	}
+
+	/**
+	 * Tests valid frequency values.
+	 */
+	@Test
+	public void setSpringStiffness() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		pj.setSpringStiffness(0.0);
+		TestCase.assertEquals(0.0, pj.getSpringStiffness());
+		
+		pj.setSpringStiffness(0.001);
+		TestCase.assertEquals(0.001, pj.getSpringStiffness());
+		
+		pj.setSpringStiffness(1.0);
+		TestCase.assertEquals(1.0, pj.getSpringStiffness());
+		
+		pj.setSpringStiffness(29.0);
+		TestCase.assertEquals(29.0, pj.getSpringStiffness());
+		
+		// at rest testing
+		pj.setSpringEnabled(false);
+		pj.setSpringDamperEnabled(false);
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// the spring isn't enabled so it shouldn't wake the bodies
+		pj.setSpringStiffness(3.0);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// enabling the spring should wake the bodies
+		pj.setSpringEnabled(true);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+
+		// if the spring frequency doesn't change, then the bodies should
+		// state at rest
+		pj.setSpringStiffness(3.0);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// the frequency is changing, they should wake
+		pj.setSpringStiffness(5.0);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+		
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+
+		// this should wake the bodies
+		pj.setSpringDamperEnabled(true);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+	}
+	
+	/**
+	 * Tests a negative frequency value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setSpringFrequencyNegative() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		pj.setSpringFrequency(-0.3);
+	}
+
+	/**
+	 * Tests setting a negative maximum force.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setSpringMaximumForceNegative() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		pj.setMaximumSpringForce(-1.0);
+	}
+	
+	/**
+	 * Tests setting the maximum force.
+	 */
+	@Test
+	public void setSpringMaximumForce() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		pj.setMaximumSpringForce(0.0);
+		TestCase.assertEquals(0.0, pj.getMaximumSpringForce());
+		
+		pj.setMaximumSpringForce(0.001);
+		TestCase.assertEquals(0.001, pj.getMaximumSpringForce());
+		
+		pj.setMaximumSpringForce(1.0);
+		TestCase.assertEquals(1.0, pj.getMaximumSpringForce());
+		
+		pj.setMaximumSpringForce(1000);
+		TestCase.assertEquals(1000.0, pj.getMaximumSpringForce());
+
+		pj.setSpringEnabled(false);
+		pj.setMaximumSpringForceEnabled(false);
+		TestCase.assertFalse(pj.isMaximumSpringForceEnabled());
+		
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// this won't wake them because its not enabled
+		pj.setMaximumSpringForce(0.5);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+
+		// this won't wake the bodies because the spring isn't enabled
+		pj.setMaximumSpringForceEnabled(true);
+		TestCase.assertTrue(pj.isMaximumSpringForceEnabled());
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+
+		// enable the spring
+		pj.setSpringEnabled(true);
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// this won't wake the bodies because it's the same value
+		pj.setMaximumSpringForce(0.5);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// this should wake them
+		pj.setMaximumSpringForce(0.6);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+		
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// this should wake them
+		pj.setMaximumSpringForceEnabled(false);
+		TestCase.assertFalse(pj.isMaximumSpringForceEnabled());
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+	}
+
+	/**
+	 * Tests spring stiffness/frequency calculations
+	 */
+	@Test
+	public void computeSpringStiffnessFrequency() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		pj.setSpringEnabled(true);
+		pj.setSpringDamperEnabled(true);
+		pj.setSpringFrequency(8.0);
+		pj.setSpringDampingRatio(0.5);
+		
+		pj.updateSpringCoefficients();
+		
+		TestCase.assertEquals(8.0, pj.springFrequency);
+		TestCase.assertEquals(0.5, pj.springDampingRatio);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, pj.getSpringMode());
+		TestCase.assertEquals(3968.803, pj.springStiffness, 1e-3);
+		
+		pj.setSpringStiffness(1000.0);
+		pj.updateSpringCoefficients();
+		
+		TestCase.assertEquals(4.015, pj.springFrequency, 1e-3);
+		TestCase.assertEquals(0.5, pj.springDampingRatio);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, pj.getSpringMode());
+		TestCase.assertEquals(1000.0, pj.springStiffness, 1e-3);
+	}
+	
+	/**
+	 * Tests the body's sleep state when changing the distance.
+	 */
+	@Test
+	public void setSpringRestOffsetAtRest() {
+		PrismaticJoint<Body> pj = new PrismaticJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		double distance = pj.getSpringRestOffset();
+		
+		pj.setSpringEnabled(true);
+		
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
+		TestCase.assertEquals(distance, pj.getSpringRestOffset());
+		
+		b1.setAtRest(true);
+		b2.setAtRest(true);
+		
+		// set the distance to the same value
+		pj.setSpringRestOffset(distance);
+		TestCase.assertTrue(b1.isAtRest());
+		TestCase.assertTrue(b2.isAtRest());
+		TestCase.assertEquals(distance, pj.getSpringRestOffset());
+		
+		// set the distance to a different value and make
+		// sure the bodies are awakened
+		pj.setSpringRestOffset(10);
+		TestCase.assertFalse(b1.isAtRest());
+		TestCase.assertFalse(b2.isAtRest());
+		TestCase.assertEquals(10.0, pj.getSpringRestOffset());
+	}
+	
 }

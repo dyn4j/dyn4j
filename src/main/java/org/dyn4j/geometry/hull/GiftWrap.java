@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,9 +27,10 @@ package org.dyn4j.geometry.hull;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.NullElementException;
 import org.dyn4j.geometry.RobustGeometry;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of the Gift Wrapping convex hull algorithm.
@@ -40,7 +41,7 @@ import org.dyn4j.resources.Messages;
  * This algorithm is O(nh) worst case where n is the number of points and h is the
  * number of sides in the resulting convex hull.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 2.2.0
  */
 public class GiftWrap extends AbstractHullGenerator implements HullGenerator {
@@ -50,7 +51,8 @@ public class GiftWrap extends AbstractHullGenerator implements HullGenerator {
 	@Override
 	public Vector2[] generate(Vector2... points) {
 		// check for null array
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.hull.nullArray"));
+		if (points == null) 
+			throw new ArgumentNullException("points");
 		
 		// get the size
 		int size = points.length;
@@ -63,8 +65,11 @@ public class GiftWrap extends AbstractHullGenerator implements HullGenerator {
 		Vector2 leftMost = null;
 		for (int i = 0; i < size; i++) {
 			Vector2 p = points[i];
+			
 			// check for null points
-			if (p == null) throw new NullPointerException(Messages.getString("geometry.hull.nullPoints"));
+			if (p == null) 
+				throw new NullElementException("points", i);
+			
 			// check the x cooridate
 			if (p.x < x) {
 				x = p.x;

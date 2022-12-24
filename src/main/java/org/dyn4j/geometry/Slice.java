@@ -25,7 +25,7 @@
 package org.dyn4j.geometry;
 
 import org.dyn4j.DataContainer;
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ValueOutOfRangeException;
 
 /**
  * Implementation of a Slice {@link Convex} {@link Shape}.
@@ -34,7 +34,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This shape can represent any slice of a circle up to 180 degrees (half circle).
  * @author William Bittle
- * @version 4.2.1
+ * @version 5.0.0
  * @since 3.1.5
  */
 public class Slice extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -117,9 +117,15 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 	 */
 	private static final boolean validate(double radius, double theta) {
 		// check the radius
-		if (radius <= 0) throw new IllegalArgumentException(Messages.getString("geometry.slice.invalidRadius"));
-		// check the theta
-		if (theta <= 0 || theta > Math.PI) throw new IllegalArgumentException(Messages.getString("geometry.slice.invalidTheta"));
+		if (radius <= 0) 
+			throw new ValueOutOfRangeException("radius", radius, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
+		// check theta
+		if (theta <= 0) 
+			throw new ValueOutOfRangeException("theta", theta, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
+		if (theta > Math.PI) 
+			throw new ValueOutOfRangeException("theta", theta, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, Math.PI);
 		
 		return true;
 	}

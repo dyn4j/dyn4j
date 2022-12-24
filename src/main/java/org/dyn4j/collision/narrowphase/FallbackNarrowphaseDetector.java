@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.dyn4j.exception.ArgumentNullException;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Transform;
 
@@ -53,7 +54,7 @@ import org.dyn4j.geometry.Transform;
  * The primary and fallback detectors can also be {@link FallbackNarrowphaseDetector}s as well allowing for a chain of 
  * fallbacks.
  * @author William Bittle
- * @version 4.1.0
+ * @version 5.0.0
  * @since 3.1.5
  */
 public class FallbackNarrowphaseDetector implements NarrowphaseDetector {
@@ -84,8 +85,12 @@ public class FallbackNarrowphaseDetector implements NarrowphaseDetector {
 	 * @throws NullPointerException if either the primary or fallback {@link NarrowphaseDetector}s are null
 	 */
 	public FallbackNarrowphaseDetector(NarrowphaseDetector primaryNarrowphaseDetector, NarrowphaseDetector fallbackNarrowphaseDetector, List<FallbackCondition> conditions) {
-		if (primaryNarrowphaseDetector == null) throw new NullPointerException();
-		if (fallbackNarrowphaseDetector == null) throw new NullPointerException();
+		if (primaryNarrowphaseDetector == null) 
+			throw new ArgumentNullException("primaryNarrowphaseDetector");
+		
+		if (fallbackNarrowphaseDetector == null) 
+			throw new ArgumentNullException("fallbackNarrowphaseDetector");
+		
 		this.primaryNarrowphaseDetector = primaryNarrowphaseDetector;
 		this.fallbackNarrowphaseDetector = fallbackNarrowphaseDetector;
 		if (conditions != null) {

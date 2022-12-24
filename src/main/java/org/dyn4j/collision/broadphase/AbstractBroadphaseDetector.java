@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,17 +30,17 @@ import java.util.List;
 
 import org.dyn4j.collision.CollisionPair;
 import org.dyn4j.collision.Collisions;
+import org.dyn4j.exception.ArgumentNullException;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Abstract implementation of a {@link BroadphaseDetector}.
  * @author William Bittle
- * @version 4.1.0
+ * @version 5.0.0
  * @since 1.0.0
  * @param <T> the object type
  */
@@ -72,9 +72,14 @@ public abstract class AbstractBroadphaseDetector<T> implements BroadphaseDetecto
 			AABBProducer<T> aabbProducer,
 			AABBExpansionMethod<T> aabbExpansionMethod) {
 		
-		if (broadphaseFilter == null) throw new NullPointerException(Messages.getString("collision.broadphase.nullBroadphaseFilter"));
-		if (aabbProducer == null) throw new NullPointerException(Messages.getString("collision.broadphase.nullAABBProducer"));
-		if (aabbExpansionMethod == null) throw new NullPointerException(Messages.getString("collision.broadphase.nullAABBExpansionMethod"));
+		if (broadphaseFilter == null) 
+			throw new ArgumentNullException("broadphaseFilter");
+		
+		if (aabbProducer == null) 
+			throw new ArgumentNullException("aabbProducer");
+		
+		if (aabbExpansionMethod == null) 
+			throw new ArgumentNullException("aabbExpansionMethod");
 		
 		this.aabbProducer = aabbProducer;
 		this.aabbExpansionMethod = aabbExpansionMethod;

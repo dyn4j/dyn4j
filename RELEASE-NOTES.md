@@ -1,3 +1,47 @@
+## v5.0.0 - December 23rd, 2022
+
+[Milestone](https://github.com/dyn4j/dyn4j/milestone/15?closed=1) |
+[Tag](https://github.com/dyn4j/dyn4j/tree/5.0.0) |
+[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/5.0.0/bundle) |
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=5.0.0)
+
+This major update overhauls the `org.dyn4j.dynamics.joint` package.  This update allows the creation of new joints with an arbitrary number of bodies (whereas only one-body or two-body joints were possible before).  This release sees all joints inherit from standard interfaces for things like limits, motors, and springs with the intent to make the API surface identical among all the joints.
+
+A major change from previous versions are the settings for motors and springs.  Before, you would disable these features by setting their values to zero or some default value.  Now, these features are enabled/disabled using specific `set{feature}Enabled` methods.  You can still set those settings to zero/defaults, which effectively disables them, but you lose the original value.  For example, if you want your spring stiffness to be 10.0 and you want to toggle it on or off based on user interaction, you have to store the 10.0 somewhere, then set it to zero to disable the spring, then set it back to 10.0 to re-enable the spring with the correct value.  These new methods allow you to set it to 10.0 and then toggle the behavior on/off separately.
+
+Another major change from previous versions is on the WheelJoint and PrismaticJoint.  These joints have had their body arguments reversed so that the given axis of allowed motion is fixed to the first body rather than the second.  This shouldn't impact existing code too much, but generally you'd need to reverse the first and second body and potentially negate the axis you had before.
+
+Apart from these breaking changes, many of the joints see new features to help reduce the number of joints between bodies to achieve a desired effect.  For example, before you would need to use both a `WeldJoint` and a `RevoluteJoint` if you wanted an angular spring with limits - this is now possible with only a `WeldJoint`.  Another example is if you wanted a linear spring with prismatic motion, you'd need to use both a `PrismaticJoint` and a `DistanceJoint` - now you can just use the `PrismaticJoint`.
+
+The class documentation for all joints has been revised to be clearer and reflect all the changes described above.
+
+As always with a major release, all deprecated APIs have been removed.
+
+**New Features:**
+- [#243](https://github.com/dyn4j/dyn4j/issues/243) Add the ability to specify spring stiffness or frequency
+- [#244](https://github.com/dyn4j/dyn4j/issues/244) Update all joints to have the same spring, motor, and limit APIs
+- [#245](https://github.com/dyn4j/dyn4j/issues/245) Update all joints with set{feature}Enabled methods
+- [#246](https://github.com/dyn4j/dyn4j/issues/246) Reverse the body arguments for PrismaticJoint and WheelJoint
+- [#247](https://github.com/dyn4j/dyn4j/issues/247) Allow enabling linear upper and lower limits independently
+- [#248](https://github.com/dyn4j/dyn4j/issues/248) Add a spring offset to WheelJoint
+- [#250](https://github.com/dyn4j/dyn4j/issues/250) Add maximum spring force/torque to DistanceJoint, WheelJoint, and WeldJoint
+- [#251](https://github.com/dyn4j/dyn4j/issues/251) Allow the PinJoint to work without a spring
+- [#252](https://github.com/dyn4j/dyn4j/issues/252) Add a spring-damper to PrismaticJoint
+- [#253](https://github.com/dyn4j/dyn4j/issues/253) Add angular limits to the WeldJoint when the angular spring is used
+- [#254](https://github.com/dyn4j/dyn4j/issues/254) Allow the definition of joints with an arbitrary number of bodies
+
+**Bug Fixes**
+- [#256](https://github.com/dyn4j/dyn4j/issues/256) Warm starting check missing in WeldJoint
+
+**Breaking Changes:**
+- All deprecated APIs have been removed
+- [#257](https://github.com/dyn4j/dyn4j/issues/257) The getAnchor1/getAnchor2 methods have been dropped for a number of joints
+- [#258](https://github.com/dyn4j/dyn4j/issues/258) Make all Joint default values the same for Motors and Springs
+- [#259](https://github.com/dyn4j/dyn4j/issues/259) Rename of a few Joint methods for consistency
+
+**Other:**
+- [#255](https://github.com/dyn4j/dyn4j/issues/255) Remove the use of resource files for exception messages
+
 ## v4.2.2 - October 1st, 2022
 
 [Milestone](https://github.com/dyn4j/dyn4j/milestone/14?closed=1) |

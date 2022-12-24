@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -53,7 +53,7 @@ import org.dyn4j.geometry.Vector2;
  * Solving of the graph happens internally by performing depth-first traversal and 
  * the building of {@link Island}s separated by static {@link PhysicsBody}s.
  * @author William Bittle
- * @version 4.1.3
+ * @version 5.0.0
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -148,28 +148,15 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	 * @param joint the joint
 	 */
 	public void addJoint(Joint<T> joint) {
-		T body1 = joint.getBody1();
-		T body2 = joint.getBody2();
-		
-		// some joints (one really) is a uni-body joint
-		// all others are pairwise
-		
-		if (body1 != null) {
-			ConstraintGraphNode<T> node1 = this.graph.get(body1);	
-			if (node1 == null) {
-				node1 = new ConstraintGraphNode<T>(body1);
-				this.graph.put(body1, node1);
+		int n = joint.getBodyCount();
+		for (int i = 0; i < n; i++) {
+			T body = joint.getBody(i);
+			ConstraintGraphNode<T> node = this.graph.get(body);	
+			if (node == null) {
+				node = new ConstraintGraphNode<T>(body);
+				this.graph.put(body, node);
 			}
-			node1.joints.add(joint);
-		}
-		
-		if (body2 != null && body1 != body2) {
-			ConstraintGraphNode<T> node2 = this.graph.get(body2);
-			if (node2 == null) {
-				node2 = new ConstraintGraphNode<T>(body2);
-				this.graph.put(body2, node2);
-			}
-			node2.joints.add(joint);
+			node.joints.add(joint);
 		}
 	}
 
@@ -198,14 +185,17 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 		int jSize = node.joints.size();
 		for (int i = 0; i < jSize; i++) {
 			Joint<T> joint = node.joints.get(i);
-			// get the other body
-			T other = joint.getOtherBody(body);
-			// remove the joint edge from the other body
-			ConstraintGraphNode<T> otherNode = this.graph.get(other);
-			// NOTE: some joints are unary and body1 == body2, and
-			// at this point, the body node has already been removed
-			if (otherNode != null) {
-				otherNode.joints.remove(joint);
+			// we need to remove it from all bodies involved in the joint
+			int bSize = joint.getBodyCount();
+			for (int j = 0; j < bSize; j++) {
+				T other = joint.getBody(j);
+				// remove the joint edge from the other body
+				ConstraintGraphNode<T> otherNode = this.graph.get(other);
+				// NOTE: some joints are unary and body1 == body2, and
+				// at this point, the body node has already been removed
+				if (otherNode != null) {
+					otherNode.joints.remove(joint);
+				}
 			}
 		}
 		
@@ -229,26 +219,33 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	 * @return boolean
 	 */
 	public boolean containsJoint(Joint<T> joint) {
-		T body1 = joint.getBody1();
-		T body2 = joint.getBody2();
+		// for the joint to exist, ALL bodies must exist
+		// AND all body nodes must exist, AND all body nodes
+		// must have a link to the joint
 		
-		boolean atob = false;
-		boolean btoa = false;
-		if (body1 != null) {
-			ConstraintGraphNode<T> node = this.graph.get(body1);
-			if (node != null) {
-				atob = node.joints.contains(joint);
+		int bSize = joint.getBodyCount();
+		
+		boolean bodiesExist = false;
+		boolean jointLinksExist = false;
+		
+		ConstraintGraphNode<T> node = this.graph.get(joint.getBody(0));
+		if (node != null) {
+			bodiesExist = true;
+			if (node.joints.contains(joint)) {
+				jointLinksExist = true;
 			}
 		}
 		
-		if (body2 != null) {
-			ConstraintGraphNode<T> node = this.graph.get(body2);
+		for (int i = 1; i < bSize; i++) {
+			T body = joint.getBody(i);
+			node = this.graph.get(body);
+			bodiesExist &= node != null;
 			if (node != null) {
-				btoa = node.joints.contains(joint);
+				jointLinksExist &= node.joints.contains(joint);
 			}
 		}
 		
-		return atob && btoa;
+		return bodiesExist && jointLinksExist;
 	}
 	
 	/**
@@ -288,18 +285,10 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 	 */
 	public void removeJoint(Joint<T> joint) {
 		// remove the interaction edges
-		T body1 = joint.getBody1();
-		T body2 = joint.getBody2();
-		
-		if (body1 != null) {
-			ConstraintGraphNode<T> node = this.graph.get(body1);
-			if (node != null) {
-				node.joints.remove(joint);
-			}
-		}
-		
-		if (body2 != null) {
-			ConstraintGraphNode<T> node = this.graph.get(body2);
+		int bSize = joint.getBodyCount();
+		for (int i = 0; i < bSize; i++) {
+			T body = joint.getBody(i);
+			ConstraintGraphNode<T> node = this.graph.get(body);
 			if (node != null) {
 				node.joints.remove(joint);
 			}
@@ -478,10 +467,10 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 		for (int i = 0; i < size; i++) {
 			Joint<T> joint = node1.joints.get(i);
 			// testing object references should be sufficient
-			if (joint.getBody1() == body2 || joint.getBody2() == body2) {
+			if (joint.isMember(body2)) {
 				connectedWithBody2 = true;
 				// check if collision is allowed
-				// we do an or here to find if there is at least one
+				// we do an "OR" here to find if there is at least one
 				// joint joining the two bodies that allows collision
 				if (joint.isCollisionAllowed()) {
 					return true;
@@ -518,7 +507,7 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 			for (int i = 0; i < size; i++) {
 				Joint<T> joint = node.joints.get(i);
 				// testing object references should be sufficient
-				if (joint.getBody1() == body2 || joint.getBody2() == body2) {
+				if (joint.isMember(body2)) {
 					return true;
 				}
 			}
@@ -554,11 +543,18 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 		if (node != null) {
 			int size = node.joints.size();
 			for (int i = 0; i < size; i++) {
-				Joint<T> cc = node.joints.get(i);
-				T other = cc.getOtherBody(body);
-				// basic dup detection
-				if (!bodies.contains(other)) {
-					bodies.add(other);
+				Joint<T> joint = node.joints.get(i);
+				int bSize = joint.getBodyCount();
+				for (int j = 0; j < bSize; j++) {
+					T other = joint.getBody(j);
+					// skip the input body
+					if (other == body) {
+						continue;
+					}
+					// basic dup detection (reference equals)
+					if (!bodies.contains(other)) {
+						bodies.add(other);
+					}
 				}
 			}
 		}
@@ -649,28 +645,39 @@ public final class ConstraintGraph<T extends PhysicsBody> {
 				for (int j = 0; j < jeSize; j++) {
 					Joint<T> joint = node.joints.get(j);
 					
-					// check if the joint is inactive
+					// check if the joint is enabled (all bodies must be enabled)
+					// check if the joint has already been added to an island
 					if (!joint.isEnabled() || this.onIsland.contains(joint)) {
 						continue;
 					}
-					
-					// get the other body
-					T other = joint.getOtherBody(body);
-					
-					// check if the joint has already been added to an island
-					// or if the other body is not active
-					if (!other.isEnabled()) {
-						continue;
-					}
-					
+
 					// add the joint to the island
 					this.island.add(joint);
 					this.onIsland.add(joint);
 					
-					// check if the other body has been added to an island
-					if (!this.onIsland.contains(other) && !this.staticOnIsland.contains(other)) {
-						// if not then add the body to the stack
-						this.stack.push(this.graph.get(other));
+					// now add all other bodies to this island
+					int bSize = joint.getBodyCount();
+					for (int k = 0; k < bSize; k++) {
+						// get the other body
+						T other = joint.getBody(k);
+						
+						// don't re-process the same body
+						if (other == body) {
+							continue;
+						}
+
+						// check if this body is not enabled (shouldn't happen since
+						// we check for this above and the joint wouldn't be enable
+						// in that scenario)
+						if (!other.isEnabled()) {
+							continue;
+						}
+						
+						// check if the other body has been added to an island
+						if (!this.onIsland.contains(other) && !this.staticOnIsland.contains(other)) {
+							// if not then add the body to the stack
+							this.stack.push(this.graph.get(other));
+						}
 					}
 				}
 			}

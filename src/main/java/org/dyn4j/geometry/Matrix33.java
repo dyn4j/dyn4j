@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,14 +26,14 @@ package org.dyn4j.geometry;
 
 import org.dyn4j.Copyable;
 import org.dyn4j.Epsilon;
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ArgumentNullException;
 
 /**
  * Represents a 3x3 Matrix.
  * <p>
  * Used to solve 3x3 systems of equations.
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.0
  * @since 1.0.0
  */
 public class Matrix33 implements Copyable<Matrix33> {
@@ -102,11 +102,15 @@ public class Matrix33 implements Copyable<Matrix33> {
 	 * {@link #Matrix33(double, double, double, double, double, double, double, double, double)} constructor.
 	 * @param values the values array
 	 * @throws NullPointerException if values is null
-	 * @throws IllegalArgumentException if values is not length 9
+	 * @throws IllegalArgumentException if the length of values is not 9
 	 */
 	public Matrix33(double[] values) {
-		if (values == null) throw new NullPointerException(Messages.getString("geometry.matrix.nullArray"));
-		if (values.length != 9) throw new IndexOutOfBoundsException(Messages.getString("geometry.matrix.invalidLength9"));
+		if (values == null) 
+			throw new ArgumentNullException("values");
+		
+		if (values.length != 9) 
+			throw new IndexOutOfBoundsException("The values array must have exactly 9 elements");
+		
 		this.m00 = values[0];
 		this.m01 = values[1];
 		this.m02 = values[2];
@@ -466,6 +470,8 @@ public class Matrix33 implements Copyable<Matrix33> {
 		// check for zero determinant
 		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
+		} else {
+			det = 0.0;
 		}
 		
 		// compute the cofactor determinants and apply the signs
@@ -513,7 +519,10 @@ public class Matrix33 implements Copyable<Matrix33> {
 		// check for zero determinant
 		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
+		} else {
+			det = 0.0;
 		}
+		
 		Vector3 r = new Vector3();
 		
 		double m00 =  this.m11 * this.m22 - this.m12 * this.m21;
@@ -549,7 +558,10 @@ public class Matrix33 implements Copyable<Matrix33> {
 		// check for zero determinant
 		if (Math.abs(det) > Epsilon.E) {
 			det = 1.0 / det;
+		} else {
+			det = 0.0;
 		}
+		
 		Vector2 r = new Vector2();
 		r.x = det * (this.m11 * b.x - this.m01 * b.y);
 		r.y = det * (this.m00 * b.y - this.m10 * b.x);

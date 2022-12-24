@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,16 +26,18 @@ package org.dyn4j.dynamics.joint;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
+import org.dyn4j.Ownable;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix22;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of a friction joint.
@@ -44,21 +46,25 @@ import org.dyn4j.resources.Messages;
  * velocities to zero.
  * <p>
  * This joint is typically used with one dynamic and one static body.  In this
- * context, the joint will apply linear and angular friction to stop the body's motion.
+ * context, the joint will apply linear and angular friction to stop the 
+ * body's motion.  When used with two dynamic bodies, the relative linear and
+ * angular velocities are driven to zero.
  * <p>
- * Setting the maximum force and torque values will determine the rate at which the motion
- * is stopped.  These values are defaulted to 10 and 0.25 respectively.
+ * Setting the maximum force and torque values will determine the rate at which
+ * the motion is stopped.  These values are defaulted to 10 and 0.25 
+ * respectively.
  * <p>
- * NOTE: In versions 3.4.0 and below, the maximum force and torque values were 0 by default.
- * This was changed in 4.0.0 to allow users to better understand the use of this joint
+ * NOTE: In versions 3.4.0 and below, the maximum force and torque values were 
+ * 0 by default.  This was changed in 4.0.0 to allow users to better understand
+ * the use of this joint
  * when first using it.
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.0
  * @since 1.0.0
- * @see <a href="http://www.dyn4j.org/documentation/joints/#Friction_Joint" target="_blank">Documentation</a>
+ * @see <a href="https://www.dyn4j.org/pages/joints#Friction_Joint" target="_blank">Documentation</a>
  * @param <T> the {@link PhysicsBody} type
  */
-public class FrictionJoint<T extends PhysicsBody> extends Joint<T> implements Shiftable, DataContainer {
+public class FrictionJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T> implements PairedBodyJoint<T>, Joint<T>, Shiftable, DataContainer, Ownable {
 	/** The local anchor point on the first {@link PhysicsBody} */
 	protected final Vector2 localAnchor1;
 	
@@ -97,21 +103,21 @@ public class FrictionJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	 */
 	public FrictionJoint(T body1, T body2, Vector2 anchor) {
 		// default no collision allowed
-		super(body1, body2, false);
-		// verify the bodies are not the same instance
-		if (body1 == body2) throw new IllegalArgumentException(Messages.getString("dynamics.joint.sameBody"));
+		super(body1, body2);
+		
 		// verify the anchor point is non null
-		if (anchor == null) throw new NullPointerException(Messages.getString("dynamics.joint.nullAnchor"));
+		if (anchor == null)
+			throw new ArgumentNullException("anchor");
+		
 		// put the anchor in local space
 		this.localAnchor1 = body1.getLocalPoint(anchor);
 		this.localAnchor2 = body2.getLocalPoint(anchor);
 		
-		// the maximum force in Newtons
 		this.maximumForce = 10;
-		// the maximum torque in Newton-Meters
 		this.maximumTorque = 0.25;
 		
 		this.K = new Matrix22();
+		this.angularMass = 0.0;
 		
 		this.linearImpulse = new Vector2();
 		this.angularImpulse = 0.0;
@@ -160,6 +166,8 @@ public class FrictionJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		this.angularMass = invI1 + invI2;
 		if (this.angularMass > Epsilon.E) {
 			this.angularMass = 1.0 / this.angularMass;
+		} else {
+			this.angularMass = 0.0;
 		}
 		
 		if (settings.isWarmStartingEnabled()) {
@@ -199,17 +207,17 @@ public class FrictionJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 			// get the relative velocity - the target motor speed
 			double C = this.body1.getAngularVelocity() - this.body2.getAngularVelocity();
 			// get the impulse required to obtain the speed
-			double impulse = this.angularMass * -C;
+			double stepImpulse = this.angularMass * -C;
 			// clamp the impulse between the maximum torque
-			double oldImpulse = this.angularImpulse;
+			double currentAccumulatedImpulse = this.angularImpulse;
 			double maxImpulse = this.maximumTorque * step.getDeltaTime();
-			this.angularImpulse = Interval.clamp(this.angularImpulse + impulse, -maxImpulse, maxImpulse);
+			this.angularImpulse = Interval.clamp(this.angularImpulse + stepImpulse, -maxImpulse, maxImpulse);
 			// get the impulse we need to apply to the bodies
-			impulse = this.angularImpulse - oldImpulse;
+			stepImpulse = this.angularImpulse - currentAccumulatedImpulse;
 			
 			// apply the impulse
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * impulse);
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * impulse);
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * stepImpulse);
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * stepImpulse);
 		}
 		
 		// solve the point-to-point constraint
@@ -220,22 +228,22 @@ public class FrictionJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		Vector2 v2 = this.body2.getLinearVelocity().sum(r2.cross(this.body2.getAngularVelocity()));
 		Vector2 pivotV = v1.subtract(v2);
 		
-		Vector2 impulse = this.K.solve(pivotV.negate());
+		Vector2 stepImpulse = this.K.solve(pivotV.negate());
 		
 		// clamp by the maxforce
-		Vector2 oldImpulse = this.linearImpulse.copy();
-		this.linearImpulse.add(impulse);
+		Vector2 currentAccumulatedImpulse = this.linearImpulse.copy();
+		this.linearImpulse.add(stepImpulse);
 		double maxImpulse = this.maximumForce * step.getDeltaTime();
 		if (this.linearImpulse.getMagnitudeSquared() > maxImpulse * maxImpulse) {
 			this.linearImpulse.normalize();
 			this.linearImpulse.multiply(maxImpulse);
 		}
-		impulse = this.linearImpulse.difference(oldImpulse);
+		stepImpulse = this.linearImpulse.difference(currentAccumulatedImpulse);
 		
-		this.body1.getLinearVelocity().add(impulse.product(invM1));
-		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(impulse));
-		this.body2.getLinearVelocity().subtract(impulse.product(invM2));
-		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(impulse));
+		this.body1.getLinearVelocity().add(stepImpulse.product(invM1));
+		this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * r1.cross(stepImpulse));
+		this.body2.getLinearVelocity().subtract(stepImpulse.product(invM2));
+		this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * r2.cross(stepImpulse));
 	}
 	
 	/* (non-Javadoc)
@@ -247,18 +255,18 @@ public class FrictionJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 		return true;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor1()
+	/**
+	 * Returns the anchor point in world space on the first {@link PhysicsBody}.
+	 * @return {@link Vector2}
 	 */
-	@Override
 	public Vector2 getAnchor1() {
 		return this.body1.getWorldPoint(this.localAnchor1);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.joint.Joint#getAnchor2()
+	/**
+	 * Returns the anchor point in world space on the second {@link PhysicsBody}.
+	 * @return {@link Vector2}
 	 */
-	@Override
 	public Vector2 getAnchor2() {
 		return this.body2.getWorldPoint(this.localAnchor2);
 	}
@@ -303,7 +311,9 @@ public class FrictionJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	 */
 	public void setMaximumTorque(double maximumTorque) {
 		// make sure its greater than or equal to zero
-		if (maximumTorque < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.friction.invalidMaximumTorque"));
+		if (maximumTorque < 0.0) 
+			throw new ValueOutOfRangeException("maximumTorque", maximumTorque, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		// set the max
 		this.maximumTorque = maximumTorque;
 	}
@@ -323,7 +333,9 @@ public class FrictionJoint<T extends PhysicsBody> extends Joint<T> implements Sh
 	 */
 	public void setMaximumForce(double maximumForce) {
 		// make sure its greater than or equal to zero
-		if (maximumForce < 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.joint.friction.invalidMaximumForce"));
+		if (maximumForce < 0.0) 
+			throw new ValueOutOfRangeException("maximumForce", maximumForce, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		// set the max
 		this.maximumForce = maximumForce;
 	}

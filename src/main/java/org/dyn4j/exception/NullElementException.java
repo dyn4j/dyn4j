@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -22,31 +22,31 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j;
-
-import org.dyn4j.resources.Messages;
-import org.junit.Test;
-
-import junit.framework.TestCase;
+package org.dyn4j.exception;
 
 /**
- * Test case for the {@link Messages} class.
+ * Represents an exception when a collection has a null element.
  * @author William Bittle
- * @version 4.0.0
- * @since 4.0.0
+ * @version 5.0.0
+ * @since 5.0.0
  */
-public class MessagesTest {
+public class NullElementException extends NullPointerException {
+	private static final long serialVersionUID = 4560521220204618552L;
+
 	/**
-	 * Tests the get string method.
+	 * Constructor when the index is know.
+	 * @param argumentName the name of the argument that contains the null element
+	 * @param index the index of the null element
 	 */
-	@Test
-	public void getString() {
-		String key = "geometry.circle.invalidRadius";
-		String str = Messages.getString(key);
-		TestCase.assertFalse(str.contains(key));
-		
-		key = "alkdjfaljdfljadlfjadf";
-		str = Messages.getString(key);
-		TestCase.assertTrue(str.contains(key));
+	public NullElementException(String argumentName, int index) {
+		super(String.format("%1$s contains a null element at index %2$d", argumentName, index));
+	}
+
+	/**
+	 * Minimal constructor.
+	 * @param argumentName the name of the argument that contains the null element
+	 */
+	public NullElementException(String argumentName) {
+		super(String.format("%1$s contains a null element", argumentName));
 	}
 }

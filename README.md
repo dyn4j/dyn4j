@@ -3,7 +3,7 @@
 ![Actions Status](https://github.com/dyn4j/dyn4j/workflows/Maven%20CI/badge.svg)
 ![License](https://img.shields.io/github/license/dyn4j/dyn4j)
 ![Language](https://img.shields.io/github/languages/top/dyn4j/dyn4j)
-![Java](https://img.shields.io/badge/java-%3E%3D%206-orange)
+![Java](https://img.shields.io/badge/java-6+-orange)
 ![Maven Central](https://img.shields.io/maven-central/v/org.dyn4j/dyn4j)
 [![javadoc](https://javadoc.io/badge2/org.dyn4j/dyn4j/javadoc.svg?kill_cache=1)](https://javadoc.io/doc/org.dyn4j/dyn4j)
 ![Code Coverage](https://img.shields.io/badge/coverage-96.7%25-brightgreen)
@@ -12,9 +12,8 @@
 
 A 100% Java 2D collision detection and physics engine.  Designed to be fast, stable, extensible, and easy to use.  dyn4j is free for use in commercial and non-commercial applications.
 
-The project is comprised of the main project and tests managed here and two others:
+The project is comprised of the main project and tests managed here and a samples project:
 - [dyn4j-samples](https://github.com/dyn4j/dyn4j-samples) A collection of samples to help get started
-- [dyn4j-sandbox](https://github.com/dyn4j/dyn4j-sandbox) A non-trivial desktop application that allows users to build scenes, run, save, and load them - all built with dyn4j as the simulation engine.
 
 ### Requirements
 * Java 1.6+
@@ -32,7 +31,7 @@ Add dyn4j to your classpath by adding a Maven dependency from
 <dependency>
     <groupId>org.dyn4j</groupId>
     <artifactId>dyn4j</artifactId>
-    <version>4.2.2</version>
+    <version>5.0.0</version>
 </dependency>
 ```
 
@@ -43,7 +42,7 @@ If you are not using Maven you can download the jar from either of the links abo
 ```java
 World<Body> world = new World<Body>();
 ```
-This creates a new simulation environment with default settings.  The default settings use the meter-kilogram-seconds system and include the default pipeline classes.
+This creates a new simulation environment with default settings.  The default settings use the meter-kilogram-seconds system and include the default pipeline classes for collision detection, manifold generation, and collision resolution.  You can adjust the pipeline classes using the respective methods on the `World` class and update the settings using the `getSettings` method.
 
 #### Step 3: Add Some Bodies
 ```java
@@ -53,14 +52,20 @@ body.translate(1.0, 0.0);
 body.setMass(MassType.NORMAL);
 world.addBody(body);
 ```
-A body is the primary unit of simulation and completely rigid.  A body is comprised of many fixtures or shapes.  While the shapes of dyn4j are all convex (and must be), a collection of these shapes can be used to create a body that is not.  A body can be initially placed in a scene by translating or rotating it.  Once the shape(s) of a body is defined, it must be given a mass by calling a setMass method.  The mass type is typically MassType.NORMAL or MassType.INFINITE.  When set to NORMAL, the mass will be calculated based on the shapes.  An INFINITE mass body might represent a floor, ground, or something unmovable.
+A `Body` is the primary unit of simulation and completely rigid.  A `Body` is comprised of one or more `BodyFixture`s.  Each `Fixture` has one `Shape`.  While the shapes of dyn4j are all convex (and must be), a collection of these shapes can be used to create a body that is not.  A body can be initially placed in a scene by translating or rotating it.  Once the shape(s) of a body is defined, it must be given a mass by calling a `setMass` method.  The mass type is typically `MassType.NORMAL` or `MassType.INFINITE`.  When set to `NORMAL`, the mass will be calculated based on the shapes.  An `INFINITE` mass body might represent a floor, ground, or something immovable.
 
 #### Step 4: Add Some Joints
 ```java
-PinJoint<Body> joint = new PinJoint<Body>(body, new Vector2(0, 0), 4, 0.7, 1000);
+PinJoint<Body> joint = new PinJoint<Body>(body, new Vector2(0, 0));
+joint.setSpringEnabled(true);
+joint.setSpringDamperEnabled(true);
+joint.setMaximumSpringForceEnabled(true);
+joint.setSpringFrequency(8.0);
+joint.setSpringDampingRatio(0.3);
+joint.setMaximumSpringForce(1000.0);
 world.addJoint(joint);
 ```
-A joint is a constraint on the motion of one or more bodies.  There are many joint types that serve different purposes.  Generally, joints are used to link bodies together in a specified way.  Bodies can have multiple joints attached to them making for some interesting combinations.
+A `Joint` is a constraint on the motion of one or more `Body`s.  There are many joint types that serve different purposes.  Generally, joints are used to link bodies together in a specified way.  Bodies can have multiple joints attached to them making for some interesting combinations.  Review each joint's class documentation for details on usage.
 
 #### Step 5: Run the Simulation
 ```java
@@ -68,10 +73,10 @@ for (int i = 0; i < 100; i++) {
     world.step(1);
 }
 ```
-Unlike this example, a GUI based application you would call the World.update(elapsedTime) method in it's render loop.  Either way, each time the world is advanced forward in time (which may or may not occur when using the World.update(elapsedTime) methods) the bodies added to it will be moved based on the world gravity (if any) and will interact with other bodies placed in the world. 
+Unlike this example, a GUI based application you would call the `World.update(elapsedTime)` method in it's render loop.  Either way, each time the world is advanced forward in time (which may or may not occur when using the `World.update(elapsedTime)` methods) the bodies added to it will be moved based on the world gravity (if any) and will interact with other bodies placed in the world. 
 
-#### Get output from the simulation
-After each step/update of the world each body's `transform` reflects the changes affected by the simulation.  For example:
+#### Step 6: Get output from the simulation
+After each update of the world, each body's `Transform` reflects the changes caused by the simulation.  Each `Body` stores it's current position and rotation in a `Transform`.  Using the `Transform` you can convert from local body space to world space coordinates.  For example:
 
 ```java
 for (Body body : world.getBodies()) {
@@ -86,7 +91,7 @@ for (Body body : world.getBodies()) {
             Wound w = (Wound)c;
             Vector2[] vertices = w.getVerticies();
             for (int i = 0; i < vertices.length; i++) {
-                // get the update fixture vertices
+                // get the updated fixture vertices
                 xy = body.getWorldPoint(vertices[i]);
                 // or
                 // body.getTransform().getTransformed(vertices[i]);

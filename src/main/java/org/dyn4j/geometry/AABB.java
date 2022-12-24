@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,7 +25,7 @@
 package org.dyn4j.geometry;
 
 import org.dyn4j.Copyable;
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ValueOutOfRangeException;
 
 /**
  * Implementation of an Axis-Align Bounding Box.
@@ -42,7 +42,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * The {@link #expand(double)} method can be used to expand the bounds of the {@link AABB} by some amount.
  * @author William Bittle
- * @version 4.1.0
+ * @version 5.0.0
  * @since 3.0.0
  */
 public class AABB implements Translatable, Copyable<AABB> {
@@ -129,10 +129,15 @@ public class AABB implements Translatable, Copyable<AABB> {
 	 * @param minY the minimum y extent
 	 * @param maxX the maximum x extent
 	 * @param maxY the maximum y extent
+	 * @throws IllegalArgumentException if minX is greater than maxX or if minY is greater than maxY
 	 */
 	public AABB(double minX, double minY, double maxX, double maxY) {
 		// check the min and max
-		if (minX > maxX || minY > maxY) throw new IllegalArgumentException(Messages.getString("geometry.aabb.invalidMinMax"));
+		if (minX > maxX) 
+			throw new ValueOutOfRangeException("minX", minX, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "maxX", maxX);
+		
+		if (minY > maxY) 
+			throw new ValueOutOfRangeException("minY", minY, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "maxY", maxY);
 		
 		this.minX = minX;
 		this.minY = minY;
@@ -169,7 +174,8 @@ public class AABB implements Translatable, Copyable<AABB> {
 	 * @throws IllegalArgumentException if the given radius is less than zero
 	 */
 	public AABB(Vector2 center, double radius) {
-		if (radius < 0) throw new IllegalArgumentException(Messages.getString("geometry.aabb.invalidRadius"));
+		if (radius < 0) 
+			throw new ValueOutOfRangeException("radius", radius, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
 		if (center == null) {
 			this.minX = -radius;

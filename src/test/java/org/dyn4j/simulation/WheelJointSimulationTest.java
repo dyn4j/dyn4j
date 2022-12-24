@@ -94,7 +94,7 @@ public class WheelJointSimulationTest {
 
 		w.step(4);
 		
-		// still nothing should happen
+		// things should happen
 		v2 = b.getWorldCenter();
 		TestCase.assertTrue(v2.x > 0.0);
 		TestCase.assertEquals(2.0, v2.y, 1e-3);
@@ -104,12 +104,12 @@ public class WheelJointSimulationTest {
 		
 		double invdt = w.getTimeStep().getInverseDeltaTime();
 		
-		// still nothing should happen
+		// The torque should rotate the body
 		v2 = b.getWorldCenter();
 		TestCase.assertTrue(v2.x > 0.0);
 		TestCase.assertEquals(2.0, v2.y, 1e-3);
-		TestCase.assertEquals(0.0, b.getTransform().getRotationAngle(), 1e-3);
-		TestCase.assertEquals(7.91236, dj.getReactionForce(invdt).getMagnitude(), 1e-5);
+		TestCase.assertEquals(0.001, b.getTransform().getRotationAngle(), 1e-3);
+		TestCase.assertEquals(7.89277, dj.getReactionForce(invdt).getMagnitude(), 1e-5);
 		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt), 1e-5);
 	}
 	
@@ -117,7 +117,7 @@ public class WheelJointSimulationTest {
 	 * Tests the bodies not exceeding the limits
 	 */
 	@Test
-	public void limits() {
+	public void limitsOnly() {
 		World<Body> w = new World<Body>();
 		
 		// take friction and damping out of the picture
@@ -140,22 +140,22 @@ public class WheelJointSimulationTest {
 		w.addBody(b);
 		
 		Vector2 p = b.getWorldCenter();
-		WheelJoint<Body> dj = new WheelJoint<Body>(g, b, p, new Vector2(0.0, -1.0));
+		WheelJoint<Body> dj = new WheelJoint<Body>(g, b, p, new Vector2(0.0, 1.0));
 		
 		// NOTE: that I've set the rest distance to more than the limits
 		dj.setLimitsEnabled(-1.0, 5.0);
-		dj.setFrequency(0.0);
+		dj.setSpringEnabled(false);
 		w.addJoint(dj);
 		
 		Vector2 v2 = b.getWorldCenter();
 		TestCase.assertEquals(0.0, p.distance(v2));
 		
-		w.step(30);
 		double invdt = w.getTimeStep().getInverseDeltaTime();
+		w.step(30);
 		
 		// gravity pulls down the circle to the lower limit
 		v2 = b.getWorldCenter();
-		TestCase.assertEquals(1.0, p.distance(v2), 1e-5);
+		TestCase.assertEquals(1.000, p.distance(v2), 1e-3);
 		TestCase.assertEquals(7.696, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
 		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt), 1e-3);
 		
@@ -195,7 +195,7 @@ public class WheelJointSimulationTest {
 	 * Tests the bodies not exceeding the limits
 	 */
 	@Test
-	public void springDamper() {
+	public void springDamperWithLimits() {
 		World<Body> w = new World<Body>();
 		
 		// take friction and damping out of the picture
@@ -218,7 +218,7 @@ public class WheelJointSimulationTest {
 		w.addBody(b);
 		
 		Vector2 p = b.getWorldCenter();
-		WheelJoint<Body> dj = new WheelJoint<Body>(g, b, p, new Vector2(0.0, -1.0));
+		WheelJoint<Body> dj = new WheelJoint<Body>(g, b, p, new Vector2(0.0, 1.0));
 		
 		// NOTE: that I've set the rest distance to more than the limits
 		dj.setLimitsEnabled(-1.0, 5.0);
@@ -243,7 +243,7 @@ public class WheelJointSimulationTest {
 		// gravity pulls down the circle, but spring fights back
 		v2 = b.getWorldCenter();
 		TestCase.assertEquals(1.0, p.distance(v2), 1e-5);
-		TestCase.assertEquals(7.695, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
+		TestCase.assertEquals(7.696, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
 		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt), 1e-3);
 
 		// swap the upper limit
@@ -255,13 +255,25 @@ public class WheelJointSimulationTest {
 		TestCase.assertEquals(0.5, p.distance(v2), 1e-5);
 		TestCase.assertEquals(911.350, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
 		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt), 1e-3);
+		
+		dj.setLimitsEnabled(-1.5, 1.0);
+		dj.setMaximumSpringForceEnabled(true);
+		dj.setMaximumSpringForce(200);
+		w.step(2);
+		
+		// gravity pulls down the circle, but spring fights back
+		v2 = b.getWorldCenter();
+		TestCase.assertEquals(0.29596, p.distance(v2), 1e-5);
+		TestCase.assertEquals(200.0, dj.getSpringForce(invdt), 1e-3);
+		TestCase.assertEquals(200.0, dj.getReactionForce(invdt).getMagnitude(), 1e-3);
+		TestCase.assertEquals(0.0, dj.getReactionTorque(invdt), 1e-3);
 	}
 
 	/**
 	 * Tests the bodies with a motor
 	 */
 	@Test
-	public void motor() {
+	public void motorOnly() {
 		World<Body> w = new World<Body>();
 		// take gravity out the picture
 		w.setGravity(World.ZERO_GRAVITY);
@@ -289,6 +301,7 @@ public class WheelJointSimulationTest {
 		WheelJoint<Body> dj = new WheelJoint<Body>(g, b, p, new Vector2(-1.0, 0.0));
 		
 		// NOTE: that I've set the rest distance to more than the limits
+		dj.setMaximumMotorTorqueEnabled(true);
 		dj.setMaximumMotorTorque(10000);
 		dj.setMotorSpeed(Math.toRadians(90));
 		dj.setMotorEnabled(true);
@@ -310,11 +323,10 @@ public class WheelJointSimulationTest {
 		v2 = b.getWorldCenter();
 		v = b.getLinearVelocity();
 		TestCase.assertEquals(0.0, p.distance(v2), 1e-3);
-		TestCase.assertEquals(-0.026, dj.getAngularTranslation(), 1e-3);
+		TestCase.assertEquals(0.026, dj.getAngularTranslation(), 1e-3);
 		TestCase.assertEquals(0.0, v.x, 1e-3);
-		TestCase.assertEquals(-1.5707, dj.getAngularSpeed(), 1e-3);
+		TestCase.assertEquals(1.5707, dj.getAngularSpeed(), 1e-3);
 		TestCase.assertEquals(9.252, dj.getReactionTorque(invdt), 1e-3);
 		TestCase.assertEquals(9.252, dj.getMotorTorque(invdt), 1e-3);
 	}
-	
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -28,10 +28,11 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.collision.narrowphase.DistanceDetector;
 import org.dyn4j.collision.narrowphase.Gjk;
 import org.dyn4j.collision.narrowphase.Separation;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implements the Conservative Advancement technique to solve for the time of impact.
@@ -41,7 +42,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This method is described in "Continuous Collision Detection and Physics" by Erwin Coumans (Draft).
  * @author William Bittle
- * @version 4.1.0
+ * @version 5.0.0
  * @since 1.2.0
  */
 public class ConservativeAdvancement implements TimeOfImpactDetector {
@@ -73,7 +74,9 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	 * @throws NullPointerException if distanceDetector is null
 	 */
 	public ConservativeAdvancement(DistanceDetector distanceDetector) {
-		if (distanceDetector == null) throw new NullPointerException(Messages.getString("collision.continuous.conservativeAdvancement.nullDistanceDetector"));
+		if (distanceDetector == null) 
+			throw new ArgumentNullException("distanceDetector");
+		
 		this.distanceDetector = distanceDetector;
 	}
 	
@@ -220,7 +223,9 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	 * @throws NullPointerException if distanceDetector is null
 	 */
 	public void setDistanceDetector(DistanceDetector distanceDetector) {
-		if (distanceDetector == null) throw new NullPointerException(Messages.getString("collision.continuous.conservativeAdvancement.nullDistanceDetector"));
+		if (distanceDetector == null) 
+			throw new ArgumentNullException("distanceDetector");
+		
 		this.distanceDetector = distanceDetector;
 	}
 	
@@ -240,7 +245,9 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	 * @throws IllegalArgumentException if distanceEpsilon is less than or equal to zero
 	 */
 	public void setDistanceEpsilon(double distanceEpsilon) {
-		if (distanceEpsilon <= 0.0) throw new IllegalArgumentException(Messages.getString("collision.continuous.conservativeAdvancement.invalidDistanceEpsilon"));
+		if (distanceEpsilon <= 0.0) 
+			throw new ValueOutOfRangeException("distanceEpsilon", distanceEpsilon, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+		
 		this.distanceEpsilon = distanceEpsilon;
 	}
 	
@@ -263,7 +270,9 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 	 * @throws IllegalArgumentException if maxIterations is less than 5
 	 */
 	public void setMaxIterations(int maxIterations) {
-		if (maxIterations < 5) throw new IllegalArgumentException(Messages.getString("collision.continuous.conservativeAdvancement.invalidMaximumIterations"));
+		if (maxIterations < 5) 
+			throw new ValueOutOfRangeException("maxIterations", maxIterations, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 5);
+		
 		this.maxIterations = maxIterations;
 	}
 }

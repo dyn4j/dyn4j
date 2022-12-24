@@ -28,7 +28,10 @@ import java.util.List;
 
 import org.dyn4j.Copyable;
 import org.dyn4j.Epsilon;
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.EmptyCollectionException;
+import org.dyn4j.exception.NullElementException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 
 /**
  * Represents {@link Mass} data for an object about a given point.
@@ -44,7 +47,7 @@ import org.dyn4j.resources.Messages;
  * When the mass type is changed, the original mass and inertia values are not lost. This allows the
  * swapping of mass types without recomputing the mass.
  * @author William Bittle
- * @version 4.2.2
+ * @version 5.0.0
  * @since 1.0.0
  * @see MassType
  */
@@ -93,9 +96,15 @@ public class Mass implements Copyable<Mass> {
 	 */
 	public Mass(Vector2 center, double mass, double inertia) {
 		// validate the input
-		if (center == null) throw new NullPointerException(Messages.getString("geometry.mass.nullCenter"));
-		if (mass < 0.0) throw new IllegalArgumentException(Messages.getString("geometry.mass.invalidMass"));
-		if (inertia < 0.0) throw new IllegalArgumentException(Messages.getString("geometry.mass.invalidInertia"));
+		if (center == null) 
+			throw new ArgumentNullException("center");
+		
+		if (mass < 0.0) 
+			throw new ValueOutOfRangeException("mass", mass, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
+		if (inertia < 0.0) 
+			throw new ValueOutOfRangeException("inertia", inertia, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+		
 		// create the mass
 		this.type = MassType.NORMAL;
 		this.center = center.copy();
@@ -130,7 +139,9 @@ public class Mass implements Copyable<Mass> {
 	 */
 	public Mass(Mass mass) {
 		// validate the input
-		if (mass == null) throw new NullPointerException(Messages.getString("geometry.mass.nullMass"));
+		if (mass == null) 
+			throw new ArgumentNullException("mass");
+		
 		// setup the mass
 		this.type = mass.type;
 		this.center = mass.center.copy();
@@ -219,10 +230,10 @@ public class Mass implements Copyable<Mass> {
 	public static Mass create(List<Mass> masses) {
 		// check the list for null or empty
 		if (masses == null) {
-			throw new NullPointerException(Messages.getString("geometry.mass.nullMassList"));
+			throw new ArgumentNullException("masses");
 		}
 		if (masses.size() == 0) {
-			throw new IllegalArgumentException(Messages.getString("geometry.mass.invalidMassListSize"));
+			throw new EmptyCollectionException("masses");
 		}
 		// get the length of the masses array
 		int size = masses.size();
@@ -234,7 +245,7 @@ public class Mass implements Copyable<Mass> {
 			if (m != null) {
 				return new Mass(masses.get(0));
 			} else {
-				throw new NullPointerException(Messages.getString("geometry.mass.nullMassListElement"));
+				throw new NullElementException("masses", 0);
 			}
 		}
 		
@@ -247,7 +258,9 @@ public class Mass implements Copyable<Mass> {
 		for (int i = 0; i < size; i++) {
 			Mass mass = masses.get(i);
 			// check for null mass
-			if (mass == null) throw new NullPointerException(Messages.getString("geometry.mass.nullMassListElement"));
+			if (mass == null)
+				throw new NullElementException("masses", i);
+			
 			// add the center's up (weighting them by their respective mass)
 			c.add(mass.center.product(mass.mass));
 			// sum the masses
@@ -304,7 +317,8 @@ public class Mass implements Copyable<Mass> {
 	 * @throws NullPointerException if type is null
 	 */
 	public void setType(MassType type) {
-		if (type == null) throw new NullPointerException(Messages.getString("geometry.mass.nullMassType"));
+		if (type == null) 
+			throw new ArgumentNullException("type");
 		
 		// don't allow incorrect mass type + mass/inertia combinations
 		if (type == MassType.NORMAL && (this.mass <= 0.0 || this.inertia <= 0.0)) {

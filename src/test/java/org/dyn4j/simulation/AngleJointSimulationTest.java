@@ -29,6 +29,7 @@ import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.World;
 import org.junit.Test;
 
@@ -75,11 +76,14 @@ public class AngleJointSimulationTest {
 		w.addJoint(aj);
 		
 		w.step(1);
+		double invdt = w.getTimeStep().getInverseDeltaTime();
 		
 		// since g was NOT moving and b was, and they are equal in mass/inertia then
 		// the angular velocity is split between them
 		TestCase.assertEquals(Math.toRadians(15), g.getAngularVelocity());
 		TestCase.assertEquals(Math.toRadians(15), b.getAngularVelocity());
+		TestCase.assertEquals(new Vector2(0.0, 0.0), aj.getReactionForce(invdt));
+		TestCase.assertEquals(1.542, aj.getReactionTorque(invdt), 1e-3);
 		
 		aj.setRatio(0.5);
 		w.step(1);
@@ -87,14 +91,18 @@ public class AngleJointSimulationTest {
 		// since limits are enabled, they will continue to move at the same rate
 		TestCase.assertEquals(Math.toRadians(15), g.getAngularVelocity());
 		TestCase.assertEquals(Math.toRadians(15), b.getAngularVelocity());
+		TestCase.assertEquals(new Vector2(0.0, 0.0), aj.getReactionForce(invdt));
+		TestCase.assertEquals(0.0, aj.getReactionTorque(invdt), 1e-3);
 		
-		aj.setLimitEnabled(false);
+		aj.setLimitsEnabled(false);
 		w.step(1);
 		
 		// with limits disabled, the ratio should take effect causing body1 to
 		// move at half the rate of body2
 		TestCase.assertEquals(Math.toRadians(10), g.getAngularVelocity(), 1e-8);
 		TestCase.assertEquals(Math.toRadians(20), b.getAngularVelocity(), 1e-8);
+		TestCase.assertEquals(new Vector2(0.0, 0.0), aj.getReactionForce(invdt));
+		TestCase.assertEquals(-0.514, aj.getReactionTorque(invdt), 1e-3);
 	}
 	
 	/**

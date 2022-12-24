@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,18 +32,18 @@ import java.util.List;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Ownable;
+import org.dyn4j.exception.ArgumentNullException;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Rotation;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Transformable;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * A base implementation of the {@link CollisionBody} interface.
  * @author William Bittle
- * @version 4.1.0
+ * @version 5.0.0
  * @since 4.0.0
  * @param <T> the {@link Fixture} type
  */
@@ -107,7 +107,9 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	@Override
 	public CollisionBody<T> addFixture(T fixture) {
 		// make sure neither is null
-		if (fixture == null) throw new NullPointerException(Messages.getString("dynamics.body.addNullFixture"));
+		if (fixture == null) 
+			throw new ArgumentNullException("fixture");
+		
 		// add the shape and mass to the respective lists
 		this.fixtures.add(fixture);
 		if (this.fixtureModificationHandler != null) {

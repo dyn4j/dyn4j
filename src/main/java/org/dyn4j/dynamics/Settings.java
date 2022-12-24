@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,12 +24,13 @@
  */
 package org.dyn4j.dynamics;
 
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 
 /**
  * Responsible for housing all of the dynamics engine's settings.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 1.0.0
  */
 public class Settings {
@@ -68,13 +69,6 @@ public class Settings {
 	 * @since 4.0.0
 	 */
 	public static final double DEFAULT_MAXIMUM_WARM_START_DISTANCE = 1.0e-2;
-	
-	/** 
-	 * The default restitution velocity; in meters/second
-	 * @deprecated Deprecated in 4.2.0. Use the BodyFixture.restitutionVelocity instead. 
-	 */
-	@Deprecated
-	public static final double DEFAULT_RESTITUTION_VELOCITY = 1.0;
 	
 	/** The default linear tolerance; in meters */
 	public static final double DEFAULT_LINEAR_TOLERANCE = 0.005;
@@ -138,14 +132,6 @@ public class Settings {
 	
 	/** The squared value of {@link #maximumWarmStartDistance} */
 	private double maximumWarmStartDistanceSquared = Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE * Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE;
-	
-	/** The restitution velocity */
-	@Deprecated
-	private double restitutionVelocity = Settings.DEFAULT_RESTITUTION_VELOCITY;
-	
-	/** The squared value of {@link #restitutionVelocity} */
-	@Deprecated
-	private double restitutionVelocitySquared = Settings.DEFAULT_RESTITUTION_VELOCITY * Settings.DEFAULT_RESTITUTION_VELOCITY;
 	
 	/** The allowed linear tolerance */
 	private double linearTolerance = Settings.DEFAULT_LINEAR_TOLERANCE;
@@ -227,8 +213,6 @@ public class Settings {
 		this.warmStartingEnabled = true;
 		this.maximumWarmStartDistance = Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE;
 		this.maximumWarmStartDistanceSquared = Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE * Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE;
-		this.restitutionVelocity = Settings.DEFAULT_RESTITUTION_VELOCITY;
-		this.restitutionVelocitySquared = Settings.DEFAULT_RESTITUTION_VELOCITY * Settings.DEFAULT_RESTITUTION_VELOCITY;
 		this.linearTolerance = Settings.DEFAULT_LINEAR_TOLERANCE;
 		this.linearToleranceSquared = Settings.DEFAULT_LINEAR_TOLERANCE * Settings.DEFAULT_LINEAR_TOLERANCE;
 		this.maximumAngularCorrection = Settings.DEFAULT_MAXIMUM_ANGULAR_CORRECTION;
@@ -281,8 +265,6 @@ public class Settings {
 		this.maximumWarmStartDistanceSquared = settings.maximumWarmStartDistanceSquared;
 		this.minimumAtRestTime = settings.minimumAtRestTime;
 		this.positionConstraintSolverIterations = settings.positionConstraintSolverIterations;
-		this.restitutionVelocity = settings.restitutionVelocity;
-		this.restitutionVelocitySquared = settings.restitutionVelocitySquared;
 		this.stepFrequency = settings.stepFrequency;
 		this.velocityConstraintSolverIterations = settings.velocityConstraintSolverIterations;
 		this.warmStartingEnabled = settings.warmStartingEnabled;
@@ -311,7 +293,9 @@ public class Settings {
 	 * @throws IllegalArgumentException if stepFrequency is less than or equal to zero
 	 */
 	public void setStepFrequency(double stepFrequency) {
-		if (stepFrequency <= 0.0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidStepFrequency"));
+		if (stepFrequency <= 0.0)
+			throw new ValueOutOfRangeException("stepFrequency", stepFrequency, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
+
 		this.stepFrequency = stepFrequency;
 	}
 	
@@ -342,7 +326,9 @@ public class Settings {
 	 * @throws IllegalArgumentException if maxTranslation is less than zero
 	 */
 	public void setMaximumTranslation(double maximumTranslation) {
-		if (maximumTranslation < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidMaximumTranslation"));
+		if (maximumTranslation < 0) 
+			throw new ValueOutOfRangeException("maximumTranslation", maximumTranslation, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+			
 		this.maximumTranslation = maximumTranslation;
 		this.maximumTranslationSquared = maximumTranslation * maximumTranslation;
 	}
@@ -374,7 +360,9 @@ public class Settings {
 	 * @throws IllegalArgumentException if maxRotation is less than zero
 	 */
 	public void setMaximumRotation(double maximumRotation) {
-		if (maximumRotation < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidMaximumRotation"));
+		if (maximumRotation < 0)
+			throw new ValueOutOfRangeException("maximumRotation", maximumRotation, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+			
 		this.maximumRotation = maximumRotation;
 		this.maximumRotationSquared = maximumRotation * maximumRotation;
 	}
@@ -430,7 +418,9 @@ public class Settings {
 	 * @since 4.0.0
 	 */
 	public void setMaximumAtRestLinearVelocity(double maximumAtRestLinearVelocity) {
-		if (maximumAtRestLinearVelocity < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidMaximumAtRestLinearVelocity"));
+		if (maximumAtRestLinearVelocity < 0)
+			throw new ValueOutOfRangeException("maximumAtRestLinearVelocity", maximumAtRestLinearVelocity, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+			
 		this.maximumAtRestLinearVelocity = maximumAtRestLinearVelocity;
 		this.maximumAtRestLinearVelocitySquared = maximumAtRestLinearVelocity * maximumAtRestLinearVelocity;
 	}
@@ -468,7 +458,9 @@ public class Settings {
 	 * @since 4.0.0
 	 */
 	public void setMaximumAtRestAngularVelocity(double maximumAtRestAngularVelocity) {
-		if (maximumAtRestAngularVelocity < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidMaximumAtRestAngularVelocity"));
+		if (maximumAtRestAngularVelocity < 0) 
+			throw new ValueOutOfRangeException("maximumAtRestAngularVelocity", maximumAtRestAngularVelocity, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+			
 		this.maximumAtRestAngularVelocity = maximumAtRestAngularVelocity;
 		this.maximumAtRestAngularVelocitySquared = maximumAtRestAngularVelocity * maximumAtRestAngularVelocity;
 	}
@@ -494,7 +486,9 @@ public class Settings {
 	 * @since 4.0.0
 	 */
 	public void setMinimumAtRestTime(double minimumAtRestTime) {
-		if (minimumAtRestTime < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidMinimumAtRestTime"));
+		if (minimumAtRestTime < 0) 
+			throw new ValueOutOfRangeException("minimumAtRestTime", minimumAtRestTime, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+
 		this.minimumAtRestTime = minimumAtRestTime;
 	}
 	
@@ -513,10 +507,12 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range [1, &infin;]
 	 * @param velocityConstraintSolverIterations the number of iterations used to solve velocity constraints
-	 * @throws IllegalArgumentException if velocityConstraintSolverIterations is less than 5
+	 * @throws IllegalArgumentException if velocityConstraintSolverIterations is less than 1
 	 */
 	public void setVelocityConstraintSolverIterations(int velocityConstraintSolverIterations) {
-		if (velocityConstraintSolverIterations < 1) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidVelocityIterations"));
+		if (velocityConstraintSolverIterations < 1) 
+			throw new ValueOutOfRangeException("velocityConstraintSolverIterations", velocityConstraintSolverIterations, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 1);
+
 		this.velocityConstraintSolverIterations = velocityConstraintSolverIterations;
 	}
 	
@@ -535,10 +531,12 @@ public class Settings {
 	 * <p>
 	 * Valid values are in the range [1, &infin;]
 	 * @param positionConstraintSolverIterations the number of iterations used to solve position constraints
-	 * @throws IllegalArgumentException if positionConstraintSolverIterations is less than 5
+	 * @throws IllegalArgumentException if positionConstraintSolverIterations is less than 1 
 	 */
 	public void setPositionConstraintSolverIterations(int positionConstraintSolverIterations) {
-		if (positionConstraintSolverIterations < 1) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidPositionIterations"));
+		if (positionConstraintSolverIterations < 1) 
+			throw new ValueOutOfRangeException("positionConstraintSolverIterations", positionConstraintSolverIterations, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 1);
+			
 		this.positionConstraintSolverIterations = positionConstraintSolverIterations;
 	}
 	
@@ -573,7 +571,9 @@ public class Settings {
 	 * @throws IllegalArgumentException if warmStartDistance is less than zero
 	 */
 	public void setMaximumWarmStartDistance(double maximumWarmStartDistance) {
-		if (maximumWarmStartDistance < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidMaximumWarmStartDistance"));
+		if (maximumWarmStartDistance < 0) 
+			throw new ValueOutOfRangeException("maximumWarmStartDistance", maximumWarmStartDistance, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+			
 		this.maximumWarmStartDistance = maximumWarmStartDistance;
 		this.maximumWarmStartDistanceSquared = this.maximumWarmStartDistance * this.maximumWarmStartDistance;
 	}
@@ -601,47 +601,6 @@ public class Settings {
 		this.warmStartingEnabled = flag;
 	}
 	
-	/**
-	 * Returns the restitution velocity.
-	 * @return double the restitution velocity
-	 * @see #setRestitutionVelocity(double)
-	 * @deprecated Deprecated in 4.2.0. Use the BodyFixture.restitutionVelocity instead.
-	 */
-	@Deprecated
-	public double getRestitutionVelocity() {
-		return this.restitutionVelocity;
-	}
-	
-	/**
-	 * Returns the restitution velocity squared.
-	 * @see #getRestitutionVelocity()
-	 * @see #setRestitutionVelocity(double)
-	 * @return double
-	 * @deprecated Deprecated in 4.2.0. Use the BodyFixture.restitutionVelocity instead.
-	 */
-	@Deprecated
-	public double getRestitutionVelocitySquared() {
-		return restitutionVelocitySquared;
-	}
-	
-	/**
-	 * Sets the restitution velocity.
-	 * <p>
-	 * The relative velocity in the direction of the contact normal which determines
-	 * whether to handle the collision as an inelastic or elastic collision.
-	 * <p>
-	 * Valid values are in the range [0, &infin;] meters/second
-	 * @param restitutionVelocity the restitution velocity
-	 * @throws IllegalArgumentException if restitutionVelocity is less than zero
-	 * @deprecated Deprecated in 4.2.0. Use the BodyFixture.restitutionVelocity instead.
-	 */
-	@Deprecated
-	public void setRestitutionVelocity(double restitutionVelocity) {
-		if (restitutionVelocity < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidRestitutionVelocity"));
-		this.restitutionVelocity = restitutionVelocity;
-		this.restitutionVelocitySquared = restitutionVelocity * restitutionVelocity;
-	}
-
 	/**
 	 * Returns the linear tolerance.
 	 * @return double the allowed penetration
@@ -671,7 +630,9 @@ public class Settings {
 	 * @throws IllegalArgumentException if linearTolerance is less than zero
 	 */
 	public void setLinearTolerance(double linearTolerance) {
-		if (linearTolerance < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidLinearTolerance"));
+		if (linearTolerance < 0) 
+			throw new ValueOutOfRangeException("linearTolerance", linearTolerance, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+			
 		this.linearTolerance = linearTolerance;
 		this.linearToleranceSquared = linearTolerance * linearTolerance;
 	}
@@ -705,7 +666,9 @@ public class Settings {
 	 * @throws IllegalArgumentException if angularTolerance is less than zero
 	 */
 	public void setAngularTolerance(double angularTolerance) {
-		if (angularTolerance < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidAngularTolerance"));
+		if (angularTolerance < 0) 
+			throw new ValueOutOfRangeException("angularTolerance", angularTolerance, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+			
 		this.angularTolerance = angularTolerance;
 		this.angularToleranceSquared = angularTolerance * angularTolerance;
 	}
@@ -742,7 +705,9 @@ public class Settings {
 	 * @throws IllegalArgumentException if maxLinearCorrection is less than zero
 	 */
 	public void setMaximumLinearCorrection(double maximumLinearCorrection) {
-		if (maximumLinearCorrection < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidMaximumLinearCorrection"));
+		if (maximumLinearCorrection < 0)
+			throw new ValueOutOfRangeException("maximumLinearCorrection", maximumLinearCorrection, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+			
 		this.maximumLinearCorrection = maximumLinearCorrection;
 		this.maximumLinearCorrectionSquared = maximumLinearCorrection * maximumLinearCorrection;
 	}
@@ -776,7 +741,9 @@ public class Settings {
 	 * @throws IllegalArgumentException if maxAngularCorrection is less than zero
 	 */
 	public void setMaximumAngularCorrection(double maximumAngularCorrection) {
-		if (maximumAngularCorrection < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidMaximumAngularCorrection"));
+		if (maximumAngularCorrection < 0) 
+			throw new ValueOutOfRangeException("maximumAngularCorrection", maximumAngularCorrection, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+			
 		this.maximumAngularCorrection = maximumAngularCorrection;
 		this.maximumAngularCorrectionSquared = maximumAngularCorrection * maximumAngularCorrection;
 	}
@@ -800,7 +767,9 @@ public class Settings {
 	 * @throws IllegalArgumentException if baumgarte is less than zero
 	 */
 	public void setBaumgarte(double baumgarte) {
-		if (baumgarte < 0) throw new IllegalArgumentException(Messages.getString("dynamics.settings.invalidBaumgarte"));
+		if (baumgarte < 0) 
+			throw new ValueOutOfRangeException("baumgarte", baumgarte, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
+			
 		this.baumgarte = baumgarte;
 	}
 	
@@ -821,7 +790,8 @@ public class Settings {
 	 */
 	public void setContinuousDetectionMode(ContinuousDetectionMode mode) {
 		// make sure its not null
-		if (mode == null) throw new NullPointerException(Messages.getString("dynamics.settings.invalidCCDMode"));
+		if (mode == null) 
+			throw new ArgumentNullException("mode");
 		// set the mode
 		this.continuousDetectionMode = mode;
 	}

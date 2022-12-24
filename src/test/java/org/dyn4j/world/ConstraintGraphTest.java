@@ -1112,7 +1112,7 @@ public class ConstraintGraphTest {
 		Body b1 = new Body();
 		g.addBody(b1);
 		
-		Joint<Body> j1 = new PinJoint<Body>(b1, b1.getWorldCenter(), 8.0, 0.1, 1000);
+		Joint<Body> j1 = new PinJoint<Body>(b1, b1.getWorldCenter());
 		g.addJoint(j1);
 		
 		TestCase.assertTrue(g.containsBody(b1));
@@ -1123,5 +1123,5 @@ public class ConstraintGraphTest {
 		TestCase.assertFalse(g.containsBody(b1));
 		TestCase.assertFalse(g.containsJoint(j1));
 	}
-	
+	// TODO test the constraint graph with a TripletJoint (3 bodies) all methods
 }

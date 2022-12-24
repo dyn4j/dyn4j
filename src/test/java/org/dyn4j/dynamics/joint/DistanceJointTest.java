@@ -36,7 +36,7 @@ import junit.framework.TestCase;
  * @version 4.2.0
  * @since 1.0.2
  */
-public class DistanceJointTest extends AbstractJointTest {
+public class DistanceJointTest extends BaseJointTest {
 	/**
 	 * Tests the successful creation case.
 	 */
@@ -56,8 +56,12 @@ public class DistanceJointTest extends AbstractJointTest {
 		TestCase.assertEquals(d, dj.getRestDistance());
 		TestCase.assertEquals(d, dj.getCurrentDistance());
 		
-		TestCase.assertEquals(0.0, dj.getDampingRatio());
-		TestCase.assertEquals(0.0, dj.getFrequency());
+		TestCase.assertEquals(0.3, dj.getSpringDampingRatio());
+		TestCase.assertEquals(8.0, dj.getSpringFrequency());
+		TestCase.assertEquals(1000.0, dj.getMaximumSpringForce());
+		TestCase.assertEquals(0.0, dj.getSpringStiffness());
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, dj.getSpringMode());
+		
 		TestCase.assertEquals(d, dj.getLowerLimit());
 		TestCase.assertEquals(d, dj.getUpperLimit());
 		
@@ -73,6 +77,7 @@ public class DistanceJointTest extends AbstractJointTest {
 		TestCase.assertEquals(false, dj.isUpperLimitEnabled());
 		TestCase.assertEquals(false, dj.isSpringDamperEnabled());
 		TestCase.assertEquals(false, dj.isSpringEnabled());
+		TestCase.assertEquals(false, dj.isMaximumSpringForceEnabled());
 		
 		TestCase.assertNotNull(dj.toString());
 	}
@@ -139,51 +144,56 @@ public class DistanceJointTest extends AbstractJointTest {
 	}
 	
 	/**
-	 * Tests the isSpring method.
+	 * Tests the isSpringEnabled method.
 	 */
 	@Test
-	public void isSpring() {
+	public void isSpringEnabled() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		TestCase.assertFalse(dj.isSpringEnabled());
 		
-		dj.setFrequency(0.0);
+		dj.setSpringFrequency(1.0);
 		TestCase.assertFalse(dj.isSpringEnabled());
 		
-		dj.setFrequency(1.0);
+		dj.setSpringFrequency(100.0);
+		TestCase.assertFalse(dj.isSpringEnabled());
+		
+		dj.setSpringEnabled(true);
 		TestCase.assertTrue(dj.isSpringEnabled());
 		
-		dj.setFrequency(15.24);
-		TestCase.assertTrue(dj.isSpringEnabled());
-		
-		dj.setFrequency(0.0);
+		dj.setSpringEnabled(false);
 		TestCase.assertFalse(dj.isSpringEnabled());
 	}
 
 	/**
-	 * Tests the isSpringDamper method.
+	 * Tests the isSpringDamperEnabled method.
 	 */
 	@Test
-	public void isSpringDamper() {
+	public void isSpringDamperEnabled() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		TestCase.assertFalse(dj.isSpringDamperEnabled());
 		
-		dj.setFrequency(0.0);
+		dj.setSpringFrequency(1.0);
 		TestCase.assertFalse(dj.isSpringDamperEnabled());
 		
-		dj.setFrequency(1.0);
+		dj.setSpringFrequency(100.0);
 		TestCase.assertFalse(dj.isSpringDamperEnabled());
 		
-		dj.setFrequency(15.24);
+		dj.setSpringDampingRatio(0.4);
 		TestCase.assertFalse(dj.isSpringDamperEnabled());
 		
-		dj.setDampingRatio(0.4);
+		dj.setSpringDampingRatio(1.0);
+		TestCase.assertFalse(dj.isSpringDamperEnabled());
+		
+		dj.setSpringEnabled(false);
+		dj.setSpringDamperEnabled(true);
 		TestCase.assertTrue(dj.isSpringDamperEnabled());
 		
-		dj.setDampingRatio(0.0);
-		TestCase.assertFalse(dj.isSpringDamperEnabled());
+		dj.setSpringEnabled(true);
+		dj.setSpringDamperEnabled(true);
+		TestCase.assertTrue(dj.isSpringDamperEnabled());
 		
-		dj.setDampingRatio(0.61);
-		dj.setFrequency(0.0);
+		dj.setSpringEnabled(true);
+		dj.setSpringDamperEnabled(false);
 		TestCase.assertFalse(dj.isSpringDamperEnabled());
 	}
 	
@@ -211,44 +221,51 @@ public class DistanceJointTest extends AbstractJointTest {
 	}
 
 	/**
-	 * Tests valid distance values.
-	 */
-	@Test
-	@Deprecated
-	public void setPositiveDistance() {
-		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		
-		dj.setDistance(0.0);
-		TestCase.assertEquals(0.0, dj.getDistance());
-		
-		dj.setDistance(1.0);
-		TestCase.assertEquals(1.0, dj.getDistance());
-	}
-	
-	/**
-	 * Tests a negative distance value.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	@Deprecated
-	public void setNegativeDistance() {
-		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		dj.setDistance(-2.0);
-	}
-	
-	/**
 	 * Tests valid damping ratio values.
 	 */
 	@Test
-	public void setDampingRatio() {
+	public void setSpringDampingRatio() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		dj.setDampingRatio(0.0);
-		TestCase.assertEquals(0.0, dj.getDampingRatio());
 		
-		dj.setDampingRatio(1.0);
-		TestCase.assertEquals(1.0, dj.getDampingRatio());
+		dj.setSpringDampingRatio(0.0);
+		TestCase.assertEquals(0.0, dj.getSpringDampingRatio());
 		
-		dj.setDampingRatio(0.2);
-		TestCase.assertEquals(0.2, dj.getDampingRatio());
+		dj.setSpringDampingRatio(0.001);
+		TestCase.assertEquals(0.001, dj.getSpringDampingRatio());
+		
+		dj.setSpringDampingRatio(1.0);
+		TestCase.assertEquals(1.0, dj.getSpringDampingRatio());
+		
+		dj.setSpringDampingRatio(0.2);
+		TestCase.assertEquals(0.2, dj.getSpringDampingRatio());
+
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// this won't wake them because its not enabled
+		dj.setSpringDampingRatio(0.5);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+
+		// this won't wake the bodies because the spring isn't enabled
+		dj.setSpringDamperEnabled(true);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+
+		// enable the spring
+		dj.setSpringEnabled(true);
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// this won't wake the bodies because it's the same value
+		dj.setSpringDampingRatio(0.5);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// this should wake them
+		dj.setSpringDampingRatio(0.6);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
 	}
 	
 	/**
@@ -257,7 +274,7 @@ public class DistanceJointTest extends AbstractJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setNegativeDampingRatio() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		dj.setDampingRatio(-1.0);
+		dj.setSpringDampingRatio(-1.0);
 	}
 	
 	/**
@@ -266,35 +283,248 @@ public class DistanceJointTest extends AbstractJointTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void setDampingRatioGreaterThan1() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		dj.setDampingRatio(2.0);
+		dj.setSpringDampingRatio(2.0);
 	}
 	
 	/**
 	 * Tests valid frequency values.
 	 */
 	@Test
-	public void setFrequency() {
+	public void setSpringFrequency() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
 		
-		dj.setFrequency(0.0);
-		TestCase.assertEquals(0.0, dj.getFrequency());
+		dj.setSpringFrequency(0.0);
+		TestCase.assertEquals(0.0, dj.getSpringFrequency());
 		
-		dj.setFrequency(1.0);
-		TestCase.assertEquals(1.0, dj.getFrequency());
+		dj.setSpringFrequency(0.001);
+		TestCase.assertEquals(0.001, dj.getSpringFrequency());
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, dj.getSpringMode());
 		
-		dj.setFrequency(29.0);
-		TestCase.assertEquals(29.0, dj.getFrequency());
+		dj.setSpringFrequency(1.0);
+		TestCase.assertEquals(1.0, dj.getSpringFrequency());
+		
+		dj.setSpringFrequency(29.0);
+		TestCase.assertEquals(29.0, dj.getSpringFrequency());
+		
+		// at rest testing
+		
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// the spring isn't enabled so it shouldn't wake the bodies
+		dj.setSpringFrequency(3.0);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// enabling the spring should wake the bodies
+		dj.setSpringEnabled(true);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+
+		// if the spring frequency doesn't change, then the bodies should
+		// state at rest
+		dj.setSpringFrequency(3.0);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// the frequency is changing, they should wake
+		dj.setSpringFrequency(5.0);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+		
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+
+		// this should wake the bodies
+		dj.setSpringDamperEnabled(true);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+	}
+	
+	/**
+	 * Tests the spring mode changing.
+	 */
+	@Test
+	public void setSpringMode() {
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		// test mode swapping
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, dj.getSpringMode());
+		dj.setSpringStiffness(0.3);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, dj.getSpringMode());
+		dj.setSpringFrequency(0.5);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, dj.getSpringMode());
+	}
+	
+	/**
+	 * Tests a negative stiffness value.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setSpringStiffnessNegative() {
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		dj.setSpringStiffness(-0.3);
+	}
+
+	/**
+	 * Tests valid frequency values.
+	 */
+	@Test
+	public void setSpringStiffness() {
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		dj.setSpringStiffness(0.0);
+		TestCase.assertEquals(0.0, dj.getSpringStiffness());
+		
+		dj.setSpringStiffness(0.001);
+		TestCase.assertEquals(0.001, dj.getSpringStiffness());
+		
+		dj.setSpringStiffness(1.0);
+		TestCase.assertEquals(1.0, dj.getSpringStiffness());
+		
+		dj.setSpringStiffness(29.0);
+		TestCase.assertEquals(29.0, dj.getSpringStiffness());
+		
+		// at rest testing
+		
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// the spring isn't enabled so it shouldn't wake the bodies
+		dj.setSpringStiffness(3.0);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// enabling the spring should wake the bodies
+		dj.setSpringEnabled(true);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+
+		// if the spring frequency doesn't change, then the bodies should
+		// state at rest
+		dj.setSpringStiffness(3.0);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// the frequency is changing, they should wake
+		dj.setSpringStiffness(5.0);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+		
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+
+		// this should wake the bodies
+		dj.setSpringDamperEnabled(true);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
 	}
 	
 	/**
 	 * Tests a negative frequency value.
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void setNegativeFrequency() {
+	public void setSpringFrequencyNegative() {
 		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
-		dj.setFrequency(-0.3);
+		dj.setSpringFrequency(-0.3);
 	}
 
+	/**
+	 * Tests setting a negative maximum force.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void setSpringMaximumForceNegative() {
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		dj.setMaximumSpringForce(-1.0);
+	}
+	
+	/**
+	 * Tests setting the maximum force.
+	 */
+	@Test
+	public void setSpringMaximumForce() {
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		dj.setMaximumSpringForce(0.0);
+		TestCase.assertEquals(0.0, dj.getMaximumSpringForce());
+		
+		dj.setMaximumSpringForce(0.001);
+		TestCase.assertEquals(0.001, dj.getMaximumSpringForce());
+		
+		dj.setMaximumSpringForce(1.0);
+		TestCase.assertEquals(1.0, dj.getMaximumSpringForce());
+		
+		dj.setMaximumSpringForce(1000);
+		TestCase.assertEquals(1000.0, dj.getMaximumSpringForce());
+
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// this won't wake them because its not enabled
+		dj.setMaximumSpringForce(0.5);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+
+		// this won't wake the bodies because the spring isn't enabled
+		dj.setMaximumSpringForceEnabled(true);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+
+		// enable the spring
+		dj.setSpringEnabled(true);
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// this won't wake the bodies because it's the same value
+		dj.setMaximumSpringForce(0.5);
+		TestCase.assertTrue(this.b1.isAtRest());
+		TestCase.assertTrue(this.b2.isAtRest());
+		
+		// this should wake them
+		dj.setMaximumSpringForce(0.6);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+		
+		this.b1.setAtRest(true);
+		this.b2.setAtRest(true);
+		
+		// this should wake them
+		dj.setMaximumSpringForceEnabled(false);
+		TestCase.assertFalse(this.b1.isAtRest());
+		TestCase.assertFalse(this.b2.isAtRest());
+	}
+	
+	/**
+	 * Tests spring stiffness/frequency calculations
+	 */
+	@Test
+	public void computeSpringStiffnessFrequency() {
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		dj.setSpringEnabled(true);
+		dj.setSpringDamperEnabled(true);
+		dj.setSpringFrequency(8.0);
+		dj.setSpringDampingRatio(0.5);
+		
+		dj.updateSpringCoefficients();
+		
+		TestCase.assertEquals(8.0, dj.springFrequency);
+		TestCase.assertEquals(0.5, dj.springDampingRatio);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_FREQUENCY, dj.getSpringMode());
+		TestCase.assertEquals(3968.803, dj.springStiffness, 1e-3);
+		
+		dj.setSpringStiffness(1000.0);
+		dj.updateSpringCoefficients();
+		
+		TestCase.assertEquals(4.015, dj.springFrequency, 1e-3);
+		TestCase.assertEquals(0.5, dj.springDampingRatio);
+		TestCase.assertEquals(AbstractJoint.SPRING_MODE_STIFFNESS, dj.getSpringMode());
+		TestCase.assertEquals(1000.0, dj.springStiffness, 1e-3);
+	}
+	
 	/**
 	 * Tests the body's sleep state when changing the distance.
 	 */

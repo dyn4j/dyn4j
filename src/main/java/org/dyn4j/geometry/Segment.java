@@ -28,14 +28,14 @@ import java.util.Iterator;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
-import org.dyn4j.resources.Messages;
+import org.dyn4j.exception.ArgumentNullException;
 
 /**
  * Implementation of a Line Segment {@link Convex} {@link Shape}.
  * <p>
  * This class represents a line segment that is infinitely thin.
  * @author William Bittle
- * @version 4.2.1
+ * @version 5.0.0
  * @since 1.0.0
  */
 public class Segment extends AbstractShape implements Convex, Wound, Shape, Transformable, DataContainer {
@@ -103,11 +103,15 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	 */
 	private static final boolean validate(Vector2 point1, Vector2 point2) {
 		// make sure either point is not null
-		if (point1 == null) throw new NullPointerException(Messages.getString("geometry.segment.nullPoint1"));
-		if (point2 == null) throw new NullPointerException(Messages.getString("geometry.segment.nullPoint2"));
+		if (point1 == null) 
+			throw new ArgumentNullException("point1");
+		
+		if (point2 == null) 
+			throw new ArgumentNullException("point2");
+		
 		// make sure the two points are not coincident
 		if (point1.equals(point2)) {
-			throw new IllegalArgumentException(Messages.getString("geometry.segment.samePoint"));
+			throw new IllegalArgumentException("point1 and point2 cannot be the same point");
 		}
 		
 		return true;

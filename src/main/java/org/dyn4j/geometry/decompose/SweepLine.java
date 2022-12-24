@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,11 +27,12 @@ package org.dyn4j.geometry.decompose;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import org.dyn4j.exception.ArgumentNullException;
+import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.resources.Messages;
 
 /**
  * Implementation of the Sweep convex decomposition algorithm for simple polygons.
@@ -48,7 +49,7 @@ import org.dyn4j.resources.Messages;
  * <p>
  * This algorithm total complexity is O(n log n).
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.0
  * @since 2.2.0
  */
 public class SweepLine extends AbstractDecomposer implements Decomposer, Triangulator {
@@ -90,11 +91,14 @@ public class SweepLine extends AbstractDecomposer implements Decomposer, Triangu
 	 */
 	final DoubleEdgeList createTriangulation(Vector2... points) {
 		// check for a null list
-		if (points == null) throw new NullPointerException(Messages.getString("geometry.decompose.nullArray"));
+		if (points == null) 
+			throw new ArgumentNullException("points");
+		
 		// get the number of points
 		int size = points.length;
 		// check the size
-		if (size < 4) throw new IllegalArgumentException(Messages.getString("geometry.decompose.invalidSize"));
+		if (size < 4) 
+			throw new ValueOutOfRangeException("points.length", size, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 4);
 		
 		// get the winding order
 		double winding = Geometry.getWinding(points);
