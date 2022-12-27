@@ -24,6 +24,7 @@
  */
 package org.dyn4j.world;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.dyn4j.collision.BasicCollisionItem;
@@ -31,11 +32,13 @@ import org.dyn4j.collision.BasicCollisionPair;
 import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactConstraintSolver;
 import org.dyn4j.dynamics.contact.SequentialImpulses;
+import org.dyn4j.dynamics.joint.AbstractJoint;
 import org.dyn4j.dynamics.joint.AngleJoint;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -1123,5 +1126,83 @@ public class ConstraintGraphTest {
 		TestCase.assertFalse(g.containsBody(b1));
 		TestCase.assertFalse(g.containsJoint(j1));
 	}
-	// TODO test the constraint graph with a TripletJoint (3 bodies) all methods
+	
+	// a temporary class for testing multi-body joints
+	@SuppressWarnings("javadoc")
+	final class QuadrupleBodyJoint<T extends PhysicsBody> extends AbstractJoint<T> {
+		public QuadrupleBodyJoint(T b1, T b2, T b3, T b4) {
+			super(Arrays.asList(b1, b2, b3, b4));
+		}
+
+		@Override
+		public void initializeConstraints(TimeStep step, Settings settings) {}
+		@Override
+		public void solveVelocityConstraints(TimeStep step, Settings settings) {}
+		@Override
+		public boolean solvePositionConstraints(TimeStep step, Settings settings) { return false; }
+		@Override
+		public Vector2 getReactionForce(double invdt) { return null; }
+		@Override
+		public double getReactionTorque(double invdt) { return 0; }
+		@Override
+		public void shift(Vector2 shift) {}
+	}
+	
+	/**
+	 * Tests the adding and removal of bodies/joints with multi-body joints.
+	 */
+	@Test
+	public void removeBodyWithQuadrupleJoint() {
+		Body b1 = new Body();
+		Body b2 = new Body();
+		Body b3 = new Body();
+		Body b4 = new Body();
+		
+		Joint<Body> j = new QuadrupleBodyJoint<Body>(b1, b2, b3, b4);
+		
+		ConstraintGraph<Body> g = new ConstraintGraph<Body>();
+		
+		g.addBody(b1);
+		g.addBody(b2);
+		g.addBody(b3);
+		g.addBody(b4);
+		g.addJoint(j);
+		
+		// verify everything is added correctly
+		TestCase.assertTrue(g.containsBody(b1));
+		TestCase.assertTrue(g.containsBody(b2));
+		TestCase.assertTrue(g.containsBody(b3));
+		TestCase.assertTrue(g.containsBody(b4));
+		TestCase.assertTrue(g.containsJoint(j));
+		
+		// remove one of the bodies, the joint
+		// should get implicitly removed along
+		// with the body that was removed
+		g.removeBody(b3);
+		
+		TestCase.assertTrue(g.containsBody(b1));
+		TestCase.assertTrue(g.containsBody(b2));
+		TestCase.assertFalse(g.containsBody(b3));
+		TestCase.assertTrue(g.containsBody(b4));
+		TestCase.assertFalse(g.containsJoint(j));
+		
+		// add them back, and check the joint
+		// removal
+		g.addBody(b3);
+		g.addJoint(j);
+		
+		TestCase.assertTrue(g.containsBody(b1));
+		TestCase.assertTrue(g.containsBody(b2));
+		TestCase.assertTrue(g.containsBody(b3));
+		TestCase.assertTrue(g.containsBody(b4));
+		TestCase.assertTrue(g.containsJoint(j));
+		
+		g.removeJoint(j);
+		
+		TestCase.assertTrue(g.containsBody(b1));
+		TestCase.assertTrue(g.containsBody(b2));
+		TestCase.assertTrue(g.containsBody(b3));
+		TestCase.assertTrue(g.containsBody(b4));
+		TestCase.assertFalse(g.containsJoint(j));
+	}
 }
