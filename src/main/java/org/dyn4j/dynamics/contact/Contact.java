@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,7 +30,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents a contact of a {@link ContactConstraint}.
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.1
  * @since 4.0.0
  */
 public interface Contact {
@@ -54,4 +54,18 @@ public interface Contact {
 	 * @return double the penetration depth
 	 */
 	public double getDepth();
+	
+	/**
+	 * Returns true if this contact will be ignored during
+	 * contact solving.
+	 * <p>
+	 * A contact is ignored when it's part of a sensor {@link ContactConstraint}
+	 * or if the {@link ContactConstraint} has been manually disabled.
+	 * One last situation is when the contact is part of a {@link ContactConstraint}
+	 * that has linearly dependent contacts - one of them will be solved
+	 * and the other will be ignored.
+	 * @return boolean
+	 * @since 5.0.1
+	 */
+	public boolean isIgnored();
 }

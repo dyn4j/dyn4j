@@ -73,7 +73,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link AbstractPhysicsWorld} class.
  * @author William Bittle
- * @version 5.0.0
+ * @version 5.0.1
  * @since 4.0.0
  */
 public class AbstractPhysicsWorldTest {
@@ -2210,5 +2210,58 @@ public class AbstractPhysicsWorldTest {
 		
 		b1.removeFixture(bf);
 		TestCase.assertTrue(b2.isAtRest());
+	}
+	
+	/**
+	 * Tests the solved flag state.
+	 * @since 5.0.1
+	 */
+	@Test
+	public void solvedFlag() {
+		TestWorld w = new TestWorld();
+		w.setGravity(0.0, 0.0);
+		
+		Body b1 = new Body();
+		Body b2 = new Body();
+		BodyFixture bf1 = b1.addFixture(Geometry.createSquare(0.5));
+		BodyFixture bf2 = b2.addFixture(Geometry.createSquare(0.5));
+		
+		b1.setMass(MassType.NORMAL);
+		b2.setMass(MassType.NORMAL);
+		bf1.setRestitution(0.1);
+		bf2.setRestitution(0.1);
+		b1.translate(0.450, 0.499);
+		w.addBody(b1);
+		w.addBody(b2);
+		
+		// set one to a sensor
+		bf1.setSensor(true);
+		
+		w.step(1);
+		
+		List<ContactConstraint<Body>> ccs = w.getContacts(b1);
+		ContactConstraint<Body> cc = ccs.get(0);
+		TestCase.assertEquals(2, cc.getContacts().size());
+		TestCase.assertFalse(cc.getContacts().get(0).isSolved());
+		TestCase.assertFalse(cc.getContacts().get(1).isSolved());
+		
+		// disable, but reset sensor to false
+		bf1.setSensor(false);
+		cc.setEnabled(false);
+		
+		w.step(1);
+		
+		TestCase.assertEquals(2, cc.getContacts().size());
+		TestCase.assertFalse(cc.getContacts().get(0).isSolved());
+		TestCase.assertFalse(cc.getContacts().get(1).isSolved());
+		
+		// disable, but reset sensor to false
+		cc.setEnabled(true);
+		
+		w.step(1);
+		
+		TestCase.assertEquals(2, cc.getContacts().size());
+		TestCase.assertTrue(cc.getContacts().get(0).isSolved());
+		TestCase.assertTrue(cc.getContacts().get(1).isSolved());
 	}
 }

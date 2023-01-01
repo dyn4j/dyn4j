@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents an impulse based rigid {@link PhysicsBody} physics collision resolver.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.1
  * @since 3.2.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -188,6 +188,10 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 				contact.massT = 1.0 / this.getMassCoefficient(contactConstraint, contact, T);
 				// set the velocity bias
 				contact.vb = 0.0;
+				// set the ignored flag
+				contact.ignored = false;
+				// set the solved flag
+				contact.solved = true;
 				
 				// find the relative velocity and project it onto the penetration normal
 				double rvn = this.getRelativeVelocityAlongNormal(contactConstraint, contact);
@@ -265,7 +269,9 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 					}
 					
 					// mark the contact as ignored
-					contactConstraint.contacts.get(1).ignored = true;
+					SolvableContact sc = contactConstraint.contacts.get(1);
+					sc.ignored = true;
+					sc.solved = false;
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,7 +27,7 @@ package org.dyn4j.dynamics.contact;
 /**
  * Represents a contact that has been solved.
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.1
  * @since 4.0.0
  */
 public interface SolvedContact extends Contact {
@@ -46,8 +46,14 @@ public interface SolvedContact extends Contact {
 	/**
 	 * Returns true if this contact was solved.
 	 * <p>
-	 * A contact may not be solved when it's part of a pair of contacts
-	 * that form a linearly dependent system.
+	 * A contact is only solved if it's been through the contact solver.
+	 * This means that any new contact will return false.  It also means
+	 * that contacts that are part of a sensor {@link ContactConstraint}
+	 * will return false as will manually disabled {@link ContactConstraint}s.
+	 * One last situation is when the contact is part of a {@link ContactConstraint}
+	 * that has linearly dependent contacts - one of them will be solved
+	 * and the other will be ignored.
+	 * disabled.
 	 * @return boolean
 	 * @since 4.0.0
 	 */

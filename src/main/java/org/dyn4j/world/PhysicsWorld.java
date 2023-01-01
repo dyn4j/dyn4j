@@ -50,7 +50,7 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * This interface also expands on the {@link CollisionWorld} adding other features like joints, gravity,
  * etc.
  * @author William Bittle
- * @version 5.0.0
+ * @version 5.0.1
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
@@ -671,6 +671,12 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	
 	/**
 	 * Returns a list of all {@link PhysicsBody}s that are in contact with the given {@link PhysicsBody}.
+	 * <p>
+	 * The intended behavior for this method is to return all the {@link PhysicsBody}s that are in contact
+	 * with the given {@link PhysicsBody} at the time this method is called.  This is an important distinction
+	 * since the {@link #update(double)} method will both solve collisions and re-detect collisions.  Calling
+	 * this method after {@link #update(double)} returns will report all collisions that exist - some solved
+	 * in the previous step, some new, and others may have been removed.
 	 * @param body the body
 	 * @param includeSensedContact true if sensed contacts should be included in the results
 	 * @return List&lt;{@link PhysicsBody}&gt;
@@ -682,6 +688,14 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * <p>
 	 * These represent the contact pairs between the given body and the others it's colliding with.
 	 * Each {@link ContactConstraint} could have 1 or 2 contacts associated with it.
+	 * <p>
+	 * The intended behavior for this method is to return all the {@link ContactConstraint}s that exist on
+	 * the given {@link PhysicsBody} at the time this method is called.  This is an important distinction
+	 * since the {@link #update(double)} method will both solve collisions and re-detect collisions.  Calling
+	 * this method after {@link #update(double)} returns will report all collisions that exist - some solved
+	 * in the previous step, some new, and others may have been removed.  If you need to know what happened
+	 * to each collision use {@link #addContactListener(ContactListener)} to add a contact listener.  The
+	 * listener will report the start, end, and continuation of contacts.
 	 * @param body the body
 	 * @return List&lt;{@link ContactConstraint}&gt;
 	 */

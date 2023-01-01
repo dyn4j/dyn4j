@@ -45,7 +45,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents a {@link SolvableContact} constraint for each {@link PhysicsBody} pair.  
  * @author William Bittle
- * @version 5.0.0
+ * @version 5.0.1
  * @since 1.0.0
  * @param <T> The {@link PhysicsBody} type
  */
@@ -152,9 +152,6 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		this.restitutionVelocity = handler.getRestitutionVelocity(fixture1, fixture2);
 		this.sensor = fixture1.isSensor() || fixture2.isSensor();
 		
-		this.tangentSpeed = 0;
-		this.enabled = true;
-		
 		List<ManifoldPoint> points = manifold.getPoints();
 		// get the manifold point size
 		int mSize = points.size();
@@ -170,6 +167,9 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
                   point.getDepth(), 
                   body1.getLocalPoint(point.getPoint()), 
                   body2.getLocalPoint(point.getPoint()));
+			// set the ignored flag if this is a sensor collision or not enabled
+			newContact.ignored = this.sensor || !this.enabled;
+			newContact.solved = false;
 			// add the contact to the array
 			contacts.add(newContact);
 			
@@ -189,6 +189,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 						// copy last time's data over
 						newContact.jn = oldContact.jn;
 						newContact.jt = oldContact.jt;
+						newContact.solved = oldContact.solved;
 					}
 					
 					// remove this contact from the current list
@@ -280,9 +281,15 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	}
 	
 	/**
-	 * Returns the list of {@link SolvableContact}s.
+	 * Returns an unmodifiable list of {@link SolvableContact}s.
 	 * <p>
-	 * Modification of the list is permitted.
+	 * The contacts returned here implement the {@link SolvedContact} interface, but may
+	 * not have been solved yet. This will be the case for contacts discovered at the end
+	 * of a world update. In addition, when contacts are not persisted, the {@link SolvedContact}
+	 * interface methods will return default values since it's technically a new contact.
+	 * <p>
+	 * If you want the most up to date contact information, use this method inside a world
+	 * listener that is triggered before the collision detection phase.
 	 * @return List&lt;{@link SolvableContact}&gt; the list of {@link SolvableContact}s
 	 */
 	public List<? extends SolvedContact> getContacts() {
@@ -414,7 +421,9 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * Sets the coefficient of friction for this contact constraint.
 	 * @param friction the friction; must be 0 or greater
 	 * @since 3.0.2
+	 * @deprecated Removed in 5.0.1. Set the body friction coefficients instead.
 	 */
+	@Deprecated
 	public void setFriction(double friction) {
 		if (friction < 0) 
 			throw new ValueOutOfRangeException("friction", friction, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
@@ -434,7 +443,9 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * Sets the coefficient of restitution for this contact constraint.
 	 * @param restitution the restitution; must be zero or greater
 	 * @since 3.0.2
+	 * @deprecated Removed in 5.0.1. Set the body restitution coefficients instead.
 	 */
+	@Deprecated
 	public void setRestitution(double restitution) {
 		if (restitution < 0) 
 			throw new ValueOutOfRangeException("restitution", restitution, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
@@ -455,17 +466,15 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * Sets the minimum velocity required for restitution to be applied.
 	 * @param restitutionVelocity the restitution velocity
 	 * @since 4.2.0
+	 * @deprecated Removed in 5.0.1. Set the body restitution velocity instead.
 	 */
+	@Deprecated
 	public void setRestitutionVelocity(double restitutionVelocity) {
 		this.restitutionVelocity = restitutionVelocity;
 	}
 	
 	/**
 	 * Returns true if this {@link ContactConstraint} is a sensor.
-	 * <p>
-	 * By default a contact constraint is a sensor if either of the
-	 * two {@link BodyFixture}s are sensor fixtures.  This can be
-	 * overridden using the {@link #setSensor(boolean)} method.
 	 * @return boolean
 	 * @since 1.0.1
 	 */
@@ -479,7 +488,9 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * A sensor constraint is not solved.
 	 * @param flag true if this contact constraint should be a sensor
 	 * @since 3.0.2
+	 * @deprecated Removed in 5.0.1. Set the body fixture sensor flag instead.
 	 */
+	@Deprecated
 	public void setSensor(boolean flag) {
 		this.sensor = flag;
 	}
@@ -503,7 +514,12 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * The surface speed, in meters / second, is used to simulate a
 	 * conveyor belt.
 	 * <p>
-	 * A value of zero deactivates this feature.
+	 * A value of zero deactivates this feature, which is the default.
+	 * <p>
+	 * NOTE: The tangent velocity of this contact constraint is retained
+	 * across simulation steps. If the contact constraint is removed
+	 * (because the bodies separated), then upon the bodies colliding
+	 * again, the tangent velocity will be reset to it's default value.
 	 * @param speed the speed in Meters / Second
 	 * @since 3.0.2
 	 */
@@ -519,6 +535,11 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * processing of this constraint for this step only.
 	 * <p>
 	 * True by default.
+	 * <p>
+	 * NOTE: The enabled state of this contact constraint is retained
+	 * across simulation steps. If the contact constraint is removed
+	 * (because the bodies separated), then upon the bodies colliding
+	 * again, the enable state will be reset to the default.
 	 * @param flag true if the contact should be enabled
 	 * @since 3.3.0
 	 */

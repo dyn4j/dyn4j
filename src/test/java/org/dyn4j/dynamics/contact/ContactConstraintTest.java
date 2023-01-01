@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -46,7 +46,7 @@ import junit.framework.TestCase;
 /**
  * Tests the methods of the {@link ContactConstraint} class.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.1
  * @since 4.0.0
  */
 public class ContactConstraintTest {
@@ -368,27 +368,10 @@ public class ContactConstraintTest {
 	}
 	
 	/**
-	 * Tests the get/set enabled methods.
-	 */
-	@Test
-	public void getSetEnabled() {
-		ContactConstraint<Body> cc = new ContactConstraint<Body>(this.cp);
-		
-		cc.setSensor(true);
-		TestCase.assertTrue(cc.isSensor());
-		
-		cc.setSensor(false);
-		TestCase.assertFalse(cc.isSensor());
-		
-		cc.setSensor(true);
-		TestCase.assertTrue(cc.isSensor());
-	}
-	
-	/**
 	 * Tests the get/set sensor methods.
 	 */
 	@Test
-	public void getSetSensor() {
+	public void getSetEnabled() {
 		ContactConstraint<Body> cc = new ContactConstraint<Body>(this.cp);
 		
 		cc.setEnabled(true);
@@ -399,78 +382,6 @@ public class ContactConstraintTest {
 		
 		cc.setEnabled(true);
 		TestCase.assertTrue(cc.isEnabled());
-	}
-	
-	/**
-	 * Tests the get/set friction methods.
-	 */
-	@Test
-	public void getSetFriction() {
-		ContactConstraint<Body> cc = new ContactConstraint<Body>(this.cp);
-		
-		cc.setFriction(0.5);
-		TestCase.assertEquals(0.5, cc.getFriction());
-		
-		cc.setFriction(0.0);
-		TestCase.assertEquals(0.0, cc.getFriction());
-		
-		cc.setFriction(40.0);
-		TestCase.assertEquals(40.0, cc.getFriction());
-	}
-	
-	/**
-	 * Tests setting an invalid friction.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setNegativeFriction() {
-		ContactConstraint<Body> cc = new ContactConstraint<Body>(this.cp);
-		cc.setFriction(-0.5);
-	}
-	
-	/**
-	 * Tests the get/set restitution methods.
-	 */
-	@Test
-	public void getSetRestitution() {
-		ContactConstraint<Body> cc = new ContactConstraint<Body>(this.cp);
-		
-		cc.setRestitution(0.5);
-		TestCase.assertEquals(0.5, cc.getRestitution());
-		
-		cc.setRestitution(0.0);
-		TestCase.assertEquals(0.0, cc.getRestitution());
-		
-		cc.setRestitution(40.0);
-		TestCase.assertEquals(40.0, cc.getRestitution());
-	}
-
-	/**
-	 * Tests the get/set restitution methods.
-	 */
-	@Test
-	public void getSetRestitutionVelocity() {
-		ContactConstraint<Body> cc = new ContactConstraint<Body>(this.cp);
-		
-		cc.setRestitutionVelocity(0.5);
-		TestCase.assertEquals(0.5, cc.getRestitutionVelocity());
-		
-		cc.setRestitutionVelocity(0.0);
-		TestCase.assertEquals(0.0, cc.getRestitutionVelocity());
-		
-		cc.setRestitutionVelocity(40.0);
-		TestCase.assertEquals(40.0, cc.getRestitutionVelocity());
-
-		cc.setRestitutionVelocity(-2.0);
-		TestCase.assertEquals(-2.0, cc.getRestitutionVelocity());
-	}
-
-	/**
-	 * Tests setting an invalid restitution.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setNegativeRestitution() {
-		ContactConstraint<Body> cc = new ContactConstraint<Body>(this.cp);
-		cc.setRestitution(-0.5);
 	}
 	
 	/**

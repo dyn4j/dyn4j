@@ -1,3 +1,16 @@
+## v5.0.1 - December 31st, 2022
+
+[Milestone](https://github.com/dyn4j/dyn4j/milestone/16?closed=1) |
+[Tag](https://github.com/dyn4j/dyn4j/tree/5.0.1) |
+[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/5.0.1/bundle) |
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=5.0.1)
+
+This update fixes a few issues discovered while enhancing the samples project. This update does change the behavior of the `SolvedContact.isSolved` method and removes the code that resets the `enabled` and `tangentVelocity` properties on the `ContactConstraint`.
+
+**Bug Fixes**
+- [#267](https://github.com/dyn4j/dyn4j/issues/267) Enabled, tangent speed, and other properties of ContactConstraint are not preserved
+- [#268](https://github.com/dyn4j/dyn4j/issues/268) The SolvedContact.isSolved method is not consistent
+
 ## v5.0.0 - December 23rd, 2022
 
 [Milestone](https://github.com/dyn4j/dyn4j/milestone/15?closed=1) |

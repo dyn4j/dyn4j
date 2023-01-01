@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,13 +30,16 @@ import java.util.List;
 import org.dyn4j.collision.BasicCollisionItem;
 import org.dyn4j.collision.BasicCollisionPair;
 import org.dyn4j.collision.CollisionItem;
+import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
+import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.contact.ContactConstraintSolver;
+import org.dyn4j.dynamics.contact.ContactUpdateHandler;
 import org.dyn4j.dynamics.contact.SequentialImpulses;
 import org.dyn4j.dynamics.joint.AbstractJoint;
 import org.dyn4j.dynamics.joint.AngleJoint;
@@ -55,7 +58,7 @@ import junit.framework.TestCase;
 /**
  * Tests the {@link ConstraintGraph} class.
  * @author William Bittle
- * @version 4.1.3
+ * @version 5.0.1
  * @since 4.0.0
  */
 public class ConstraintGraphTest {
@@ -869,6 +872,7 @@ public class ConstraintGraphTest {
 		TestCase.assertNotNull(bodies);
 		TestCase.assertTrue(bodies.isEmpty());
 		
+		Settings settings = new Settings();
 		ContactConstraint<Body> cc = new ContactConstraint<Body>(new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(
 				new BasicCollisionItem<Body, BodyFixture>(b1, f1),
 				new BasicCollisionItem<Body, BodyFixture>(b2, f2)));
@@ -879,7 +883,21 @@ public class ConstraintGraphTest {
 		TestCase.assertFalse(bodies.isEmpty());
 		TestCase.assertSame(b2, bodies.get(0));
 		
-		cc.setSensor(true);
+		f1.setSensor(true);
+		cc.update(new Manifold(), settings, new ContactUpdateHandler() {
+			@Override
+			public void persist(Contact oldContact, Contact newContact) {}
+			@Override
+			public double getRestitutionVelocity(BodyFixture fixture1, BodyFixture fixture2) { return 0; }
+			@Override
+			public double getRestitution(BodyFixture fixture1, BodyFixture fixture2) { return 0; }
+			@Override
+			public double getFriction(BodyFixture fixture1, BodyFixture fixture2) { return 0; }
+			@Override
+			public void end(Contact contact) {}
+			@Override
+			public void begin(Contact contact) {}
+		});
 		
 		bodies = g.getInContactBodies(b1, false);
 		TestCase.assertNotNull(bodies);

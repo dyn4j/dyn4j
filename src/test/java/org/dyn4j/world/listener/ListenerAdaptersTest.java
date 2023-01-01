@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -49,7 +49,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link WorldEventListener} adapter classes.
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.1
  * @since 4.0.0
  */
 public class ListenerAdaptersTest {
@@ -105,6 +105,8 @@ public class ListenerAdaptersTest {
 			public double getTangentialImpulse() { return 0; }
 			@Override
 			public boolean isSolved() { return true; }
+			@Override
+			public boolean isIgnored() { return false; }
 		};
 		
 		// nothing to assert since they are no-ops with no effect any where

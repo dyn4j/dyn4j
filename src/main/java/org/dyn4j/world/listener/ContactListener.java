@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -41,7 +41,7 @@ import org.dyn4j.world.PhysicsWorld;
  * to be notified when contact events occur.  Contact events occur after all 
  * {@link CollisionListener} events have been raised.
  * @author William Bittle
- * @version 4.1.0
+ * @version 5.0.1
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -120,10 +120,8 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	 * This method is only called if {@link ContactCollisionData#isManifoldCollision()} returns true.
 	 * <p>
 	 * This listener is the place to use the {@link ContactConstraint#setEnabled(boolean)}, 
-	 * {@link ContactConstraint#setFriction(double)}, {@link ContactConstraint#setRestitution(double)},
-	 * {@link ContactConstraint#setSensor(boolean)}, and {@link ContactConstraint#setTangentSpeed(double)}
-	 * methods. You can get access to the {@link ContactConstraint} via the 
-	 * {@link ContactCollisionData#getContactConstraint()} method.
+	 * and {@link ContactConstraint#setTangentSpeed(double)} methods. You can get access to the 
+	 * {@link ContactConstraint} via the {@link ContactCollisionData#getContactConstraint()} method.
 	 * @param collision the collision data
 	 * @since 4.1.0
 	 */

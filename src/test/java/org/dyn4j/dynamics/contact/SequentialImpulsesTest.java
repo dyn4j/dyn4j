@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -51,7 +51,7 @@ import junit.framework.TestCase;
 /**
  * Tests the methods of the {@link SequentialImpulses} class.
  * @author William Bittle
- * @version 4.2.0
+ * @version 5.0.1
  * @since 4.2.0
  */
 public class SequentialImpulsesTest {
@@ -170,7 +170,8 @@ public class SequentialImpulsesTest {
 		si.initialize(ccs, step, settings);
 		
 		TestCase.assertEquals(cc.size, 1);
-		TestCase.assertTrue(cc.contacts.get(1).ignored);
+		TestCase.assertTrue(cc.contacts.get(0).isSolved());
+		TestCase.assertFalse(cc.contacts.get(1).isSolved());
 		
 		// ignore one, but swap to use the second that has the larger depth
 		manifold.getPoints().get(1).setDepth(penetration.getDepth() + 0.1);
@@ -185,7 +186,9 @@ public class SequentialImpulsesTest {
 		TestCase.assertEquals(cc.size, 1);
 		TestCase.assertEquals(cc.contacts.get(0), c2);
 		TestCase.assertEquals(cc.contacts.get(1), c1);
-		TestCase.assertTrue(cc.contacts.get(1).ignored);
-		TestCase.assertTrue(c1.ignored);
+		TestCase.assertTrue(cc.contacts.get(0).isSolved());
+		TestCase.assertFalse(cc.contacts.get(1).isSolved());
+		TestCase.assertTrue(c2.isSolved());
+		TestCase.assertFalse(c1.isSolved());
 	}
 }

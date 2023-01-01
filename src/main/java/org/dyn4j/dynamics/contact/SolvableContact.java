@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.dyn4j.geometry.Vector2;
  * Represents a contact point between two {@link PhysicsBody} objects that
  * has the necessary information to allow solving.
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.1
  * @since 1.0.0
  */
 final class SolvableContact implements Contact, SolvedContact {
@@ -77,6 +77,9 @@ final class SolvableContact implements Contact, SolvedContact {
 	
 	/** True if the contact was ignored during solving */
 	boolean ignored;
+	
+	/** True if the contact will/was solved */
+	boolean solved;
 	
 	/**
 	 * Full constructor.
@@ -149,6 +152,14 @@ final class SolvableContact implements Contact, SolvedContact {
 	 */
 	@Override
 	public boolean isSolved() {
-		return !this.ignored;
+		return this.solved;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.dynamics.contact.Contact#isIgnored()
+	 */
+	@Override
+	public boolean isIgnored() {
+		return this.ignored;
 	}
 }
