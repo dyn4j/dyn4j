@@ -163,12 +163,12 @@ public class PulleyJointSimulationTest {
 		b2.setLinearVelocity(0.0, 10.0);
 		w.step(2);
 		
-		TestCase.assertEquals(1.020, b1.getWorldCenter().distance(pa1), 1e-3);
-		TestCase.assertEquals(0.479, b2.getWorldCenter().distance(pa2), 1e-3);
-		TestCase.assertEquals(-0.020, b1.getTransform().getTranslationY(), 1e-3);
-		TestCase.assertEquals(0.520, b2.getTransform().getTranslationY(), 1e-3);
-		TestCase.assertEquals(0.009, b2.getLinearVelocity().y, 1e-3);
-		TestCase.assertEquals(1.5, aj.getCurrentLength(), 1e-3);
+		TestCase.assertEquals(1.041, b1.getWorldCenter().distance(pa1), 1e-3);
+		TestCase.assertEquals(0.458, b2.getWorldCenter().distance(pa2), 1e-3);
+		TestCase.assertEquals(-0.041, b1.getTransform().getTranslationY(), 1e-3);
+		TestCase.assertEquals(0.541, b2.getTransform().getTranslationY(), 1e-3);
+		TestCase.assertEquals(0.156, b2.getLinearVelocity().y, 1e-3);
+		TestCase.assertEquals(1.500, aj.getCurrentLength(), 1e-3);
 		
 		// with the slack enabled, the total length of the rope can be smaller
 		// than the target length
@@ -179,9 +179,9 @@ public class PulleyJointSimulationTest {
 		
 		w.step(1);
 		TestCase.assertEquals(9.836, b2.getLinearVelocity().y, 1e-3);
-		TestCase.assertEquals(0.784, b2.getTransform().getTranslationY(), 1e-3);
-		TestCase.assertEquals(0.215, b2.getWorldCenter().distance(pa2), 1e-3);
-		TestCase.assertEquals(1.228, aj.getCurrentLength(), 1e-3);
+		TestCase.assertEquals(0.805, b2.getTransform().getTranslationY(), 1e-3);
+		TestCase.assertEquals(0.194, b2.getWorldCenter().distance(pa2), 1e-3);
+		TestCase.assertEquals(1.222, aj.getCurrentLength(), 1e-3);
 	}
 	
 }

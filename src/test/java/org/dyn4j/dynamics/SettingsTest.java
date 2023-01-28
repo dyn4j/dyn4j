@@ -395,9 +395,9 @@ public class SettingsTest {
 		settings.setMaximumTranslation(Settings.DEFAULT_MAXIMUM_TRANSLATION * 2);
 		settings.setMaximumWarmStartDistance(Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE * 2);
 		settings.setMinimumAtRestTime(Settings.DEFAULT_MINIMUM_AT_REST_TIME * 2);
-		settings.setPositionConstraintSolverIterations(Settings.DEFAULT_SOLVER_ITERATIONS * 2);
+		settings.setPositionConstraintSolverIterations(Settings.DEFAULT_POSITION_CONSTRAINT_SOLVER_ITERATIONS * 2);
 		settings.setStepFrequency(Settings.DEFAULT_STEP_FREQUENCY * 2);
-		settings.setVelocityConstraintSolverIterations(Settings.DEFAULT_SOLVER_ITERATIONS * 2);
+		settings.setVelocityConstraintSolverIterations(Settings.DEFAULT_VELOCITY_CONSTRAINT_SOLVER_ITERATIONS * 2);
 		settings.setWarmStartingEnabled(false);
 		
 		TestCase.assertEquals(Settings.DEFAULT_ANGULAR_TOLERANCE * 2, settings.getAngularTolerance());
@@ -413,9 +413,9 @@ public class SettingsTest {
 		TestCase.assertEquals(Settings.DEFAULT_MAXIMUM_TRANSLATION * 2, settings.getMaximumTranslation());
 		TestCase.assertEquals(Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE * 2, settings.getMaximumWarmStartDistance());
 		TestCase.assertEquals(Settings.DEFAULT_MINIMUM_AT_REST_TIME * 2, settings.getMinimumAtRestTime());
-		TestCase.assertEquals(Settings.DEFAULT_SOLVER_ITERATIONS * 2, settings.getPositionConstraintSolverIterations());
+		TestCase.assertEquals(Settings.DEFAULT_POSITION_CONSTRAINT_SOLVER_ITERATIONS * 2, settings.getPositionConstraintSolverIterations());
 		TestCase.assertEquals(Settings.DEFAULT_STEP_FREQUENCY * 2, settings.getStepFrequency());
-		TestCase.assertEquals(Settings.DEFAULT_SOLVER_ITERATIONS * 2, settings.getVelocityConstraintSolverIterations());
+		TestCase.assertEquals(Settings.DEFAULT_VELOCITY_CONSTRAINT_SOLVER_ITERATIONS * 2, settings.getVelocityConstraintSolverIterations());
 		TestCase.assertEquals(false, settings.isWarmStartingEnabled());
 	}
 	
@@ -437,9 +437,9 @@ public class SettingsTest {
 		settings.setMaximumTranslation(Settings.DEFAULT_MAXIMUM_TRANSLATION * 2);
 		settings.setMaximumWarmStartDistance(Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE * 2);
 		settings.setMinimumAtRestTime(Settings.DEFAULT_MINIMUM_AT_REST_TIME * 2);
-		settings.setPositionConstraintSolverIterations(Settings.DEFAULT_SOLVER_ITERATIONS * 2);
+		settings.setPositionConstraintSolverIterations(Settings.DEFAULT_POSITION_CONSTRAINT_SOLVER_ITERATIONS * 2);
 		settings.setStepFrequency(Settings.DEFAULT_STEP_FREQUENCY * 2);
-		settings.setVelocityConstraintSolverIterations(Settings.DEFAULT_SOLVER_ITERATIONS * 2);
+		settings.setVelocityConstraintSolverIterations(Settings.DEFAULT_VELOCITY_CONSTRAINT_SOLVER_ITERATIONS * 2);
 		settings.setWarmStartingEnabled(false);
 		
 		Settings copy = settings.copy();

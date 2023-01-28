@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2023 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,7 +30,7 @@ import org.dyn4j.exception.ValueOutOfRangeException;
 /**
  * Responsible for housing all of the dynamics engine's settings.
  * @author William Bittle
- * @version 5.0.0
+ * @version 5.0.2
  * @since 1.0.0
  */
 public class Settings {
@@ -61,8 +61,24 @@ public class Settings {
 	 */
 	public static final double DEFAULT_MINIMUM_AT_REST_TIME = 0.5;
 
-	/** The default number of solver iterations */
+	/** 
+	 * The default number of solver iterations
+	 * @deprecated Deprecated in 5.0.2. Use {@link #DEFAULT_VELOCITY_CONSTRAINT_SOLVER_ITERATIONS} or {@link #DEFAULT_POSITION_CONSTRAINT_SOLVER_ITERATIONS} instead. 
+	 */
+	@Deprecated
 	public static final int DEFAULT_SOLVER_ITERATIONS = 10;
+	
+	/** 
+	 * The default number of velocity constraint solver iterations
+	 * @since 5.0.2 
+	 */
+	public static final int DEFAULT_VELOCITY_CONSTRAINT_SOLVER_ITERATIONS = 6;
+	
+	/** 
+	 * The default number of position constraint solver iterations
+	 * @since 5.0.2 
+	 */
+	public static final int DEFAULT_POSITION_CONSTRAINT_SOLVER_ITERATIONS = 2;
 
 	/** 
 	 * The default warm starting distance; in meters<sup>2</sup> 
@@ -119,10 +135,10 @@ public class Settings {
 	private double minimumAtRestTime = Settings.DEFAULT_MINIMUM_AT_REST_TIME;
 	
 	/** The number of iterations used to solve velocity constraints */
-	private int velocityConstraintSolverIterations = Settings.DEFAULT_SOLVER_ITERATIONS;
+	private int velocityConstraintSolverIterations = Settings.DEFAULT_VELOCITY_CONSTRAINT_SOLVER_ITERATIONS;
 	
 	/** The maximum number of iterations used to solve position constraints */
-	private int positionConstraintSolverIterations = Settings.DEFAULT_SOLVER_ITERATIONS;
+	private int positionConstraintSolverIterations = Settings.DEFAULT_POSITION_CONSTRAINT_SOLVER_ITERATIONS;
 	
 	/** True if contact warm starting is enabled */
 	private boolean warmStartingEnabled = true;
@@ -208,8 +224,8 @@ public class Settings {
 		this.maximumAtRestAngularVelocity = Settings.DEFAULT_MAXIMUM_AT_REST_ANGULAR_VELOCITY;
 		this.maximumAtRestAngularVelocitySquared = Settings.DEFAULT_MAXIMUM_AT_REST_ANGULAR_VELOCITY * Settings.DEFAULT_MAXIMUM_AT_REST_ANGULAR_VELOCITY;
 		this.minimumAtRestTime = Settings.DEFAULT_MINIMUM_AT_REST_TIME;
-		this.velocityConstraintSolverIterations = Settings.DEFAULT_SOLVER_ITERATIONS;
-		this.positionConstraintSolverIterations = Settings.DEFAULT_SOLVER_ITERATIONS;
+		this.velocityConstraintSolverIterations = Settings.DEFAULT_VELOCITY_CONSTRAINT_SOLVER_ITERATIONS;
+		this.positionConstraintSolverIterations = Settings.DEFAULT_POSITION_CONSTRAINT_SOLVER_ITERATIONS;
 		this.warmStartingEnabled = true;
 		this.maximumWarmStartDistance = Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE;
 		this.maximumWarmStartDistanceSquared = Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE * Settings.DEFAULT_MAXIMUM_WARM_START_DISTANCE;
