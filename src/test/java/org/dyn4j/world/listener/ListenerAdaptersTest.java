@@ -24,6 +24,7 @@
  */
 package org.dyn4j.world.listener;
 
+import org.dyn4j.collision.BasicCollisionItem;
 import org.dyn4j.collision.BasicCollisionPair;
 import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.continuous.TimeOfImpact;
@@ -72,7 +73,10 @@ public class ListenerAdaptersTest {
 	public void collisionListenerAdapter() {
 		// test that nothing happens, even with null
 		CollisionListenerAdapter<Body, BodyFixture> cla = new CollisionListenerAdapter<Body, BodyFixture>();
-		WorldCollisionData<Body> data = new WorldCollisionData<Body>(new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(null, null));
+		WorldCollisionData<Body> data = new WorldCollisionData<Body>(
+				new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(
+						new BasicCollisionItem<Body, BodyFixture>(null, null), 
+						new BasicCollisionItem<Body, BodyFixture>(null, null)));
 		
 		TestCase.assertTrue(cla.collision((BroadphaseCollisionData<Body, BodyFixture>)null));
 		TestCase.assertTrue(cla.collision((BroadphaseCollisionData<Body, BodyFixture>)data));
@@ -91,7 +95,10 @@ public class ListenerAdaptersTest {
 	public void contactListenerAdapter() {
 		// test that nothing happens, even with null
 		ContactListenerAdapter<Body> cla = new ContactListenerAdapter<Body>();
-		WorldCollisionData<Body> data = new WorldCollisionData<Body>(new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(null, null));
+		WorldCollisionData<Body> data = new WorldCollisionData<Body>(
+				new BasicCollisionPair<CollisionItem<Body, BodyFixture>>(
+						new BasicCollisionItem<Body, BodyFixture>(null, null), 
+						new BasicCollisionItem<Body, BodyFixture>(null, null)));
 		SolvedContact c = new SolvedContact() {
 			@Override
 			public Vector2 getPoint() { return null; }
