@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2023 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -42,7 +42,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * All {@link ManifoldPoint}s are in world space coordinates.
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.2
  * @since 1.0.0
  */
 public class Manifold implements Shiftable, Copyable<Manifold> {
@@ -95,7 +95,8 @@ public class Manifold implements Shiftable, Copyable<Manifold> {
 	 */
 	public void clear() {
 		this.points.clear();
-		this.normal.zero();
+		this.normal.x = 0;
+		this.normal.y = 0;
 	}
 	
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2023 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,7 +36,7 @@ import org.dyn4j.geometry.Vector2;
  * The penetration normal should always be a normalized vector that points from the first
  * {@link Convex} {@link Shape} to the second.
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.2
  * @since 1.0.0
  */
 public class Penetration implements Shiftable, Copyable<Penetration> {
@@ -79,7 +79,8 @@ public class Penetration implements Shiftable, Copyable<Penetration> {
 	 * Clears the penetration information.
 	 */
 	public void clear() {
-		this.normal.zero();
+		this.normal.x = 0;
+		this.normal.y = 0;
 		this.depth = 0;
 	}
 	

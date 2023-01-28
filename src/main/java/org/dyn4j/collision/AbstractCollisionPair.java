@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2023 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ import org.dyn4j.Copyable;
 /**
  * Abstract implementation of the {@link CollisionPair} interface.
  * @author William Bittle
- * @version 4.1.0
+ * @version 5.0.2
  * @since 4.0.0
  * @param <T> the object type
  */
@@ -45,7 +45,7 @@ public abstract class AbstractCollisionPair<T> implements CollisionPair<T>, Copy
 	 * @param fixture2 the second body's fixture
 	 * @return int
 	 */
-	public static int getHashCode(CollisionBody<?> body1, Fixture fixture1, CollisionBody<?> body2, Fixture fixture2) {
+	public static final int getHashCode(CollisionBody<?> body1, Fixture fixture1, CollisionBody<?> body2, Fixture fixture2) {
 		int h1 = AbstractCollisionItem.getHashCode(body1, fixture1);
 		int h2 = AbstractCollisionItem.getHashCode(body2, fixture2);
 		// the total can be in any order
@@ -59,7 +59,7 @@ public abstract class AbstractCollisionPair<T> implements CollisionPair<T>, Copy
 	 * @return int
 	 * @since 4.1.0
 	 */
-	public static int getHashCode(Object item1, Object item2) {
+	public static final int getHashCode(Object item1, Object item2) {
 		int h1 = item1.hashCode();
 		int h2 = item2.hashCode();
 		// the total can be in any order
@@ -72,7 +72,7 @@ public abstract class AbstractCollisionPair<T> implements CollisionPair<T>, Copy
 	 * @param obj the other object
 	 * @return boolean
 	 */
-	public static boolean equals(CollisionPair<?> pairA, Object obj) {
+	public static final boolean equals(CollisionPair<?> pairA, Object obj) {
 		if (obj == pairA) return true;
 		if (obj == null || pairA == null) return false;
 		if (obj instanceof CollisionPair) {
