@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2023 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,25 +40,11 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents an impulse based rigid {@link PhysicsBody} physics collision resolver.
  * @author William Bittle
- * @version 5.0.1
+ * @version 5.0.2
  * @since 3.2.0
  * @param <T> the {@link PhysicsBody} type
  */
 public class SequentialImpulses<T extends PhysicsBody> implements ContactConstraintSolver<T> {
-	
-	/**
-	 * Compute the mass coefficient for a {@link SolvableContact}.
-	 * 
-	 * @param contactConstraint The {@link ContactConstraint} of the contact
-	 * @param contact The contact
-	 * @param n The normal
-	 * @return The mass coefficient
-	 * @since 3.4.0
-	 */
-	private double getMassCoefficient(ContactConstraint<T> contactConstraint, SolvableContact contact, Vector2 n) {
-		return this.getMassCoefficient(contactConstraint, contact.r1, contact.r2, n);
-	}
-	
 	/**
 	 * Compute the mass coefficient for a {@link SolvableContact}.
 	 * 
@@ -69,14 +55,17 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * @return The mass coefficient
 	 * @since 3.4.0
 	 */
-	private double getMassCoefficient(ContactConstraint<T> contactConstraint, Vector2 r1, Vector2 r2, Vector2 n) {
+	private static final double getMassCoefficient(ContactConstraint<?> contactConstraint, Vector2 r1, Vector2 r2, Vector2 n) {
 		Mass m1 = contactConstraint.getBody1().getMass();
 		Mass m2 = contactConstraint.getBody2().getMass();
 		
 		double r1CrossN = r1.cross(n);
 		double r2CrossN = r2.cross(n);
 		
-		return m1.getInverseMass() + m2.getInverseMass() + m1.getInverseInertia() * r1CrossN * r1CrossN + m2.getInverseInertia() * r2CrossN * r2CrossN;
+		return m1.getInverseMass() + 
+				m2.getInverseMass() + 
+				m1.getInverseInertia() * r1CrossN * r1CrossN + 
+				m2.getInverseInertia() * r2CrossN * r2CrossN;
 	}
 	
 	/**
@@ -87,7 +76,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * @param J
 	 * @since 3.4.0
 	 */
-	private void updateBodies(ContactConstraint<T> contactConstraint, SolvableContact contact, Vector2 J) {
+	private static final void updateBodies(ContactConstraint<?> contactConstraint, SolvableContact contact, Vector2 J) {
 		PhysicsBody b1 = contactConstraint.getBody1();
 		PhysicsBody b2 = contactConstraint.getBody2();
 		Mass m1 = b1.getMass();
@@ -103,19 +92,6 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	}
 	
 	/**
-	 * Compute the relative velocity to the {@link ContactConstraint}'s normal.
-	 * 
-	 * @param contactConstraint The {@link ContactConstraint}
-	 * @param contact The {@link SolvableContact}
-	 * @return double
-	 * @since 3.4.0
-	 */
-	private double getRelativeVelocityAlongNormal(ContactConstraint<T> contactConstraint, SolvableContact contact) {
-		Vector2 rv = this.getRelativeVelocity(contactConstraint, contact);
-		return contactConstraint.normal.dot(rv);
-	}
-	
-	/**
 	 * Compute the relative velocity of this {@link ContactConstraint}'s bodies.
 	 * 
 	 * @param contactConstraint The {@link ContactConstraint}
@@ -123,7 +99,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * @return The relative velocity vector
 	 * @since 3.4.0
 	 */
-	private Vector2 getRelativeVelocity(ContactConstraint<T> contactConstraint, SolvableContact contact) {
+	private static final Vector2 getRelativeVelocity(ContactConstraint<?> contactConstraint, SolvableContact contact) {
 		PhysicsBody b1 = contactConstraint.getBody1();
 		PhysicsBody b2 = contactConstraint.getBody2();
 		
@@ -183,9 +159,9 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 				contact.r2 = c2.to(contact.p);
 				
 				// pre calculate the mass normal
-				contact.massN = 1.0 / this.getMassCoefficient(contactConstraint, contact, N);
+				contact.massN = 1.0 / SequentialImpulses.getMassCoefficient(contactConstraint, contact.r1, contact.r2, N);
 				// pre calculate the mass tangent
-				contact.massT = 1.0 / this.getMassCoefficient(contactConstraint, contact, T);
+				contact.massT = 1.0 / SequentialImpulses.getMassCoefficient(contactConstraint, contact.r1, contact.r2, T);
 				// set the velocity bias
 				contact.vb = 0.0;
 				// set the ignored flag
@@ -194,7 +170,8 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 				contact.solved = true;
 				
 				// find the relative velocity and project it onto the penetration normal
-				double rvn = this.getRelativeVelocityAlongNormal(contactConstraint, contact);
+				Vector2 rv = SequentialImpulses.getRelativeVelocity(contactConstraint, contact);
+				double rvn = N.dot(rv);
 				
 				// if its negative then the bodies are moving away from one another
 				if (rvn < -restitutionVelocity) {
@@ -315,7 +292,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 				
 				// apply accumulated impulses to warm start the solver
 				Vector2 J = new Vector2(N.x * contact.jn + T.x * contact.jt, N.y * contact.jn + T.y * contact.jt);
-				this.updateBodies(contactConstraint, contact, J);
+				SequentialImpulses.updateBodies(contactConstraint, contact, J);
 			}
 		}
 	}
@@ -345,7 +322,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 				SolvableContact contact = contacts.get(k);
 				
 				// get the relative velocity
-				Vector2 rv = this.getRelativeVelocity(contactConstraint, contact);
+				Vector2 rv = SequentialImpulses.getRelativeVelocity(contactConstraint, contact);
 				
 				// project the relative velocity onto the tangent normal
 				double rvt = T.dot(rv) - tangentSpeed;
@@ -362,7 +339,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 				
 				// apply to the bodies immediately
 				Vector2 J = new Vector2(T.x * jt, T.y * jt);
-				this.updateBodies(contactConstraint, contact, J);
+				SequentialImpulses.updateBodies(contactConstraint, contact, J);
 			}
 			
 			// evalutate the normal impulse
@@ -373,7 +350,8 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 				SolvableContact contact = contacts.get(0);
 				
 				// get the relative velocity and project it onto the penetration normal
-				double rvn = this.getRelativeVelocityAlongNormal(contactConstraint, contact);
+				Vector2 rv = SequentialImpulses.getRelativeVelocity(contactConstraint, contact);
+				double rvn = N.dot(rv);
 				
 				// calculate the impulse using the velocity bias
 				double j = -contact.massN * (rvn - contact.vb);
@@ -385,7 +363,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 				
 				// only update the bodies after processing all the contacts
 				Vector2 J = new Vector2(N.x * j, N.y * j);
-				this.updateBodies(contactConstraint, contact, J);
+				SequentialImpulses.updateBodies(contactConstraint, contact, J);
 			} else {
 				// if its 2 then solve the contacts simultaneously using a mini-LCP
 				
@@ -430,8 +408,10 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 				
 				// get the relative velocity at both contacts and
 				// compute the relative velocities along the collision normal
-				double rvn1 = this.getRelativeVelocityAlongNormal(contactConstraint, contact1);
-				double rvn2 = this.getRelativeVelocityAlongNormal(contactConstraint, contact2);
+				Vector2 rv1 = SequentialImpulses.getRelativeVelocity(contactConstraint, contact1);
+				Vector2 rv2 = SequentialImpulses.getRelativeVelocity(contactConstraint, contact2);
+				double rvn1 = N.dot(rv1);
+				double rvn2 = N.dot(rv2);
 				
 				// create the b vector
 				Vector2 b = new Vector2();
@@ -452,7 +432,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 					Vector2 x = contactConstraint.invK.product(b).negate();
 
 					if (x.x >= 0.0 && x.y >= 0.0) {
-						this.updateBodies(contactConstraint, contact1, contact2, x, a);
+						SequentialImpulses.updateBodies(contactConstraint, contact1, contact2, x, a);
 						break;
 					}
 
@@ -469,7 +449,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 					rvn2 = contactConstraint.K.m10 * x.x + b.y;
 
 					if (x.x >= 0.0 && rvn2 >= 0.0) {
-						this.updateBodies(contactConstraint, contact1, contact2, x, a);
+						SequentialImpulses.updateBodies(contactConstraint, contact1, contact2, x, a);
 						break;
 					}
 
@@ -487,7 +467,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 					rvn2 = 0.0;
 
 					if (x.y >= 0.0 && rvn1 >= 0.0) {
-						this.updateBodies(contactConstraint, contact1, contact2, x, a);
+						SequentialImpulses.updateBodies(contactConstraint, contact1, contact2, x, a);
 						break;
 					}
 
@@ -502,7 +482,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 					rvn2 = b.y;
 					
 					if (rvn1 >= 0.0 && rvn2 >= 0.0) {
-						this.updateBodies(contactConstraint, contact1, contact2, x, a);
+						SequentialImpulses.updateBodies(contactConstraint, contact1, contact2, x, a);
 						break;
 					}
 					
@@ -523,7 +503,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * @param a
 	 * @since 3.4.0
 	 */
-	private void updateBodies(ContactConstraint<T> contactConstraint, SolvableContact contact1, SolvableContact contact2, Vector2 x, Vector2 a) {
+	private static final void updateBodies(ContactConstraint<?> contactConstraint, SolvableContact contact1, SolvableContact contact2, Vector2 x, Vector2 a) {
 		PhysicsBody b1 = contactConstraint.getBody1();
 		PhysicsBody b2 = contactConstraint.getBody2();
 		Mass m1 = b1.getMass();
@@ -624,7 +604,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 				double cp = baumgarte * Interval.clamp(penetration + allowedPenetration, -maxLinearCorrection, 0.0);
 				
 				// compute the position impulse
-				double K = this.getMassCoefficient(contactConstraint, r1, r2, N);
+				double K = SequentialImpulses.getMassCoefficient(contactConstraint, r1, r2, N);
 				double jp = (K > Epsilon.E)? (-cp / K) : 0.0;
 				
 				// clamp the accumulated position impulse
