@@ -40,7 +40,7 @@ import org.dyn4j.Epsilon;
  * a.zero().add(1, 2).multiply(2);
  * </pre>
  * @author William Bittle
- * @version 4.0.0
+ * @version 4.0.1
  * @since 1.0.0
  */
 public class Vector2 implements Copyable<Vector2> {
@@ -131,6 +131,7 @@ public class Vector2 implements Copyable<Vector2> {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.Copyable#copy()
 	 */
+        @Override
 	public Vector2 copy() {
 		return new Vector2(this.x, this.y);
 	}
@@ -395,9 +396,9 @@ public class Vector2 implements Copyable<Vector2> {
 	public Vector2 setDirection(double angle) {
 		//double magnitude = Math.hypot(this.x, this.y);
 		double magnitude = Math.sqrt(this.x * this.x + this.y * this.y);
-        this.x = magnitude * Math.cos(angle);
-        this.y = magnitude * Math.sin(angle);
-        return this;
+                this.x = magnitude * Math.cos(angle);
+                this.y = magnitude * Math.sin(angle);
+                return this;
 	}
 	
 	/**
@@ -881,6 +882,53 @@ public class Vector2 implements Copyable<Vector2> {
 		return this;
 	}
 
+        /**
+         * Linearly interpolates between this vector and the specified vector, 
+         * returning the current (modified) instance.
+         * 
+         * @param target the desired value when changeAmount=1 (not null)
+         * @param changeAmount the fractional change amount
+         * @return the current instance (modified)
+         */
+        public Vector2 interpolate(Vector2 target, double changeAmount) {
+                this.x = (1 - changeAmount) * this.x + changeAmount * target.x;
+                this.y = (1 - changeAmount) * this.y + changeAmount * target.y;
+                return this;
+        }
+        
+        /**
+         * Linearly interpolates between the specified start and end vectors, 
+         * returning the current (modified) instance.
+         * 
+         * @param begin the desired value when changeAmount=0 (not null)
+         * @param target the desired value when changeAmount=1 (not null)
+         * @param changeAmount the fractional change amount
+         * @return the current instance (modified)
+         */
+        public Vector2 interpolate(Vector2 begin, Vector2 target, double changeAmount) {
+                this.x = (1 - changeAmount) * begin.x + changeAmount * target.x;
+                this.y = (1 - changeAmount) * begin.y + changeAmount * target.y;
+                return this;
+        }
+        
+        /**
+         * Method in charge of determining if this vector is similar to the 
+         * other (with a controlled error tolerance).
+         * 
+         * @param other the vector to compare (unaffected) or null for none
+         * @param epsilon the tolerance (error) for each vector.
+         * @return {@code true} if both components are within tolerance, otherwise {@code false}
+         */
+        public boolean isSimilar(Vector2 other, double epsilon) {
+                if (other == null) {
+                    return false;
+                }
+                if (Double.compare(Math.abs(other.x - x), epsilon) > 0) {
+                    return false;
+                }
+                return Double.compare(Math.abs(other.y - y), epsilon) <= 0;
+        }
+        
 	/**
 	 * Returns a unit {@link Vector2} of this {@link Vector2}.
 	 * <p>
