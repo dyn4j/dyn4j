@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -615,11 +615,14 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 				Vector2 J = N.product(jp);
 				
 				// translate and rotate the objects
-				b1.translate(J.product(m1.getInverseMass()));
-				b1.rotate(m1.getInverseInertia() * r1.cross(J), c1.x, c1.y);
+//				b1.translate(J.product(m1.getInverseMass()));
+				t1.translate(J.product(m1.getInverseMass()));
+//				b1.rotate(m1.getInverseInertia() * r1.cross(J), c1.x, c1.y);
+				t1.rotate(m1.getInverseInertia() * r1.cross(J), c1.x, c1.y);
 				
-				b2.translate(J.product(-m2.getInverseMass()));
-				b2.rotate(-m2.getInverseInertia() * r2.cross(J), c2.x, c2.y);
+				t2.translate(J.product(-m2.getInverseMass()));
+//				b2.translate(J.product(-m2.getInverseMass()));
+				t2.rotate(-m2.getInverseInertia() * r2.cross(J), c2.x, c2.y);
 			}
 		}
 		// check if the minimum separation between all objects is still
