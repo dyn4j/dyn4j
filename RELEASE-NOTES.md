@@ -1,3 +1,24 @@
+## v5.0.2 - March 16th, 2024
+
+[Milestone](https://github.com/dyn4j/dyn4j/milestone/17?closed=1) |
+[Tag](https://github.com/dyn4j/dyn4j/tree/5.0.2) |
+[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/5.0.2/bundle) |
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=5.0.2)
+
+This update focuses on a few minor performance improvements, fixes and enhancements.
+
+NOTE: [#275](https://github.com/dyn4j/dyn4j/issues/275) reduced the default number of velocity/position solver iterations. If this causes an issue, you can manually set the solver iterations back to 10 and 10 which were the old defaults using `Settings.setVelocityConstraintSolverIterations` and `Settings.setPositionConstraintSolverIterations`.  This change was made based on testing where it was found that a lower number of iterations reduces jitter and the overall system energy without significant fidelity loss.  The performance improvement was a side effect.
+
+NOTE: [#287](https://github.com/dyn4j/dyn4j/issues/287) will now wake the body when certain changes are made to it.  Please review the issue for the details. If you relied on the body staying at rest in these situations, just use `setAtRest(true)` after making the change.
+
+**Changes**
+- [#288](https://github.com/dyn4j/dyn4j/issues/288) Add methods from PR286
+- [#287](https://github.com/dyn4j/dyn4j/issues/287) Wake bodies when body properties are changed
+- [#275](https://github.com/dyn4j/dyn4j/issues/275) Reduce the default solver iterations
+- [#274](https://github.com/dyn4j/dyn4j/issues/274) Store the bodies and fixtures directly on the CollisionData object
+- [#273](https://github.com/dyn4j/dyn4j/issues/273) Clean up methods in SequentialImpulses
+- [#276](https://github.com/dyn4j/dyn4j/issues/276) Various minor performance improvements
+
 ## v5.0.1 - December 31st, 2022
 
 [Milestone](https://github.com/dyn4j/dyn4j/milestone/16?closed=1) |

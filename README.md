@@ -31,7 +31,7 @@ Add dyn4j to your classpath by adding a Maven dependency from
 <dependency>
     <groupId>org.dyn4j</groupId>
     <artifactId>dyn4j</artifactId>
-    <version>5.0.1</version>
+    <version>5.0.2</version>
 </dependency>
 ```
 
