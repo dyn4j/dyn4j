@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link Vector2} class.
  * @author William Bittle
- * @version 4.2.2
+ * @version 5.0.2
  * @since 1.0.0
  */
 public class Vector2Test {
@@ -562,5 +562,166 @@ public class Vector2Test {
 		double angle = Math.abs(v1.getAngleBetween(Math.toRadians(300)));
 		TestCase.assertEquals(Math.toRadians(75), angle, 1e-3);
 		TestCase.assertTrue(angle <= Math.PI);
+	}
+	
+	/**
+	 * Tests the interpolate methods.
+	 * @since 5.0.2
+	 */
+	@Test
+	public void interpolate() {
+		Vector2 start = new Vector2(1, 1);
+		Vector2 end = new Vector2(2, 2);
+		
+		// go to middle
+		start.lerp(end, 0.5);
+		TestCase.assertEquals(start.x, 1.5, 1e-5);
+		TestCase.assertEquals(start.y, 1.5, 1e-5);
+		TestCase.assertEquals(end.x, 2.0);
+		TestCase.assertEquals(end.y, 2.0);
+		
+		// try again
+		start.lerp(end, 0.5);
+		TestCase.assertEquals(start.x, 1.75, 1e-5);
+		TestCase.assertEquals(start.y, 1.75, 1e-5);
+		TestCase.assertEquals(end.x, 2.0);
+		TestCase.assertEquals(end.y, 2.0);
+		
+		// negative change
+		start.set(1, 1);
+		start.lerp(end, -0.5);
+		TestCase.assertEquals(start.x, 0.5, 1e-5);
+		TestCase.assertEquals(start.y, 0.5, 1e-5);
+		TestCase.assertEquals(end.x, 2.0);
+		TestCase.assertEquals(end.y, 2.0);
+		
+		// no change
+		start.lerp(end, 0);
+		TestCase.assertEquals(start.x, 0.5, 1e-5);
+		TestCase.assertEquals(start.y, 0.5, 1e-5);
+		TestCase.assertEquals(end.x, 2.0);
+		TestCase.assertEquals(end.y, 2.0);
+		
+		// try another non-middle value
+		start.lerp(end, 0.1);
+		TestCase.assertEquals(start.x, 0.65, 1e-5);
+		TestCase.assertEquals(start.y, 0.65, 1e-5);
+		TestCase.assertEquals(end.x, 2.0);
+		TestCase.assertEquals(end.y, 2.0);
+		
+		/// now try the other method
+		Vector2 dest = new Vector2();
+		
+		// go to middle
+		start.set(1, 1);
+		dest.lerp(start, end, 0.5);
+		TestCase.assertEquals(dest.x, 1.5, 1e-5);
+		TestCase.assertEquals(dest.y, 1.5, 1e-5);
+		TestCase.assertEquals(start.x, 1.0);
+		TestCase.assertEquals(start.y, 1.0);
+		TestCase.assertEquals(end.x, 2.0);
+		TestCase.assertEquals(end.y, 2.0);
+		
+		// try again
+		dest.lerp(start, end, 0.5);
+		TestCase.assertEquals(dest.x, 1.5, 1e-5);
+		TestCase.assertEquals(dest.y, 1.5, 1e-5);
+		TestCase.assertEquals(start.x, 1.0);
+		TestCase.assertEquals(start.y, 1.0);
+		TestCase.assertEquals(end.x, 2.0);
+		TestCase.assertEquals(end.y, 2.0);
+		
+		// negative change
+		dest.lerp(start, end, -0.5);
+		TestCase.assertEquals(dest.x, 0.5, 1e-5);
+		TestCase.assertEquals(dest.y, 0.5, 1e-5);
+		TestCase.assertEquals(start.x, 1.0);
+		TestCase.assertEquals(start.y, 1.0);
+		TestCase.assertEquals(end.x, 2.0);
+		TestCase.assertEquals(end.y, 2.0);
+		
+		// no change
+		dest.lerp(start, end, 0);
+		TestCase.assertEquals(dest.x, 1.0, 1e-5);
+		TestCase.assertEquals(dest.y, 1.0, 1e-5);
+		TestCase.assertEquals(start.x, 1.0);
+		TestCase.assertEquals(start.y, 1.0);
+		TestCase.assertEquals(end.x, 2.0);
+		TestCase.assertEquals(end.y, 2.0);
+		
+		// try another non-middle value
+		dest.lerp(start, end, 0.1);
+		TestCase.assertEquals(dest.x, 1.1, 1e-5);
+		TestCase.assertEquals(dest.y, 1.1, 1e-5);
+		TestCase.assertEquals(start.x, 1.0);
+		TestCase.assertEquals(start.y, 1.0);
+		TestCase.assertEquals(end.x, 2.0);
+		TestCase.assertEquals(end.y, 2.0);
+	}
+	
+	/**
+	 * Tests the equals w/ epsilon method.
+	 */
+	@Test
+	public void equalsEpsilon() {
+		Vector2 v1 = new Vector2(1, 1);
+		Vector2 v2 = new Vector2(2, 2);
+		
+		TestCase.assertFalse(v1.equals(v2, 0.0));
+		TestCase.assertFalse(v1.equals(v2, 0.1));
+		TestCase.assertFalse(v1.equals(v2, 0.99));
+		TestCase.assertTrue(v1.equals(v2, 1.0));
+		TestCase.assertTrue(v1.equals(v2, 5.0));
+		TestCase.assertTrue(v1.equals(v2, Double.MAX_VALUE));
+		
+		// extremes
+		v1.set(Double.MAX_VALUE, Double.MAX_VALUE);
+		v2.set(-Double.MAX_VALUE, -Double.MAX_VALUE);
+		
+		TestCase.assertFalse(v1.equals(v2, 0.1));
+		TestCase.assertFalse(v1.equals(v2, 1.0));
+		TestCase.assertFalse(v1.equals(v2, 5.0));
+		TestCase.assertFalse(v1.equals(v2, Double.MAX_VALUE));
+		TestCase.assertTrue(v1.equals(v2, Double.POSITIVE_INFINITY));
+		
+		v1.set(1, 1);
+		
+		TestCase.assertFalse(v1.equals(2, 2, 0.0));
+		TestCase.assertFalse(v1.equals(2, 2, 0.1));
+		TestCase.assertFalse(v1.equals(2, 2, 0.99));
+		TestCase.assertTrue(v1.equals(2, 2, 1.0));
+		TestCase.assertTrue(v1.equals(2, 2, 5.0));
+		TestCase.assertTrue(v1.equals(2, 2, Double.MAX_VALUE));
+		
+		// extremes
+		v1.set(Double.MAX_VALUE, Double.MAX_VALUE);
+		
+		TestCase.assertFalse(v1.equals(-Double.MAX_VALUE, -Double.MAX_VALUE, 0.1));
+		TestCase.assertFalse(v1.equals(-Double.MAX_VALUE, -Double.MAX_VALUE, 1.0));
+		TestCase.assertFalse(v1.equals(-Double.MAX_VALUE, -Double.MAX_VALUE, 5.0));
+		TestCase.assertFalse(v1.equals(-Double.MAX_VALUE, -Double.MAX_VALUE, Double.MAX_VALUE));
+		TestCase.assertTrue(v1.equals(-Double.MAX_VALUE, -Double.MAX_VALUE, Double.POSITIVE_INFINITY));
+		
+		// others
+		TestCase.assertFalse(v1.equals(null, 0));
+		TestCase.assertTrue(v1.equals(v1, 0));
+		
+		// x component matches exactly, but y is off
+		v1.set(1, 2);
+		v2.set(1, 3);
+		
+		TestCase.assertFalse(v1.equals(v2, 0.0));
+		TestCase.assertFalse(v1.equals(v2, 0.1));
+		TestCase.assertFalse(v1.equals(v2, 0.99));
+		TestCase.assertTrue(v1.equals(v2, 1.0));
+		TestCase.assertTrue(v1.equals(v2, 5.0));
+		TestCase.assertTrue(v1.equals(v2, Double.MAX_VALUE));
+		
+		TestCase.assertFalse(v1.equals(1, 3, 0.0));
+		TestCase.assertFalse(v1.equals(1, 3, 0.1));
+		TestCase.assertFalse(v1.equals(1, 3, 0.99));
+		TestCase.assertTrue(v1.equals(1, 3, 1.0));
+		TestCase.assertTrue(v1.equals(1, 3, 5.0));
+		TestCase.assertTrue(v1.equals(1, 3, Double.MAX_VALUE));
 	}
 }

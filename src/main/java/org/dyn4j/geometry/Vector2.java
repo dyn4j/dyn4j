@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.Epsilon;
  * a.zero().add(1, 2).multiply(2);
  * </pre>
  * @author William Bittle
- * @version 4.0.0
+ * @version 5.0.2
  * @since 1.0.0
  */
 public class Vector2 implements Copyable<Vector2> {
@@ -131,6 +131,7 @@ public class Vector2 implements Copyable<Vector2> {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.Copyable#copy()
 	 */
+	@Override
 	public Vector2 copy() {
 		return new Vector2(this.x, this.y);
 	}
@@ -283,6 +284,49 @@ public class Vector2 implements Copyable<Vector2> {
 		return this.x == x && this.y == y;
 	}
 	
+    /**
+     * Returns true if the given vector and this {@link Vector2}
+	 * are the same within a given tolerance.
+	 * @param vector the vector to compare to
+	 * @param epsilon the tolerance in the range [0, &infin;)
+	 * @return boolean
+	 * @since 5.0.2
+     */
+    public boolean equals(Vector2 vector, double epsilon) {
+        if (vector == null) {
+            return false;
+        }
+        if (vector == this) {
+        	return true;
+        }
+        if (Math.abs(vector.x - this.x) > epsilon) {
+        	return false;
+        }
+        if (Math.abs(vector.y - this.y) > epsilon) {
+        	return false;
+        }
+        return true;
+    }
+    
+	/**
+	 * Returns true if the x and y components of this {@link Vector2}
+	 * are the same as the given x and y components.
+	 * @param x the x coordinate to compare to
+	 * @param y the y coordinate to compare to
+	 * @param epsilon the tolerance in the range [0, &infin;)
+	 * @return boolean
+	 * @since 5.0.2
+	 */
+	public boolean equals(double x, double y, double epsilon) {
+		if (Math.abs(x - this.x) > epsilon) {
+        	return false;
+        }
+        if (Math.abs(y - this.y) > epsilon) {
+        	return false;
+        }
+        return true;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -395,9 +439,9 @@ public class Vector2 implements Copyable<Vector2> {
 	public Vector2 setDirection(double angle) {
 		//double magnitude = Math.hypot(this.x, this.y);
 		double magnitude = Math.sqrt(this.x * this.x + this.y * this.y);
-        this.x = magnitude * Math.cos(angle);
-        this.y = magnitude * Math.sin(angle);
-        return this;
+		this.x = magnitude * Math.cos(angle);
+		this.y = magnitude * Math.sin(angle);
+		return this;
 	}
 	
 	/**
@@ -939,4 +983,34 @@ public class Vector2 implements Copyable<Vector2> {
 		if (a < -Math.PI) return a + Geometry.TWO_PI;
 		return a;
 	}
+	
+	/**
+     * Linearly interpolates between this vector (which is used as
+     * the start vector) and the specified end vector, setting this 
+     * vector to the result and returning this vector.
+     * @param end the desired value when changeAmount is 1
+     * @param changeAmount the fractional change amount in the range [0, 1]
+     * @return {@link Vector2}
+     * @since 5.0.2
+     */
+    public Vector2 lerp(Vector2 end, double changeAmount) {
+		this.x = (1 - changeAmount) * this.x + changeAmount * end.x;
+		this.y = (1 - changeAmount) * this.y + changeAmount * end.y;
+		return this;
+    }
+
+    /**
+     * Linearly interpolates between the specified start and end vectors, 
+     * setting this vector to the result and returning this vector.
+     * @param start the desired value when changeAmount is 0
+     * @param end the desired value when changeAmount is 1
+     * @param changeAmount the fractional change amount in the range [0, 1]
+     * @return {@link Vector2}
+     * @since 5.0.2
+     */
+    public Vector2 lerp(Vector2 start, Vector2 end, double changeAmount) {
+        this.x = (1 - changeAmount) * start.x + changeAmount * end.x;
+        this.y = (1 - changeAmount) * start.y + changeAmount * end.y;
+        return this;
+    }
 }
