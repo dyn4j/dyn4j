@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -39,40 +39,9 @@ import org.dyn4j.geometry.Transformable;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * Represents a physical {@link PhysicsBody}.
- * <p>
- * A {@link PhysicsBody} typically has at least one {@link BodyFixture} attached to it. 
- * the {@link BodyFixture}s represent the shape of the body.  When a body 
- * is first created the body is a shapeless infinite mass body.  Add fixtures to
- * the body using the <code>addFixture</code> methods.
- * <p>
- * Use the {@link #setMass(org.dyn4j.geometry.MassType)} methods to calculate the 
- * mass of the entire {@link PhysicsBody} given the currently attached
- * {@link BodyFixture}s.  The {@link #setMass(Mass)} method can be used to set
- * the mass directly.  Use the {@link #setMassType(org.dyn4j.geometry.MassType)}
- * method to toggle the mass type between the special types.
- * <p>
- * The coefficient of friction and restitution and the linear and angular damping
- * are all defaulted but can be changed via the accessor and mutator methods.
- * <p>
- * By default {@link PhysicsBody}s are flagged as at-rest automatically. This occurs when 
- * their linear or angular velocity is low enough (as determined by the 
- * {@link Settings#getMaximumAtRestLinearVelocity()} and 
- * {@link Settings#getMaximumAtRestAngularVelocity()} methods) and they have been this way
- * for a period of time (as determined by {@link Settings#getMinimumAtRestTime()}).  Applying 
- * any force, torque, or impulse will wake the {@link PhysicsBody}.
- * <p>
- * A {@link PhysicsBody} becomes disabled when the {@link PhysicsBody} has left the boundary of
- * the world.
- * <p>
- * A {@link PhysicsBody} is dynamic if either its inertia or mass is greater than zero.
- * A {@link PhysicsBody} is static if both its inertia and mass are close to zero.
- * <p>
- * A {@link PhysicsBody} flagged as a bullet {@link #setBullet(boolean)} will be checked for 
- * tunneling depending on the CCD setting in the world's {@link Settings}.  Use this if the body 
- * is a fast moving body, but be careful as this will incur a performance hit.
+ * Represents an object in a simulation that reacts as defined by newtonian mechanics.
  * @author William Bittle
- * @version 4.1.0
+ * @version 5.0.2
  * @since 1.0.0
  */
 public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, Shiftable, DataContainer, Ownable {
@@ -91,6 +60,8 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * {@link Mass} for the body.
 	 * <p>
 	 * This is a convenience method for setting the density of a {@link BodyFixture}.
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param convex the {@link Convex} {@link Shape} to add to the {@link PhysicsBody}
 	 * @param density the density of the shape in kg/m<sup>2</sup>; in the range (0.0, &infin;]
 	 * @return {@link BodyFixture} the fixture created using the given {@link Shape} and added to the {@link PhysicsBody}
@@ -114,6 +85,8 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * Use the {@link BodyFixture#DEFAULT_DENSITY}, {@link BodyFixture#DEFAULT_FRICTION},
 	 * and {@link BodyFixture#DEFAULT_RESTITUTION} values if you need to only set one
 	 * of these properties.  
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param convex the {@link Convex} {@link Shape} to add to the {@link PhysicsBody}
 	 * @param density the density of the shape in kg/m<sup>2</sup>; in the range (0.0, &infin;]
 	 * @param friction the coefficient of friction; in the range [0.0, &infin;]
@@ -131,6 +104,8 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * This is a shortcut method for the {@link #setMass(org.dyn4j.geometry.MassType)}
 	 * method that will use the current mass type as the mass type and
 	 * then recompute the mass from the body's fixtures.
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @return {@link PhysicsBody} this body
 	 * @since 3.2.0
 	 * @see #setMass(org.dyn4j.geometry.MassType)
@@ -146,6 +121,8 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * <p>
 	 * A {@link org.dyn4j.geometry.MassType} can be used to create special mass
 	 * types.
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param type the mass type
 	 * @return {@link PhysicsBody} this body
 	 */
@@ -153,6 +130,8 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	
 	/**
 	 * Explicitly sets this {@link PhysicsBody}'s mass information.
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param mass the new {@link Mass}
 	 * @return {@link PhysicsBody} this body
 	 * @throws NullPointerException if the given mass is null
@@ -168,6 +147,8 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * Since its possible to create a {@link Mass} object with zero mass and/or
 	 * zero inertia (<code>Mass m = new Mass(new Vector2(), 0, 0);</code> for example), setting the type 
 	 * to something other than MassType.INFINITE can have undefined results.
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param type the desired type
 	 * @return {@link PhysicsBody} this body
 	 * @throws NullPointerException if the given mass type is null
@@ -184,8 +165,6 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	/**
 	 * Applies the given force to this {@link PhysicsBody}.
 	 * <p>
-	 * This method will wake-up the body if its sleeping.
-	 * <p>
 	 * This method does not apply the force if this body 
 	 * returns zero from the {@link Mass#getMass()} method.
 	 * <p>
@@ -194,6 +173,8 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * preserve the last time step's computed force ({@link #getForce()}.
 	 * <p>
 	 * The force is assumed to be in world space coordinates.
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param force the force
 	 * @return {@link PhysicsBody} this body
 	 * @throws NullPointerException if force is null
@@ -204,8 +185,6 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	/**
 	 * Applies the given {@link Force} to this {@link PhysicsBody}.
 	 * <p>
-	 * This method will wake-up the body if its sleeping.
-	 * <p>
 	 * This method does not apply the force if this body 
 	 * returns zero from the {@link Mass#getMass()} method.
 	 * <p>
@@ -214,6 +193,8 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * preserve the last time step's computed force ({@link #getForce()}.
 	 * <p>
 	 * The force is assumed to be in world space coordinates.
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param force the force
 	 * @return {@link PhysicsBody} this body
 	 * @throws NullPointerException if force is null
@@ -224,14 +205,14 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	/**
 	 * Applies the given torque about the center of this {@link PhysicsBody}.
 	 * <p>
-	 * This method will wake-up the body if its sleeping.
-	 * <p>
 	 * This method does not apply the torque if this body returns 
 	 * zero from the {@link Mass#getInertia()} method.
 	 * <p>
 	 * The torque is not applied immediately, but instead stored in the 
 	 * torque accumulator ({@link #getAccumulatedTorque()}).  This is to 
 	 * preserve the last time step's computed torque ({@link #getTorque()}.
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param torque the torque about the center
 	 * @return {@link PhysicsBody} this body
 	 * @since 3.1.1
@@ -241,14 +222,14 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	/**
 	 * Applies the given {@link Torque} to this {@link PhysicsBody}.
 	 * <p>
-	 * This method will wake-up the body if its sleeping.
-	 * <p>
 	 * This method does not apply the torque if this body returns 
 	 * zero from the {@link Mass#getInertia()} method.
 	 * <p>
 	 * The torque is not applied immediately, but instead stored in the 
 	 * torque accumulator ({@link #getAccumulatedTorque()}).  This is to 
 	 * preserve the last time step's computed torque ({@link #getTorque()}.
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param torque the torque
 	 * @return {@link PhysicsBody} this body
 	 * @throws NullPointerException if torque is null
@@ -259,8 +240,6 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	/**
 	 * Applies the given force to this {@link PhysicsBody} at the
 	 * given point (torque).
-	 * <p>
-	 * This method will wake-up the body if its sleeping.
 	 * <p>
 	 * This method does not apply the force if this body  
 	 * returns zero from the {@link Mass#getMass()} method nor 
@@ -273,6 +252,8 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * step's computed force ({@link #getForce()} and torque ({@link #getTorque()}).
 	 * <p>
 	 * The force and point are assumed to be in world space coordinates.
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param force the force
 	 * @param point the application point in world coordinates
 	 * @return {@link PhysicsBody} this body
@@ -284,8 +265,6 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	/**
 	 * Applies a linear impulse to this {@link PhysicsBody} at its center of mass.
 	 * <p>
-	 * This method will wake-up the body if its sleeping.
-	 * <p>
 	 * This method does not apply the impulse if this body's mass 
 	 * returns zero from the {@link Mass#getInertia()} method.
 	 * <p>
@@ -294,6 +273,8 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * velocities of the body immediately.
 	 * <p>
 	 * The impulse is assumed to be in world space coordinates.
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param impulse the impulse to apply
 	 * @return {@link PhysicsBody} this body
 	 * @throws NullPointerException if impulse is null
@@ -304,14 +285,14 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	/**
 	 * Applies an angular impulse to this {@link PhysicsBody} about its center of mass.
 	 * <p>
-	 * This method will wake-up the body if its sleeping.
-	 * <p>
 	 * This method does not apply the impulse if this body's inertia 
 	 * returns zero from the {@link Mass#getInertia()} method.
 	 * <p>
 	 * <b>NOTE:</b> Applying an impulse differs from applying a force and/or torque. Forces
 	 * and torques are stored in accumulators, but impulses are applied to the
 	 * velocities of the body immediately.
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param impulse the impulse to apply
 	 * @return {@link PhysicsBody} this body
 	 * @since 3.1.1
@@ -320,8 +301,6 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	
 	/**
 	 * Applies an impulse to this {@link PhysicsBody} at the given point.
-	 * <p>
-	 * This method will wake-up the body if its sleeping.
 	 * <p>
 	 * This method does not apply the linear impulse if this body 
 	 * returns zero from the {@link Mass#getMass()} method nor 
@@ -333,6 +312,8 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * velocities of the body immediately.
 	 * <p>
 	 * The impulse and point are assumed to be in world space coordinates.
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param impulse the impulse to apply
 	 * @param point the world space point to apply the impulse
 	 * @return {@link PhysicsBody} this body
@@ -589,6 +570,8 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * zero and larger values will cause the linear velocity to reduce faster.
 	 * <p>
 	 * The units are seconds<sup>-1</sup>. 
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param linearDamping the linear damping; must be greater than or equal to zero
 	 * @throws IllegalArgumentException if linearDamping is less than zero
 	 */
@@ -608,6 +591,8 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * zero and larger values will cause the angular velocity to reduce faster.
 	 * <p>
 	 * The units are seconds<sup>-1</sup>.
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param angularDamping the angular damping; must be greater than or equal to zero
 	 * @throws IllegalArgumentException if angularDamping is less than zero
 	 */
@@ -627,6 +612,8 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * The gravity scale is a multiplier applied to the acceleration due to
 	 * gravity before applying the force of gravity to the body.  This allows
 	 * bodies to be affected differently under the same gravity.
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 * @param scale the gravity scale for this body
 	 * @since 3.0.0
 	 */

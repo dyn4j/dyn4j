@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -48,7 +48,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Abstract implementation of the {@link PhysicsBody} interface.
  * @author William Bittle
- * @version 5.0.0
+ * @version 5.0.2
  * @since 4.0.0
  */
 public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixture> implements PhysicsBody, CollisionBody<BodyFixture>, Transformable, DataContainer, Ownable {
@@ -175,8 +175,10 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		return sb.toString();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.collision.CollidableBody#addFixture(org.dyn4j.geometry.Convex)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
 	 */
 	@Override
 	public BodyFixture addFixture(Convex convex) {
@@ -208,8 +210,95 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		fixture.setRestitution(restitution);
 		// add the fixture to the body
 		super.addFixture(fixture);
+		// wake the body up
+		this.setAtRest(false);
 		// return the fixture so the caller can configure it
 		return fixture;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
+	 */
+	@Override
+	public List<BodyFixture> removeAllFixtures() {
+		List<BodyFixture> fixtures = super.removeAllFixtures();
+		// wake the body if something was removed
+		if (fixtures.size() > 0) {
+			this.setAtRest(false);
+		}
+		return fixtures;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
+	 */
+	@Override
+	public boolean removeFixture(BodyFixture fixture) {
+		boolean removed = super.removeFixture(fixture);
+		// if something was removed, then wake the body
+		if (removed) {
+			this.setAtRest(false);
+		}
+		return removed;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
+	 */
+	@Override
+	public BodyFixture removeFixture(int index) {
+		BodyFixture bf = super.removeFixture(index);
+		this.setAtRest(false);
+		return bf;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
+	 */
+	@Override
+	public BodyFixture removeFixture(Vector2 point) {
+		BodyFixture bf = super.removeFixture(point);
+		// if it was removed, then wake the body
+		if (bf != null) {
+			this.setAtRest(false);
+		}
+		return bf;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
+	 */
+	@Override
+	public List<BodyFixture> removeFixtures(Vector2 point) {
+		List<BodyFixture> fixtures = super.removeFixtures(point);
+		// if anything was removed, then wake the body
+		if (fixtures.size() > 0) {
+			this.setAtRest(false);
+		}
+		return fixtures;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Calling this method will reset the body's rest state to not at rest.
+	 */
+	@Override
+	public void setEnabled(boolean enabled) {
+		if (enabled != this.enabled && enabled) {
+			this.setAtRest(false);
+		}
+		super.setEnabled(enabled);
 	}
 	
 	/* (non-Javadoc)
@@ -262,6 +351,8 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		this.mass.setType(type);
 		// compute the rotation disc radius
 		this.setRotationDiscRadius(this.mass.getCenter());
+		// wake the body up
+		this.setAtRest(false);
 		// return this body to facilitate chaining
 		return this;
 	}
@@ -279,6 +370,8 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		this.mass = mass;
 		// compute the rotation disc radius
 		this.setRotationDiscRadius(this.mass.getCenter());
+		// wake the body up
+		this.setAtRest(false);
 		return this;
 	}
 	
@@ -290,6 +383,11 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		// check for null type
 		if (type == null) 
 			throw new ArgumentNullException("type");
+		
+		// wake the body up if the mass type is really changing
+		if (type != this.mass.getType()) {
+			this.setAtRest(false);
+		}
 		
 		// otherwise just set the type
 		this.mass.setType(type);
@@ -766,6 +864,9 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	@Override
 	public void setAtRestDetectionEnabled(boolean flag) {
 		this.atRestDetectionEnabled = flag;
+		if (!flag) {
+			this.setAtRest(false);
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -1012,7 +1113,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	public void setLinearVelocity(Vector2 velocity) {
 		if (velocity == null) 
 			throw new ArgumentNullException("velocity");
-		
+
 		this.linearVelocity.set(velocity);
 	}
 
@@ -1100,6 +1201,10 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		if (linearDamping < 0) 
 			throw new ValueOutOfRangeException("linearDamping", linearDamping, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
+		if (linearDamping != this.linearDamping) {
+			this.setAtRest(false);
+		}
+		
 		this.linearDamping = linearDamping;
 	}
 	
@@ -1119,6 +1224,10 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		if (angularDamping < 0) 
 			throw new ValueOutOfRangeException("angularDamping", angularDamping, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, 0.0);
 		
+		if (angularDamping != this.angularDamping) {
+			this.setAtRest(false);
+		}
+		
 		this.angularDamping = angularDamping;
 	}
 	
@@ -1135,6 +1244,10 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	 */
 	@Override
 	public void setGravityScale(double scale) {
+		if (scale != this.gravityScale) {
+			this.setAtRest(false);
+		}
+		
 		this.gravityScale = scale;
 	}
 }
