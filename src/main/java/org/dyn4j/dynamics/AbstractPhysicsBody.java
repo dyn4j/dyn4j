@@ -48,7 +48,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Abstract implementation of the {@link PhysicsBody} interface.
  * @author William Bittle
- * @version 5.0.2
+ * @version 5.0.3
  * @since 4.0.0
  */
 public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixture> implements PhysicsBody, CollisionBody<BodyFixture>, Transformable, DataContainer, Ownable {
@@ -94,11 +94,22 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	
 	// force/torque accumulators
 	
-	/** The force accumulator */
-	protected final List<Force> forces;
+	/**
+         * The force accumulator.
+         * <p>
+         * <b>WARNING:</b>Avoid directly modifying the contents of this list as 
+         * it may cause unwanted effects on physics unless necessary.
+         */
+	protected List<Force> forces;
 	
-	/** The torque accumulator */
-	protected final List<Torque> torques;
+	/** 
+         * The torque accumulator.
+         * <p>
+         * <b>WARNING:</b>
+         * Avoid directly modifying the contents of this list as 
+         * it may cause unwanted effects on physics unless necessary.
+         */
+	protected List<Torque> torques;
 	
 	/**
 	 * Default constructor.

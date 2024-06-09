@@ -43,22 +43,32 @@ import org.dyn4j.geometry.Vector2;
 /**
  * A base implementation of the {@link CollisionBody} interface.
  * @author William Bittle
- * @version 5.0.0
+ * @version 5.0.1
  * @since 4.0.0
  * @param <T> the {@link Fixture} type
  */
 public abstract class AbstractCollisionBody<T extends Fixture> implements CollisionBody<T>, Transformable, DataContainer, Ownable {
 	/** The current {@link Transform} */
-	protected final Transform transform;
+	protected Transform transform;
 
 	/** The previous {@link Transform} */
-	protected final Transform transform0;
+	protected Transform transform0;
 	
-	/** The {@link Fixture} list */
-	protected final List<T> fixtures;
+	/**
+         * The {@link Fixture} list.
+         * <p>
+         * <b>WARNING:</b>Avoid directly modifying the contents of this list as 
+         * it may cause unwanted effects on physics unless necessary.
+         */
+	protected List<T> fixtures;
 	
-	/** An unmodifiable view of the fixtures on this body */
-	protected final List<T> fixturesUnmodifiable;
+	/** 
+         * An unmodifiable view of the fixtures on this body.
+         * <p>
+         * <b>WARNING:</b>Avoid directly modifying the contents of this list as 
+         * it may cause unwanted effects on physics unless necessary.
+         */
+	protected List<T> fixturesUnmodifiable;
 	
 	/** The the rotation disk radius */
 	protected double radius;
@@ -100,8 +110,8 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 		this.transform0 = new Transform();
 		this.enabled = true;
 	}
-	
-	/* (non-Javadoc)
+
+        /* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#addFixture(org.dyn4j.collision.Fixture)
 	 */
 	@Override
@@ -122,6 +132,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#removeFixture(org.dyn4j.collision.Fixture)
 	 */
+        @Override
 	public boolean removeFixture(T fixture) {
 		// because the fixture list contains no nulls, this handles the case fixture == null as well
 		boolean wasRemoved = this.fixtures.remove(fixture);
@@ -134,6 +145,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#removeFixture(int)
 	 */
+        @Override
 	public T removeFixture(int index) {
 		T fixture = this.fixtures.remove(index);
 		if (fixture != null && this.fixtureModificationHandler != null) {
@@ -145,6 +157,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#removeAllFixtures()
 	 */
+        @Override
 	public List<T> removeAllFixtures() {
 		// return a list of the current fixtures
 		List<T> fixtures = new ArrayList<T>(this.fixtures);
@@ -160,6 +173,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#removeFixture(org.dyn4j.geometry.Vector2)
 	 */
+        @Override
 	public T removeFixture(Vector2 point) {
 		int size = this.fixtures.size();
 		for (int i = 0; i < size; i++) {
@@ -179,6 +193,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#removeFixtures(org.dyn4j.geometry.Vector2)
 	 */
+        @Override
 	public List<T> removeFixtures(Vector2 point) {
 		List<T> fixtures = new ArrayList<T>();
 		Iterator<T> it = this.fixtures.iterator();
@@ -199,6 +214,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#containsFixture(org.dyn4j.collision.Fixture)
 	 */
+        @Override
 	public boolean containsFixture(T fixture) {
 		// because the fixture list contains no nulls, this handles the case fixture == null as well
 		return this.fixtures.contains(fixture);
@@ -207,6 +223,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#getFixture(int)
 	 */
+        @Override
 	public T getFixture(int index) {
 		return this.fixtures.get(index);
 	}
@@ -214,6 +231,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#getFixture(org.dyn4j.geometry.Vector2)
 	 */
+        @Override
 	public T getFixture(Vector2 point) {
 		int size = this.fixtures.size();
 		for (int i = 0; i < size; i++) {
@@ -229,6 +247,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#getFixtures(org.dyn4j.geometry.Vector2)
 	 */
+        @Override
 	public List<T> getFixtures(Vector2 point) {
 		List<T> fixtures = new ArrayList<T>();
 		int size = this.fixtures.size();
@@ -245,6 +264,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#getFixtureCount()
 	 */
+        @Override
 	public int getFixtureCount() {
 		return this.fixtures.size();
 	}
@@ -252,6 +272,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#getFixtures()
 	 */
+        @Override
 	public List<T> getFixtures() {
 		return this.fixturesUnmodifiable;
 	}
@@ -352,6 +373,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#rotateAboutCenter(double)
 	 */
+        @Override
 	public void rotateAboutCenter(double theta) {
 		Vector2 center = this.getWorldCenter();
 		this.rotate(theta, center);
@@ -376,6 +398,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#translateToOrigin()
 	 */
+        @Override
 	public void translateToOrigin() {
 		// get the world space center of mass
 		Vector2 wc = this.getWorldCenter();
@@ -386,6 +409,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.geometry.Shiftable#shift(org.dyn4j.geometry.Vector2)
 	 */
+        @Override
 	public void shift(Vector2 shift) {
 		this.transform.translate(shift);
 	}
@@ -393,6 +417,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#getTransform()
 	 */
+        @Override
 	public Transform getTransform() {
 		return this.transform;
 	}
@@ -408,6 +433,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#getRotationDiscRadius()
 	 */
+        @Override
 	public double getRotationDiscRadius() {
 		return this.radius;
 	}
@@ -415,6 +441,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#setTransform(org.dyn4j.geometry.Transform)
 	 */
+        @Override
 	public void setTransform(Transform transform) {
 		if (transform == null) return;
 		this.transform.set(transform);
@@ -423,6 +450,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.DataContainer#getUserData()
 	 */
+        @Override
 	public Object getUserData() {
 		return this.userData;
 	}
@@ -430,6 +458,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.DataContainer#setUserData(java.lang.Object)
 	 */
+        @Override
 	public void setUserData(Object userData) {
 		this.userData = userData;
 	}
@@ -447,6 +476,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#createAABB(org.dyn4j.geometry.Transform)
 	 */
+        @Override
 	public AABB createAABB(Transform transform) {
 		AABB aabb = new AABB(0,0,0,0);
 		this.computeAABB(transform, aabb);
@@ -464,6 +494,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#computeAABB(org.dyn4j.geometry.Transform, org.dyn4j.geometry.AABB)
 	 */
+        @Override
 	public void computeAABB(Transform transform, AABB result) {
 		// get the number of fixtures
 		int size = this.fixtures.size();
@@ -487,6 +518,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#getLocalPoint(org.dyn4j.geometry.Vector2)
 	 */
+        @Override
 	public Vector2 getLocalPoint(Vector2 worldPoint) {
 		return this.transform.getInverseTransformed(worldPoint);
 	}
@@ -494,6 +526,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#getWorldPoint(org.dyn4j.geometry.Vector2)
 	 */
+        @Override
 	public Vector2 getWorldPoint(Vector2 localPoint) {
 		return this.transform.getTransformed(localPoint);
 	}
@@ -501,6 +534,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#getLocalVector(org.dyn4j.geometry.Vector2)
 	 */
+        @Override
 	public Vector2 getLocalVector(Vector2 worldVector) {
 		return this.transform.getInverseTransformedR(worldVector);
 	}
@@ -508,6 +542,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#getWorldVector(org.dyn4j.geometry.Vector2)
 	 */
+        @Override
 	public Vector2 getWorldVector(Vector2 localVector) {
 		return this.transform.getTransformedR(localVector);
 	}
@@ -523,6 +558,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#contains(org.dyn4j.geometry.Vector2)
 	 */
+        @Override
 	public boolean contains(Vector2 point) {
 		int size = this.fixtures.size();
 		for (int i = 0; i < size; i++) {
