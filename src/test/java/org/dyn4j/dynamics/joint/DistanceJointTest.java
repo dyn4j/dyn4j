@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link DistanceJoint} class.
  * @author William Bittle
- * @version 4.2.0
+ * @version 6.0.0
  * @since 1.0.2
  */
 public class DistanceJointTest extends BaseJointTest {
@@ -1218,5 +1218,127 @@ public class DistanceJointTest extends BaseJointTest {
 		TestCase.assertFalse(b2.isAtRest());
 		TestCase.assertEquals(0.5, dj.getLowerLimit());
 		TestCase.assertEquals(4.0, dj.getUpperLimit());
+	}
+
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		dj.setCollisionAllowed(true);
+		dj.setLimits(2, 5);
+		dj.setLimitsEnabled(true);
+		dj.setOwner(new Object());
+		dj.setUserData(new Object());
+		dj.setMaximumSpringForce(3);
+		dj.setMaximumSpringForceEnabled(true);
+		dj.setRestDistance(2);
+		dj.setSpringDamperEnabled(true);
+		dj.setSpringDampingRatio(0.5);
+		dj.setSpringEnabled(true);
+		dj.setSpringFrequency(1.0);
+		dj.bias = 5;
+		dj.currentDistance = 2;
+		dj.damping = 1;
+		dj.gamma = 4;
+		dj.impulse = 9;
+		dj.lowerLimitImpulse = 10;
+		dj.mass = 0.5;
+		dj.n.set(1, 1);
+		dj.softMass = 0.3;
+		dj.upperLimitImpulse = -1;
+		
+		DistanceJoint<Body> djc = dj.copy();
+		
+		TestCase.assertNotSame(dj, djc);
+		TestCase.assertNotSame(dj.bodies, djc.bodies);
+		TestCase.assertNotSame(dj.body1, djc.body1);
+		TestCase.assertNotSame(dj.body2, djc.body2);
+		TestCase.assertNotSame(dj.localAnchor1, djc.localAnchor1);
+		TestCase.assertNotSame(dj.localAnchor2, djc.localAnchor2);
+		TestCase.assertNotSame(dj.n, djc.n);
+		TestCase.assertSame(djc.body1, djc.bodies.get(0));
+		TestCase.assertSame(djc.body2, djc.bodies.get(1));
+		TestCase.assertEquals(dj.bodies.size(), djc.bodies.size());
+		TestCase.assertEquals(dj.localAnchor1.x, djc.localAnchor1.x);
+		TestCase.assertEquals(dj.localAnchor1.y, djc.localAnchor1.y);
+		TestCase.assertEquals(dj.localAnchor2.x, djc.localAnchor2.x);
+		TestCase.assertEquals(dj.localAnchor2.y, djc.localAnchor2.y);
+		TestCase.assertEquals(dj.n.x, djc.n.x);
+		TestCase.assertEquals(dj.n.y, djc.n.y);
+		
+		TestCase.assertNull(djc.owner);
+		TestCase.assertNull(djc.userData);
+		
+		TestCase.assertEquals(dj.bias, djc.bias);
+		TestCase.assertEquals(dj.collisionAllowed, djc.collisionAllowed);
+		TestCase.assertEquals(dj.currentDistance, djc.currentDistance);
+		TestCase.assertEquals(dj.damping, djc.damping);
+		TestCase.assertEquals(dj.gamma, djc.gamma);
+		TestCase.assertEquals(dj.impulse, djc.impulse);
+		TestCase.assertEquals(dj.lowerLimit, djc.lowerLimit);
+		TestCase.assertEquals(dj.lowerLimitEnabled, djc.lowerLimitEnabled);
+		TestCase.assertEquals(dj.lowerLimitImpulse, djc.lowerLimitImpulse);
+		TestCase.assertEquals(dj.mass, djc.mass);
+		TestCase.assertEquals(dj.restDistance, djc.restDistance);
+		TestCase.assertEquals(dj.softMass, djc.softMass);
+		TestCase.assertEquals(dj.springDamperEnabled, djc.springDamperEnabled);
+		TestCase.assertEquals(dj.springDampingRatio, djc.springDampingRatio);
+		TestCase.assertEquals(dj.springEnabled, djc.springEnabled);
+		TestCase.assertEquals(dj.springFrequency, djc.springFrequency);
+		TestCase.assertEquals(dj.springMaximumForce, djc.springMaximumForce);
+		TestCase.assertEquals(dj.springMaximumForceEnabled, djc.springMaximumForceEnabled);
+		TestCase.assertEquals(dj.springMode, djc.springMode);
+		TestCase.assertEquals(dj.springStiffness, djc.springStiffness);
+		TestCase.assertEquals(dj.upperLimit, djc.upperLimit);
+		TestCase.assertEquals(dj.upperLimitEnabled, djc.upperLimitEnabled);
+		TestCase.assertEquals(dj.upperLimitImpulse, djc.upperLimitImpulse);
+		
+		// test overriding the bodies
+		djc = dj.copy(b1, b2);
+		
+		TestCase.assertNotSame(dj, djc);
+		TestCase.assertNotSame(dj.bodies, djc.bodies);
+		TestCase.assertSame(dj.body1, djc.body1);
+		TestCase.assertSame(dj.body2, djc.body2);
+		TestCase.assertSame(djc.body1, djc.bodies.get(0));
+		TestCase.assertSame(djc.body2, djc.bodies.get(1));
+		TestCase.assertEquals(dj.bodies.size(), djc.bodies.size());
+		
+		// test overriding body1
+		djc = dj.copy(b1, null);
+		
+		TestCase.assertNotSame(dj, djc);
+		TestCase.assertNotSame(dj.bodies, djc.bodies);
+		TestCase.assertSame(dj.body1, djc.body1);
+		TestCase.assertNotSame(dj.body2, djc.body2);
+		TestCase.assertSame(djc.body1, djc.bodies.get(0));
+		TestCase.assertSame(djc.body2, djc.bodies.get(1));
+		TestCase.assertEquals(dj.bodies.size(), djc.bodies.size());
+
+		// test overriding body2
+		djc = dj.copy(null, b2);
+		
+		TestCase.assertNotSame(dj, djc);
+		TestCase.assertNotSame(dj.bodies, djc.bodies);
+		TestCase.assertNotSame(dj.body1, djc.body1);
+		TestCase.assertSame(dj.body2, djc.body2);
+		TestCase.assertSame(djc.body1, djc.bodies.get(0));
+		TestCase.assertSame(djc.body2, djc.bodies.get(1));
+		TestCase.assertEquals(dj.bodies.size(), djc.bodies.size());
+	}
+	
+	/**
+	 * Test the copy fail fast.
+	 */
+	@Test(expected = ClassCastException.class)
+	public void copyFailed() {
+		TestBody b1 = new TestBody();
+		TestBody b2 = new TestBody();
+		
+		DistanceJoint<Body> dj = new DistanceJoint<Body>(b1, b2, new Vector2(), new Vector2(0.0, 1.0));
+		
+		dj.copy();
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.junit.Before;
 /**
  * Base class for Joint test cases.
  * @author William Bittle
- * @version 4.0.0
+ * @version 6.0.0
  * @since 4.0.0
  */
 public abstract class BaseJointTest {
@@ -55,4 +55,12 @@ public abstract class BaseJointTest {
 		this.b2.addFixture(Geometry.createCircle(1.0), 1.0, 0.2, 0.0);
 		this.b2.setMass(MassType.NORMAL);
 	}
+	
+	/**
+	 * For negative testing in copy.
+	 * @author William Bittle
+	 * @version 6.0.0
+	 * @since 6.0.0
+	 */
+	protected final class TestBody extends Body {}
 }

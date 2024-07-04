@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link Segment} class.
  * @author William Bittle
- * @version 4.2.2
+ * @version 6.0.0
  * @since 4.2.2
  */
 public class LinkTest {
@@ -43,7 +43,7 @@ public class LinkTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createNullPoint1() {
-		new Link(null, new Vector2());
+		new Link(null, null, new Vector2(), null);
 	}
 	
 	/**
@@ -52,7 +52,7 @@ public class LinkTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createNullPoint2() {
-		new Link(new Vector2(), null);
+		new Link(null, new Vector2(), null, null);
 	}
 	
 	/**
@@ -60,7 +60,7 @@ public class LinkTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void createCoincident() {
-		new Link(new Vector2(), new Vector2());
+		new Link(null, new Vector2(), new Vector2(), null);
 	}
 	
 	/**
@@ -69,8 +69,10 @@ public class LinkTest {
 	@Test
 	public void creatSuccess() {
 		Link l = new Link(
+			null,
 			new Vector2(0.0, 1.0),
-			new Vector2(1.0, 2.0)
+			new Vector2(1.0, 2.0),
+			null
 		);
 		
 		TestCase.assertEquals(0.500, l.center.x, 1.0e-3);
@@ -80,10 +82,6 @@ public class LinkTest {
 		TestCase.assertEquals(WoundIterator.class, l.getVertexIterator().getClass());
 		TestCase.assertNotNull(l.getNormalIterator());
 		TestCase.assertEquals(WoundIterator.class, l.getNormalIterator().getClass());
-		TestCase.assertNull(l.next);
-		TestCase.assertNull(l.previous);
-		TestCase.assertNull(l.getNext());
-		TestCase.assertNull(l.getPrevious());
 		TestCase.assertNull(l.getPoint0());
 		TestCase.assertNotNull(l.getPoint1());
 		TestCase.assertNotNull(l.getPoint2());
@@ -106,59 +104,15 @@ public class LinkTest {
 		
 		TestCase.assertEquals(3, links.size());
 		
-		Link l = links.get(1);
-		TestCase.assertEquals(1.500, l.center.x, 1.0e-3);
-		TestCase.assertEquals(0.500, l.center.y, 1.0e-3);
-		
-		double l1 = links.get(0).getLength();
-		double l2 = links.get(1).getLength();
-		double l3 = links.get(2).getLength();
-		TestCase.assertEquals(1.0, l1, 1.0e-3);
-		TestCase.assertEquals(Math.sqrt(2.0), l2, 1.0e-3);
-		TestCase.assertEquals(1.0, l3, 1.0e-3);
-		
-		TestCase.assertEquals( 1.000, links.get(0).normals[0].x, 1.0e-3);
-		TestCase.assertEquals( 0.000, links.get(0).normals[0].y, 1.0e-3);
-		TestCase.assertEquals( 0.707, links.get(1).normals[0].x, 1.0e-3);
-		TestCase.assertEquals( 0.707, links.get(1).normals[0].y, 1.0e-3);
-		TestCase.assertEquals( 1.000, links.get(2).normals[0].x, 1.0e-3);
-		TestCase.assertEquals( 0.000, links.get(2).normals[0].y, 1.0e-3);
-		TestCase.assertEquals( 0.000, links.get(0).normals[1].x, 1.0e-3);
-		TestCase.assertEquals( 1.000, links.get(0).normals[1].y, 1.0e-3);
-		TestCase.assertEquals(-0.707, links.get(1).normals[1].x, 1.0e-3);
-		TestCase.assertEquals( 0.707, links.get(1).normals[1].y, 1.0e-3);
-		TestCase.assertEquals( 0.000, links.get(2).normals[1].x, 1.0e-3);
-		TestCase.assertEquals( 1.000, links.get(2).normals[1].y, 1.0e-3);
-		
-		l.rotate(Math.toRadians(45), l.center.x, l.center.y);
-		TestCase.assertEquals(1.500, l.center.x, 1.0e-3);
-		TestCase.assertEquals(0.500, l.center.y, 1.0e-3);
-		TestCase.assertEquals(1.500, l.vertices[0].x, 1.0e-3);
-		TestCase.assertEquals(-0.207, l.vertices[0].y, 1.0e-3);
-		TestCase.assertEquals(1.500, l.vertices[1].x, 1.0e-3);
-		TestCase.assertEquals(1.207, l.vertices[1].y, 1.0e-3);
-		TestCase.assertEquals(links.get(0).getPoint2(), links.get(1).getPoint1());
-		TestCase.assertEquals(links.get(2).getPoint1(), links.get(1).getPoint2());
-		
-		l1 = links.get(0).getLength();
-		l2 = links.get(1).getLength();
-		l3 = links.get(2).getLength();
-		TestCase.assertEquals(l.getPoint0().distance(l.getPoint1()), l1, 1.0e-3);
-		TestCase.assertEquals(Math.sqrt(2), l2, 1.0e-3);
-		TestCase.assertEquals(l.getPoint2().distance(l.getPoint3()), l3, 1.0e-3);
-		
-		TestCase.assertEquals( 0.990, links.get(0).normals[0].x, 1.0e-3);
-		TestCase.assertEquals(-0.136, links.get(0).normals[0].y, 1.0e-3);
-		TestCase.assertEquals( 0.000, links.get(1).normals[0].x, 1.0e-3);
-		TestCase.assertEquals( 1.000, links.get(1).normals[0].y, 1.0e-3);
-		TestCase.assertEquals( 0.990, links.get(2).normals[0].x, 1.0e-3);
-		TestCase.assertEquals(-0.136, links.get(2).normals[0].y, 1.0e-3);
-		TestCase.assertEquals( 0.136, links.get(0).normals[1].x, 1.0e-3);
-		TestCase.assertEquals( 0.990, links.get(0).normals[1].y, 1.0e-3);
-		TestCase.assertEquals(-1.000, links.get(1).normals[1].x, 1.0e-3);
-		TestCase.assertEquals( 0.000, links.get(1).normals[1].y, 1.0e-3);
-		TestCase.assertEquals( 0.136, links.get(2).normals[1].x, 1.0e-3);
-		TestCase.assertEquals( 0.990, links.get(2).normals[1].y, 1.0e-3);
+		for (Link link : links) {
+			try { link.rotate(Math.toRadians(30)); TestCase.fail(); } catch (UnsupportedOperationException ex) { }
+			try { link.rotate(Rotation.of(Math.toRadians(40))); TestCase.fail(); } catch (UnsupportedOperationException ex) { }
+			try { link.rotate(Math.toRadians(40), new Vector2(1, 2)); TestCase.fail(); } catch (UnsupportedOperationException ex) { }
+			try { link.rotate(Rotation.of(Math.toRadians(20)), new Vector2(0, 3)); TestCase.fail(); } catch (UnsupportedOperationException ex) { }
+			try { link.rotate(Math.toRadians(10), 2, -1); TestCase.fail(); } catch (UnsupportedOperationException ex) { }
+			try { link.rotate(Rotation.of(Math.toRadians(45)), -1, -1); TestCase.fail(); } catch (UnsupportedOperationException ex) { }
+			try { link.rotateAboutCenter(Math.toRadians(26)); TestCase.fail(); } catch (UnsupportedOperationException ex) { }
+		}
 	}
 	
 	/**
@@ -175,60 +129,53 @@ public class LinkTest {
 		
 		TestCase.assertEquals(3, links.size());
 		
-		Link l = links.get(1);
-		TestCase.assertEquals(1.500, l.center.x, 1.0e-3);
-		TestCase.assertEquals(0.500, l.center.y, 1.0e-3);
-		
-		double l1 = links.get(0).getLength();
-		double l2 = links.get(1).getLength();
-		double l3 = links.get(2).getLength();
-		TestCase.assertEquals(1.0, l1, 1.0e-3);
-		TestCase.assertEquals(Math.sqrt(2.0), l2, 1.0e-3);
-		TestCase.assertEquals(1.0, l3, 1.0e-3);
-		
-		TestCase.assertEquals( 1.000, links.get(0).normals[0].x, 1.0e-3);
-		TestCase.assertEquals( 0.000, links.get(0).normals[0].y, 1.0e-3);
-		TestCase.assertEquals( 0.707, links.get(1).normals[0].x, 1.0e-3);
-		TestCase.assertEquals( 0.707, links.get(1).normals[0].y, 1.0e-3);
-		TestCase.assertEquals( 1.000, links.get(2).normals[0].x, 1.0e-3);
-		TestCase.assertEquals( 0.000, links.get(2).normals[0].y, 1.0e-3);
-		TestCase.assertEquals( 0.000, links.get(0).normals[1].x, 1.0e-3);
-		TestCase.assertEquals( 1.000, links.get(0).normals[1].y, 1.0e-3);
-		TestCase.assertEquals(-0.707, links.get(1).normals[1].x, 1.0e-3);
-		TestCase.assertEquals( 0.707, links.get(1).normals[1].y, 1.0e-3);
-		TestCase.assertEquals( 0.000, links.get(2).normals[1].x, 1.0e-3);
-		TestCase.assertEquals( 1.000, links.get(2).normals[1].y, 1.0e-3);
-		
-		l.translate(0.5, 0.5);
-		
-		TestCase.assertEquals(2.000, l.center.x, 1.0e-3);
-		TestCase.assertEquals(1.000, l.center.y, 1.0e-3);
-		TestCase.assertEquals(1.500, l.vertices[0].x, 1.0e-3);
-		TestCase.assertEquals(0.500, l.vertices[0].y, 1.0e-3);
-		TestCase.assertEquals(2.500, l.vertices[1].x, 1.0e-3);
-		TestCase.assertEquals(1.500, l.vertices[1].y, 1.0e-3);
-		TestCase.assertEquals(links.get(0).getPoint2(), links.get(1).getPoint1());
-		TestCase.assertEquals(links.get(2).getPoint1(), links.get(1).getPoint2());
-		
-		l1 = links.get(0).getLength();
-		l2 = links.get(1).getLength();
-		l3 = links.get(2).getLength();
-		TestCase.assertEquals(l.getPoint0().distance(l.getPoint1()), l1, 1.0e-3);
-		TestCase.assertEquals(Math.sqrt(2), l2, 1.0e-3);
-		TestCase.assertEquals(l.getPoint2().distance(l.getPoint3()), l3, 1.0e-3);
-		
-		TestCase.assertEquals( 0.948, links.get(0).normals[0].x, 1.0e-3);
-		TestCase.assertEquals( 0.316, links.get(0).normals[0].y, 1.0e-3);
-		TestCase.assertEquals( 0.707, links.get(1).normals[0].x, 1.0e-3);
-		TestCase.assertEquals( 0.707, links.get(1).normals[0].y, 1.0e-3);
-		TestCase.assertEquals( 0.707, links.get(2).normals[0].x, 1.0e-3);
-		TestCase.assertEquals(-0.707, links.get(2).normals[0].y, 1.0e-3);
-		TestCase.assertEquals(-0.316, links.get(0).normals[1].x, 1.0e-3);
-		TestCase.assertEquals( 0.948, links.get(0).normals[1].y, 1.0e-3);
-		TestCase.assertEquals(-0.707, links.get(1).normals[1].x, 1.0e-3);
-		TestCase.assertEquals( 0.707, links.get(1).normals[1].y, 1.0e-3);
-		TestCase.assertEquals( 0.707, links.get(2).normals[1].x, 1.0e-3);
-		TestCase.assertEquals( 0.707, links.get(2).normals[1].y, 1.0e-3);
+		for (Link link : links) {
+			try { link.translate(new Vector2(1, 1)); TestCase.fail(); } catch (UnsupportedOperationException ex) { }
+			try { link.translate(6, 7); TestCase.fail(); } catch (UnsupportedOperationException ex) { }
+		}
 	}
 	
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		Link link = new Link(
+				new Vector2(0, 0), 
+				new Vector2(1, 1), 
+				new Vector2(2, 1), 
+				new Vector2(3, 0));
+		link.setUserData(new Object());
+		
+		Link copy = link.copy();
+		
+		TestCase.assertNotSame(link, copy);
+		TestCase.assertNotSame(link.point0, copy.point0);
+		TestCase.assertNotSame(link.point3, copy.point3);
+		TestCase.assertNotSame(link.center, copy.center);
+		TestCase.assertNotSame(link.normals, copy.normals);
+		TestCase.assertNotSame(link.vertices, copy.vertices);
+		TestCase.assertEquals(link.length, copy.length);
+		TestCase.assertEquals(link.radius, copy.radius);
+		TestCase.assertNull(copy.userData);
+		
+		TestCase.assertEquals(link.center.x, copy.center.x);
+		TestCase.assertEquals(link.center.y, copy.center.y);
+		TestCase.assertEquals(link.point0.x, copy.point0.x);
+		TestCase.assertEquals(link.point0.y, copy.point0.y);
+		TestCase.assertEquals(link.point3.x, copy.point3.x);
+		TestCase.assertEquals(link.point3.y, copy.point3.y);
+		
+		TestCase.assertEquals(link.normals.length, copy.normals.length);
+		for (int i = 0; i < link.normals.length; i++) {
+			TestCase.assertEquals(link.normals[i].x, copy.normals[i].x);
+			TestCase.assertEquals(link.normals[i].y, copy.normals[i].y);
+		}
+		
+		TestCase.assertEquals(link.vertices.length, copy.vertices.length);
+		for (int i = 0; i < link.vertices.length; i++) {
+			TestCase.assertEquals(link.vertices[i].x, copy.vertices[i].x);
+			TestCase.assertEquals(link.vertices[i].y, copy.vertices[i].y);
+		}
+	}
 }

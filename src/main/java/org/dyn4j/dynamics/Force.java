@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,16 +24,17 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.exception.ArgumentNullException;
 import org.dyn4j.geometry.Vector2;
 
 /**
  * Represents a force.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 1.0.0
  */
-public class Force {
+public class Force implements Copyable<Force> {
 	/** The force to apply */
 	protected Vector2 force;
 	
@@ -71,6 +72,16 @@ public class Force {
 	public Force(Force force) {
 		if (force == null) throw new ArgumentNullException("force");
 		this.force = force.force.copy();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link Force}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Force copy() {
+		return new Force(this);
 	}
 	
 	/**

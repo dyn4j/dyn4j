@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,7 +34,7 @@ import org.dyn4j.exception.ValueOutOfRangeException;
  * <p>
  * A {@link Rectangle} must have a width and height greater than zero.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class Rectangle extends Polygon implements Convex, Wound, Shape, Transformable, DataContainer {
@@ -100,6 +100,27 @@ public class Rectangle extends Polygon implements Convex, Wound, Shape, Transfor
 			throw new ValueOutOfRangeException("height", height, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
 		
 		return true;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param rectangle the rectangle to copy
+	 * @since 6.0.0
+	 */
+	protected Rectangle(Rectangle rectangle) {
+		super(rectangle);
+		this.width = rectangle.width;
+		this.height = rectangle.height;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link Rectangle}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Rectangle copy() {
+		return new Rectangle(this);
 	}
 	
 	/* (non-Javadoc)

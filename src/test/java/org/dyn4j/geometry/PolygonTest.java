@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Polygon} class.
  * @author William Bittle
- * @version 4.2.2
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class PolygonTest {
@@ -543,5 +543,36 @@ public class PolygonTest {
 		Polygon p = Geometry.createUnitCirclePolygon(5, 0.5);
 		TestCase.assertEquals(0.594, p.getArea(), 1.0e-3);
 	}
-	
+
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		Polygon poly = Geometry.createUnitCirclePolygon(5, 0.5);
+		poly.setUserData(new Object());
+		Polygon copy = poly.copy();
+		
+		TestCase.assertNotSame(poly, copy);
+		TestCase.assertNotSame(poly.center, copy.center);
+		TestCase.assertNotSame(poly.normals, copy.normals);
+		TestCase.assertNotSame(poly.vertices, copy.vertices);
+		TestCase.assertEquals(poly.radius, copy.radius);
+		TestCase.assertNull(copy.userData);
+		
+		TestCase.assertEquals(poly.center.x, copy.center.x);
+		TestCase.assertEquals(poly.center.y, copy.center.y);
+		
+		TestCase.assertEquals(poly.normals.length, copy.normals.length);
+		for (int i = 0; i < poly.normals.length; i++) {
+			TestCase.assertEquals(poly.normals[i].x, copy.normals[i].x);
+			TestCase.assertEquals(poly.normals[i].y, copy.normals[i].y);
+		}
+		
+		TestCase.assertEquals(poly.vertices.length, copy.vertices.length);
+		for (int i = 0; i < poly.vertices.length; i++) {
+			TestCase.assertEquals(poly.vertices[i].x, copy.vertices[i].x);
+			TestCase.assertEquals(poly.vertices[i].y, copy.vertices[i].y);
+		}
+	}
 }

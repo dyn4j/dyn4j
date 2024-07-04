@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -43,7 +43,7 @@ import org.dyn4j.geometry.Shiftable;
  * Represents an abstract implementation of constrained motion between 
  * {@link PhysicsBody}s.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 5.0.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -82,6 +82,17 @@ public abstract class AbstractJoint<T extends PhysicsBody> implements Joint<T>, 
 		
 		this.bodies = Collections.unmodifiableList(bodies);
 		this.collisionAllowed = false;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @param bodies the bodies for the copy
+	 * @since 6.0.0
+	 */
+	protected AbstractJoint(AbstractJoint<T> joint, List<T> bodies) {
+		this.bodies = Collections.unmodifiableList(bodies);
+		this.collisionAllowed = joint.collisionAllowed;
 	}
 	
 	/* (non-Javadoc)

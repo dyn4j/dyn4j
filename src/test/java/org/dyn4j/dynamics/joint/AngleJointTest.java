@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link AngleJoint} class.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 2.2.2
  */
 public class AngleJointTest extends BaseJointTest {
@@ -640,5 +640,91 @@ public class AngleJointTest extends BaseJointTest {
 		// there's nothing to check...
 		TestCase.assertEquals(p1, b1.getWorldCenter());
 		TestCase.assertEquals(p2, b2.getWorldCenter());
+	}
+	
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
+		aj.setCollisionAllowed(true);
+		aj.setLimits(2, 5);
+		aj.setLimitsEnabled(true);
+		aj.setOwner(new Object());
+		aj.setRatio(0.5);
+		aj.setUserData(new Object());
+		
+		AngleJoint<Body> ajc = aj.copy();
+		
+		TestCase.assertNotSame(aj, ajc);
+		TestCase.assertNotSame(aj.bodies, ajc.bodies);
+		TestCase.assertNotSame(aj.body1, ajc.body1);
+		TestCase.assertNotSame(aj.body2, ajc.body2);
+		TestCase.assertSame(ajc.body1, ajc.bodies.get(0));
+		TestCase.assertSame(ajc.body2, ajc.bodies.get(1));
+		TestCase.assertEquals(aj.bodies.size(), ajc.bodies.size());
+		
+		TestCase.assertNull(ajc.owner);
+		TestCase.assertNull(ajc.userData);
+		
+		TestCase.assertEquals(aj.angle, ajc.angle);
+		TestCase.assertEquals(aj.axialMass, ajc.axialMass);
+		TestCase.assertEquals(aj.collisionAllowed, ajc.collisionAllowed);
+		TestCase.assertEquals(aj.fixedRotation, ajc.fixedRotation);
+		TestCase.assertEquals(aj.impulse, ajc.impulse);
+		TestCase.assertEquals(aj.limitsEnabled, ajc.limitsEnabled);
+		TestCase.assertEquals(aj.lowerImpulse, ajc.lowerImpulse);
+		TestCase.assertEquals(aj.lowerLimit, ajc.lowerLimit);
+		TestCase.assertEquals(aj.ratio, ajc.ratio);
+		TestCase.assertEquals(aj.referenceAngle, ajc.referenceAngle);
+		TestCase.assertEquals(aj.upperImpulse, ajc.upperImpulse);
+		TestCase.assertEquals(aj.upperLimit, ajc.upperLimit);
+		
+		// test overriding the bodies
+		ajc = aj.copy(b1, b2);
+		
+		TestCase.assertNotSame(aj, ajc);
+		TestCase.assertNotSame(aj.bodies, ajc.bodies);
+		TestCase.assertSame(aj.body1, ajc.body1);
+		TestCase.assertSame(aj.body2, ajc.body2);
+		TestCase.assertSame(ajc.body1, ajc.bodies.get(0));
+		TestCase.assertSame(ajc.body2, ajc.bodies.get(1));
+		TestCase.assertEquals(aj.bodies.size(), ajc.bodies.size());
+		
+		// test overriding body1
+		ajc = aj.copy(b1, null);
+		
+		TestCase.assertNotSame(aj, ajc);
+		TestCase.assertNotSame(aj.bodies, ajc.bodies);
+		TestCase.assertSame(aj.body1, ajc.body1);
+		TestCase.assertNotSame(aj.body2, ajc.body2);
+		TestCase.assertSame(ajc.body1, ajc.bodies.get(0));
+		TestCase.assertSame(ajc.body2, ajc.bodies.get(1));
+		TestCase.assertEquals(aj.bodies.size(), ajc.bodies.size());
+
+		// test overriding body2
+		ajc = aj.copy(null, b2);
+		
+		TestCase.assertNotSame(aj, ajc);
+		TestCase.assertNotSame(aj.bodies, ajc.bodies);
+		TestCase.assertNotSame(aj.body1, ajc.body1);
+		TestCase.assertSame(aj.body2, ajc.body2);
+		TestCase.assertSame(ajc.body1, ajc.bodies.get(0));
+		TestCase.assertSame(ajc.body2, ajc.bodies.get(1));
+		TestCase.assertEquals(aj.bodies.size(), ajc.bodies.size());
+	}
+	
+	/**
+	 * Test the copy fail fast.
+	 */
+	@Test(expected = ClassCastException.class)
+	public void copyFailed() {
+		TestBody b1 = new TestBody();
+		TestBody b2 = new TestBody();
+		
+		AngleJoint<TestBody> aj = new AngleJoint<TestBody>(b1, b2);
+		
+		aj.copy();
 	}
 }

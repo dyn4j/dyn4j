@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link FrictionJoint} class.
  * @author William Bittle
- * @version 4.0.1
+ * @version 6.0.0
  * @since 1.0.2
  */
 public class FrictionJointTest extends BaseJointTest {
@@ -170,5 +170,102 @@ public class FrictionJointTest extends BaseJointTest {
 		TestCase.assertEquals(1.0, fj.getAnchor2().x);
 		TestCase.assertEquals(2.0, fj.getAnchor2().y);
 	}
+
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		FrictionJoint<Body> fj = new FrictionJoint<Body>(b1, b2, new Vector2(1, 1));
+		fj.setCollisionAllowed(true);
+		fj.setOwner(new Object());
+		fj.setUserData(new Object());
+		fj.setMaximumForce(5);
+		fj.setMaximumTorque(9);
+		fj.angularImpulse = 7;
+		fj.angularMass = 4;
+		fj.K.m00 = 1;
+		fj.K.m01 = 2;
+		fj.K.m10 = 3;
+		fj.K.m11 = 4;
+		fj.linearImpulse.set(2, 3);
+		
+		FrictionJoint<Body> fjc = fj.copy();
+		
+		TestCase.assertNotSame(fj, fjc);
+		TestCase.assertNotSame(fj.bodies, fjc.bodies);
+		TestCase.assertNotSame(fj.body1, fjc.body1);
+		TestCase.assertNotSame(fj.body2, fjc.body2);
+		TestCase.assertNotSame(fj.localAnchor1, fjc.localAnchor1);
+		TestCase.assertNotSame(fj.localAnchor2, fjc.localAnchor2);
+		TestCase.assertNotSame(fj.K, fjc.K);
+		TestCase.assertSame(fjc.body1, fjc.bodies.get(0));
+		TestCase.assertSame(fjc.body2, fjc.bodies.get(1));
+		TestCase.assertEquals(fj.bodies.size(), fjc.bodies.size());
+		TestCase.assertEquals(fj.localAnchor1.x, fjc.localAnchor1.x);
+		TestCase.assertEquals(fj.localAnchor1.y, fjc.localAnchor1.y);
+		TestCase.assertEquals(fj.localAnchor2.x, fjc.localAnchor2.x);
+		TestCase.assertEquals(fj.localAnchor2.y, fjc.localAnchor2.y);
+		TestCase.assertEquals(fj.K.m00, fjc.K.m00);
+		TestCase.assertEquals(fj.K.m01, fjc.K.m01);
+		TestCase.assertEquals(fj.K.m10, fjc.K.m10);
+		TestCase.assertEquals(fj.K.m11, fjc.K.m11);
+		TestCase.assertEquals(fj.linearImpulse.x, fjc.linearImpulse.x);
+		TestCase.assertEquals(fj.linearImpulse.y, fjc.linearImpulse.y);
+		
+		TestCase.assertNull(fjc.owner);
+		TestCase.assertNull(fjc.userData);
+		
+		TestCase.assertEquals(fj.angularImpulse, fjc.angularImpulse);
+		TestCase.assertEquals(fj.collisionAllowed, fjc.collisionAllowed);
+		TestCase.assertEquals(fj.angularMass, fjc.angularMass);
+		TestCase.assertEquals(fj.maximumForce, fjc.maximumForce);
+		TestCase.assertEquals(fj.maximumTorque, fjc.maximumTorque);
+		
+		// test overriding the bodies
+		fjc = fj.copy(b1, b2);
+		
+		TestCase.assertNotSame(fj, fjc);
+		TestCase.assertNotSame(fj.bodies, fjc.bodies);
+		TestCase.assertSame(fj.body1, fjc.body1);
+		TestCase.assertSame(fj.body2, fjc.body2);
+		TestCase.assertSame(fjc.body1, fjc.bodies.get(0));
+		TestCase.assertSame(fjc.body2, fjc.bodies.get(1));
+		TestCase.assertEquals(fj.bodies.size(), fjc.bodies.size());
+		
+		// test overriding body1
+		fjc = fj.copy(b1, null);
+		
+		TestCase.assertNotSame(fj, fjc);
+		TestCase.assertNotSame(fj.bodies, fjc.bodies);
+		TestCase.assertSame(fj.body1, fjc.body1);
+		TestCase.assertNotSame(fj.body2, fjc.body2);
+		TestCase.assertSame(fjc.body1, fjc.bodies.get(0));
+		TestCase.assertSame(fjc.body2, fjc.bodies.get(1));
+		TestCase.assertEquals(fj.bodies.size(), fjc.bodies.size());
+
+		// test overriding body2
+		fjc = fj.copy(null, b2);
+		
+		TestCase.assertNotSame(fj, fjc);
+		TestCase.assertNotSame(fj.bodies, fjc.bodies);
+		TestCase.assertNotSame(fj.body1, fjc.body1);
+		TestCase.assertSame(fj.body2, fjc.body2);
+		TestCase.assertSame(fjc.body1, fjc.bodies.get(0));
+		TestCase.assertSame(fjc.body2, fjc.bodies.get(1));
+		TestCase.assertEquals(fj.bodies.size(), fjc.bodies.size());
+	}
 	
+	/**
+	 * Test the copy fail fast.
+	 */
+	@Test(expected = ClassCastException.class)
+	public void copyFailed() {
+		TestBody b1 = new TestBody();
+		TestBody b2 = new TestBody();
+		
+		FrictionJoint<Body> fj = new FrictionJoint<Body>(b1, b2, new Vector2(1, 1));
+		
+		fj.copy();
+	}
 }

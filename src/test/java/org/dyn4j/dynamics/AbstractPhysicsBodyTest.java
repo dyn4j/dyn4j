@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import junit.framework.TestCase;
 /**
  * Class to test the {@link AbstractPhysicsBody} class.
  * @author William Bittle
- * @version 4.2.2
+ * @version 6.0.0
  * @since 4.0.0
  */
 public class AbstractPhysicsBodyTest {
@@ -51,6 +51,9 @@ public class AbstractPhysicsBodyTest {
 		public TestBody(int fixtureCount) {
 			super(fixtureCount);
 		}
+		
+		@Override
+		public TestBody copy() { return null; }
 	}
 	
 	/**

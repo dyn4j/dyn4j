@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -39,7 +39,7 @@ import junit.framework.TestCase;
  * <p>
  * Was FixtureTest.
  * @author William Bittle
- * @version 4.2.2
+ * @version 6.0.0
  * @since 3.1.1
  */
 public class BodyFixtureTest {
@@ -59,7 +59,7 @@ public class BodyFixtureTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createNullShape() {
-		new BodyFixture(null);
+		new BodyFixture((Convex)null);
 	}
 	
 	/**

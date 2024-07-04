@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -25,7 +25,9 @@
 package org.dyn4j.dynamics.joint;
 
 import java.util.Arrays;
+import java.util.List;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.DataContainer;
 import org.dyn4j.Ownable;
 import org.dyn4j.collision.CollisionBody;
@@ -38,7 +40,7 @@ import org.dyn4j.geometry.Shiftable;
  * Represents an abstract implementation of constrained motion between two 
  * {@link PhysicsBody}s.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 5.0.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -69,6 +71,84 @@ public abstract class AbstractPairedBodyJoint<T extends PhysicsBody> extends Abs
 		this.body1 = body1;
 		this.body2 = body2;
 	}
+	
+	/**
+	 * Copy constructor that uses the given bodies instead of the
+	 * bodies on the joint being copied.
+	 * @param joint the joint to copy
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @since 6.0.0
+	 */
+	protected AbstractPairedBodyJoint(AbstractPairedBodyJoint<T> joint, T body1, T body2) {
+		super(joint, buildBodyList(joint, body1, body2));
+		this.body1 = this.bodies.get(0);
+		this.body2 = this.bodies.get(1);
+	}
+	
+	/**
+	 * Builds the body list based on the given bodies.
+	 * <p>
+	 * If null is given for body1 or body2, the corresponding body in 
+	 * the given joint will be copied and used instead.
+	 * @param <T> the body type
+	 * @param joint the joint to copy
+	 * @param body1 the first body or null
+	 * @param body2 the second body or null
+	 * @return T
+	 */
+	private static final <T extends PhysicsBody> List<T> buildBodyList(AbstractPairedBodyJoint<T> joint, T body1, T body2) {
+		if (body1 != null && body2 != null) {
+			return Arrays.asList(body1, body2);
+		} else if (body1 != null && body2 == null) {
+			// copy joint body2
+			T copy = Copyable.copyUnsafe(joint.body2);
+			return Arrays.asList(body1, copy);
+		} else if (body1 == null && body2 != null) {
+			// copy joint body1
+			T copy = Copyable.copyUnsafe(joint.body1);
+			return Arrays.asList(copy, body2);
+		} else {
+			// copy both bodies
+			return Arrays.asList(
+				Copyable.copyUnsafe(joint.body1),
+				Copyable.copyUnsafe(joint.body2));
+		}
+	}
+	
+	/**
+	 * Returns a deep copy of this joint, but uses the given bodies
+	 * instead of the bodies associated to this joint.
+	 * <p>
+	 * Imagine the following scenario:
+	 * <p style="white-space: pre;"> Body b1 = ...;
+	 * Body b2 = ...;
+	 * Body b3 = ...;
+	 * Joint j1 = new Joint(b1, b2);
+	 * Joint j2 = new Joint(b2, b3);
+	 * Joint j1copy = j1.copy();
+	 * Joint j2copy = j2.copy();</p>
+	 * In this scenario, <code>j1</code> and <code>j2</code> have copied their related bodies, but this
+	 * means that we now have two copies of <code>b2</code>, since it was referenced by both
+	 * <code>j1</code> and <code>j2</code>.  Instead, this method allows you to do this:
+	 * <p style="white-space: pre;"> Body b1 = ...;
+	 * Body b2 = ...;
+	 * Body b3 = ...;
+	 * Joint j1 = new Joint(b1, b2);
+	 * Joint j2 = new Joint(b2, b3);
+	 * Body b1copy = b1.copy();
+	 * Body b2copy = b2.copy();
+	 * Body b3copy = b3.copy();
+	 * Joint j1copy = j1.copy(b1copy, b2copy);
+	 * Joint j2copy = j2.copy(b2copy, b3copy);</p>
+	 * In this modified code, you manually copy <code>b1</code>, <code>b2</code>, and <code>b3</code> first.
+	 * Then you supply them to the copy method of the joints so that <code>b2</code> isn't copied twice.
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @return {@link AbstractPairedBodyJoint}
+	 * @since 6.0.0
+	 */
+	public abstract AbstractPairedBodyJoint<T> copy(T body1, T body2);
 	
 	/**
 	 * Returns the reduced mass of this pair of bodies.

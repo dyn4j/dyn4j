@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.collision;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.DataContainer;
 import org.dyn4j.exception.ArgumentNullException;
 import org.dyn4j.geometry.Convex;
@@ -54,10 +55,10 @@ import org.dyn4j.geometry.Shape;
  * A {@link Fixture} can be flagged as a sensor fixture to enable standard collision detection, but disable
  * collision resolution (response).
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 2.0.0
  */
-public class Fixture implements DataContainer {
+public class Fixture implements DataContainer, Copyable<Fixture> {
 	/** The convex shape for this fixture */
 	protected final Convex shape;
 	
@@ -82,6 +83,30 @@ public class Fixture implements DataContainer {
 		this.shape = shape;
 		this.filter = Filter.DEFAULT_FILTER;
 		this.sensor = false;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param fixture the fixture to copy
+	 * @since 6.0.0
+	 */
+	protected Fixture(Fixture fixture) {
+		super();
+		this.shape = (Convex)fixture.shape.copy();
+		this.filter = fixture.filter.copy();
+		this.sensor = fixture.sensor;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * NOTE: The user data field is not copied and left null in the copy.
+	 * @return {@link Fixture}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Fixture copy() {
+		return new Fixture(this);
 	}
 	
 	/* (non-Javadoc)

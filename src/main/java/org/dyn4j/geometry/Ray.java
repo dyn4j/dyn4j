@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.exception.ArgumentNullException;
 
 /**
@@ -31,10 +32,10 @@ import org.dyn4j.exception.ArgumentNullException;
  * <p>
  * A ray is a vector with a start point.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 2.0.0
  */
-public class Ray {
+public class Ray implements Copyable<Ray> {
 	/** The start point */
 	protected Vector2 start;
 	
@@ -87,6 +88,26 @@ public class Ray {
 		
 		this.start = start;
 		this.direction = direction.getNormalized();
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param ray the ray to copy
+	 * @since 6.0.0
+	 */
+	protected Ray(Ray ray) {
+		this.start = ray.start.copy();
+		this.direction = ray.direction.copy();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link Ray}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Ray copy() {
+		return new Ray(this);
 	}
 	
 	/* (non-Javadoc)

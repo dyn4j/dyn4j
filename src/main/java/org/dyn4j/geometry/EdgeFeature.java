@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ package org.dyn4j.geometry;
  * <p>
  * The index is the index of the edge in the {@link Shape}.
  * @author William Bittle
- * @version 3.2.0
+ * @version 6.0.0
  * @since 1.0.0
  */
 public final class EdgeFeature extends Feature {
@@ -62,6 +62,29 @@ public final class EdgeFeature extends Feature {
 		this.vertex2 = vertex2;
 		this.edge = edge;
 		this.max = max;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param feature the feature to copy
+	 * @since 6.0.0
+	 */
+	protected EdgeFeature(EdgeFeature feature) {
+		super(feature);
+		this.vertex1 = feature.vertex1.copy();
+		this.vertex2 = feature.vertex2.copy();
+		this.max = feature.max.copy();
+		this.edge = feature.edge.copy();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link EdgeFeature}
+	 * @since 6.0.0
+	 */
+	@Override
+	public EdgeFeature copy() {
+		return new EdgeFeature(this);
 	}
 	
 	/* (non-Javadoc)

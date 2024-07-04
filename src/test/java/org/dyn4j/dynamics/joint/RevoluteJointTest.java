@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link RevoluteJoint} class.
  * @author William Bittle
- * @version 4.0.1
+ * @version 6.0.0
  * @since 1.0.2
  */
 public class RevoluteJointTest extends BaseJointTest {
@@ -979,5 +979,131 @@ public class RevoluteJointTest extends BaseJointTest {
 		TestCase.assertEquals(-3.0, rj.getAnchor2().x);
 		TestCase.assertEquals(0.5, rj.getAnchor2().y);
 	}
+
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2(-3.0, 0.5));
+		rj.setCollisionAllowed(true);
+		rj.setLimits(2, 5);
+		rj.setLimitsEnabled(true);
+		rj.setOwner(new Object());
+		rj.setUserData(new Object());
+		rj.setLimitsReferenceAngle(2);
+		rj.setMaximumMotorTorque(6);
+		rj.setMaximumMotorTorqueEnabled(true);
+		rj.setMotorEnabled(true);
+		rj.setMotorSpeed(5);
+		rj.angle = 2;
+		rj.axialMass = 3;
+		rj.fixedRotation = true;
+		rj.impulse.set(6, 3);
+		rj.K.m00 = 2;
+		rj.K.m01 = 3;
+		rj.K.m10 = 4;
+		rj.K.m11 = 5;
+		rj.lowerLimitImpulse = 5;
+		rj.motorImpulse = 3;
+		rj.r1.set(4, 5);
+		rj.r2.set(9, 5);
+		rj.referenceAngle = 3;
+		rj.upperLimitImpulse = 7;
+		
+		RevoluteJoint<Body> rjc = rj.copy();
+		
+		TestCase.assertNotSame(rj, rjc);
+		TestCase.assertNotSame(rj.bodies, rjc.bodies);
+		TestCase.assertNotSame(rj.body1, rjc.body1);
+		TestCase.assertNotSame(rj.body2, rjc.body2);
+		TestCase.assertNotSame(rj.impulse, rjc.impulse);
+		TestCase.assertNotSame(rj.K, rjc.K);
+		TestCase.assertNotSame(rj.localAnchor1, rjc.localAnchor1);
+		TestCase.assertNotSame(rj.localAnchor2, rjc.localAnchor2);
+		TestCase.assertNotSame(rj.r1, rjc.r1);
+		TestCase.assertNotSame(rj.r2, rjc.r2);
+		TestCase.assertSame(rjc.body1, rjc.bodies.get(0));
+		TestCase.assertSame(rjc.body2, rjc.bodies.get(1));
+		TestCase.assertEquals(rj.bodies.size(), rjc.bodies.size());
+		TestCase.assertEquals(rj.impulse.x, rjc.impulse.x);
+		TestCase.assertEquals(rj.impulse.y, rjc.impulse.y);
+		TestCase.assertEquals(rj.K.m00, rjc.K.m00);
+		TestCase.assertEquals(rj.K.m01, rjc.K.m01);
+		TestCase.assertEquals(rj.K.m10, rjc.K.m10);
+		TestCase.assertEquals(rj.K.m11, rjc.K.m11);
+		TestCase.assertEquals(rj.localAnchor1.x, rjc.localAnchor1.x);
+		TestCase.assertEquals(rj.localAnchor1.y, rjc.localAnchor1.y);
+		TestCase.assertEquals(rj.localAnchor2.x, rjc.localAnchor2.x);
+		TestCase.assertEquals(rj.localAnchor2.y, rjc.localAnchor2.y);
+		TestCase.assertEquals(rj.r1.x, rjc.r1.x);
+		TestCase.assertEquals(rj.r1.y, rjc.r1.y);
+		TestCase.assertEquals(rj.r2.x, rjc.r2.x);
+		TestCase.assertEquals(rj.r2.y, rjc.r2.y);
+		
+		TestCase.assertNull(rjc.owner);
+		TestCase.assertNull(rjc.userData);
+		
+		TestCase.assertEquals(rj.angle, rjc.angle);
+		TestCase.assertEquals(rj.axialMass, rjc.axialMass);
+		TestCase.assertEquals(rj.collisionAllowed, rjc.collisionAllowed);
+		TestCase.assertEquals(rj.fixedRotation, rjc.fixedRotation);
+		TestCase.assertEquals(rj.limitsEnabled, rjc.limitsEnabled);
+		TestCase.assertEquals(rj.lowerLimit, rjc.lowerLimit);
+		TestCase.assertEquals(rj.lowerLimitImpulse, rjc.lowerLimitImpulse);
+		TestCase.assertEquals(rj.motorEnabled, rjc.motorEnabled);
+		TestCase.assertEquals(rj.motorImpulse, rjc.motorImpulse);
+		TestCase.assertEquals(rj.motorMaximumTorque, rjc.motorMaximumTorque);
+		TestCase.assertEquals(rj.motorMaximumTorqueEnabled, rjc.motorMaximumTorqueEnabled);
+		TestCase.assertEquals(rj.motorSpeed, rjc.motorSpeed);
+		TestCase.assertEquals(rj.referenceAngle, rjc.referenceAngle);
+		TestCase.assertEquals(rj.upperLimit, rjc.upperLimit);
+		TestCase.assertEquals(rj.upperLimitImpulse, rjc.upperLimitImpulse);
+		
+		// test overriding the bodies
+		rjc = rj.copy(b1, b2);
+		
+		TestCase.assertNotSame(rj, rjc);
+		TestCase.assertNotSame(rj.bodies, rjc.bodies);
+		TestCase.assertSame(rj.body1, rjc.body1);
+		TestCase.assertSame(rj.body2, rjc.body2);
+		TestCase.assertSame(rjc.body1, rjc.bodies.get(0));
+		TestCase.assertSame(rjc.body2, rjc.bodies.get(1));
+		TestCase.assertEquals(rj.bodies.size(), rjc.bodies.size());
+		
+		// test overriding body1
+		rjc = rj.copy(b1, null);
+		
+		TestCase.assertNotSame(rj, rjc);
+		TestCase.assertNotSame(rj.bodies, rjc.bodies);
+		TestCase.assertSame(rj.body1, rjc.body1);
+		TestCase.assertNotSame(rj.body2, rjc.body2);
+		TestCase.assertSame(rjc.body1, rjc.bodies.get(0));
+		TestCase.assertSame(rjc.body2, rjc.bodies.get(1));
+		TestCase.assertEquals(rj.bodies.size(), rjc.bodies.size());
+
+		// test overriding body2
+		rjc = rj.copy(null, b2);
+		
+		TestCase.assertNotSame(rj, rjc);
+		TestCase.assertNotSame(rj.bodies, rjc.bodies);
+		TestCase.assertNotSame(rj.body1, rjc.body1);
+		TestCase.assertSame(rj.body2, rjc.body2);
+		TestCase.assertSame(rjc.body1, rjc.bodies.get(0));
+		TestCase.assertSame(rjc.body2, rjc.bodies.get(1));
+		TestCase.assertEquals(rj.bodies.size(), rjc.bodies.size());
+	}
 	
+	/**
+	 * Test the copy fail fast.
+	 */
+	@Test(expected = ClassCastException.class)
+	public void copyFailed() {
+		TestBody b1 = new TestBody();
+		TestBody b2 = new TestBody();
+		
+		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2(-3.0, 0.5));
+		
+		rj.copy();
+	}
 }

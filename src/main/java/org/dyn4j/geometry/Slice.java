@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,7 +34,7 @@ import org.dyn4j.exception.ValueOutOfRangeException;
  * <p>
  * This shape can represent any slice of a circle up to 180 degrees (half circle).
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 3.1.5
  */
 public class Slice extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -128,6 +128,39 @@ public class Slice extends AbstractShape implements Convex, Shape, Transformable
 			throw new ValueOutOfRangeException("theta", theta, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, Math.PI);
 		
 		return true;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param slice the slice to copy
+	 * @since 6.0.0
+	 */
+	protected Slice(Slice slice) {	
+		super(slice);
+		this.alpha = slice.alpha;
+		this.cosAlpha = slice.cosAlpha;
+		this.rotation = slice.rotation.copy();
+		this.sliceRadius = slice.sliceRadius;
+		
+		this.vertices = new Vector2[slice.vertices.length];
+		for (int i = 0; i < slice.vertices.length; i++) {
+			this.vertices[i] = slice.vertices[i].copy();
+		}
+		
+		this.normals = new Vector2[slice.normals.length];
+		for (int i = 0; i < slice.normals.length; i++) {
+			this.normals[i] = slice.normals[i].copy();
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link Slice}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Slice copy() {
+		return new Slice(this);
 	}
 	
 	/* (non-Javadoc)

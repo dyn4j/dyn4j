@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -73,7 +73,7 @@ import org.dyn4j.geometry.Vector2;
  * value and by default the limits are enabled, you will need to disable the 
  * limit to see the effect of the ratio.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 2.2.2
  * @see <a href="https://www.dyn4j.org/pages/joints#Angle_Joint" target="_blank">Documentation</a>
  * @see <a href="https://www.dyn4j.org/2010/12/angle-constraint/" target="_blank">Angle Constraint</a>
@@ -102,24 +102,24 @@ public class AngleJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	// current state
 	
 	/** The current angle between the bodies */
-	private double angle;
-		
+	double angle;
+	
 	/** The angular mass about the pivot point */
-	private double axialMass;
+	double axialMass;
 	
 	/** True if the axial mass was close or equal to zero */
-	private boolean fixedRotation;
+	boolean fixedRotation;
 	
 	// output
 	
 	/** The impulse applied to reduce angular motion */
-	private double impulse;
+	double impulse;
 	
 	/** The impulse applied by the lower limit */
-	private double lowerImpulse;
+	double lowerImpulse;
 	
 	/** The impulse applied by the upper limit */
-	private double upperImpulse;
+	double upperImpulse;
 
 	/**
 	 * Minimal constructor.
@@ -148,7 +148,62 @@ public class AngleJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		this.impulse = 0.0;
 		this.lowerImpulse = 0.0;
 		this.upperImpulse = 0.0;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @since 6.0.0
+	 */
+	protected AngleJoint(AngleJoint<T> joint) {
+		this(joint, null, null);
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @since 6.0.0
+	 */
+	protected AngleJoint(AngleJoint<T> joint, T body1, T body2) {
+		super(joint, body1, body2);
+
+		this.ratio = joint.ratio;
+		this.referenceAngle = joint.referenceAngle;
 		
+		this.limitsEnabled = joint.limitsEnabled;
+		this.lowerLimit = joint.lowerLimit;
+		this.upperLimit = joint.upperLimit;
+		
+		this.angle = joint.angle;
+		this.axialMass = joint.axialMass;
+		this.fixedRotation = joint.fixedRotation;
+		
+		this.impulse = joint.impulse;
+		this.lowerImpulse = joint.lowerImpulse;
+		this.upperImpulse = joint.upperImpulse;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link AngleJoint}
+	 * @see #copy(PhysicsBody, PhysicsBody)
+	 * @since 6.0.0
+	 */
+	@Override
+	public AngleJoint<T> copy() {
+		return new AngleJoint<T>(this);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link AngleJoint}
+	 * @since 6.0.0
+	 */
+	@Override
+	public AngleJoint<T> copy(T body1, T body2) {
+		return new AngleJoint<T>(this, body1, body2);
 	}
 	
 	/* (non-Javadoc)

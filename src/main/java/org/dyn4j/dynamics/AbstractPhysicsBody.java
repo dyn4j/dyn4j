@@ -48,7 +48,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Abstract implementation of the {@link PhysicsBody} interface.
  * @author William Bittle
- * @version 5.0.2
+ * @version 6.0.0
  * @since 4.0.0
  */
 public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixture> implements PhysicsBody, CollisionBody<BodyFixture>, Transformable, DataContainer, Ownable {
@@ -139,6 +139,38 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 		this.linearDamping = AbstractPhysicsBody.DEFAULT_LINEAR_DAMPING;
 		this.angularDamping = AbstractPhysicsBody.DEFAULT_ANGULAR_DAMPING;
 		this.gravityScale = 1.0;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param body the body to copy
+	 * @since 6.0.0
+	 */
+	protected AbstractPhysicsBody(AbstractPhysicsBody body) {
+		super(body);
+		
+		this.radius = body.radius;
+		this.mass = body.mass.copy();
+		this.linearVelocity = body.linearVelocity.copy();
+		this.angularVelocity = body.angularVelocity;
+		this.force = body.force.copy();
+		this.torque = body.torque;
+		this.atRestDetectionEnabled = body.atRestDetectionEnabled;
+		this.atRest = body.atRest;
+		this.bullet = body.bullet;
+		this.atRestTime = body.atRestTime;
+		this.linearDamping = body.linearDamping;
+		this.angularDamping = body.angularDamping;
+		this.gravityScale = body.gravityScale;
+		
+		this.forces = new ArrayList<Force>(5);
+		this.torques = new ArrayList<Torque>(5);
+		for (Force force : body.forces) {
+			this.forces.add(force.copy());
+		}
+		for (Torque torque : body.torques) {
+			this.torques.add(torque.copy());
+		}
 	}
 	
 	/* (non-Javadoc)

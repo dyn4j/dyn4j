@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -81,7 +81,7 @@ import org.dyn4j.geometry.Vector2;
  * the {@link Settings#getLinearTolerance()}) the joint will be treated as a
  * fixed length joint.
  * @author William Bittle
- * @version 5.0.0 
+ * @version 6.0.0 
  * @since 1.0.0
  * @see <a href="https://www.dyn4j.org/pages/joints#Distance_Joint" target="_blank">Documentation</a>
  * @see <a href="https://www.dyn4j.org/2010/09/distance-constraint/" target="_blank">Distance Constraint</a>
@@ -142,36 +142,36 @@ public class DistanceJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 	// current state
 
 	/** The current distance as of constraint initialization */
-	private double currentDistance;
+	double currentDistance;
 
 	/** The damping coefficient of the spring-damper */
-	private double damping;
+	double damping;
 
 	/** The normal */
-	private Vector2 n;
+	final Vector2 n;
 	
 	/** The damping portion of the constraint */
-	private double gamma;
+	double gamma;
 
 	/** The bias for adding work to the constraint (simulating a spring) */
-	private double bias;
+	double bias;
 
 	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */
-	private double mass;
+	double mass;
 	
 	/** The effective mass of the soft constraint of the two body system */
-	private double softMass;
+	double softMass;
 	
 	// output
 	
 	/** The accumulated impulse from the previous time step */
-	private double impulse;
+	double impulse;
 
 	/** The accumulated upper limit impulse */
-	private double upperLimitImpulse;
+	double upperLimitImpulse;
 	
 	/** The accumulated lower limit impulse */
-	private double lowerLimitImpulse;
+	double lowerLimitImpulse;
 	
 	/**
 	 * Minimal constructor.
@@ -218,7 +218,7 @@ public class DistanceJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 		this.springMaximumForce = 1000.0;
 		
 		this.damping = 0.0;
-		this.n = null;
+		this.n = new Vector2();
 		
 		this.gamma = 0.0;
 		this.bias = 0.0;
@@ -226,6 +226,81 @@ public class DistanceJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 		
 		this.lowerLimitImpulse = 0.0;
 		this.upperLimitImpulse = 0.0;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @since 6.0.0
+	 */
+	protected DistanceJoint(DistanceJoint<T> joint) {
+		this(joint, null, null);
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @since 6.0.0
+	 */
+	protected DistanceJoint(DistanceJoint<T> joint, T body1, T body2) {
+		super(joint, body1, body2);
+
+		this.localAnchor1 = joint.localAnchor1.copy();
+		this.localAnchor2 = joint.localAnchor2.copy();
+		this.restDistance = joint.restDistance;
+		
+		// limits
+		this.lowerLimit = joint.lowerLimit;
+		this.lowerLimitEnabled = joint.lowerLimitEnabled;
+		this.upperLimit = joint.upperLimit;
+		this.upperLimitEnabled = joint.upperLimitEnabled;
+		
+		// spring
+		this.springMode = joint.springMode;
+		this.springEnabled = joint.springEnabled;
+		this.springFrequency = joint.springFrequency;
+		this.springStiffness = joint.springStiffness;
+		this.springDamperEnabled = joint.springDamperEnabled;
+		this.springDampingRatio = joint.springDampingRatio;
+		this.springMaximumForceEnabled = joint.springMaximumForceEnabled;
+		this.springMaximumForce = joint.springMaximumForce;
+		
+		// current state
+		this.n = joint.n.copy();
+		this.softMass = joint.softMass;
+		this.mass = joint.mass;
+		this.bias = joint.bias;
+		this.currentDistance = joint.currentDistance;
+		this.damping = joint.damping;
+		this.gamma = joint.gamma;
+		
+		// output
+		this.impulse = joint.impulse;
+		this.lowerLimitImpulse = joint.lowerLimitImpulse;
+		this.upperLimitImpulse = joint.upperLimitImpulse;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link DistanceJoint}
+	 * @see #copy(PhysicsBody, PhysicsBody)
+	 * @since 6.0.0
+	 */
+	@Override
+	public DistanceJoint<T> copy() {
+		return new DistanceJoint<T>(this);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link DistanceJoint}
+	 * @since 6.0.0
+	 */
+	@Override
+	public DistanceJoint<T> copy(T body1, T body2) {
+		return new DistanceJoint<T>(this, body1, body2);
 	}
 	
 	/* (non-Javadoc)
@@ -267,7 +342,7 @@ public class DistanceJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 		// compute the normal
 		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
-		this.n = r1.sum(this.body1.getWorldCenter()).subtract(r2.sum(this.body2.getWorldCenter()));
+		this.n.set(r1.sum(this.body1.getWorldCenter()).subtract(r2.sum(this.body2.getWorldCenter())));
 		
 		// get the current length
 		this.currentDistance = this.n.getMagnitude();
@@ -491,9 +566,9 @@ public class DistanceJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 		// recompute n since it may have changed after integration
 		Vector2 r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
 		Vector2 r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
-		this.n = r1.sum(this.body1.getWorldCenter()).subtract(r2.sum(this.body2.getWorldCenter()));
+		Vector2 n = r1.sum(this.body1.getWorldCenter()).subtract(r2.sum(this.body2.getWorldCenter()));
 		
-		double l = this.n.normalize();
+		double l = n.normalize();
 		double C = 0.0;
 		
 		if (this.upperLimitEnabled && this.lowerLimitEnabled && Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * linearTolerance) {
@@ -516,7 +591,7 @@ public class DistanceJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 
 		double impulse = -this.mass * C;
 		
-		Vector2 J = this.n.product(impulse);
+		Vector2 J = n.product(impulse);
 		
 		// translate and rotate the objects
 		this.body1.translate(J.product(invM1));

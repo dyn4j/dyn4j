@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,6 +27,7 @@ package org.dyn4j.dynamics.joint;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.DataContainer;
 import org.dyn4j.Ownable;
 import org.dyn4j.collision.CollisionBody;
@@ -39,16 +40,33 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents constrained motion between {@link PhysicsBody}s.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 5.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-public interface Joint<T extends PhysicsBody> extends Shiftable, DataContainer, Ownable {
+public interface Joint<T extends PhysicsBody> extends Shiftable, DataContainer, Ownable, Copyable<Joint<T>> {
 	/** Mode indicating that the current frequency should be used to calculate the spring stiffness */
 	public static final int SPRING_MODE_FREQUENCY = 1;
 	
 	/** Mode indicating that the current stiffness should be used to calculate the spring frequency */
 	public static final int SPRING_MODE_STIFFNESS = 2;
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * NOTE: The userData and owner fields are not copied and left null in 
+	 * the copy.  The owner field is used internally when the joint is 
+	 * added to a World.  If you want the copy to be added to a World, you 
+	 * must add it manually after copying it.
+	 * <p>
+	 * NOTE: This method will copy the related {@link PhysicsBody}s as well.
+	 * If you don't want this behavior, use the copy methods that accept
+	 * {@link PhysicsBody}s instead.
+	 * @return {@link Joint}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Joint<T> copy();
 	
 	/**
 	 * Returns an unmodifiable list of bodies involved in this joint.

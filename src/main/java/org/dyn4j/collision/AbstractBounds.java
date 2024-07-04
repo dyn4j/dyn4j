@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Abstract implementation of the {@link Bounds} interface.
  * @author William Bittle
- * @version 3.2.0
+ * @version 6.0.0
  * @since 1.0.0
  */
 public abstract class AbstractBounds implements Bounds, Translatable {
@@ -62,6 +62,15 @@ public abstract class AbstractBounds implements Bounds, Translatable {
 	public AbstractBounds(Vector2 translation) {
 		this();
 		this.translate(translation);
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param bounds the bounds to copy
+	 * @since 6.0.0
+	 */
+	protected AbstractBounds(AbstractBounds bounds) {
+		this.transform = bounds.transform.copy();
 	}
 	
 	/* (non-Javadoc)

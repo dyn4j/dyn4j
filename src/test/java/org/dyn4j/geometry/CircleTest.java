@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Circle} class.
  * @author William Bittle
- * @version 4.2.2
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class CircleTest {
@@ -287,5 +287,23 @@ public class CircleTest {
 	public void getArea() {
 		Circle c = new Circle(3.0);
 		TestCase.assertEquals(28.274, c.getArea(), 1e-3);
+	}
+
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		Circle circ = new Circle(3.0);
+		circ.setUserData(new Object());
+		Circle copy = circ.copy();
+		
+		TestCase.assertNotSame(circ, copy);
+		TestCase.assertNotSame(circ.center, copy.center);
+		TestCase.assertEquals(circ.radius, copy.radius);
+		TestCase.assertNull(copy.userData);
+		
+		TestCase.assertEquals(circ.center.x, copy.center.x);
+		TestCase.assertEquals(circ.center.y, copy.center.y);
 	}
 }

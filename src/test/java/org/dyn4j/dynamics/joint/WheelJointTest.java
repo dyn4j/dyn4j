@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link WheelJoint} class.
  * @author William Bittle
- * @version 4.2.0
+ * @version 6.0.0
  * @since 3.0.0
  */
 public class WheelJointTest extends BaseJointTest {
@@ -1425,5 +1425,164 @@ public class WheelJointTest extends BaseJointTest {
 		TestCase.assertEquals(1.0, wj.getAnchor2().x);
 		TestCase.assertEquals(2.0, wj.getAnchor2().y);
 	}
+
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		WheelJoint<Body> pj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		pj.setCollisionAllowed(true);
+		pj.setOwner(new Object());
+		pj.setUserData(new Object());
+		pj.setMaximumSpringForce(3);
+		pj.setMaximumSpringForceEnabled(true);
+		pj.setSpringDamperEnabled(true);
+		pj.setSpringDampingRatio(0.5);
+		pj.setSpringEnabled(true);
+		pj.setSpringFrequency(1.0);
+		pj.setLimits(2, 4);
+		pj.setLimitsEnabled(true);
+		pj.setMaximumMotorTorque(6);
+		pj.setMaximumMotorTorqueEnabled(true);
+		pj.setMotorEnabled(true);
+		pj.setMotorSpeed(8);
+		pj.setSpringRestOffset(1);
+		pj.setSpringStiffness(7);
+		pj.axialMass = 3;
+		pj.bias = 5;
+		pj.damping = 1;
+		pj.gamma = 4;
+		pj.impulse = 5;
+		pj.invK = 8;
+		pj.lowerLimitImpulse = 7;
+		pj.upperLimitImpulse = 4;
+		pj.motorImpulse = 6;
+		pj.motorMass = 10;
+		pj.springImpulse = 10;
+		pj.springMass = 7;
+		pj.translation = 3;
+		pj.xAxis.set(1, 2);
+		pj.yAxis.set(4, 5);
+		pj.springStiffness = 3;
+		pj.s1x = 1;
+		pj.s1y = 2;
+		pj.s2x = 3;
+		pj.s2y = 4;
+		pj.wxAxis.set(1, 2);
+		pj.wyAxis.set(4, 5);
+		
+		WheelJoint<Body> pjc = pj.copy();
+		
+		TestCase.assertNotSame(pj, pjc);
+		TestCase.assertNotSame(pj.bodies, pjc.bodies);
+		TestCase.assertNotSame(pj.body1, pjc.body1);
+		TestCase.assertNotSame(pj.body2, pjc.body2);
+		TestCase.assertNotSame(pj.localAnchor1, pjc.localAnchor1);
+		TestCase.assertNotSame(pj.localAnchor2, pjc.localAnchor2);
+		TestCase.assertNotSame(pj.wxAxis, pjc.wxAxis);
+		TestCase.assertNotSame(pj.wyAxis, pjc.wyAxis);
+		TestCase.assertNotSame(pj.xAxis, pjc.xAxis);
+		TestCase.assertNotSame(pj.yAxis, pjc.yAxis);
+		TestCase.assertSame(pjc.body1, pjc.bodies.get(0));
+		TestCase.assertSame(pjc.body2, pjc.bodies.get(1));
+		TestCase.assertEquals(pj.bodies.size(), pjc.bodies.size());
+		TestCase.assertEquals(pj.localAnchor1.x, pjc.localAnchor1.x);
+		TestCase.assertEquals(pj.localAnchor1.y, pjc.localAnchor1.y);
+		TestCase.assertEquals(pj.localAnchor2.x, pjc.localAnchor2.x);
+		TestCase.assertEquals(pj.localAnchor2.y, pjc.localAnchor2.y);
+		TestCase.assertEquals(pj.wxAxis.x, pjc.wxAxis.x);
+		TestCase.assertEquals(pj.wxAxis.y, pjc.wxAxis.y);
+		TestCase.assertEquals(pj.wyAxis.x, pjc.wyAxis.x);
+		TestCase.assertEquals(pj.wyAxis.y, pjc.wyAxis.y);
+		TestCase.assertEquals(pj.xAxis.x, pjc.xAxis.x);
+		TestCase.assertEquals(pj.xAxis.y, pjc.xAxis.y);
+		TestCase.assertEquals(pj.yAxis.x, pjc.yAxis.x);
+		TestCase.assertEquals(pj.yAxis.y, pjc.yAxis.y);
+		
+		TestCase.assertNull(pjc.owner);
+		TestCase.assertNull(pjc.userData);
+		
+		TestCase.assertEquals(pj.s1x, pjc.s1x);
+		TestCase.assertEquals(pj.s1y, pjc.s1y);
+		TestCase.assertEquals(pj.s2x, pjc.s2x);
+		TestCase.assertEquals(pj.s2y, pjc.s2y);
+		TestCase.assertEquals(pj.axialMass, pjc.axialMass);
+		TestCase.assertEquals(pj.bias, pjc.bias);
+		TestCase.assertEquals(pj.collisionAllowed, pjc.collisionAllowed);
+		TestCase.assertEquals(pj.damping, pjc.damping);
+		TestCase.assertEquals(pj.gamma, pjc.gamma);
+		TestCase.assertEquals(pj.impulse, pjc.impulse);
+		TestCase.assertEquals(pj.invK, pjc.invK);
+		TestCase.assertEquals(pj.lowerLimit, pjc.lowerLimit);
+		TestCase.assertEquals(pj.lowerLimitEnabled, pjc.lowerLimitEnabled);
+		TestCase.assertEquals(pj.lowerLimitImpulse, pjc.lowerLimitImpulse);
+		TestCase.assertEquals(pj.upperLimit, pjc.upperLimit);
+		TestCase.assertEquals(pj.upperLimitEnabled, pjc.upperLimitEnabled);
+		TestCase.assertEquals(pj.upperLimitImpulse, pjc.upperLimitImpulse);
+		TestCase.assertEquals(pj.motorEnabled, pjc.motorEnabled);
+		TestCase.assertEquals(pj.motorImpulse, pjc.motorImpulse);
+		TestCase.assertEquals(pj.motorSpeed, pjc.motorSpeed);
+		TestCase.assertEquals(pj.motorMass, pjc.motorMass);
+		TestCase.assertEquals(pj.motorMaximumTorque, pjc.motorMaximumTorque);
+		TestCase.assertEquals(pj.motorMaximumTorqueEnabled, pjc.motorMaximumTorqueEnabled);
+		TestCase.assertEquals(pj.springDamperEnabled, pjc.springDamperEnabled);
+		TestCase.assertEquals(pj.springDampingRatio, pjc.springDampingRatio);
+		TestCase.assertEquals(pj.springEnabled, pjc.springEnabled);
+		TestCase.assertEquals(pj.springFrequency, pjc.springFrequency);
+		TestCase.assertEquals(pj.springMaximumForce, pjc.springMaximumForce);
+		TestCase.assertEquals(pj.springMaximumForceEnabled, pjc.springMaximumForceEnabled);
+		TestCase.assertEquals(pj.springMode, pjc.springMode);
+		TestCase.assertEquals(pj.springStiffness, pjc.springStiffness);
+		TestCase.assertEquals(pj.springImpulse, pjc.springImpulse);
+		TestCase.assertEquals(pj.springMass, pjc.springMass);
+		TestCase.assertEquals(pj.springRestOffset, pjc.springRestOffset);
+		TestCase.assertEquals(pj.translation, pjc.translation);
+		
+		// test overriding the bodies
+		pjc = pj.copy(b1, b2);
+		
+		TestCase.assertNotSame(pj, pjc);
+		TestCase.assertNotSame(pj.bodies, pjc.bodies);
+		TestCase.assertSame(pj.body1, pjc.body1);
+		TestCase.assertSame(pj.body2, pjc.body2);
+		TestCase.assertSame(pjc.body1, pjc.bodies.get(0));
+		TestCase.assertSame(pjc.body2, pjc.bodies.get(1));
+		TestCase.assertEquals(pj.bodies.size(), pjc.bodies.size());
+		
+		// test overriding body1
+		pjc = pj.copy(b1, null);
+		
+		TestCase.assertNotSame(pj, pjc);
+		TestCase.assertNotSame(pj.bodies, pjc.bodies);
+		TestCase.assertSame(pj.body1, pjc.body1);
+		TestCase.assertNotSame(pj.body2, pjc.body2);
+		TestCase.assertSame(pjc.body1, pjc.bodies.get(0));
+		TestCase.assertSame(pjc.body2, pjc.bodies.get(1));
+		TestCase.assertEquals(pj.bodies.size(), pjc.bodies.size());
+
+		// test overriding body2
+		pjc = pj.copy(null, b2);
+		
+		TestCase.assertNotSame(pj, pjc);
+		TestCase.assertNotSame(pj.bodies, pjc.bodies);
+		TestCase.assertNotSame(pj.body1, pjc.body1);
+		TestCase.assertSame(pj.body2, pjc.body2);
+		TestCase.assertSame(pjc.body1, pjc.bodies.get(0));
+		TestCase.assertSame(pjc.body2, pjc.bodies.get(1));
+		TestCase.assertEquals(pj.bodies.size(), pjc.bodies.size());
+	}
 	
+	/**
+	 * Test the copy fail fast.
+	 */
+	@Test(expected = ClassCastException.class)
+	public void copyFailed() {
+		TestBody b1 = new TestBody();
+		TestBody b2 = new TestBody();
+		
+		WheelJoint<Body> wj = new WheelJoint<Body>(b1, b2, new Vector2(1.0, 2.0), new Vector2(-3.0, 0.5));
+		
+		wj.copy();
+	}
 }

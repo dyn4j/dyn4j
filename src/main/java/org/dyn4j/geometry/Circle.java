@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.dyn4j.exception.ValueOutOfRangeException;
  * <p>
  * A {@link Circle}'s radius must be greater than zero.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class Circle extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -69,6 +69,25 @@ public class Circle extends AbstractShape implements Convex, Shape, Transformabl
 			throw new ValueOutOfRangeException("radius", radius, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
 		
 		return true;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param circle the circle to copy
+	 * @since 6.0.0
+	 */
+	protected Circle(Circle circle) {
+		super(circle);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link Circle}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Circle copy() {
+		return new Circle(this);
 	}
 	
 	/* (non-Javadoc)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link Ray} class.
  * @author William Bittle
- * @version 3.2.0
+ * @version 6.0.0
  * @since 3.0.2
  */
 public class RayTest {
@@ -150,5 +150,22 @@ public class RayTest {
 		TestCase.assertEquals(0.950, r.getDirection(), 1e-3);
 		TestCase.assertEquals(5, r.getDirectionVector().x, 1e-3);
 		TestCase.assertEquals(7, r.getDirectionVector().y, 1e-3);
+	}
+	
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		Ray ray = new Ray(new Vector2(1, 1), Math.toRadians(30));
+		Ray copy = ray.copy();
+		
+		TestCase.assertNotSame(ray, copy);
+		TestCase.assertNotSame(ray.direction, copy.direction);
+		TestCase.assertNotSame(ray.start, copy.start);
+		TestCase.assertEquals(ray.direction.x, copy.direction.x);
+		TestCase.assertEquals(ray.direction.y, copy.direction.y);
+		TestCase.assertEquals(ray.start.x, copy.start.x);
+		TestCase.assertEquals(ray.start.y, copy.start.y);
 	}
 }

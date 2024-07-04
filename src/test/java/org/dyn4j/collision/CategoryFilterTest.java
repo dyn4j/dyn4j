@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link CategoryFilter} class.
  * @author William Bittle
- * @version 1.0.3
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class CategoryFilterTest {
@@ -119,5 +119,18 @@ public class CategoryFilterTest {
 	public void tostring() {
 		CategoryFilter f1 = new CategoryFilter();
 		TestCase.assertNotNull(f1.toString());
+	}
+	
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		CategoryFilter filter = new CategoryFilter(1, 5);
+		CategoryFilter copy = filter.copy();
+		
+		TestCase.assertNotSame(filter, copy);
+		TestCase.assertEquals(filter.category, copy.category);
+		TestCase.assertEquals(filter.mask, copy.mask);
 	}
 }

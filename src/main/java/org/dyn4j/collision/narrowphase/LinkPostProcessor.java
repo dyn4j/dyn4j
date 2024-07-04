@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,7 +36,7 @@ import org.dyn4j.geometry.Vector2;
  * NOTE: the {@link Link} class assumes one-way intersection as the right-handed normal of the
  * edge. 
  * @author William Bittle
- * @version 4.2.0
+ * @version 6.0.0
  * @since 3.2.2
  * @see <a href="https://bullet.googlecode.com/files/GDC10_Coumans_Erwin_Contact.pdf">Slides 46-54</a>
  */
@@ -65,8 +65,8 @@ public final class LinkPostProcessor implements NarrowphasePostProcessor {
 	 * @param penetration the narrow-phase collision information
 	 */
 	public void process(Link link, Penetration penetration) {
-		Link prev = link.getPrevious();
-		Link next = link.getNext();
+		Vector2 prev = link.getPoint0();
+		Vector2 next = link.getPoint3();
 		
 		if (prev == null && next == null) {
 			// if there's no connectivity info, then take
@@ -92,7 +92,7 @@ public final class LinkPostProcessor implements NarrowphasePostProcessor {
 				return;
 			}
 			
-			Vector2 prevEdge = prev.getEdgeVector();
+			Vector2 prevEdge = link.getPreviousEdgeVector();
 			prevEdge.normalize();
 			
 			// does the previous edge and this edge form a convex feature?
@@ -124,7 +124,7 @@ public final class LinkPostProcessor implements NarrowphasePostProcessor {
 				return;
 			}
 			
-			Vector2 nextEdge = next.getEdgeVector();
+			Vector2 nextEdge = link.getNextEdgeVector();
 			nextEdge.normalize();
 			
 			// does this edge and the next edge form a convex feature?

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,15 +24,16 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.exception.ValueOutOfRangeException;
 
 /**
  * Represents a one dimensional numeric {@link Interval}.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 1.0.0
  */
-public class Interval {
+public class Interval implements Copyable<Interval> {
 	/** The minimum value */
 	protected double min;
 	
@@ -61,6 +62,16 @@ public class Interval {
 	public Interval(Interval interval) {
 		this.min = interval.min;
 		this.max = interval.max;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link Interval}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Interval copy() {
+		return new Interval(this);
 	}
 	
 	/* (non-Javadoc)

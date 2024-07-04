@@ -67,9 +67,45 @@ import org.dyn4j.geometry.Transformable;
  * tunneling depending on the CCD setting in the world's {@link Settings}.  Use this if the body 
  * is a fast moving body, but be careful as this will incur a performance hit.
  * @author William Bittle
- * @version 5.0.2
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class Body extends AbstractPhysicsBody implements PhysicsBody, CollisionBody<BodyFixture>, Transformable, DataContainer, Ownable {
+	/**
+	 * Default constructor.
+	 */
+	public Body() {
+		super();
+	}
 	
+	/**
+	 * Optional constructor. 
+	 * <p>
+	 * Creates a new {@link Body} using the given estimated fixture count.  Assignment of the initial fixture count allows sizing 
+	 * of internal structures for optimal memory/performance. This estimated fixture count is not a limit on the number 
+	 * of fixtures.
+	 * @param fixtureCount the estimated number of fixtures
+	 */
+	public Body(int fixtureCount) {
+		super(fixtureCount);
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param body the body to copy
+	 * @since 6.0.0
+	 */
+	protected Body(Body body) {
+		super(body);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link Body}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Body copy() {
+		return new Body(this);
+	}
 }

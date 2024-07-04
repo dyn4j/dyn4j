@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,7 +34,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link AbstractBounds} class.
  * @author William Bittle
- * @version 4.2.1
+ * @version 6.0.0
  * @since 4.0.0
  */
 public class AbstractBoundsTest {
@@ -64,6 +64,11 @@ public class AbstractBoundsTest {
 		@Override
 		public boolean isOutside(AABB aabb, Transform transform, Fixture fixture) {
 			return false;
+		}
+		
+		@Override
+		public TestBounds copy() {
+			return null;
 		}
 	}
 	

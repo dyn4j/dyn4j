@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -89,7 +89,7 @@ import org.dyn4j.geometry.Vector2;
  * was changed to accept the frame first, then the wheel to make things more 
  * natural.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 3.0.0
  * @see <a href="https://www.dyn4j.org/pages/joints#Wheel_Joint" target="_blank">Documentation</a>
  * @param <T> the {@link PhysicsBody} type
@@ -167,63 +167,63 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	// current state
 
 	/** The damping coefficient */
-	private double damping;
+	double damping;
 	
 	/** The bias for adding work to the constraint (simulating a spring) */
-	private double bias;
+	double bias;
 	
 	/** The damping portion of the constraint */
-	private double gamma;
+	double gamma;
 	
 	/** The current translation along the allowed line of motion */
-	private double translation;
+	double translation;
 	
 	/** The point-on-line constraint mass; K = J * Minv * Jtrans */
-	private double invK;
+	double invK;
 	
 	/** The mass along the axis of allowed motion */
-	private double axialMass;
+	double axialMass;
 	
 	/** The spring/damper constraint mass */
-	private double springMass;
+	double springMass;
 	
 	/** The mass of the motor */
-	private double motorMass;
+	double motorMass;
 	
 	/** The world space yAxis from body1's transform */
-	private Vector2 wyAxis;
+	final Vector2 wyAxis;
 	
 	/** The world space xAxis from body1's transform */
-	private Vector2 wxAxis;
+	final Vector2 wxAxis;
 	
 	/** s1y = (r1 + d).cross(yaxis) */
-	private double s1y;
+	double s1y;
 
 	/** s2y = r2.cross(yaxis) */
-	private double s2y;
+	double s2y;
 	
 	/** s1x = (r1 + d).cross(xaxis) */
-	private double s1x;
+	double s1x;
 
 	/** s2x = r2.cross(xaxis) */
-	private double s2x;
+	double s2x;
 
 	// output
 	
 	/** The accumulated impulse for warm starting */
-	private double impulse;
+	double impulse;
 	
 	/** The lower limit impulse */
-	private double lowerLimitImpulse;
+	double lowerLimitImpulse;
 	
 	/** The upper limit impulse */
-	private double upperLimitImpulse;
+	double upperLimitImpulse;
 	
 	/** The impulse applied by the spring/damper */
-	private double springImpulse;
+	double springImpulse;
 	
 	/** The impulse applied by the motor */
-	private double motorImpulse;
+	double motorImpulse;
 	
 	/**
 	 * Minimal constructor.
@@ -294,8 +294,8 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		this.motorMass = 0.0;
 		this.springMass = 0.0;
 
-		this.wyAxis = null;
-		this.wxAxis = null;
+		this.wyAxis = new Vector2();
+		this.wxAxis = new Vector2();
 		this.s1x = 0.0;
 		this.s2x = 0.0;
 		this.s2y = 0.0;
@@ -306,6 +306,98 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		this.upperLimitImpulse = 0.0;
 		this.motorImpulse = 0.0;
 		this.springImpulse = 0.0;
+	}
+
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @since 6.0.0
+	 */
+	protected WheelJoint(WheelJoint<T> joint) {
+		this(joint, null, null);
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @since 6.0.0
+	 */
+	protected WheelJoint(WheelJoint<T> joint, T body1, T body2) {
+		super(joint, body1, body2);
+		
+		this.localAnchor1 = joint.localAnchor1.copy();
+		this.localAnchor2 = joint.localAnchor2.copy();
+		this.xAxis = joint.xAxis.copy();
+		this.yAxis = joint.yAxis.copy();
+		
+		// limits
+		this.lowerLimit = joint.lowerLimit;
+		this.lowerLimitEnabled = joint.lowerLimitEnabled;
+		this.upperLimit = joint.upperLimit;
+		this.upperLimitEnabled = joint.upperLimitEnabled;
+		
+		// motor
+		this.motorEnabled = joint.motorEnabled;
+		this.motorSpeed = joint.motorSpeed;
+		this.motorMaximumTorque = joint.motorMaximumTorque;
+		this.motorMaximumTorqueEnabled = joint.motorMaximumTorqueEnabled;
+		
+		// spring
+		this.springMode = joint.springMode;
+		this.springEnabled = joint.springEnabled;
+		this.springFrequency = joint.springFrequency;
+		this.springStiffness = joint.springStiffness;
+		this.springDamperEnabled = joint.springDamperEnabled;
+		this.springDampingRatio = joint.springDampingRatio;
+		this.springMaximumForceEnabled = joint.springMaximumForceEnabled;
+		this.springMaximumForce = joint.springMaximumForce;
+		this.springRestOffset = joint.springRestOffset;
+		
+		// current state
+		this.axialMass = joint.axialMass;
+		this.bias = joint.bias;
+		this.damping = joint.damping;
+		this.gamma = joint.gamma;
+		this.invK = joint.invK;
+		this.motorMass = joint.motorMass;
+		this.s1x = joint.s1x;
+		this.s1y = joint.s1y;
+		this.s2x = joint.s2x;
+		this.s2y = joint.s2y;
+		this.springMass = joint.springMass;
+		this.translation = joint.translation;
+		this.wxAxis = joint.wxAxis.copy();
+		this.wyAxis = joint.wyAxis.copy();
+		
+		// output
+		this.impulse = joint.impulse;
+		this.lowerLimitImpulse = joint.lowerLimitImpulse;
+		this.upperLimitImpulse = joint.upperLimitImpulse;
+		this.motorImpulse = joint.motorImpulse;
+		this.springImpulse = joint.springImpulse;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @return {@link WheelJoint}
+	 * @see #copy(PhysicsBody, PhysicsBody)
+	 * @since 6.0.0
+	 */
+	@Override
+	public WheelJoint<T> copy() {
+		return new WheelJoint<T>(this);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link WheelJoint}
+	 * @since 6.0.0
+	 */
+	@Override
+	public WheelJoint<T> copy(T body1, T body2) {
+		return new WheelJoint<T>(this, body1, body2);
 	}
 	
 	/* (non-Javadoc)
@@ -349,8 +441,8 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		Vector2 d = this.body2.getWorldCenter().sum(r2).subtract(this.body1.getWorldCenter().sum(r1));
 		
 		// get the world vectors of the axes
-		this.wxAxis = this.body1.getWorldVector(this.xAxis);
-		this.wyAxis = this.body1.getWorldVector(this.yAxis);
+		this.body1.getWorldVector(this.xAxis, this.wxAxis);
+		this.body1.getWorldVector(this.yAxis, this.wyAxis);
 		
 		// s1y = (r1 + d).cross(yaxis)
 		this.s1y = r1.sum(d).cross(this.wyAxis);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the AbstractShape class.
  * @author William Bittle
- * @version 4.2.1
+ * @version 6.0.0
  * @since 3.1.1
  */
 public class AbstractShapeTest {
@@ -59,6 +59,10 @@ public class AbstractShapeTest {
 		public void computeAABB(Transform transform, AABB aabb) { }
 		@Override
 		public double getArea() { return 0; }
+		@Override
+		public TestShape copy() {
+			return new TestShape(this.center.copy(), this.radius);
+		}
 	}
 	
 	/**

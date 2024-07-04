@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.junit.Test;
  * Category 3  Category 4
  * </pre>
  * @author William Bittle
- * @version 3.0.2
+ * @version 6.0.0
  * @since 3.0.2
  */
 public class TypeFilterTest {
@@ -118,5 +118,17 @@ public class TypeFilterTest {
 		TestCase.assertFalse(ALL.isAllowed(new CategoryFilter()));
 		
 		TestCase.assertNotNull(ALL.toString());
+	}
+	
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		TypeFilter copy = ALL.copy();
+		TestCase.assertSame(ALL, copy);
+		
+		copy = CATEGORY_3.copy();
+		TestCase.assertSame(CATEGORY_3, copy);
 	}
 }

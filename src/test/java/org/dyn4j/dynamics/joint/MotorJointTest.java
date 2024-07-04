@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link MotorJoint} class.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 4.0.0
  */
 public class MotorJointTest extends BaseJointTest {
@@ -250,5 +250,114 @@ public class MotorJointTest extends BaseJointTest {
 		TestCase.assertTrue(b1.isAtRest());
 		TestCase.assertTrue(b2.isAtRest());
 		TestCase.assertEquals(1.0, mj.getAngularTarget());
+	}
+	
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		MotorJoint<Body> mj = new MotorJoint<Body>(b1, b2);
+		mj.setCollisionAllowed(true);
+		mj.setOwner(new Object());
+		mj.setUserData(new Object());
+		mj.setMaximumForce(5);
+		mj.setMaximumTorque(9);
+		mj.setAngularTarget(Math.toRadians(40));
+		mj.setCorrectionFactor(0.1);
+		mj.setLinearTarget(3, 4);
+		mj.angularError = 1;
+		mj.angularImpulse = 7;
+		mj.angularMass = 4;
+		mj.K.m00 = 1;
+		mj.K.m01 = 2;
+		mj.K.m10 = 3;
+		mj.K.m11 = 4;
+		mj.linearError.set(2, 1);
+		mj.linearImpulse.set(2, 3);
+		
+		MotorJoint<Body> mjc = mj.copy();
+		
+		TestCase.assertNotSame(mj, mjc);
+		TestCase.assertNotSame(mj.bodies, mjc.bodies);
+		TestCase.assertNotSame(mj.body1, mjc.body1);
+		TestCase.assertNotSame(mj.body2, mjc.body2);
+		TestCase.assertNotSame(mj.K, mjc.K);
+		TestCase.assertNotSame(mj.linearError, mjc.linearError);
+		TestCase.assertNotSame(mj.linearImpulse, mjc.linearImpulse);
+		TestCase.assertNotSame(mj.linearTarget, mjc.linearTarget);
+		TestCase.assertNotSame(mj.r1, mjc.r1);
+		TestCase.assertNotSame(mj.r2, mjc.r2);
+		TestCase.assertSame(mjc.body1, mjc.bodies.get(0));
+		TestCase.assertSame(mjc.body2, mjc.bodies.get(1));
+		TestCase.assertEquals(mj.bodies.size(), mjc.bodies.size());
+		TestCase.assertEquals(mj.linearError.x, mjc.linearError.x);
+		TestCase.assertEquals(mj.linearError.y, mjc.linearError.y);
+		TestCase.assertEquals(mj.linearImpulse.x, mjc.linearImpulse.x);
+		TestCase.assertEquals(mj.linearImpulse.y, mjc.linearImpulse.y);
+		TestCase.assertEquals(mj.linearTarget.y, mjc.linearTarget.y);
+		TestCase.assertEquals(mj.linearTarget.y, mjc.linearTarget.y);
+		TestCase.assertEquals(mj.K.m00, mjc.K.m00);
+		TestCase.assertEquals(mj.K.m01, mjc.K.m01);
+		TestCase.assertEquals(mj.K.m10, mjc.K.m10);
+		TestCase.assertEquals(mj.K.m11, mjc.K.m11);
+		
+		TestCase.assertNull(mjc.owner);
+		TestCase.assertNull(mjc.userData);
+		
+		TestCase.assertEquals(mj.angularError, mjc.angularError);
+		TestCase.assertEquals(mj.angularImpulse, mjc.angularImpulse);
+		TestCase.assertEquals(mj.angularMass, mjc.angularMass);
+		TestCase.assertEquals(mj.angularTarget, mjc.angularTarget);
+		TestCase.assertEquals(mj.collisionAllowed, mjc.collisionAllowed);
+		TestCase.assertEquals(mj.correctionFactor, mjc.correctionFactor);
+		TestCase.assertEquals(mj.maximumForce, mjc.maximumForce);
+		TestCase.assertEquals(mj.maximumTorque, mjc.maximumTorque);
+		
+		// test overriding the bodies
+		mjc = mj.copy(b1, b2);
+		
+		TestCase.assertNotSame(mj, mjc);
+		TestCase.assertNotSame(mj.bodies, mjc.bodies);
+		TestCase.assertSame(mj.body1, mjc.body1);
+		TestCase.assertSame(mj.body2, mjc.body2);
+		TestCase.assertSame(mjc.body1, mjc.bodies.get(0));
+		TestCase.assertSame(mjc.body2, mjc.bodies.get(1));
+		TestCase.assertEquals(mj.bodies.size(), mjc.bodies.size());
+		
+		// test overriding body1
+		mjc = mj.copy(b1, null);
+		
+		TestCase.assertNotSame(mj, mjc);
+		TestCase.assertNotSame(mj.bodies, mjc.bodies);
+		TestCase.assertSame(mj.body1, mjc.body1);
+		TestCase.assertNotSame(mj.body2, mjc.body2);
+		TestCase.assertSame(mjc.body1, mjc.bodies.get(0));
+		TestCase.assertSame(mjc.body2, mjc.bodies.get(1));
+		TestCase.assertEquals(mj.bodies.size(), mjc.bodies.size());
+
+		// test overriding body2
+		mjc = mj.copy(null, b2);
+		
+		TestCase.assertNotSame(mj, mjc);
+		TestCase.assertNotSame(mj.bodies, mjc.bodies);
+		TestCase.assertNotSame(mj.body1, mjc.body1);
+		TestCase.assertSame(mj.body2, mjc.body2);
+		TestCase.assertSame(mjc.body1, mjc.bodies.get(0));
+		TestCase.assertSame(mjc.body2, mjc.bodies.get(1));
+		TestCase.assertEquals(mj.bodies.size(), mjc.bodies.size());
+	}
+	
+	/**
+	 * Test the copy fail fast.
+	 */
+	@Test(expected = ClassCastException.class)
+	public void copyFailed() {
+		TestBody b1 = new TestBody();
+		TestBody b2 = new TestBody();
+		
+		MotorJoint<Body> mj = new MotorJoint<Body>(b1, b2);
+		
+		mj.copy();
 	}
 }

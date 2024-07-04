@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Rectangle} class.
  * @author William Bittle
- * @version 4.2.2
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class RectangleTest {
@@ -232,5 +232,39 @@ public class RectangleTest {
 		TestCase.assertEquals(0.707, aabb.maxY, 1e-3);
 		TestCase.assertEquals(-0.707, aabb.minX, 1e-3);
 		TestCase.assertEquals(-0.707, aabb.minY, 1e-3);
+	}
+
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		Rectangle rect = new Rectangle(1.0, 1.0);
+		rect.setUserData(new Object());
+		Rectangle copy = rect.copy();
+		
+		TestCase.assertNotSame(rect, copy);
+		TestCase.assertNotSame(rect.center, copy.center);
+		TestCase.assertNotSame(rect.normals, copy.normals);
+		TestCase.assertNotSame(rect.vertices, copy.vertices);
+		TestCase.assertEquals(rect.radius, copy.radius);
+		TestCase.assertEquals(rect.height, copy.height);
+		TestCase.assertEquals(rect.width, copy.width);
+		TestCase.assertNull(copy.userData);
+		
+		TestCase.assertEquals(rect.center.x, copy.center.x);
+		TestCase.assertEquals(rect.center.y, copy.center.y);
+		
+		TestCase.assertEquals(rect.normals.length, copy.normals.length);
+		for (int i = 0; i < rect.normals.length; i++) {
+			TestCase.assertEquals(rect.normals[i].x, copy.normals[i].x);
+			TestCase.assertEquals(rect.normals[i].y, copy.normals[i].y);
+		}
+		
+		TestCase.assertEquals(rect.vertices.length, copy.vertices.length);
+		for (int i = 0; i < rect.vertices.length; i++) {
+			TestCase.assertEquals(rect.vertices[i].x, copy.vertices[i].x);
+			TestCase.assertEquals(rect.vertices[i].y, copy.vertices[i].y);
+		}
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -59,7 +59,7 @@ import org.dyn4j.geometry.Vector2;
  * the use of this joint
  * when first using it.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 1.0.0
  * @see <a href="https://www.dyn4j.org/pages/joints#Friction_Joint" target="_blank">Documentation</a>
  * @param <T> the {@link PhysicsBody} type
@@ -80,18 +80,18 @@ public class FrictionJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 	// current state
 	
 	/** The pivot mass; K = J * Minv * Jtrans */
-	private final Matrix22 K;
+	final Matrix22 K;
 	
 	/** The mass for the angular constraint */
-	private double angularMass;
+	double angularMass;
 
 	// output
 	
 	/** The impulse applied to reduce linear motion */
-	private Vector2 linearImpulse;
+	final Vector2 linearImpulse;
 	
 	/** The impulse applied to reduce angular motion */
-	private double angularImpulse;
+	double angularImpulse;
 	
 	/**
 	 * Minimal constructor.
@@ -121,6 +121,58 @@ public class FrictionJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 		
 		this.linearImpulse = new Vector2();
 		this.angularImpulse = 0.0;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @since 6.0.0
+	 */
+	protected FrictionJoint(FrictionJoint<T> joint) {
+		this(joint, null, null);
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @since 6.0.0
+	 */
+	protected FrictionJoint(FrictionJoint<T> joint, T body1, T body2) {
+		super(joint, body1, body2);
+		
+		this.localAnchor1 = joint.localAnchor1.copy();
+		this.localAnchor2 = joint.localAnchor2.copy();
+		this.maximumForce = joint.maximumForce;
+		this.maximumTorque = joint.maximumTorque;
+		
+		this.angularMass = joint.angularMass;
+		this.K = joint.K.copy();
+		
+		this.angularImpulse = joint.angularImpulse;
+		this.linearImpulse = joint.linearImpulse.copy();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @return {@link FrictionJoint}
+	 * @see #copy(PhysicsBody, PhysicsBody)
+	 * @since 6.0.0
+	 */
+	@Override
+	public FrictionJoint<T> copy() {
+		return new FrictionJoint<T>(this);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link FrictionJoint}
+	 * @since 6.0.0
+	 */
+	@Override
+	public FrictionJoint<T> copy(T body1, T body2) {
+		return new FrictionJoint<T>(this, body1, body2);
 	}
 	
 	/* (non-Javadoc)

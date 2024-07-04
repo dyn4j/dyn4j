@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -58,7 +58,7 @@ import junit.framework.TestCase;
 /**
  * Tests the {@link ConstraintGraph} class.
  * @author William Bittle
- * @version 5.0.1
+ * @version 6.0.0
  * @since 4.0.0
  */
 public class ConstraintGraphTest {
@@ -1164,6 +1164,8 @@ public class ConstraintGraphTest {
 		public double getReactionTorque(double invdt) { return 0; }
 		@Override
 		public void shift(Vector2 shift) {}
+		@Override
+		public QuadrupleBodyJoint<T> copy() { return null; }
 	}
 	
 	/**

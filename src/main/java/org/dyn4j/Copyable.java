@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,7 +27,7 @@ package org.dyn4j;
 /**
  * Simple interface to support deep copying of objects.
  * @author William Bittle
- * @version 4.0.0
+ * @version 6.0.0
  * @since 4.0.0
  * @param <T> the copied object type
  */
@@ -37,4 +37,27 @@ public interface Copyable<T extends Copyable<? extends T>> {
 	 * @return T
 	 */
 	public T copy();
+	
+	/**
+	 * Copies the given {@link Copyable} and attempts to cast it to T.
+	 * <p>
+	 * This should be safe for all dyn4j objects that implement the {@link Copyable}
+	 * interface. Where this will not be safe is for any user classes that extend
+	 * from dyn4j classes that implement {@link Copyable}.  The guidance is that if
+	 * you extend a dyn4j class, override the copy method and ensure you return
+	 * an object of the same type.
+	 * @param <T> the type to cast it to
+	 * @param copyable the copyable to copy
+	 * @return T
+	 * @throws ClassCastException if the copy method on type T doesn't return an object of type T
+	 * @since 6.0.0
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Copyable<?>> T copyUnsafe(T copyable) {
+		Object copy = copyable.copy();
+		if (!copy.getClass().equals(copyable.getClass())) {
+			throw new ClassCastException("The copy method on class '" + copyable.getClass() + "' returns an object of class '" + copy.getClass() + "'.  You must override the copy method to return type '" + copyable.getClass() + "'");
+		}
+		return (T)copy;
+	}
 }

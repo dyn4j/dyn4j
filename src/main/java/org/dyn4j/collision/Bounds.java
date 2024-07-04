@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.collision;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Rotatable;
 import org.dyn4j.geometry.Shiftable;
@@ -45,10 +46,10 @@ import org.dyn4j.geometry.Vector2;
  * to provide the most flexibility.  The {@link #isOutside(CollisionBody)} and {@link #isOutside(AABB)}
  * methods are NOT called internally.
  * @author William Bittle
- * @version 4.2.1
+ * @version 6.0.0
  * @since 1.0.0
  */
-public interface Bounds extends Translatable, Shiftable {
+public interface Bounds extends Translatable, Shiftable, Copyable<Bounds> {
 	/**
 	 * Returns the translation of the bounds.
 	 * @return {@link Vector2}

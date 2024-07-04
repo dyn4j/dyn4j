@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,8 @@
  */
 package org.dyn4j.collision;
 
+import org.dyn4j.Copyable;
+
 /**
  * Interface representing a filter for collision detection.
  * <p>
@@ -32,10 +34,10 @@ package org.dyn4j.collision;
  * <p>
  * The {@link #DEFAULT_FILTER} allows all fixture collisions.
  * @author William Bittle
- * @version 3.0.2
+ * @version 6.0.0
  * @since 1.0.0
  */
-public interface Filter {
+public interface Filter extends Copyable<Filter> {
 	/** The default filter which always returns true */
 	public static final Filter DEFAULT_FILTER = new Filter() {
 		/* (non-Javadoc)
@@ -52,6 +54,14 @@ public interface Filter {
 		 */
 		public String toString() {
 			return "DefaultFilter[]";
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.dyn4j.Copyable#copy()
+		 */
+		@Override
+		public Filter copy() {
+			return this;
 		}
 	};
 	

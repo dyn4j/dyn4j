@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * A temporary implementation of the {@link AbstractPairedBodyJoint} class for testing.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 5.0.0
  */
 public class TestAbstractPairedBodyJoint extends AbstractPairedBodyJoint<Body> {
@@ -56,4 +56,8 @@ public class TestAbstractPairedBodyJoint extends AbstractPairedBodyJoint<Body> {
 	public double getReactionTorque(double invdt) { return 0; }
 	@Override
 	public void shift(Vector2 shift) {}
+	@Override
+	public TestAbstractPairedBodyJoint copy() { return null; }
+	@Override
+	public TestAbstractPairedBodyJoint copy(Body body1, Body body2) { return null; }
 }

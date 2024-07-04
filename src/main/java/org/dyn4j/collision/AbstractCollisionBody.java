@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,6 +30,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.DataContainer;
 import org.dyn4j.Ownable;
 import org.dyn4j.exception.ArgumentNullException;
@@ -43,7 +44,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * A base implementation of the {@link CollisionBody} interface.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 4.0.0
  * @param <T> the {@link Fixture} type
  */
@@ -99,6 +100,27 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 		this.transform = new Transform();
 		this.transform0 = new Transform();
 		this.enabled = true;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param body the body to copy
+	 * @since 6.0.0
+	 */
+	protected AbstractCollisionBody(AbstractCollisionBody<T> body) {
+		this();
+		
+		this.enabled = body.enabled;
+		this.radius = body.radius;
+		this.transform.set(body.transform);
+		this.transform0.set(body.transform0);
+		
+		int size = body.fixtures.size();
+		for (int i = 0; i < size; i++) {
+			T of = body.getFixture(i);
+			T nf = Copyable.copyUnsafe(of);
+			this.fixtures.add((T)nf);
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -492,10 +514,26 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionBody#getLocalPoint(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public void getLocalPoint(Vector2 worldPoint, Vector2 destination) {
+		this.transform.getInverseTransformed(worldPoint, destination);
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#getWorldPoint(org.dyn4j.geometry.Vector2)
 	 */
 	public Vector2 getWorldPoint(Vector2 localPoint) {
 		return this.transform.getTransformed(localPoint);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionBody#getWorldPoint(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public void getWorldPoint(Vector2 localPoint, Vector2 destination) {
+		this.transform.getTransformed(localPoint, destination);
 	}
 	
 	/* (non-Javadoc)
@@ -506,10 +544,26 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionBody#getLocalVector(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public void getLocalVector(Vector2 worldVector, Vector2 destination) {
+		this.transform.getInverseTransformedR(worldVector, destination);
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.dyn4j.collision.CollisionBody#getWorldVector(org.dyn4j.geometry.Vector2)
 	 */
 	public Vector2 getWorldVector(Vector2 localVector) {
 		return this.transform.getTransformedR(localVector);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dyn4j.collision.CollisionBody#getWorldVector(org.dyn4j.geometry.Vector2, org.dyn4j.geometry.Vector2)
+	 */
+	@Override
+	public void getWorldVector(Vector2 localVector, Vector2 destination) {
+		this.transform.getTransformedR(localVector, destination);
 	}
 
 	/* (non-Javadoc)

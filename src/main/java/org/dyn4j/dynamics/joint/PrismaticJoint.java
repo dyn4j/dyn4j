@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -104,7 +104,7 @@ import org.dyn4j.geometry.Vector3;
  * constructor were reversed. It was changed to accept the frame first, then 
  * the wheel to make things more natural.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 1.0.0
  * @see <a href="https://www.dyn4j.org/pages/joints#Prismatic_Joint" target="_blank">Documentation</a>
  * @see <a href="https://www.dyn4j.org/2011/03/prismatic-constraint/" target="_blank">Prismatic Constraint</a>
@@ -186,60 +186,60 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 	// current state
 
 	/** The damping coefficient */
-	private double damping;
+	double damping;
 	
 	/** The bias for adding work to the constraint (simulating a spring) */
-	private double bias;
+	double bias;
 	
 	/** The damping portion of the constraint */
-	private double gamma;
+	double gamma;
 	
 	/** The constraint mass; K = J * Minv * Jtrans */
-	private final Matrix22 K;
+	final Matrix22 K;
 	
 	/** The mass of the motor */
-	private double axialMass;
+	double axialMass;
 
 	/** The spring/damper constraint mass */
-	private double springMass;
+	double springMass;
 	
 	/** The world space yAxis from body1's transform */
-	private Vector2 perp;
+	final Vector2 perp;
 	
 	/** The world space xAxis from body1's transform */
-	private Vector2 axis;
+	final Vector2 axis;
 	
 	/** s1y = (r1 + d).cross(yaxis) */
-	private double s1;
+	double s1;
 
 	/** s2y = r2.cross(yaxis) */
-	private double s2;
+	double s2;
 	
 	/** s1x = (r1 + d).cross(xaxis) */
-	private double a1;
+	double a1;
 
 	/** s2x = r2.cross(xaxis) */
-	private double a2;
+	double a2;
 
 	/** The current translation */
-	private double translation;
+	double translation;
 	
 	// output
 	
 	/** The accumulated impulse for warm starting */
-	private Vector2 impulse;
+	final Vector2 impulse;
 
 	/** The impulse applied by the spring/damper */
-	private double springImpulse;
+	double springImpulse;
 	
 	/** The impulse applied by the motor */
-	private double motorImpulse;
+	double motorImpulse;
 	
 	/** The impulse applied by the lower limit */
-	private double lowerLimitImpulse;
+	double lowerLimitImpulse;
 	
 	/** The impulse applied by the upper limit */
-	private double upperLimitImpulse;
+	double upperLimitImpulse;
 	
 	/**
 	 * Minimal constructor.
@@ -304,8 +304,8 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 		
 		this.axialMass = 0.0;
 		
-		this.perp = null;
-		this.axis = null;
+		this.perp = new Vector2();
+		this.axis = new Vector2();
 		this.a1 = 0.0;
 		this.a2 = 0.0;
 		this.s2 = 0.0;
@@ -317,6 +317,98 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 		this.motorImpulse = 0.0;
 		this.lowerLimitImpulse = 0.0;
 		this.upperLimitImpulse = 0.0;
+	}
+
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @since 6.0.0
+	 */
+	protected PrismaticJoint(PrismaticJoint<T> joint) {
+		this(joint, null, null);
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @since 6.0.0
+	 */
+	protected PrismaticJoint(PrismaticJoint<T> joint, T body1, T body2) {
+		super(joint, body1, body2);
+		
+		this.localAnchor1 = joint.localAnchor1.copy();
+		this.localAnchor2 = joint.localAnchor2.copy();
+		this.xAxis = joint.xAxis.copy();
+		this.yAxis = joint.yAxis.copy();
+		this.referenceAngle = joint.referenceAngle;
+		
+		// limits
+		this.lowerLimit = joint.lowerLimit;
+		this.lowerLimitEnabled = joint.lowerLimitEnabled;
+		this.upperLimit = joint.upperLimit;
+		this.upperLimitEnabled = joint.upperLimitEnabled;
+		
+		// motor
+		this.motorEnabled = joint.motorEnabled;
+		this.motorSpeed = joint.motorSpeed;
+		this.maximumMotorForce = joint.maximumMotorForce;
+		this.maximumMotorForceEnabled = joint.maximumMotorForceEnabled;
+		
+		// spring
+		this.springMode = joint.springMode;
+		this.springEnabled = joint.springEnabled;
+		this.springFrequency = joint.springFrequency;
+		this.springStiffness = joint.springStiffness;
+		this.springDamperEnabled = joint.springDamperEnabled;
+		this.springDampingRatio = joint.springDampingRatio;
+		this.springMaximumForceEnabled = joint.springMaximumForceEnabled;
+		this.springMaximumForce = joint.springMaximumForce;
+		this.springRestOffset = joint.springRestOffset;
+		
+		// current state
+		this.a1 = joint.a1;
+		this.a2 = joint.a2;
+		this.axialMass = joint.axialMass;
+		this.axis = joint.axis.copy();
+		this.bias = joint.bias;
+		this.damping = joint.damping;
+		this.gamma = joint.gamma;
+		this.K = joint.K.copy();
+		this.perp = joint.perp.copy();
+		this.s1 = joint.s1;
+		this.s2 = joint.s2;
+		this.springMass = joint.springMass;
+		this.translation = joint.translation;
+		
+		// output
+		this.impulse = joint.impulse.copy();
+		this.lowerLimitImpulse = joint.lowerLimitImpulse;
+		this.upperLimitImpulse = joint.upperLimitImpulse;
+		this.motorImpulse = joint.motorImpulse;
+		this.springImpulse = joint.springImpulse;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @return {@link PrismaticJoint}
+	 * @see #copy(PhysicsBody, PhysicsBody)
+	 * @since 6.0.0
+	 */
+	@Override
+	public PrismaticJoint<T> copy() {
+		return new PrismaticJoint<T>(this);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link PrismaticJoint}
+	 * @since 6.0.0
+	 */
+	@Override
+	public PrismaticJoint<T> copy(T body1, T body2) {
+		return new PrismaticJoint<T>(this, body1, body2);
 	}
 	
 	/* (non-Javadoc)
@@ -363,8 +455,8 @@ public class PrismaticJoint<T extends PhysicsBody> extends AbstractPairedBodyJoi
 		Vector2 d = this.body2.getWorldCenter().sum(r2).subtract(this.body1.getWorldCenter().sum(r1));
 		
 		// get the world vectors of the axes
-		this.axis = this.body1.getWorldVector(this.xAxis);
-		this.perp = this.body1.getWorldVector(this.yAxis);
+		this.body1.getWorldVector(this.xAxis, this.axis);
+		this.body1.getWorldVector(this.yAxis, this.perp);
 		
 		// s1y = (r1 + d).cross(yaxis)
 		this.s1 = r1.sum(d).cross(this.perp);

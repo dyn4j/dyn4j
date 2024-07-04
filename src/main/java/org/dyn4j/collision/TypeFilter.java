@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -71,10 +71,20 @@ package org.dyn4j.collision;
  * fixture.setFilter(Categories.CATEGORY1);
  * </pre>
  * @author William Bittle
- * @version 3.0.2
+ * @version 6.0.0
  * @since 3.0.2
  */
 public abstract class TypeFilter implements Filter {
+	/**
+	 * {@inheritDoc}
+	 * @return {@link TypeFilter}
+	 * @since 6.0.0
+	 */
+	@Override
+	public TypeFilter copy() {
+		return this;
+	}
+	
 	/**
 	 * Returns true under the following conditions:
 	 * <ol>

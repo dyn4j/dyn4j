@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.exception.ValueOutOfRangeException;
  * <p>
  * A polygon cannot have coincident vertices.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class Polygon extends AbstractShape implements Convex, Wound, Shape, Transformable, DataContainer {
@@ -155,6 +155,35 @@ public class Polygon extends AbstractShape implements Convex, Wound, Shape, Tran
 		}
 		// if we've made it this far then continue;
 		return true;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param polygon the polygon to copy
+	 * @since 6.0.0
+	 */
+	protected Polygon(Polygon polygon) {
+		super(polygon);
+		
+		this.vertices = new Vector2[polygon.vertices.length];
+		for (int i = 0; i < polygon.vertices.length; i++) {
+			this.vertices[i] = polygon.vertices[i].copy();
+		}
+		
+		this.normals = new Vector2[polygon.normals.length];
+		for (int i = 0; i < polygon.normals.length; i++) {
+			this.normals[i] = polygon.normals[i].copy();
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link Polygon}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Polygon copy() {
+		return new Polygon(this);
 	}
 	
 	/* (non-Javadoc)

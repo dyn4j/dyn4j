@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Segment} class.
  * @author William Bittle
- * @version 4.2.2
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class SegmentTest {
@@ -776,4 +776,39 @@ public class SegmentTest {
 		}
 	}
 
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		Segment seg = new Segment(
+				new Vector2(0.0, 1.0),
+				new Vector2(-1.0, 0.0));
+		seg.setUserData(new Object());
+		
+		Segment copy = seg.copy();
+		
+		TestCase.assertNotSame(seg, copy);
+		TestCase.assertNotSame(seg.center, copy.center);
+		TestCase.assertNotSame(seg.normals, copy.normals);
+		TestCase.assertNotSame(seg.vertices, copy.vertices);
+		TestCase.assertEquals(seg.length, copy.length);
+		TestCase.assertEquals(seg.radius, copy.radius);
+		TestCase.assertNull(copy.userData);
+		
+		TestCase.assertEquals(seg.center.x, copy.center.x);
+		TestCase.assertEquals(seg.center.y, copy.center.y);
+		
+		TestCase.assertEquals(seg.normals.length, copy.normals.length);
+		for (int i = 0; i < seg.normals.length; i++) {
+			TestCase.assertEquals(seg.normals[i].x, copy.normals[i].x);
+			TestCase.assertEquals(seg.normals[i].y, copy.normals[i].y);
+		}
+		
+		TestCase.assertEquals(seg.vertices.length, copy.vertices.length);
+		for (int i = 0; i < seg.vertices.length; i++) {
+			TestCase.assertEquals(seg.vertices[i].x, copy.vertices[i].x);
+			TestCase.assertEquals(seg.vertices[i].y, copy.vertices[i].y);
+		}
+	}
 }

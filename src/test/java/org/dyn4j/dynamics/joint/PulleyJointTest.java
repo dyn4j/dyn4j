@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link PulleyJoint} class.
  * @author William Bittle
- * @version 4.0.1
+ * @version 6.0.0
  * @since 2.1.0
  */
 public class PulleyJointTest extends BaseJointTest {
@@ -268,5 +268,107 @@ public class PulleyJointTest extends BaseJointTest {
 		TestCase.assertEquals( 2.0, pj.getPulleyAnchor1().y, 1.0e-3);
 		TestCase.assertEquals(-2.0, pj.getPulleyAnchor2().x, 1.0e-3);
 		TestCase.assertEquals( 3.0, pj.getPulleyAnchor2().y, 1.0e-3);
+	}
+
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		PulleyJoint<Body> pj = new PulleyJoint<Body>(b1, b2, new Vector2(1.0, 0.0), new Vector2(-1.0, 0.0), new Vector2(1.0, -1.0), new Vector2(-1.0, -1.0));
+		pj.setCollisionAllowed(true);
+		pj.setLength(5);
+		pj.setRatio(0.4);
+		pj.setSlackEnabled(true);
+		pj.setOwner(new Object());
+		pj.setUserData(new Object());
+		pj.impulse = 9;
+		pj.invK = 1;
+		pj.n1.set(1, 2);
+		pj.n2.set(4, 5);
+		pj.overLength = true;
+		
+		PulleyJoint<Body> pjc = pj.copy();
+		
+		TestCase.assertNotSame(pj, pjc);
+		TestCase.assertNotSame(pj.bodies, pjc.bodies);
+		TestCase.assertNotSame(pj.body1, pjc.body1);
+		TestCase.assertNotSame(pj.body2, pjc.body2);
+		TestCase.assertNotSame(pj.localAnchor1, pjc.localAnchor1);
+		TestCase.assertNotSame(pj.localAnchor2, pjc.localAnchor2);
+		TestCase.assertNotSame(pj.n1, pjc.n1);
+		TestCase.assertNotSame(pj.n2, pjc.n2);
+		TestCase.assertSame(pjc.body1, pjc.bodies.get(0));
+		TestCase.assertSame(pjc.body2, pjc.bodies.get(1));
+		TestCase.assertEquals(pj.bodies.size(), pjc.bodies.size());
+		TestCase.assertEquals(pj.pulleyAnchor1.x, pjc.pulleyAnchor1.x);
+		TestCase.assertEquals(pj.pulleyAnchor1.y, pjc.pulleyAnchor1.y);
+		TestCase.assertEquals(pj.pulleyAnchor2.x, pjc.pulleyAnchor2.x);
+		TestCase.assertEquals(pj.pulleyAnchor2.y, pjc.pulleyAnchor2.y);
+		TestCase.assertEquals(pj.localAnchor1.x, pjc.localAnchor1.x);
+		TestCase.assertEquals(pj.localAnchor1.y, pjc.localAnchor1.y);
+		TestCase.assertEquals(pj.localAnchor2.x, pjc.localAnchor2.x);
+		TestCase.assertEquals(pj.localAnchor2.y, pjc.localAnchor2.y);
+		TestCase.assertEquals(pj.n1.x, pjc.n1.x);
+		TestCase.assertEquals(pj.n1.y, pjc.n1.y);
+		TestCase.assertEquals(pj.n2.x, pjc.n2.x);
+		TestCase.assertEquals(pj.n2.y, pjc.n2.y);
+		
+		TestCase.assertNull(pjc.owner);
+		TestCase.assertNull(pjc.userData);
+		
+		TestCase.assertEquals(pj.collisionAllowed, pjc.collisionAllowed);
+		TestCase.assertEquals(pj.impulse, pjc.impulse);
+		TestCase.assertEquals(pj.invK, pjc.invK);
+		TestCase.assertEquals(pj.length, pjc.length);
+		TestCase.assertEquals(pj.overLength, pjc.overLength);
+		TestCase.assertEquals(pj.ratio, pjc.ratio);
+		TestCase.assertEquals(pj.slackEnabled, pjc.slackEnabled);
+		
+		// test overriding the bodies
+		pjc = pj.copy(b1, b2);
+		
+		TestCase.assertNotSame(pj, pjc);
+		TestCase.assertNotSame(pj.bodies, pjc.bodies);
+		TestCase.assertSame(pj.body1, pjc.body1);
+		TestCase.assertSame(pj.body2, pjc.body2);
+		TestCase.assertSame(pjc.body1, pjc.bodies.get(0));
+		TestCase.assertSame(pjc.body2, pjc.bodies.get(1));
+		TestCase.assertEquals(pj.bodies.size(), pjc.bodies.size());
+		
+		// test overriding body1
+		pjc = pj.copy(b1, null);
+		
+		TestCase.assertNotSame(pj, pjc);
+		TestCase.assertNotSame(pj.bodies, pjc.bodies);
+		TestCase.assertSame(pj.body1, pjc.body1);
+		TestCase.assertNotSame(pj.body2, pjc.body2);
+		TestCase.assertSame(pjc.body1, pjc.bodies.get(0));
+		TestCase.assertSame(pjc.body2, pjc.bodies.get(1));
+		TestCase.assertEquals(pj.bodies.size(), pjc.bodies.size());
+
+		// test overriding body2
+		pjc = pj.copy(null, b2);
+		
+		TestCase.assertNotSame(pj, pjc);
+		TestCase.assertNotSame(pj.bodies, pjc.bodies);
+		TestCase.assertNotSame(pj.body1, pjc.body1);
+		TestCase.assertSame(pj.body2, pjc.body2);
+		TestCase.assertSame(pjc.body1, pjc.bodies.get(0));
+		TestCase.assertSame(pjc.body2, pjc.bodies.get(1));
+		TestCase.assertEquals(pj.bodies.size(), pjc.bodies.size());
+	}
+	
+	/**
+	 * Test the copy fail fast.
+	 */
+	@Test(expected = ClassCastException.class)
+	public void copyFailed() {
+		TestBody b1 = new TestBody();
+		TestBody b2 = new TestBody();
+		
+		PulleyJoint<Body> pj = new PulleyJoint<Body>(b1, b2, new Vector2(1.0, 0.0), new Vector2(-1.0, 1.0), new Vector2(), new Vector2());
+		
+		pj.copy();
 	}
 }

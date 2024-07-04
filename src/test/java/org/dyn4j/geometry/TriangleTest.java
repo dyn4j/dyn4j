@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Triangle} class.
  * @author William Bittle
- * @version 4.2.1
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class TriangleTest {
@@ -131,5 +131,41 @@ public class TriangleTest {
 		p.set(0.0, 0.76);
 		// 0.76 should be 0.75 but it fails because of floating point problems
 		TestCase.assertTrue(t.contains(p, tx));
+	}
+
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		Triangle tri = new Triangle(
+				new Vector2( 0.0,  0.5),
+				new Vector2(-0.5, -0.5),
+				new Vector2( 0.5, -0.5)
+			);
+		tri.setUserData(new Object());
+		Triangle copy = tri.copy();
+		
+		TestCase.assertNotSame(tri, copy);
+		TestCase.assertNotSame(tri.center, copy.center);
+		TestCase.assertNotSame(tri.normals, copy.normals);
+		TestCase.assertNotSame(tri.vertices, copy.vertices);
+		TestCase.assertEquals(tri.radius, copy.radius);
+		TestCase.assertNull(copy.userData);
+		
+		TestCase.assertEquals(tri.center.x, copy.center.x);
+		TestCase.assertEquals(tri.center.y, copy.center.y);
+		
+		TestCase.assertEquals(tri.normals.length, copy.normals.length);
+		for (int i = 0; i < tri.normals.length; i++) {
+			TestCase.assertEquals(tri.normals[i].x, copy.normals[i].x);
+			TestCase.assertEquals(tri.normals[i].y, copy.normals[i].y);
+		}
+		
+		TestCase.assertEquals(tri.vertices.length, copy.vertices.length);
+		for (int i = 0; i < tri.vertices.length; i++) {
+			TestCase.assertEquals(tri.vertices[i].x, copy.vertices[i].x);
+			TestCase.assertEquals(tri.vertices[i].y, copy.vertices[i].y);
+		}
 	}
 }

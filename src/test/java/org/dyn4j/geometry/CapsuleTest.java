@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Capsule} class.
  * @author William Bittle
- * @version 4.2.2
+ * @version 6.0.0
  * @since 3.1.5
  */
 public class CapsuleTest {
@@ -419,5 +419,35 @@ public class CapsuleTest {
 		TestCase.assertEquals(Math.PI * 0.5 - Math.toRadians(30), e.getRotationAngle(), 1e-8);
 		TestCase.assertEquals(Math.cos(Math.toRadians(60)), e.getRotation().getCost(), 1e-8);
 		TestCase.assertEquals(Math.sin(Math.toRadians(60)), e.getRotation().getSint(), 1e-8);
+	}
+
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		Capsule cap = new Capsule(1.0, 0.5);
+		cap.setUserData(new Object());
+		Capsule copy = cap.copy();
+		
+		TestCase.assertNotSame(cap, copy);
+		TestCase.assertNotSame(cap.foci, copy.foci);
+		TestCase.assertNotSame(cap.center, copy.center);
+		TestCase.assertNotSame(cap.localXAxis, copy.localXAxis);
+		TestCase.assertEquals(cap.capRadius, copy.capRadius);
+		TestCase.assertEquals(cap.radius, copy.radius);
+		TestCase.assertEquals(cap.length, copy.length);
+		TestCase.assertNull(copy.userData);
+		
+		TestCase.assertEquals(cap.center.x, copy.center.x);
+		TestCase.assertEquals(cap.center.y, copy.center.y);
+		TestCase.assertEquals(cap.localXAxis.x, copy.localXAxis.x);
+		TestCase.assertEquals(cap.localXAxis.y, copy.localXAxis.y);
+		
+		TestCase.assertEquals(cap.foci.length, copy.foci.length);
+		for (int i = 0; i < cap.foci.length; i++) {
+			TestCase.assertEquals(cap.foci[i].x, copy.foci[i].x);
+			TestCase.assertEquals(cap.foci[i].y, copy.foci[i].y);
+		}
 	}
 }

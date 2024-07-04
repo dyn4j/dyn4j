@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -76,7 +76,7 @@ import org.dyn4j.geometry.Vector2;
  * greater than zero for the motor to apply any motion, but can be disabled 
  * or enabled using {@link #setMaximumMotorTorqueEnabled(boolean)}.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 1.0.0
  * @see <a href="https://www.dyn4j.org/pages/joints#Revolute_Joint" target="_blank">Documentation</a>
  * @see <a href="https://www.dyn4j.org/2010/07/point-to-point-constraint/" target="_blank">Point-to-Point Constraint</a>
@@ -120,36 +120,36 @@ public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 	// current state
 
 	/** The current angle between the bodies */
-	private double angle;
+	double angle;
 		
 	/** The angular mass about the pivot point */
-	private double axialMass;
+	double axialMass;
 	
 	/** True if the axial mass was close or equal to zero */
-	private boolean fixedRotation;
+	boolean fixedRotation;
 	
 	/** The world space vector from b1's COM to the pivot point */
-	private Vector2 r1;
+	final Vector2 r1;
 	
 	/** The world space vector from b2's COM to the pivot point */
-	private Vector2 r2;
+	final Vector2 r2;
 
 	/** The pivot mass; K = J * Minv * Jtrans */
-	private final Matrix22 K;
+	final Matrix22 K;
 	
 	// output
 
 	/** The linear impulse applied by the point-to-point constraint */
-	private Vector2 impulse;
+	final Vector2 impulse;
 		
 	/** The impulse applied by the motor */
-	private double motorImpulse;
+	double motorImpulse;
 	
 	/** The impulse applied by the lower limit */
-	private double lowerLimitImpulse;
+	double lowerLimitImpulse;
 	
 	/** The impulse applied by the upper limit */
-	private double upperLimitImpulse;
+	double upperLimitImpulse;
 
 	/**
 	 * Minimal constructor.
@@ -187,8 +187,8 @@ public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 		
 		this.axialMass = 0.0;
 		this.fixedRotation = false;
-		this.r1 = null;
-		this.r2 = null;
+		this.r1 = new Vector2();
+		this.r2 = new Vector2();
 		this.angle = 0.0;
 		
 		this.impulse = new Vector2();
@@ -197,6 +197,76 @@ public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 		this.motorImpulse = 0.0;
 		
 		this.K = new Matrix22();
+	}
+
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @since 6.0.0
+	 */
+	protected RevoluteJoint(RevoluteJoint<T> joint) {
+		this(joint, null, null);
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @since 6.0.0
+	 */
+	protected RevoluteJoint(RevoluteJoint<T> joint, T body1, T body2) {
+		super(joint, body1, body2);
+		
+		this.localAnchor1 = joint.localAnchor1.copy();
+		this.localAnchor2 = joint.localAnchor2.copy();
+		
+		// limits
+		this.limitsEnabled = joint.limitsEnabled;
+		this.lowerLimit = joint.lowerLimit;
+		this.upperLimit = joint.upperLimit;
+		this.referenceAngle = joint.referenceAngle;
+		
+		// motor
+		this.motorEnabled = joint.motorEnabled;
+		this.motorMaximumTorque = joint.motorMaximumTorque;
+		this.motorMaximumTorqueEnabled = joint.motorMaximumTorqueEnabled;
+		this.motorSpeed = joint.motorSpeed;
+		
+		// state
+		this.angle = joint.angle;
+		this.axialMass = joint.axialMass;
+		this.fixedRotation = joint.fixedRotation;
+		this.K = joint.K.copy();
+		this.r1 = joint.r1.copy();
+		this.r2 = joint.r2.copy();
+		
+		// output
+		this.impulse = joint.impulse.copy();
+		this.motorImpulse = joint.motorImpulse;
+		this.lowerLimitImpulse = joint.lowerLimitImpulse;
+		this.upperLimitImpulse = joint.upperLimitImpulse;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @return {@link RevoluteJoint}
+	 * @see #copy(PhysicsBody, PhysicsBody)
+	 * @since 6.0.0
+	 */
+	@Override
+	public RevoluteJoint<T> copy() {
+		return new RevoluteJoint<T>(this);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link RevoluteJoint}
+	 * @since 6.0.0
+	 */
+	@Override
+	public RevoluteJoint<T> copy(T body1, T body2) {
+		return new RevoluteJoint<T>(this, body1, body2);
 	}
 	
 	/* (non-Javadoc)
@@ -234,8 +304,9 @@ public class RevoluteJoint<T extends PhysicsBody> extends AbstractPairedBodyJoin
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		this.r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
-		this.r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
+		// update r1 and r2
+		t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1), this.r1);
+		t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2), this.r2);
 		
 		// compute the K matrix for the point-to-point constraint
 		this.K.m00 = invM1 + invM2 + this.r1.y * this.r1.y * invI1 + this.r2.y * this.r2.y * invI2;

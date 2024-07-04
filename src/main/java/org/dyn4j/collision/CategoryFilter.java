@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -87,7 +87,7 @@ package org.dyn4j.collision;
  * By default the {@link CategoryFilter} will be set to category 1 and
  * have a mask of all category bits.
  * @author William Bittle
- * @version 3.2.0
+ * @version 6.0.0
  * @since 1.0.0
  */
 public final class CategoryFilter implements Filter {
@@ -116,6 +116,27 @@ public final class CategoryFilter implements Filter {
 		super();
 		this.category = category;
 		this.mask = mask;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param filter the filter to copy
+	 * @since 6.0.0
+	 */
+	protected CategoryFilter(CategoryFilter filter) {
+		super();
+		this.category = filter.category;
+		this.mask = filter.mask;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link CategoryFilter}
+	 * @since 6.0.0
+	 */
+	@Override
+	public CategoryFilter copy() {
+		return new CategoryFilter(this);
 	}
 	
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -35,7 +35,7 @@ import org.dyn4j.exception.ArgumentNullException;
  * <p>
  * This class represents a line segment that is infinitely thin.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class Segment extends AbstractShape implements Convex, Wound, Shape, Transformable, DataContainer {
@@ -115,6 +115,37 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 		}
 		
 		return true;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param segment the segment to copy
+	 * @since 6.0.0
+	 */
+	protected Segment(Segment segment) {
+		super(segment);
+		
+		this.length = segment.length;
+		
+		this.vertices = new Vector2[segment.vertices.length];
+		for (int i = 0; i < segment.vertices.length; i++) {
+			this.vertices[i] = segment.vertices[i].copy();
+		}
+		
+		this.normals = new Vector2[segment.normals.length];
+		for (int i = 0; i < segment.normals.length; i++) {
+			this.normals[i] = segment.normals[i].copy();
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link Segment}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Segment copy() {
+		return new Segment(this);
 	}
 	
 	/* (non-Javadoc)

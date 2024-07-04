@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ package org.dyn4j.geometry;
  * The index of a {@link PointFeature} is the index of the vertex in the {@link Shape}
  * or {@link Feature#NOT_INDEXED} if its an arbitrary point.
  * @author William Bittle
- * @version 3.2.0
+ * @version 6.0.0
  * @since 1.0.0
  */
 public final class PointFeature extends Feature {
@@ -58,6 +58,26 @@ public final class PointFeature extends Feature {
 	public PointFeature(Vector2 point, int index) {
 		super(index);
 		this.point = point;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param feature the feature to copy
+	 * @since 6.0.0
+	 */
+	protected PointFeature(PointFeature feature) {
+		super(feature);
+		this.point = feature.point.copy();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link PointFeature}
+	 * @since 6.0.0
+	 */
+	@Override
+	public PointFeature copy() {
+		return new PointFeature(this);
 	}
 	
 	/* (non-Javadoc)

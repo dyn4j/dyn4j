@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -42,7 +42,7 @@ import junit.framework.TestCase;
 /**
  * Class to test the {@link AbstractCollisionBody} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 6.0.0
  * @since 4.0.0
  */
 public class AbstractCollisionBodyTest {
@@ -56,6 +56,10 @@ public class AbstractCollisionBodyTest {
 		public TestBody(int fixtureCount) {
 			super(fixtureCount);
 		}
+		
+		protected TestBody(TestBody body) {
+			super(body);
+		}
 
 		@Override
 		public Fixture addFixture(Convex convex) {
@@ -67,6 +71,17 @@ public class AbstractCollisionBodyTest {
 		@Override
 		public Vector2 getLocalCenter() {
 			return this.center;
+		}
+		
+		@Override
+		public TestBody copy() {
+			return new TestBody(this);
+		}
+	}
+	
+	private class TestFixture extends Fixture {
+		public TestFixture(Convex shape) {
+			super(shape);
 		}
 	}
 	
@@ -544,6 +559,34 @@ public class AbstractCollisionBodyTest {
 		lsp = b.getLocalPoint(wsp);
 		TestCase.assertEquals(0.0, lsp.x);
 		TestCase.assertEquals(-1.0, lsp.y);
+		
+		// test destination variation
+		b.transform.identity();
+		wsp.zero();
+		Vector2 dest = new Vector2(1, 1);
+		b.getLocalPoint(wsp, dest);
+		
+		// test without transform
+		TestCase.assertEquals(0.0, wsp.x);
+		TestCase.assertEquals(0.0, wsp.y);
+		TestCase.assertEquals(0.0, dest.x);
+		TestCase.assertEquals(0.0, dest.y);
+		
+		// test with transform
+		b.translate(1.0, 2.0);
+		b.getLocalPoint(wsp, dest);
+		TestCase.assertEquals(0.0, wsp.x);
+		TestCase.assertEquals(0.0, wsp.y);
+		TestCase.assertEquals(-1.0, dest.x);
+		TestCase.assertEquals(-2.0, dest.y);
+		
+		// test with transform + non-origin point
+		wsp.set(1, 1);
+		b.getLocalPoint(wsp, dest);
+		TestCase.assertEquals(1.0, wsp.x);
+		TestCase.assertEquals(1.0, wsp.y);
+		TestCase.assertEquals(0.0, dest.x);
+		TestCase.assertEquals(-1.0, dest.y);
 	}
 
 	/**
@@ -572,6 +615,34 @@ public class AbstractCollisionBodyTest {
 		lsv = b.getLocalVector(wsv);
 		TestCase.assertEquals(1.0, lsv.x, 1e-8);
 		TestCase.assertEquals(-1.0, lsv.y, 1e-8);
+		
+		// test the destination variants
+		b.transform.identity();
+		wsv.set(1, 1);
+		Vector2 dest = new Vector2(2, 2);
+		b.getLocalVector(wsv, dest);
+		
+		// test without transform
+		TestCase.assertEquals(1.0, wsv.x);
+		TestCase.assertEquals(1.0, wsv.y);
+		TestCase.assertEquals(1.0, dest.x);
+		TestCase.assertEquals(1.0, dest.y);
+		
+		// test with transform
+		b.translate(1.0, 2.0);
+		b.getLocalVector(wsv, dest);
+		TestCase.assertEquals(1.0, wsv.x);
+		TestCase.assertEquals(1.0, wsv.y);
+		TestCase.assertEquals(1.0, dest.x);
+		TestCase.assertEquals(1.0, dest.y);
+		
+		// test with transform + non-origin point
+		b.rotate(Math.toRadians(90));
+		b.getLocalVector(wsv, dest);
+		TestCase.assertEquals(1.0, wsv.x);
+		TestCase.assertEquals(1.0, wsv.y);
+		TestCase.assertEquals(1.0, dest.x, 1e-8);
+		TestCase.assertEquals(-1.0, dest.y, 1e-8);
 	}
 	
 	/**
@@ -740,6 +811,34 @@ public class AbstractCollisionBodyTest {
 		wsp = b.getWorldPoint(lsp);
 		TestCase.assertEquals(2.0, wsp.x);
 		TestCase.assertEquals(3.0, wsp.y);
+		
+		// test the destination methods
+		
+		// reset test data
+		b.translateToOrigin();
+		lsp.set(0 ,0);
+		Vector2 dest = new Vector2(1, 1);
+		b.getWorldPoint(lsp, dest);
+		
+		// test without transform
+		TestCase.assertEquals(0.0, dest.x);
+		TestCase.assertEquals(0.0, dest.y);
+		
+		// test with transform
+		b.translate(1.0, 2.0);
+		b.getWorldPoint(lsp, dest);
+		TestCase.assertEquals(0.0, lsp.x);
+		TestCase.assertEquals(0.0, lsp.y);
+		TestCase.assertEquals(1.0, dest.x);
+		TestCase.assertEquals(2.0, dest.y);
+		
+		// test with transform + non-origin point
+		lsp.set(1, 1);
+		b.getWorldPoint(lsp, dest);
+		TestCase.assertEquals(1.0, lsp.x);
+		TestCase.assertEquals(1.0, lsp.y);
+		TestCase.assertEquals(2.0, dest.x);
+		TestCase.assertEquals(3.0, dest.y);
 	}
 
 	/**
@@ -768,6 +867,36 @@ public class AbstractCollisionBodyTest {
 		wsv = b.getWorldVector(lsv);
 		TestCase.assertEquals(-1.0, wsv.x, 1e-8);
 		TestCase.assertEquals(1.0, wsv.y, 1e-8);
+
+		// test the destination methods
+		
+		// reset test data
+		b.transform.setRotation(0);
+		b.transform.setTranslation(0, 0);
+		lsv.set(1 ,1);
+		Vector2 dest = new Vector2(0, 0);
+		b.getWorldPoint(lsv, dest);
+		
+		// test without transform
+		TestCase.assertEquals(1.0, dest.x);
+		TestCase.assertEquals(1.0, dest.y);
+		
+		// test with transform
+		b.translate(1.0, 2.0);
+		b.getWorldPoint(lsv, dest);
+		TestCase.assertEquals(1.0, lsv.x);
+		TestCase.assertEquals(1.0, lsv.y);
+		TestCase.assertEquals(2.0, dest.x);
+		TestCase.assertEquals(3.0, dest.y);
+		
+		// test with transform + non-origin point
+		lsv.set(2, 2);
+		b.rotateAboutCenter(Math.toRadians(90));
+		b.getWorldPoint(lsv, dest);
+		TestCase.assertEquals(2.0, lsv.x);
+		TestCase.assertEquals(2.0, lsv.y);
+		TestCase.assertEquals(-1.000, dest.x, 1e-8);
+		TestCase.assertEquals(4.0, dest.y);
 	}
 	
 	/**
@@ -1029,5 +1158,77 @@ public class AbstractCollisionBodyTest {
 		
 		TestCase.assertEquals(0.0, b.getTransform().getTranslationX());
 		TestCase.assertEquals(0.0, b.getTransform().getTranslationY());
+	}
+	
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		TestBody tb = new TestBody();
+		tb.setEnabled(true);
+		tb.setOwner(new Object());
+		tb.setUserData(new Object());
+		tb.addFixture(Geometry.createCircle(0.5));
+		tb.addFixture(Geometry.createSquare(1));
+		tb.fixtures.get(0).setFilter(new CategoryFilter(1, 3));
+		tb.fixtures.get(0).setSensor(true);
+		tb.fixtures.get(0).setUserData(new Object());
+		tb.fixtures.get(1).setFilter(new CategoryFilter(2, 5));
+		tb.fixtures.get(1).setSensor(true);
+		tb.fixtures.get(1).setUserData(new Object());
+		tb.setRotationDiscRadius(new Vector2(0, 0));
+		tb.rotate(Math.toRadians(30), new Vector2(1, 1));
+		tb.translate(2, 1);
+		tb.getPreviousTransform().set(tb.getTransform());
+		
+		TestBody copy = tb.copy();
+		
+		TestCase.assertNotSame(tb, copy);
+		TestCase.assertNotSame(tb.fixtures, copy.fixtures);
+		TestCase.assertNotSame(tb.fixturesUnmodifiable, copy.fixturesUnmodifiable);
+		TestCase.assertNotSame(tb.transform, copy.transform);
+		TestCase.assertNotSame(tb.transform0, copy.transform0);
+		TestCase.assertNotSame(copy.transform, copy.transform0);
+		TestCase.assertNull(copy.owner);
+		TestCase.assertNull(copy.userData);
+		TestCase.assertNull(copy.fixtureModificationHandler);
+		
+		TestCase.assertEquals(tb.enabled, copy.enabled);
+		TestCase.assertEquals(tb.radius, copy.radius);
+		
+		TestCase.assertEquals(tb.transform.getCost(), copy.transform.getCost());
+		TestCase.assertEquals(tb.transform.getSint(), copy.transform.getSint());
+		TestCase.assertEquals(tb.transform.getTranslationX(), copy.transform.getTranslationX());
+		TestCase.assertEquals(tb.transform.getTranslationY(), copy.transform.getTranslationY());
+		
+		TestCase.assertEquals(tb.transform0.getCost(), copy.transform0.getCost());
+		TestCase.assertEquals(tb.transform0.getSint(), copy.transform0.getSint());
+		TestCase.assertEquals(tb.transform0.getTranslationX(), copy.transform0.getTranslationX());
+		TestCase.assertEquals(tb.transform0.getTranslationY(), copy.transform0.getTranslationY());
+		
+		TestCase.assertEquals(tb.fixtures.size(), copy.fixtures.size());
+		for (int i = 0; i < tb.fixtures.size(); i++) {
+			Fixture fo = tb.getFixture(i);
+			Fixture fc = copy.getFixture(i);
+			
+			TestCase.assertNotSame(fo, fc);
+			TestCase.assertNotSame(fo.filter, fc.filter);
+			TestCase.assertNotSame(fo.shape, fc.shape);
+			TestCase.assertNull(fc.userData);
+			
+			TestCase.assertEquals(fo.sensor, fc.sensor);
+		}
+	}
+	
+	/**
+	 * Tests the copy method with a fixture class that doesn't override copy.
+	 */
+	@Test(expected = ClassCastException.class)
+	public void copyNotOverridden() {
+		TestBody tb = new TestBody();
+		tb.addFixture(new TestFixture(Geometry.createCircle(1.0)));
+		
+		tb.copy();
 	}
 }

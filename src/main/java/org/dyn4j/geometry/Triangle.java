@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,7 +34,7 @@ import org.dyn4j.DataContainer;
  * This class is provided to enhance performance of some of the methods contained in
  * the {@link Convex} and {@link Shape} interfaces.
  * @author William Bittle
- * @version 3.2.0
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class Triangle extends Polygon implements Convex, Wound, Shape, Transformable, DataContainer {
@@ -54,6 +54,25 @@ public class Triangle extends Polygon implements Convex, Wound, Shape, Transform
 	 */
 	public Triangle(Vector2 point1, Vector2 point2, Vector2 point3) {
 		super(point1, point2, point3);
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param triangle the triangle to copy
+	 * @since 6.0.0
+	 */
+	protected Triangle(Triangle triangle) {
+		super(triangle);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link Triangle}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Triangle copy() {
+		return new Triangle(this);
 	}
 	
 	/* (non-Javadoc)

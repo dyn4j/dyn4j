@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link AxisAlignedBounds} class.
  * @author William Bittle
- * @version 4.2.1
+ * @version 6.0.0
  * @since 3.1.1
  */
 public class AxisAlignedBoundsTest {
@@ -424,5 +424,27 @@ public class AxisAlignedBoundsTest {
 		aabb.translate(-0.5, 1.0);
 		TestCase.assertFalse(bounds.isOutside(aabb));
 		TestCase.assertFalse(bounds.isOutside(aabb, null, null));
+	}
+	
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		AxisAlignedBounds aab = new AxisAlignedBounds(1, 1);
+		AxisAlignedBounds copy = aab.copy();
+		
+		TestCase.assertNotSame(aab, copy);
+		TestCase.assertNotSame(aab.transform, copy.transform);
+		TestCase.assertEquals(aab.transform.getCost(), copy.transform.getCost());
+		TestCase.assertEquals(aab.transform.getSint(), copy.transform.getSint());
+		TestCase.assertEquals(aab.transform.getTranslationX(), copy.transform.getTranslationX());
+		TestCase.assertEquals(aab.transform.getTranslationY(), copy.transform.getTranslationY());
+		TestCase.assertNotSame(aab.aabb, copy.aabb);
+		TestCase.assertEquals(aab.aabb.getMinX(), copy.aabb.getMinX());
+		TestCase.assertEquals(aab.aabb.getMinY(), copy.aabb.getMinY());
+		TestCase.assertEquals(aab.aabb.getMaxX(), copy.aabb.getMaxX());
+		TestCase.assertEquals(aab.aabb.getMaxY(), copy.aabb.getMaxY());
+		
 	}
 }

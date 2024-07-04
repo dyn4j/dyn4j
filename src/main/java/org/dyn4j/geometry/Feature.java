@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,13 +24,15 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.Copyable;
+
 /**
  * Represents an indexed feature of a {@link Shape}.
  * @author William Bittle
- * @version 3.2.0
+ * @version 6.0.0
  * @since 1.0.0
  */
-public abstract class Feature {
+public abstract class Feature implements Copyable<Feature> {
 	/** Index for non-indexed vertices */
 	public static final int NOT_INDEXED = -1;
 
@@ -45,6 +47,14 @@ public abstract class Feature {
 		this.index = index;
 	}
 
+	/**
+	 * Copy constructor.
+	 * @param feature the feature to copy
+	 */
+	protected Feature(Feature feature) {
+		this.index = feature.index;
+	}
+	
 	/**
 	 * Returns the edge index.
 	 * <p>

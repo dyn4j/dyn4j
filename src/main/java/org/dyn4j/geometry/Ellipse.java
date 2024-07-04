@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.exception.ValueOutOfRangeException;
  * {@link Polygon} approximation. Another option is to use the GJK or your own collision detection
  * algorithm for this shape only and use SAT on others.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 3.1.7
  */
 public class Ellipse extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -112,6 +112,28 @@ public class Ellipse extends AbstractShape implements Convex, Shape, Transformab
 			throw new ValueOutOfRangeException("height", height, ValueOutOfRangeException.MUST_BE_GREATER_THAN, 0.0);
 				
 		return true;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param ellipse the ellipse to copy
+	 * @since 6.0.0
+	 */
+	protected Ellipse(Ellipse ellipse) {
+		super(ellipse);
+		this.halfHeight = ellipse.halfHeight;
+		this.halfWidth = ellipse.halfWidth;
+		this.rotation = ellipse.rotation.copy();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link Ellipse}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Ellipse copy() {
+		return new Ellipse(this);
 	}
 	
 	/* (non-Javadoc)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Fixture} class.
  * @author William Bittle
- * @version 3.4.0
+ * @version 6.0.0
  * @since 3.1.1
  */
 public class FixtureTest {
@@ -51,7 +51,7 @@ public class FixtureTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void createNullFixture() {
-		new Fixture(null);
+		new Fixture((Convex)null);
 	}
 	
 	/**
@@ -129,5 +129,28 @@ public class FixtureTest {
 		
 		fixture.setUserData(null);
 		TestCase.assertNull(fixture.getUserData());
+	}
+
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		Fixture fixture = new Fixture(Geometry.createCircle(1.0));
+		fixture.setFilter(new CategoryFilter(2, 6));
+		fixture.setSensor(true);
+		fixture.setUserData(new Object());
+		
+		Fixture copy = fixture.copy();
+		
+		TestCase.assertNotSame(fixture, copy);
+		TestCase.assertNotSame(fixture.shape, copy.shape);
+		TestCase.assertNotSame(fixture.filter, copy.filter);
+		TestCase.assertNull(copy.userData);
+		TestCase.assertEquals(fixture.sensor, copy.sensor);
+		TestCase.assertNotSame(fixture.shape.getCenter(), copy.shape.getCenter());
+		TestCase.assertEquals(fixture.shape.getCenter().x, copy.shape.getCenter().x);
+		TestCase.assertEquals(fixture.shape.getCenter().y, copy.shape.getCenter().y);
+		TestCase.assertEquals(fixture.shape.getRadius(), copy.shape.getRadius());
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -69,7 +69,7 @@ import org.dyn4j.geometry.Vector2;
  * Renamed from MouseJoint in 3.2.0. Can function without a spring-damper as
  * of 5.0.0.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 1.0.0
  * @see <a href="https://www.dyn4j.org/pages/joints#Pin_Joint" target="_blank">Documentation</a>
  * @param <T> the {@link PhysicsBody} type
@@ -118,27 +118,27 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	// current state
 
 	/** The world-space vector from the local center to the local anchor point */
-	private Vector2 r;
+	final Vector2 r;
 	
 	/** The damping coefficient of the spring-damper */
-	private double damping;
+	double damping;
 
 	/** The bias for adding work to the constraint (simulating a spring) */
-	private Vector2 bias;
+	final Vector2 bias;
 	
 	/** The damping portion of the constraint */
-	private double gamma;
+	double gamma;
 
 	/** The constraint mass; K = J * Minv * Jtrans */
-	private final Matrix22 K;
+	final Matrix22 K;
 
 	/** The calculated linear error in the target distance */
-	private Vector2 linearError;
+	final Vector2 linearError;
 	
 	// output
 	
 	/** The impulse applied to the body to satisfy the constraint */
-	private Vector2 impulse;
+	final Vector2 impulse;
 	
 	/**
 	 * Full constructor.
@@ -172,10 +172,78 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 		// initialize
 		this.damping = 0.0;
 		this.gamma = 0.0;
+		this.r = new Vector2();
 		this.bias = new Vector2();
 		this.K = new Matrix22();
+		this.linearError = new Vector2();
 		
 		this.impulse = new Vector2();
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @since 6.0.0
+	 */
+	protected PinJoint(PinJoint<T> joint) {
+		this(joint, null);
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @param body the body to use instead of the body in the joint
+	 * @since 6.0.0
+	 */
+	protected PinJoint(PinJoint<T> joint, T body) {
+		super(joint, body);
+		
+		this.target = joint.target.copy();
+		this.localAnchor = joint.localAnchor.copy();
+		
+		this.springMode = joint.springMode;
+		this.springEnabled = joint.springEnabled;
+		this.springFrequency = joint.springFrequency;
+		this.springStiffness = joint.springStiffness;
+		this.springDamperEnabled = joint.springDamperEnabled;
+		this.springDampingRatio = joint.springDampingRatio;
+		this.springMaximumForceEnabled = joint.springMaximumForceEnabled;
+		this.springMaximumForce = joint.springMaximumForce;
+		
+		// "motor" joint
+		this.correctionFactor = joint.correctionFactor;
+		this.correctionMaximumForce = joint.correctionMaximumForce;
+		
+		// initialize
+		this.r = joint.r.copy();
+		this.linearError = joint.linearError.copy();
+		this.damping = joint.damping;
+		this.gamma = joint.gamma;
+		this.bias = joint.bias.copy();
+		this.K = joint.K.copy();
+		
+		this.impulse = joint.impulse.copy();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link PinJoint}
+	 * @see #copy(PhysicsBody)
+	 * @since 6.0.0
+	 */
+	@Override
+	public PinJoint<T> copy() {
+		return new PinJoint<>(this);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link PinJoint}
+	 * @since 6.0.0
+	 */
+	@Override
+	public PinJoint<T> copy(T body) {
+		return new PinJoint<>(this, body);
 	}
 	
 	/* (non-Javadoc)
@@ -206,7 +274,7 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 		double invI = mass.getInverseInertia();
 		
 		// compute the r vector
-		this.r = transform.getTransformedR(body.getLocalCenter().to(this.localAnchor));
+		transform.getTransformedR(body.getLocalCenter().to(this.localAnchor), this.r);
 		
 		// compute the K inverse matrix (point-to-point constraint)
 		this.K.m00 = invM + this.r.y * this.r.y * invI;
@@ -230,7 +298,8 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 			double erp = getErrorReductionParameter(dt, this.springStiffness, this.damping);
 			
 			// compute the bias = ERP where ERP = hk / (hk + d)
-			this.bias = body.getWorldCenter().add(this.r).difference(this.target);
+			// bias = body.getWorldCenter().add(this.r).difference(this.target);
+			this.bias.set(body.getWorldCenter().add(this.r).difference(this.target));
 			this.bias.multiply(erp);
 
 			// apply the spring
@@ -241,7 +310,8 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 			Vector2 bp = this.r.sum(this.body.getWorldCenter());
 			// the linear error is the distance along the x/y 
 			// from the local anchor to the target
-			this.linearError = this.target.difference(bp);
+			// linearError = this.target.difference(bp);
+			this.linearError.set(this.target.x - bp.x, this.target.y - bp.y);
 		}
 		
 		// warm start
@@ -391,6 +461,23 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 			this.body.setAtRest(false);
 			// set the new target
 			this.target.set(target);
+		}
+	}
+	
+	/**
+	 * Returns the target point in world coordinates.
+	 * @param x the target point x coordinates
+	 * @param y the target point y coordinates
+	 * @throws NullPointerException if target is null
+	 * @since 6.0.0
+	 */
+	public void setTarget(double x, double y) {
+		// only wake the body if the target has changed
+		if (!this.target.equals(x, y)) {
+			// wake up the body
+			this.body.setAtRest(false);
+			// set the new target
+			this.target.set(x, y);
 		}
 	}
 	

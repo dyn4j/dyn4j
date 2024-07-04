@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Interval} class.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class IntervalTest {
@@ -412,5 +412,18 @@ public class IntervalTest {
 		
 		i = new Interval(-1.0, -1.0);
 		TestCase.assertEquals(0.0, i.getLength());
+	}
+	
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		Interval i = new Interval(-1, 0);
+		Interval copy = i.copy();
+		
+		TestCase.assertNotSame(i, copy);
+		TestCase.assertEquals(i.max, copy.max);
+		TestCase.assertEquals(i.min, copy.min);
 	}
 }

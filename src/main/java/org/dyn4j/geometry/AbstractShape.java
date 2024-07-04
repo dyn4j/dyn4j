@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -29,7 +29,7 @@ import org.dyn4j.DataContainer;
 /**
  * Base implementation of the {@link Shape} interface.
  * @author William Bittle
- * @version 4.2.1
+ * @version 6.0.0
  * @since 1.0.0
  */
 public abstract class AbstractShape implements Shape, Transformable, DataContainer {
@@ -64,6 +64,16 @@ public abstract class AbstractShape implements Shape, Transformable, DataContain
 	protected AbstractShape(Vector2 center, double radius) {
 		this.center = center;
 		this.radius = radius;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param shape the shape to copy
+	 * @since 6.0.0
+	 */
+	protected AbstractShape(AbstractShape shape) {
+		this.center = shape.center.copy();
+		this.radius = shape.radius;
 	}
 	
 	/* (non-Javadoc)

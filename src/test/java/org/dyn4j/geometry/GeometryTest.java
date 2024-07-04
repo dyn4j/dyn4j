@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,7 +36,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link Geometry} class.
  * @author William Bittle
- * @version 4.2.2
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class GeometryTest {
@@ -2115,8 +2115,6 @@ public class GeometryTest {
 		TestCase.assertEquals(4, links.size());
 		
 		// test link1
-		TestCase.assertEquals(links.get(3), links.get(0).getPrevious());
-		TestCase.assertEquals(links.get(1), links.get(0).getNext());
 		TestCase.assertEquals(verts.get(3).x, links.get(0).getPoint0().x);
 		TestCase.assertEquals(verts.get(3).y, links.get(0).getPoint0().y);
 		TestCase.assertEquals(verts.get(0).x, links.get(0).getPoint1().x);
@@ -2127,8 +2125,6 @@ public class GeometryTest {
 		TestCase.assertEquals(verts.get(2).y, links.get(0).getPoint3().y);
 		
 		// test link2
-		TestCase.assertEquals(links.get(0), links.get(1).getPrevious());
-		TestCase.assertEquals(links.get(2), links.get(1).getNext());
 		TestCase.assertEquals(verts.get(0).x, links.get(1).getPoint0().x);
 		TestCase.assertEquals(verts.get(0).y, links.get(1).getPoint0().y);
 		TestCase.assertEquals(verts.get(1).x, links.get(1).getPoint1().x);
@@ -2139,8 +2135,6 @@ public class GeometryTest {
 		TestCase.assertEquals(verts.get(3).y, links.get(1).getPoint3().y);
 		
 		// test link3
-		TestCase.assertEquals(links.get(1), links.get(2).getPrevious());
-		TestCase.assertEquals(links.get(3), links.get(2).getNext());
 		TestCase.assertEquals(verts.get(1).x, links.get(2).getPoint0().x);
 		TestCase.assertEquals(verts.get(1).y, links.get(2).getPoint0().y);
 		TestCase.assertEquals(verts.get(2).x, links.get(2).getPoint1().x);
@@ -2151,8 +2145,6 @@ public class GeometryTest {
 		TestCase.assertEquals(verts.get(0).y, links.get(2).getPoint3().y);
 		
 		// test link4
-		TestCase.assertEquals(links.get(2), links.get(3).getPrevious());
-		TestCase.assertEquals(links.get(0), links.get(3).getNext());
 		TestCase.assertEquals(verts.get(2).x, links.get(3).getPoint0().x);
 		TestCase.assertEquals(verts.get(2).y, links.get(3).getPoint0().y);
 		TestCase.assertEquals(verts.get(3).x, links.get(3).getPoint1().x);
@@ -2167,8 +2159,6 @@ public class GeometryTest {
 		TestCase.assertEquals(3, links.size());
 		
 		// test link1
-		TestCase.assertEquals(null, links.get(0).getPrevious());
-		TestCase.assertEquals(links.get(1), links.get(0).getNext());
 		TestCase.assertEquals(null, links.get(0).getPoint0());
 		TestCase.assertEquals(verts.get(0).x, links.get(0).getPoint1().x);
 		TestCase.assertEquals(verts.get(0).y, links.get(0).getPoint1().y);
@@ -2178,8 +2168,6 @@ public class GeometryTest {
 		TestCase.assertEquals(verts.get(2).y, links.get(0).getPoint3().y);
 		
 		// test link2
-		TestCase.assertEquals(links.get(0), links.get(1).getPrevious());
-		TestCase.assertEquals(links.get(2), links.get(1).getNext());
 		TestCase.assertEquals(verts.get(0).x, links.get(1).getPoint0().x);
 		TestCase.assertEquals(verts.get(0).y, links.get(1).getPoint0().y);
 		TestCase.assertEquals(verts.get(1).x, links.get(1).getPoint1().x);
@@ -2190,8 +2178,6 @@ public class GeometryTest {
 		TestCase.assertEquals(verts.get(3).y, links.get(1).getPoint3().y);
 		
 		// test link3
-		TestCase.assertEquals(links.get(1), links.get(2).getPrevious());
-		TestCase.assertEquals(null, links.get(2).getNext());
 		TestCase.assertEquals(verts.get(1).x, links.get(2).getPoint0().x);
 		TestCase.assertEquals(verts.get(1).y, links.get(2).getPoint0().y);
 		TestCase.assertEquals(verts.get(2).x, links.get(2).getPoint1().x);

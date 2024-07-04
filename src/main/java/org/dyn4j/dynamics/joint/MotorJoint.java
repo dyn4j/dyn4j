@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -70,7 +70,7 @@ import org.dyn4j.geometry.Vector2;
  * character body will move and rotate smoothly, participating in any collision
  * or with other joints to match the infinite mass body.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 3.1.0
  * @see <a href="https://www.dyn4j.org/pages/joints#Motor_Joint" target="_blank">Documentation</a>
  * @param <T> the {@link PhysicsBody} type
@@ -94,30 +94,30 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	// current state
 	
 	/** The world vector from body1's local center to the linear target */
-	private Vector2 r1;
+	final Vector2 r1;
 	
 	/** The world vector from body2's local center to the origin */
-	private Vector2 r2;
+	final Vector2 r2;
 	
 	/** The pivot mass; K = J * Minv * Jtrans */
-	private final Matrix22 K;
+	final Matrix22 K;
 	
 	/** The mass for the angular constraint */
-	private double angularMass;
+	double angularMass;
 	
 	/** The calculated linear error in the target distance */
-	private Vector2 linearError;
+	final Vector2 linearError;
 	
 	/** The calculated angular error in the target angle */
-	private double angularError;
+	double angularError;
 
 	// output
 	
 	/** The impulse applied to reduce linear motion */
-	private Vector2 linearImpulse;
+	final Vector2 linearImpulse;
 	
 	/** The impulse applied to reduce angular motion */
-	private double angularImpulse;
+	double angularImpulse;
 	
 	/**
 	 * Minimal constructor.
@@ -139,12 +139,71 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		this.maximumTorque = 1000.0;
 		
 		this.K = new Matrix22();
+		this.r1 = new Vector2();
+		this.r2 = new Vector2();
 		this.angularMass = 0.0;
 		this.linearError = new Vector2();
 		this.angularError = 0.0;
 		
 		this.linearImpulse = new Vector2();
 		this.angularImpulse = 0.0;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @since 6.0.0
+	 */
+	protected MotorJoint(MotorJoint<T> joint) {
+		this(joint, null, null);
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @since 6.0.0
+	 */
+	protected MotorJoint(MotorJoint<T> joint, T body1, T body2) {
+		super(joint, body1, body2);
+		
+		this.linearTarget = joint.linearTarget.copy();
+		this.angularTarget = joint.angularTarget;
+		this.correctionFactor = joint.correctionFactor;
+		this.maximumForce = joint.maximumForce;
+		this.maximumTorque = joint.maximumTorque;
+		
+		this.r1 = joint.r1.copy();
+		this.r2 = joint.r2.copy();
+		this.K = joint.K.copy();
+		this.angularMass = joint.angularMass;
+		this.linearError = joint.linearError.copy();
+		this.angularError = joint.angularError;
+		
+		this.linearImpulse = joint.linearImpulse.copy();
+		this.angularImpulse = joint.angularImpulse;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @return {@link MotorJoint}
+	 * @see #copy(PhysicsBody, PhysicsBody)
+	 * @since 6.0.0
+	 */
+	@Override
+	public MotorJoint<T> copy() {
+		return new MotorJoint<T>(this);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link MotorJoint}
+	 * @since 6.0.0
+	 */
+	@Override
+	public MotorJoint<T> copy(T body1, T body2) {
+		return new MotorJoint<T>(this, body1, body2);
 	}
 	
 	/* (non-Javadoc)
@@ -179,8 +238,8 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		double invI1 = m1.getInverseInertia();
 		double invI2 = m2.getInverseInertia();
 		
-		this.r1 = t1.getTransformedR(this.linearTarget.difference(this.body1.getLocalCenter()));
-		this.r2 = t2.getTransformedR(this.body2.getLocalCenter().getNegative());
+		t1.getTransformedR(this.linearTarget.difference(this.body1.getLocalCenter()), this.r1);
+		t2.getTransformedR(this.body2.getLocalCenter().getNegative(), this.r2);
 		
 		// compute the K inverse matrix
 		this.K.m00 = invM1 + invM2 + this.r1.y * this.r1.y * invI1 + this.r2.y * this.r2.y * invI2;
@@ -201,7 +260,8 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 		// compute the error in the linear and angular targets
 		Vector2 d1 = this.r1.sum(this.body1.getWorldCenter());
 		Vector2 d2 = this.r2.sum(this.body2.getWorldCenter());
-		this.linearError = d2.subtract(d1);
+		// error = d2.subtract(d1);
+		this.linearError.set(d2.x - d1.x, d2.y - d1.y);
 		this.angularError = this.getAngularError();
 		
 		if (settings.isWarmStartingEnabled()) {
@@ -351,6 +411,21 @@ public class MotorJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 			this.body1.setAtRest(false);
 			this.body2.setAtRest(false);
 			this.linearTarget.set(target);
+		}
+	}
+	
+	/**
+	 * Sets the desired linear distance along the x and y coordinates from 
+	 * body1's world center.
+	 * @param x the desired distance along the x
+	 * @param y the desired distance along the y
+	 * @since 6.0.0
+	 */
+	public void setLinearTarget(double x, double y) {
+		if (!this.linearTarget.equals(x, y)) {
+			this.body1.setAtRest(false);
+			this.body2.setAtRest(false);
+			this.linearTarget.set(x, y);
 		}
 	}
 	

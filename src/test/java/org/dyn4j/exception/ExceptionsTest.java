@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,15 +24,14 @@
  */
 package org.dyn4j.exception;
 
-import junit.framework.TestCase;
-
-import org.dyn4j.ExceptionMessageFactory;
 import org.junit.Test;
 
+import junit.framework.TestCase;
+
 /**
- * Test case for the {@link ExceptionMessageFactory} class.
+ * Test case for the custom exceptions.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 5.0.0
  */
 public class ExceptionsTest {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -45,7 +45,7 @@ import org.dyn4j.exception.ValueOutOfRangeException;
  * This class also contains various helper methods for cleaning vector arrays and lists and performing
  * various operations on {@link Shape}s.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 1.0.0
  */
 public final class Geometry {
@@ -2002,8 +2002,23 @@ public final class Geometry {
 		// generate the links
 		List<Link> links = new ArrayList<Link>();
 		for (int i = 0; i < size - 1; i++) {
+			Vector2 p0 = null;
+			if (i == 0) {
+				p0 = closed ? vertices[size - 1] : null;
+			} else {
+				p0 = vertices[i - 1];
+			}
+			
 			Vector2 p1 = vertices[i];
 			Vector2 p2 = vertices[i + 1];
+			
+			Vector2 p3 = null;//vertices[i + 2];
+			if (i + 2 >= size) {
+				p3 = closed ? vertices[i + 2 - size] : null;
+			} else {
+				p3 = vertices[i + 2]; 
+			}
+			
 			// check for null segment vertices
 			if (p1 == null)
 				throw new NullElementException("points", i);
@@ -2011,26 +2026,24 @@ public final class Geometry {
 			if (p2 == null)
 				throw new NullElementException("points", i + 1);
 			
-			Link link = new Link(p1.copy(), p2.copy());
-			// link up the previous and this link
-			if (i > 0) {
-				Link prev = links.get(i - 1);
-				link.setPrevious(prev);
-			}
+			Link link = new Link(
+					p0 != null ? p0.copy() : null, 
+					p1.copy(), 
+					p2.copy(),
+					p3 != null ? p3.copy() : null);
+			
 			// add link to the list of links
 			links.add(link);
 		}
 		
 		if (closed) {
 			// create a link to span the first and last vertex
-			Vector2 p1 = vertices[0].copy();
-			Vector2 p2 = vertices[size - 1].copy();
-			Link link = new Link(p2, p1);
-			// wire it up
-			Link prev = links.get(links.size() - 1);
-			Link next = links.get(0);
-			link.setPrevious(prev);
-			link.setNext(next);
+			Vector2 p0 = vertices[size - 2].copy();
+			Vector2 p1 = vertices[size - 1].copy();
+			Vector2 p2 = vertices[0].copy();
+			Vector2 p3 = vertices[1].copy();
+			
+			Link link = new Link(p0, p1, p2, p3);
 			links.add(link);
 		}
 		

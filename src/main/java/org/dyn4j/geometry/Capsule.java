@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.exception.ValueOutOfRangeException;
  * A capsule's width and height must be larger than zero and cannot be equal.  A {@link Circle} should be used
  * instead of an equal width/height capsule for both performance and stability.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 3.1.5
  */
 public class Capsule extends AbstractShape implements Convex, Shape, Transformable, DataContainer {
@@ -149,6 +149,31 @@ public class Capsule extends AbstractShape implements Convex, Shape, Transformab
 		if (Math.abs(width - height) < Epsilon.E) throw new IllegalArgumentException("The width and height cannot be near equal - use a Circle instead.");
 		
 		return true;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param capsule the capsule to copy
+	 * @since 6.0.0
+	 */
+	protected Capsule(Capsule capsule) {
+		super(capsule);
+		this.capRadius = capsule.capRadius;
+		this.foci = new Vector2[2];
+		this.foci[0] = capsule.foci[0].copy();
+		this.foci[1] = capsule.foci[1].copy();
+		this.length = capsule.length;
+		this.localXAxis = capsule.localXAxis.copy();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link Capsule}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Capsule copy() {
+		return new Capsule(this);
 	}
 	
 	/* (non-Javadoc)

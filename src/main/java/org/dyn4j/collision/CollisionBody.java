@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,6 +27,7 @@ package org.dyn4j.collision;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.DataContainer;
 import org.dyn4j.Ownable;
 import org.dyn4j.geometry.AABB;
@@ -40,14 +41,27 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents an object that can collide with other objects.
  * @author William Bittle
- * @version 4.1.0
+ * @version 6.0.0
  * @since 4.0.0
  * @param <T> the {@link Fixture} type
  * @see AbstractCollisionBody
  */
-public interface CollisionBody<T extends Fixture> extends Transformable, Shiftable, DataContainer, Ownable {
+public interface CollisionBody<T extends Fixture> extends Transformable, Shiftable, DataContainer, Ownable, Copyable<CollisionBody<T>> {
 	/** Number of fixtures typically attached to a {@link CollisionBody} */
 	public static final int TYPICAL_FIXTURE_COUNT = 1;
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * NOTE: The userData, fixtureModificationHandler, and owner fields are 
+	 * not copied and left null in the copy.  The fixtureModificationHandler
+	 * and owner fields are used internally to when the body is added to a
+	 * World.  If you want the copy to be added to a World, you must add it
+	 * manually after copying it.
+	 * @since 6.0.0
+	 */
+	@Override
+	public CollisionBody<T> copy();
 
 	/**
 	 * Adds the given {@link Fixture} to this {@link CollisionBody}.
@@ -222,6 +236,16 @@ public interface CollisionBody<T extends Fixture> extends Transformable, Shiftab
 	public abstract Vector2 getLocalPoint(Vector2 worldPoint);
 	
 	/**
+	 * Converts the given <code>worldPoint</code> into local coordinates of this {@link CollisionBody}
+	 * and places the result in the given <code>destination</code>.
+	 * @param worldPoint a point in world coordinates
+	 * @param destination the vector to put the result
+	 * @throws NullPointerException if the given vector is null
+	 * @since 6.0.0
+	 */
+	public abstract void getLocalPoint(Vector2 worldPoint, Vector2 destination);
+	
+	/**
 	 * Returns a new point in world coordinates given a point in the
 	 * local coordinates of this {@link CollisionBody}.
 	 * @param localPoint a point in the local coordinates of this {@link CollisionBody}
@@ -230,6 +254,16 @@ public interface CollisionBody<T extends Fixture> extends Transformable, Shiftab
 	 * @since 3.2.0
 	 */
 	public abstract Vector2 getWorldPoint(Vector2 localPoint);
+	
+	/**
+	 * Converts the given <code>localPoint</code> into world coordinates of this {@link CollisionBody}
+	 * and places the result in the given <code>destination</code>.
+	 * @param localPoint a point in the local coordinates of this {@link CollisionBody}
+	 * @param destination the vector to put the result
+	 * @throws NullPointerException if the given vector is null
+	 * @since 6.0.0
+	 */
+	public abstract void getWorldPoint(Vector2 localPoint, Vector2 destination);
 	
 	/**
 	 * Returns a new vector in local coordinates of this {@link CollisionBody} given
@@ -242,6 +276,16 @@ public interface CollisionBody<T extends Fixture> extends Transformable, Shiftab
 	public abstract Vector2 getLocalVector(Vector2 worldVector);
 	
 	/**
+	 * Converts the given <code>worldVector</code> into local coordinates of this {@link CollisionBody}
+	 * and places the result in the given <code>destination</code>.
+	 * @param worldVector a vector in world coordinates
+	 * @param destination the vector to put the result
+	 * @throws NullPointerException if the given vector is null
+	 * @since 6.0.0
+	 */
+	public abstract void getLocalVector(Vector2 worldVector, Vector2 destination);
+	
+	/**
 	 * Returns a new vector in world coordinates given a vector in the
 	 * local coordinates of this {@link CollisionBody}.
 	 * @param localVector a vector in the local coordinates of this {@link CollisionBody}
@@ -250,6 +294,16 @@ public interface CollisionBody<T extends Fixture> extends Transformable, Shiftab
 	 * @since 3.2.0
 	 */
 	public abstract Vector2 getWorldVector(Vector2 localVector);
+	
+	/**
+	 * Converts the given <code>localVector</code> into world coordinates of this {@link CollisionBody}
+	 * and places the result in the given <code>destination</code>.
+	 * @param localVector a vector in the local coordinates of this {@link CollisionBody}
+	 * @param destination the vector to put the result
+	 * @throws NullPointerException if the given vector is null
+	 * @since 6.0.0
+	 */
+	public abstract void getWorldVector(Vector2 localVector, Vector2 destination);
 
 	/**
 	 * Returns the maximum radius of the disk that the

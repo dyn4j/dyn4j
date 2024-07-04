@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,15 +24,16 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.exception.ArgumentNullException;
 
 /**
  * Represents a torque about the z-axis.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 1.0.0
  */
-public class Torque {
+public class Torque implements Copyable<Torque> {
 	/** The point where the {@link Force} is applied in world coordinates */
 	protected double torque;
 	
@@ -62,6 +63,16 @@ public class Torque {
 			throw new ArgumentNullException("torque");
 		
 		this.torque = torque.torque;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link Torque}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Torque copy() {
+		return new Torque(this);
 	}
 	
 	/**

@@ -41,7 +41,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents an object in a simulation that reacts as defined by newtonian mechanics.
  * @author William Bittle
- * @version 5.0.2
+ * @version 6.0.0
  * @since 1.0.0
  */
 public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, Shiftable, DataContainer, Ownable {
@@ -50,6 +50,13 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	
 	/** The default angular damping; value = {@link #DEFAULT_ANGULAR_DAMPING} */
 	public static final double DEFAULT_ANGULAR_DAMPING 	= 0.01;
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link PhysicsBody}
+	 * @since 6.0.0
+	 */
+	public PhysicsBody copy();
 	
 	/**
 	 * Creates a {@link BodyFixture} for the given {@link Convex} {@link Shape},

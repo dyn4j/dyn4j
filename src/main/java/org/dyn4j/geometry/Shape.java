@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.DataContainer;
 
 /**
@@ -36,10 +37,20 @@ import org.dyn4j.DataContainer;
  * mutable objects.  It's recommended that a {@link Shape}, after creation and use, remain
  * unchanged and instead be replaced with a new {@link Shape} if modification is necessary.
  * @author William Bittle
- * @version 4.2.1
+ * @version 6.0.0
  * @since 1.0.0
  */
-public interface Shape extends Transformable, DataContainer {
+public interface Shape extends Transformable, DataContainer, Copyable<Shape> {
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * NOTE: The user data field is not copied and left null in the copy.
+	 * @return {@link Shape}
+	 * @since 6.0.0
+	 */
+	@Override
+	public abstract Shape copy();
+	
 	/**
 	 * Returns the center/centroid of the {@link Shape} in local coordinates.
 	 * @return {@link Vector2}

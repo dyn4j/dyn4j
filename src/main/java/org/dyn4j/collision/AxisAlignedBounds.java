@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,7 +36,7 @@ import org.dyn4j.geometry.Vector2;
  * This class compares its AABB with the AABB of the given body and returns true
  * if they do not overlap.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 3.1.1
  */
 public final class AxisAlignedBounds extends AbstractBounds implements Bounds, Translatable {
@@ -60,7 +60,27 @@ public final class AxisAlignedBounds extends AbstractBounds implements Bounds, T
 		double h2 = height * 0.5;
 		this.aabb = new AABB(-w2, -h2, w2, h2);
 	}
+	
+	/**
+	 * Copy constructor.
+	 * @param bounds the bounds to copy
+	 * @since 6.0.0
+	 */
+	protected AxisAlignedBounds(AxisAlignedBounds bounds) {
+		super(bounds);
+		this.aabb = bounds.aabb.copy();
+	}
 
+	/**
+	 * {@inheritDoc}
+	 * @return {@link AxisAlignedBounds}
+	 * @since 6.0.0
+	 */
+	@Override
+	public AxisAlignedBounds copy() {
+		return new AxisAlignedBounds(this);
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

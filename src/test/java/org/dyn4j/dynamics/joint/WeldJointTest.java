@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link WeldJoint} class.
  * @author William Bittle
- * @version 4.2.0
+ * @version 6.0.0
  * @since 1.0.2
  */
 public class WeldJointTest extends BaseJointTest {
@@ -1091,141 +1091,6 @@ public class WeldJointTest extends BaseJointTest {
 		TestCase.assertFalse(b1.isAtRest());
 		TestCase.assertFalse(b2.isAtRest());
 	}
-	
-	
-	
-	
-	
-//	/**
-//	 * Tests the isSpring method.
-//	 * @since 3.0.2
-//	 */
-//	@Test
-//	public void isSpring() {
-//		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-//		TestCase.assertFalse(wj.isSpringEnabled());
-//		
-//		wj.setFrequency(0.0);
-//		TestCase.assertFalse(wj.isSpringEnabled());
-//		
-//		wj.setFrequency(1.0);
-//		TestCase.assertTrue(wj.isSpringEnabled());
-//		
-//		wj.setFrequency(15.24);
-//		TestCase.assertTrue(wj.isSpringEnabled());
-//		
-//		wj.setFrequency(0.0);
-//		TestCase.assertFalse(wj.isSpringEnabled());
-//	}
-//
-//	/**
-//	 * Tests the isSpringDamper method.
-//	 * @since 3.0.2
-//	 */
-//	@Test
-//	public void isSpringDamper() {
-//		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-//		TestCase.assertFalse(wj.isSpringDamperEnabled());
-//		
-//		wj.setFrequency(0.0);
-//		TestCase.assertFalse(wj.isSpringDamperEnabled());
-//		
-//		wj.setFrequency(1.0);
-//		TestCase.assertFalse(wj.isSpringDamperEnabled());
-//		
-//		wj.setFrequency(15.24);
-//		TestCase.assertFalse(wj.isSpringDamperEnabled());
-//		
-//		wj.setDampingRatio(0.4);
-//		TestCase.assertTrue(wj.isSpringDamperEnabled());
-//		
-//		wj.setDampingRatio(0.0);
-//		TestCase.assertFalse(wj.isSpringDamperEnabled());
-//		
-//		wj.setDampingRatio(0.61);
-//		wj.setFrequency(0.0);
-//		TestCase.assertFalse(wj.isSpringDamperEnabled());
-//	}
-//	
-//	/**
-//	 * Tests valid damping ratio values.
-//	 * @since 3.0.2
-//	 */
-//	@Test
-//	public void setDampingRatio() {
-//		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-//		
-//		wj.setDampingRatio(0.0);
-//		TestCase.assertEquals(0.0, wj.getDampingRatio());
-//		
-//		wj.setDampingRatio(1.0);
-//		TestCase.assertEquals(1.0, wj.getDampingRatio());
-//		
-//		wj.setDampingRatio(0.2);
-//		TestCase.assertEquals(0.2, wj.getDampingRatio());
-//	}
-//	
-//	/**
-//	 * Tests a negative damping ratio value.
-//	 * @since 3.0.2
-//	 */
-//	@Test(expected = IllegalArgumentException.class)
-//	public void setDampingRatioNegative() {
-//		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-//		wj.setDampingRatio(-1.0);
-//	}
-//	
-//	/**
-//	 * Tests a greater than one damping ratio value.
-//	 * @since 3.0.2
-//	 */
-//	@Test(expected = IllegalArgumentException.class)
-//	public void setDampingRatioGreaterThan1() {
-//		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-//		wj.setDampingRatio(2.0);
-//	}
-//	
-//	/**
-//	 * Tests valid frequency values.
-//	 * @since 3.0.2
-//	 */
-//	@Test
-//	public void setFrequency() {
-//		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-//		
-//		wj.setFrequency(0.0);
-//		TestCase.assertEquals(0.0, wj.getFrequency());
-//		
-//		wj.setFrequency(1.0);
-//		TestCase.assertEquals(1.0, wj.getFrequency());
-//		
-//		wj.setFrequency(29.0);
-//		TestCase.assertEquals(29.0, wj.getFrequency());
-//	}
-//	
-//	/**
-//	 * Tests a negative frequency value.
-//	 * @since 3.0.2
-//	 */
-//	@Test(expected = IllegalArgumentException.class)
-//	public void setFrequencyNegative() {
-//		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-//		wj.setFrequency(-0.3);
-//	}
-//
-//	/**
-//	 * Tests setting the reference angle.
-//	 */
-//	@Test
-//	public void setReferenceAngle() {
-//		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-//		
-//		TestCase.assertEquals(0, wj.getReferenceAngle(), 1e-6);
-//		
-//		wj.setReferenceAngle(Math.toRadians(30));
-//		
-//		TestCase.assertEquals(Math.toRadians(30), wj.getReferenceAngle(), 1e-6);
-//	}
 
 	/**
 	 * Tests the shift method.
@@ -1247,5 +1112,149 @@ public class WeldJointTest extends BaseJointTest {
 		TestCase.assertEquals(-3.0, wj.getAnchor2().x);
 		TestCase.assertEquals(0.5, wj.getAnchor2().y);
 	}
+
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2(-3.0, 0.5));
+		wj.setCollisionAllowed(true);
+		wj.setLimits(2, 5);
+		wj.setLimitsEnabled(true);
+		wj.setOwner(new Object());
+		wj.setUserData(new Object());
+		wj.setLimitsReferenceAngle(2);
+		wj.setMaximumSpringTorque(4);
+		wj.setMaximumSpringTorqueEnabled(true);
+		wj.setSpringDamperEnabled(true);
+		wj.setSpringDampingRatio(0.3);
+		wj.setSpringEnabled(true);
+		wj.setSpringFrequency(4.0);
+		wj.setSpringStiffness(0.4);
+		wj.angle = 2;
+		wj.axialMass = 3;
+		wj.impulse.set(3, 4, 5);
+		wj.K.m00 = 2;
+		wj.K.m01 = 3;
+		wj.K.m02 = 4;
+		wj.K.m10 = 4;
+		wj.K.m11 = 5;
+		wj.K.m12 = 6;
+		wj.K.m20 = 7;
+		wj.K.m21 = 2;
+		wj.K.m22 = 1;
+		wj.lowerLimitImpulse = 5;
+		wj.r1.set(4, 5);
+		wj.r2.set(9, 5);
+		wj.referenceAngle = 3;
+		wj.upperLimitImpulse = 7;
+		wj.bias = 4;
+		wj.damping = 3;
+		wj.gamma = 6;
+		wj.springImpulse = 5;
+		wj.springMass = 6;
+		
+		WeldJoint<Body> wjc = wj.copy();
+		
+		TestCase.assertNotSame(wj, wjc);
+		TestCase.assertNotSame(wj.bodies, wjc.bodies);
+		TestCase.assertNotSame(wj.body1, wjc.body1);
+		TestCase.assertNotSame(wj.body2, wjc.body2);
+		TestCase.assertNotSame(wj.impulse, wjc.impulse);
+		TestCase.assertNotSame(wj.K, wjc.K);
+		TestCase.assertNotSame(wj.localAnchor1, wjc.localAnchor1);
+		TestCase.assertNotSame(wj.localAnchor2, wjc.localAnchor2);
+		TestCase.assertNotSame(wj.r1, wjc.r1);
+		TestCase.assertNotSame(wj.r2, wjc.r2);
+		TestCase.assertSame(wjc.body1, wjc.bodies.get(0));
+		TestCase.assertSame(wjc.body2, wjc.bodies.get(1));
+		TestCase.assertEquals(wj.bodies.size(), wjc.bodies.size());
+		TestCase.assertEquals(wj.impulse.x, wjc.impulse.x);
+		TestCase.assertEquals(wj.impulse.y, wjc.impulse.y);
+		TestCase.assertEquals(wj.K.m00, wjc.K.m00);
+		TestCase.assertEquals(wj.K.m01, wjc.K.m01);
+		TestCase.assertEquals(wj.K.m10, wjc.K.m10);
+		TestCase.assertEquals(wj.K.m11, wjc.K.m11);
+		TestCase.assertEquals(wj.localAnchor1.x, wjc.localAnchor1.x);
+		TestCase.assertEquals(wj.localAnchor1.y, wjc.localAnchor1.y);
+		TestCase.assertEquals(wj.localAnchor2.x, wjc.localAnchor2.x);
+		TestCase.assertEquals(wj.localAnchor2.y, wjc.localAnchor2.y);
+		TestCase.assertEquals(wj.r1.x, wjc.r1.x);
+		TestCase.assertEquals(wj.r1.y, wjc.r1.y);
+		TestCase.assertEquals(wj.r2.x, wjc.r2.x);
+		TestCase.assertEquals(wj.r2.y, wjc.r2.y);
+		
+		TestCase.assertNull(wjc.owner);
+		TestCase.assertNull(wjc.userData);
+		
+		TestCase.assertEquals(wj.angle, wjc.angle);
+		TestCase.assertEquals(wj.axialMass, wjc.axialMass);
+		TestCase.assertEquals(wj.bias, wjc.bias);
+		TestCase.assertEquals(wj.collisionAllowed, wjc.collisionAllowed);
+		TestCase.assertEquals(wj.damping, wjc.damping);
+		TestCase.assertEquals(wj.gamma, wjc.gamma);
+		TestCase.assertEquals(wj.limitsEnabled, wjc.limitsEnabled);
+		TestCase.assertEquals(wj.lowerLimit, wjc.lowerLimit);
+		TestCase.assertEquals(wj.lowerLimitImpulse, wjc.lowerLimitImpulse);
+		TestCase.assertEquals(wj.springDamperEnabled, wjc.springDamperEnabled);
+		TestCase.assertEquals(wj.springDampingRatio, wjc.springDampingRatio);
+		TestCase.assertEquals(wj.springEnabled, wjc.springEnabled);
+		TestCase.assertEquals(wj.springFrequency, wjc.springFrequency);
+		TestCase.assertEquals(wj.springImpulse, wjc.springImpulse);
+		TestCase.assertEquals(wj.springMass, wjc.springMass);
+		TestCase.assertEquals(wj.springMaximumTorque, wjc.springMaximumTorque);
+		TestCase.assertEquals(wj.springMaximumTorqueEnabled, wjc.springMaximumTorqueEnabled);
+		TestCase.assertEquals(wj.springMode, wjc.springMode);
+		TestCase.assertEquals(wj.springStiffness, wjc.springStiffness);
+		TestCase.assertEquals(wj.referenceAngle, wjc.referenceAngle);
+		TestCase.assertEquals(wj.upperLimit, wjc.upperLimit);
+		TestCase.assertEquals(wj.upperLimitImpulse, wjc.upperLimitImpulse);
+		
+		// test overriding the bodies
+		wjc = wj.copy(b1, b2);
+		
+		TestCase.assertNotSame(wj, wjc);
+		TestCase.assertNotSame(wj.bodies, wjc.bodies);
+		TestCase.assertSame(wj.body1, wjc.body1);
+		TestCase.assertSame(wj.body2, wjc.body2);
+		TestCase.assertSame(wjc.body1, wjc.bodies.get(0));
+		TestCase.assertSame(wjc.body2, wjc.bodies.get(1));
+		TestCase.assertEquals(wj.bodies.size(), wjc.bodies.size());
+		
+		// test overriding body1
+		wjc = wj.copy(b1, null);
+		
+		TestCase.assertNotSame(wj, wjc);
+		TestCase.assertNotSame(wj.bodies, wjc.bodies);
+		TestCase.assertSame(wj.body1, wjc.body1);
+		TestCase.assertNotSame(wj.body2, wjc.body2);
+		TestCase.assertSame(wjc.body1, wjc.bodies.get(0));
+		TestCase.assertSame(wjc.body2, wjc.bodies.get(1));
+		TestCase.assertEquals(wj.bodies.size(), wjc.bodies.size());
+
+		// test overriding body2
+		wjc = wj.copy(null, b2);
+		
+		TestCase.assertNotSame(wj, wjc);
+		TestCase.assertNotSame(wj.bodies, wjc.bodies);
+		TestCase.assertNotSame(wj.body1, wjc.body1);
+		TestCase.assertSame(wj.body2, wjc.body2);
+		TestCase.assertSame(wjc.body1, wjc.bodies.get(0));
+		TestCase.assertSame(wjc.body2, wjc.bodies.get(1));
+		TestCase.assertEquals(wj.bodies.size(), wjc.bodies.size());
+	}
 	
+	/**
+	 * Test the copy fail fast.
+	 */
+	@Test(expected = ClassCastException.class)
+	public void copyFailed() {
+		TestBody b1 = new TestBody();
+		TestBody b2 = new TestBody();
+		
+		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2(-3.0, 0.5));
+		
+		wj.copy();
+	}
 }

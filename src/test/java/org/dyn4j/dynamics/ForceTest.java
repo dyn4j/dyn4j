@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import junit.framework.TestCase;
 /**
  * Class used to test the {@link Force} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 6.0.0
  * @since 1.0.2
  */
 public class ForceTest {
@@ -140,5 +140,19 @@ public class ForceTest {
 		
 		// by default it should be true
 		TestCase.assertTrue(f.isComplete(0.0));
+	}
+	
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		Force fo = new Force(new Vector2(1, 1));
+		Force fc = fo.copy();
+		
+		TestCase.assertNotSame(fo, fc);
+		TestCase.assertNotSame(fo.force, fc.force);
+		TestCase.assertEquals(fo.force.x, fc.force.x);
+		TestCase.assertEquals(fo.force.y, fc.force.y);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -66,7 +66,7 @@ import org.dyn4j.geometry.Vector2;
  * behave as if connected by flexible rope pass in <code>true</code> to the 
  * {@link #setSlackEnabled(boolean)} method.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 2.1.0
  * @see <a href="https://www.dyn4j.org/pages/joints#Pulley_Joint" target="_blank">Documentation</a>
  * @see <a href="https://www.dyn4j.org/2010/12/pulley-constraint/" target="_blank">Pulley Constraint</a>
@@ -94,24 +94,24 @@ public class PulleyJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<
 	// current state
 	
 	/** The state of the limit (only used for slack) */
-	private boolean overLength;
+	boolean overLength;
 	
 	/** The total length of the pulley system */
-	private double length;
+	double length;
 	
 	/** The normal from the first pulley anchor to the first {@link PhysicsBody} anchor */
-	private Vector2 n1;
+	final Vector2 n1;
 	
 	/** The normal from the second pulley anchor to the second {@link PhysicsBody} anchor */
-	private Vector2 n2;
+	final Vector2 n2;
 	
 	/** The effective mass of the two body system (Kinv = J * Minv * Jtrans) */
-	private double invK;
+	double invK;
 	
 	// output
 	
 	/** The accumulated impulse from the previous time step */
-	private double impulse;
+	double impulse;
 	
 	/**
 	 * Minimal constructor.
@@ -162,6 +162,66 @@ public class PulleyJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<
 		// initialize the slack parameters
 		this.slackEnabled = false;
 		this.overLength = false;
+		this.n1 = new Vector2();
+		this.n2 = new Vector2();
+	}
+
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @since 6.0.0
+	 */
+	protected PulleyJoint(PulleyJoint<T> joint) {
+		this(joint, null, null);
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @since 6.0.0
+	 */
+	protected PulleyJoint(PulleyJoint<T> joint, T body1, T body2) {
+		super(joint, body1, body2);
+		
+		this.pulleyAnchor1 = joint.pulleyAnchor1.copy();
+		this.pulleyAnchor2 = joint.pulleyAnchor2.copy();
+		this.localAnchor1 = joint.localAnchor1.copy();
+		this.localAnchor2 = joint.localAnchor2.copy();
+		this.ratio = joint.ratio;
+		this.slackEnabled = joint.slackEnabled;
+		
+		this.invK = joint.invK;
+		this.length = joint.length;
+		this.n1 = joint.n1.copy();
+		this.n2 = joint.n2.copy();
+		this.overLength = joint.overLength;
+		
+		// output
+		this.impulse = joint.impulse;
+		
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @return {@link PulleyJoint}
+	 * @see #copy(PhysicsBody, PhysicsBody)
+	 * @since 6.0.0
+	 */
+	@Override
+	public PulleyJoint<T> copy() {
+		return new PulleyJoint<T>(this);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link PulleyJoint}
+	 * @since 6.0.0
+	 */
+	@Override
+	public PulleyJoint<T> copy(T body1, T body2) {
+		return new PulleyJoint<T>(this, body1, body2);
 	}
 	
 	/* (non-Javadoc)
@@ -208,8 +268,13 @@ public class PulleyJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<
 		Vector2 s2 = this.pulleyAnchor2;
 		
 		// compute the axes
-		this.n1 = s1.to(p1);
-		this.n2 = s2.to(p2);
+//		this.n1 = s1.to(p1);
+//		this.n2 = s2.to(p2);
+		// inlined version of above
+		this.n1.x = p1.x - s1.x;
+		this.n1.y = p1.y - s1.y;
+		this.n2.x = p2.x - s2.x;
+		this.n2.y = p2.y - s2.y;
 		
 		// get the lengths
 		double l1 = this.n1.normalize();
@@ -342,27 +407,27 @@ public class PulleyJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<
 			Vector2 s2 = this.pulleyAnchor2;
 			
 			// compute the axes
-			this.n1 = s1.to(p1);
-			this.n2 = s2.to(p2);
+			Vector2 n1 = s1.to(p1);
+			Vector2 n2 = s2.to(p2);
 			
 			// normalize and save the length
-			double l1 = this.n1.normalize();
-			double l2 = this.n2.normalize();
+			double l1 = n1.normalize();
+			double l2 = n2.normalize();
 			
 			// make sure the length is not near zero
 			if (l1 <= 10.0 * linearTolerance) {
-				this.n1.zero();
+				n1.zero();
 			}
 			// make sure the length is not near zero
 			if (l2 <= 10.0 * linearTolerance) {
-				this.n2.zero();
+				n2.zero();
 			}
 			
 			double linearError = 0.0;
 			
 			// recompute K
-			double r1CrossN1 = r1.cross(this.n1);
-			double r2CrossN2 = r2.cross(this.n2);
+			double r1CrossN1 = r1.cross(n1);
+			double r2CrossN2 = r2.cross(n2);
 			double pm1 = invM1 + invI1 * r1CrossN1 * r1CrossN1;
 			double pm2 = invM2 + invI2 * r2CrossN2 * r2CrossN2;
 			this.invK = pm1 + pm2;
@@ -381,8 +446,8 @@ public class PulleyJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<
 			double impulse = -this.invK * C;
 			
 			// compute the impulse along the axes
-			Vector2 J1 = this.n1.product(-impulse);
-			Vector2 J2 = this.n2.product(-impulse);
+			Vector2 J1 = n1.product(-impulse);
+			Vector2 J2 = n2.product(-impulse);
 			
 			// apply the impulse
 			this.body1.translate(J1.x * invM1, J1.y * invM1);

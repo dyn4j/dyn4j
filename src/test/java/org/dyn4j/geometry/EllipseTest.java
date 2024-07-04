@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Ellipse} class.
  * @author William Bittle
- * @version 4.2.2
+ * @version 6.0.0
  * @since 3.1.5
  */
 public class EllipseTest {
@@ -425,5 +425,28 @@ public class EllipseTest {
 		TestCase.assertEquals(Math.toRadians(-30), e.getRotationAngle(), 1e-8);
 		TestCase.assertEquals(Math.cos(Math.toRadians(-30)), e.getRotation().getCost(), 1e-8);
 		TestCase.assertEquals(Math.sin(Math.toRadians(-30)), e.getRotation().getSint(), 1e-8);
+	}
+
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		Ellipse ellipse = new Ellipse(1.0, 0.5);
+		ellipse.setUserData(new Object());
+		Ellipse copy = ellipse.copy();
+		
+		TestCase.assertNotSame(ellipse, copy);
+		TestCase.assertNotSame(ellipse.center, copy.center);
+		TestCase.assertNotSame(ellipse.rotation, copy.rotation);
+		TestCase.assertEquals(ellipse.radius, copy.radius);
+		TestCase.assertEquals(ellipse.halfHeight, copy.halfHeight);
+		TestCase.assertEquals(ellipse.halfWidth, copy.halfWidth);
+		TestCase.assertNull(copy.userData);
+		
+		TestCase.assertEquals(ellipse.center.x, copy.center.x);
+		TestCase.assertEquals(ellipse.center.y, copy.center.y);
+		TestCase.assertEquals(ellipse.rotation.cost, copy.rotation.cost);
+		TestCase.assertEquals(ellipse.rotation.sint, copy.rotation.sint);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link Slice} class.
  * @author William Bittle
- * @version 4.2.2
+ * @version 6.0.0
  * @since 3.1.5
  */
 public class SliceTest {
@@ -380,5 +380,43 @@ public class SliceTest {
 		TestCase.assertEquals(0.866, s.getRotation().cost, 1e-3);
 		TestCase.assertEquals(0.499, s.getRotation().sint, 1e-3);
 		TestCase.assertEquals(Math.toRadians(30), s.getRotationAngle(), 1e-3);
+	}
+	
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		Slice slice = new Slice(1.0, Math.toRadians(45));
+		slice.setUserData(new Object());
+		Slice copy = slice.copy();
+		
+		TestCase.assertNotSame(slice, copy);
+		TestCase.assertNotSame(slice.rotation, copy.rotation);
+		TestCase.assertNotSame(slice.center, copy.center);
+		TestCase.assertNotSame(slice.normals, copy.normals);
+		TestCase.assertNotSame(slice.vertices, copy.vertices);
+		TestCase.assertEquals(slice.alpha, copy.alpha);
+		TestCase.assertEquals(slice.radius, copy.radius);
+		TestCase.assertEquals(slice.cosAlpha, copy.cosAlpha);
+		TestCase.assertEquals(slice.sliceRadius, copy.sliceRadius);
+		TestCase.assertNull(copy.userData);
+		
+		TestCase.assertEquals(slice.center.x, copy.center.x);
+		TestCase.assertEquals(slice.center.y, copy.center.y);
+		TestCase.assertEquals(slice.rotation.cost, copy.rotation.cost);
+		TestCase.assertEquals(slice.rotation.sint, copy.rotation.sint);
+		
+		TestCase.assertEquals(slice.normals.length, copy.normals.length);
+		for (int i = 0; i < slice.normals.length; i++) {
+			TestCase.assertEquals(slice.normals[i].x, copy.normals[i].x);
+			TestCase.assertEquals(slice.normals[i].y, copy.normals[i].y);
+		}
+		
+		TestCase.assertEquals(slice.vertices.length, copy.vertices.length);
+		for (int i = 0; i < slice.vertices.length; i++) {
+			TestCase.assertEquals(slice.vertices[i].x, copy.vertices[i].x);
+			TestCase.assertEquals(slice.vertices[i].y, copy.vertices[i].y);
+		}
 	}
 }

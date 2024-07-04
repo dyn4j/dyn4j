@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -37,7 +37,7 @@ import org.dyn4j.geometry.Shape;
  * {@link BodyFixture} extends the {@link Fixture} class, adding physical features
  * like density and friction.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 2.0.0
  * @see Fixture
  */
@@ -82,6 +82,29 @@ public class BodyFixture extends Fixture implements DataContainer {
 		this.friction = BodyFixture.DEFAULT_FRICTION;
 		this.restitution = BodyFixture.DEFAULT_RESTITUTION;
 		this.restitutionVelocity = DEFAULT_RESTITUTION_VELOCITY;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param fixture the fixture to copy
+	 * @since 6.0.0
+	 */
+	protected BodyFixture(BodyFixture fixture) {
+		super(fixture);
+		this.density = fixture.density;
+		this.friction = fixture.friction;
+		this.restitution = fixture.restitution;
+		this.restitutionVelocity = fixture.restitutionVelocity;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link BodyFixture}
+	 * @since 6.0.0
+	 */
+	@Override
+	public Fixture copy() {
+		return new BodyFixture(this);
 	}
 	
 	/* (non-Javadoc)

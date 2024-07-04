@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -88,7 +88,7 @@ import org.dyn4j.geometry.Vector3;
  * joint.setReferenceAngle(Math.toRadians(90));
  * </pre>
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 1.0.0
  * @see <a href="https://www.dyn4j.org/pages/joints#Weld_Joint" target="_blank">Documentation</a>
  * @see <a href="https://www.dyn4j.org/2010/12/weld-constraint/" target="_blank">Weld Constraint</a>
@@ -144,45 +144,45 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	// current state
 
 	/** The current angle between the bodies */
-	private double angle;
+	double angle;
 
 	/** The world space vector from b1's COM to the pivot point */
-	private Vector2 r1;
+	final Vector2 r1;
 	
 	/** The world space vector from b2's COM to the pivot point */
-	private Vector2 r2;
+	final Vector2 r2;
 
 	/** The constraint mass; K = J * Minv * Jtrans */
-	private final Matrix33 K;
+	final Matrix33 K;
 	
 	/** The axial mass for limits */
-	private double axialMass;
+	double axialMass;
 	
 	/** The soft mass for angular spring */
-	private double springMass;
+	double springMass;
 
 	/** The damping coefficient of the spring-damper */
-	private double damping;
+	double damping;
 
 	/** The bias for adding work to the constraint (simulating a spring) */
-	private double bias;
+	double bias;
 	
 	/** The damping portion of the constraint */
-	private double gamma;
+	double gamma;
 
 	// output
 	
 	/** The accumulated impulse for warm starting */
-	private Vector3 impulse;
+	final Vector3 impulse;
 	
 	/** The spring impulse */
-	private double springImpulse;
+	double springImpulse;
 	
 	/** The impulse applied by the lower limit */
-	private double lowerLimitImpulse;
+	double lowerLimitImpulse;
 	
 	/** The impulse applied by the upper limit */
-	private double upperLimitImpulse;
+	double upperLimitImpulse;
 
 	/**
 	 * Minimal constructor.
@@ -207,8 +207,8 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 		
 		// initialize
 		this.K = new Matrix33();
-		this.r1 = null;
-		this.r2 = null;
+		this.r1 = new Vector2();
+		this.r2 = new Vector2();
 
 		// spring
 		this.springMode = SPRING_MODE_FREQUENCY;
@@ -236,6 +236,83 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 		this.springImpulse = 0.0;
 		this.lowerLimitImpulse = 0.0;
 		this.upperLimitImpulse = 0.0;
+	}
+
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @since 6.0.0
+	 */
+	protected WeldJoint(WeldJoint<T> joint) {
+		this(joint, null, null);
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param joint the joint to copy
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @since 6.0.0
+	 */
+	protected WeldJoint(WeldJoint<T> joint, T body1, T body2) {
+		super(joint, body1, body2);
+		
+		this.localAnchor1 = joint.localAnchor1.copy();
+		this.localAnchor2 = joint.localAnchor2.copy();
+		
+		// limits
+		this.limitsEnabled = joint.limitsEnabled;
+		this.lowerLimit = joint.lowerLimit;
+		this.upperLimit = joint.upperLimit;
+		this.referenceAngle = joint.referenceAngle;
+		
+		// spring
+		this.springMode = joint.springMode;
+		this.springEnabled = joint.springEnabled;
+		this.springFrequency = joint.springFrequency;
+		this.springStiffness = joint.springStiffness;
+		this.springDamperEnabled = joint.springDamperEnabled;
+		this.springDampingRatio = joint.springDampingRatio;
+		this.springMaximumTorqueEnabled = joint.springMaximumTorqueEnabled;
+		this.springMaximumTorque = joint.springMaximumTorque;
+		
+		// state
+		this.angle = joint.angle;
+		this.axialMass = joint.axialMass;
+		this.bias = joint.bias;
+		this.damping = joint.damping;
+		this.gamma = joint.gamma;
+		this.K = joint.K.copy();
+		this.r1 = joint.r1.copy();
+		this.r2 = joint.r2.copy();
+		this.springMass = joint.springMass;
+		
+		// output
+		this.impulse = joint.impulse.copy();
+		this.springImpulse = joint.springImpulse;
+		this.lowerLimitImpulse = joint.lowerLimitImpulse;
+		this.upperLimitImpulse = joint.upperLimitImpulse;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @return {@link WeldJoint}
+	 * @see #copy(PhysicsBody, PhysicsBody)
+	 * @since 6.0.0
+	 */
+	@Override
+	public WeldJoint<T> copy() {
+		return new WeldJoint<T>(this);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @return {@link WeldJoint}
+	 * @since 6.0.0
+	 */
+	@Override
+	public WeldJoint<T> copy(T body1, T body2) {
+		return new WeldJoint<T>(this, body1, body2);
 	}
 	
 	/* (non-Javadoc)
@@ -271,8 +348,8 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 		
 		this.angle = this.getRelativeRotation();
 		
-		this.r1 = t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1));
-		this.r2 = t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2));
+		t1.getTransformedR(this.body1.getLocalCenter().to(this.localAnchor1), this.r1);
+		t2.getTransformedR(this.body2.getLocalCenter().to(this.localAnchor2), this.r2);
 		
 		// compute the K inverse matrix
 		this.K.m00 = invM1 + invM2 + this.r1.y * this.r1.y * invI1 + this.r2.y * this.r2.y * invI2;

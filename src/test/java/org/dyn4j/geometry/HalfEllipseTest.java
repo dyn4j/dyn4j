@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Test case for the {@link HalfEllipse} class.
  * @author William Bittle
- * @version 4.2.2
+ * @version 6.0.0
  * @since 3.1.5
  */
 public class HalfEllipseTest {
@@ -429,5 +429,35 @@ public class HalfEllipseTest {
 		
 		TestCase.assertEquals(3.927647520827677, d, 1e-3);
 	}
-	
+
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		HalfEllipse he = new HalfEllipse(1.0, 1.0);
+		he.setUserData(new Object());
+		HalfEllipse copy = he.copy();
+		
+		TestCase.assertNotSame(he, copy);
+		TestCase.assertNotSame(he.center, copy.center);
+		TestCase.assertNotSame(he.ellipseCenter, copy.ellipseCenter);
+		TestCase.assertNotSame(he.vertexLeft, copy.vertexLeft);
+		TestCase.assertNotSame(he.vertexRight, copy.vertexRight);
+		TestCase.assertNotSame(he.rotation, copy.rotation);
+		TestCase.assertEquals(he.radius, copy.radius);
+		TestCase.assertEquals(he.height, copy.height);
+		TestCase.assertEquals(he.halfWidth, copy.halfWidth);
+		TestCase.assertNull(copy.userData);
+		
+		TestCase.assertEquals(he.center.x, copy.center.x);
+		TestCase.assertEquals(he.center.y, copy.center.y);
+		
+		TestCase.assertEquals(he.vertexLeft.x, copy.vertexLeft.x);
+		TestCase.assertEquals(he.vertexLeft.y, copy.vertexLeft.y);
+		TestCase.assertEquals(he.vertexRight.x, copy.vertexRight.x);
+		TestCase.assertEquals(he.vertexRight.y, copy.vertexRight.y);
+		TestCase.assertEquals(he.rotation.cost, copy.rotation.cost);
+		TestCase.assertEquals(he.rotation.sint, copy.rotation.sint);
+	}
 }

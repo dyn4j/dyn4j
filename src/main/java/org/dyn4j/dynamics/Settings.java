@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,16 +24,17 @@
  */
 package org.dyn4j.dynamics;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.exception.ArgumentNullException;
 import org.dyn4j.exception.ValueOutOfRangeException;
 
 /**
  * Responsible for housing all of the dynamics engine's settings.
  * @author William Bittle
- * @version 5.0.2
+ * @version 6.0.0
  * @since 1.0.0
  */
-public class Settings {
+public class Settings implements Copyable<Settings> {
 	/** The default step frequency of the dynamics engine; in seconds */
 	public static final double DEFAULT_STEP_FREQUENCY = 1.0 / 60.0;
 	
