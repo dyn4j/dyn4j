@@ -233,7 +233,7 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	 */
 	@Override
 	public PinJoint<T> copy() {
-		return new PinJoint<>(this);
+		return new PinJoint<T>(this);
 	}
 	
 	/**
@@ -243,7 +243,7 @@ public class PinJoint<T extends PhysicsBody> extends AbstractSingleBodyJoint<T> 
 	 */
 	@Override
 	public PinJoint<T> copy(T body) {
-		return new PinJoint<>(this, body);
+		return new PinJoint<T>(this, body);
 	}
 	
 	/* (non-Javadoc)
