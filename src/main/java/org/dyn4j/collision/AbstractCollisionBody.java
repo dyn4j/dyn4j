@@ -30,9 +30,9 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 
-import org.dyn4j.Copyable;
 import org.dyn4j.DataContainer;
 import org.dyn4j.Ownable;
+import org.dyn4j.Unsafe;
 import org.dyn4j.exception.ArgumentNullException;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
@@ -118,7 +118,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 		int size = body.fixtures.size();
 		for (int i = 0; i < size; i++) {
 			T of = body.getFixture(i);
-			T nf = Copyable.copyUnsafe(of);
+			T nf = Unsafe.copy(of);
 			this.fixtures.add((T)nf);
 		}
 	}

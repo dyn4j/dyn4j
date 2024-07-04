@@ -27,9 +27,9 @@ package org.dyn4j.dynamics.joint;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dyn4j.Copyable;
 import org.dyn4j.DataContainer;
 import org.dyn4j.Ownable;
+import org.dyn4j.Unsafe;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.exception.InvalidIndexException;
@@ -102,17 +102,17 @@ public abstract class AbstractPairedBodyJoint<T extends PhysicsBody> extends Abs
 			return Arrays.asList(body1, body2);
 		} else if (body1 != null && body2 == null) {
 			// copy joint body2
-			T copy = Copyable.copyUnsafe(joint.body2);
+			T copy = Unsafe.copy(joint.body2);
 			return Arrays.asList(body1, copy);
 		} else if (body1 == null && body2 != null) {
 			// copy joint body1
-			T copy = Copyable.copyUnsafe(joint.body1);
+			T copy = Unsafe.copy(joint.body1);
 			return Arrays.asList(copy, body2);
 		} else {
 			// copy both bodies
 			return Arrays.asList(
-				Copyable.copyUnsafe(joint.body1),
-				Copyable.copyUnsafe(joint.body2));
+				Unsafe.copy(joint.body1),
+				Unsafe.copy(joint.body2));
 		}
 	}
 	

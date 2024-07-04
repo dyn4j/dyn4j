@@ -22,19 +22,23 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dyn4j;
+package org.dyn4j.exception;
 
 /**
- * Simple interface to support deep copying of objects.
+ * Represents an exception when the copy method fails.
  * @author William Bittle
  * @version 6.0.0
- * @since 4.0.0
- * @param <T> the copied object type
+ * @since 6.0.0
  */
-public interface Copyable<T extends Copyable<? extends T>> {
+public class CopyException extends ClassCastException {
+	private static final long serialVersionUID = 2434249738746680073L;
+
 	/**
-	 * Returns a deep copy of this object.
-	 * @return T
+	 * Minimal constructor.
+	 * @param source the source class
+	 * @param copy the copy class
 	 */
-	public T copy();
+	public CopyException(Class<?> source, Class<?> copy) {
+		super(String.format("The copy method on class '%1$s' returns an object of class '%2$s'. You must override the copy method to return type '%1$s'.", source.getName(), copy.getName()));
+	}
 }

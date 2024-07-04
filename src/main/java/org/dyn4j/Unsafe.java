@@ -24,17 +24,36 @@
  */
 package org.dyn4j;
 
+import org.dyn4j.exception.CopyException;
+
 /**
- * Simple interface to support deep copying of objects.
+ * The version of the engine.
  * @author William Bittle
  * @version 6.0.0
- * @since 4.0.0
- * @param <T> the copied object type
+ * @since 1.0.0
  */
-public interface Copyable<T extends Copyable<? extends T>> {
+public final class Unsafe {
+	private Unsafe() {}
+	
 	/**
-	 * Returns a deep copy of this object.
+	 * Copies the given {@link Copyable} and attempts to cast it to T.
+	 * <p>
+	 * This should be safe for all dyn4j objects that implement the {@link Copyable}
+	 * interface. Where this will not be safe is for any user classes that extend
+	 * from dyn4j classes that implement {@link Copyable}.  The guidance is that if
+	 * you extend a dyn4j class, override the copy method and ensure you return
+	 * an object of the same type.
+	 * @param <T> the type to cast it to
+	 * @param copyable the copyable to copy
 	 * @return T
+	 * @throws ClassCastException if the copy method on type T doesn't return an object of type T
 	 */
-	public T copy();
+	@SuppressWarnings("unchecked")
+	public final static <T extends Copyable<?>> T copy(T copyable) {
+		Object copy = copyable.copy();
+		if (!copy.getClass().equals(copyable.getClass())) {
+			throw new CopyException(copyable.getClass(), copy.getClass());
+		}
+		return (T)copy;
+	}
 }

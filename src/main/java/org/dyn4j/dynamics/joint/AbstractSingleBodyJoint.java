@@ -26,9 +26,9 @@ package org.dyn4j.dynamics.joint;
 
 import java.util.Arrays;
 
-import org.dyn4j.Copyable;
 import org.dyn4j.DataContainer;
 import org.dyn4j.Ownable;
+import org.dyn4j.Unsafe;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.exception.InvalidIndexException;
@@ -64,7 +64,7 @@ public abstract class AbstractSingleBodyJoint<T extends PhysicsBody> extends Abs
 	 * @since 6.0.0
 	 */
 	protected AbstractSingleBodyJoint(AbstractSingleBodyJoint<T> joint, T body) {
-		super(joint, body != null ? Arrays.asList(body) : Arrays.asList(Copyable.copyUnsafe(joint.body)));
+		super(joint, body != null ? Arrays.asList(body) : Arrays.asList(Unsafe.copy(joint.body)));
 		this.body = this.bodies.get(0);
 	}
 	
