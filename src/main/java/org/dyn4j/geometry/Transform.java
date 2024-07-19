@@ -453,7 +453,7 @@ public class Transform implements Transformable, Copyable<Transform> {
 	}
 
 	/**
-	 * Returns the x translation.
+	 * Returns the y translation.
 	 * @return double
 	 */
 	public double getTranslationY() {
