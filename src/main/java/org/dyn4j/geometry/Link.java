@@ -70,8 +70,8 @@ public class Link extends Segment implements Convex, Wound, Shape, Transformable
 	 */
 	protected Link(Link link) {
 		super(link);
-		this.point0 = link.point0.copy();
-		this.point3 = link.point3.copy();
+		this.point0 = link.point0 != null ? link.point0.copy() : null;
+		this.point3 = link.point3 != null ? link.point3.copy() : null;
 	}
 	
 	/**

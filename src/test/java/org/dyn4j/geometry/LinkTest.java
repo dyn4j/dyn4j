@@ -24,6 +24,7 @@
  */
 package org.dyn4j.geometry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -176,6 +177,66 @@ public class LinkTest {
 		for (int i = 0; i < link.vertices.length; i++) {
 			TestCase.assertEquals(link.vertices[i].x, copy.vertices[i].x);
 			TestCase.assertEquals(link.vertices[i].y, copy.vertices[i].y);
+		}
+	}
+	
+	/**
+	 * Tests the copy method with a non-loop to verify copy works when point0 or point3 are null.
+	 */
+	@Test
+	public void copyNonLoop() {
+		List<Vector2> points = new ArrayList<Vector2>();
+		points.add(new Vector2(0, 0));
+		points.add(new Vector2(1, 0));
+		points.add(new Vector2(2, 1));
+		points.add(new Vector2(3, 1));
+		points.add(new Vector2(2, 2));
+		
+		List<Link> links = Geometry.createLinks(points, false);
+		
+		for (Link link : links) {
+			Link copy = link.copy();
+			
+			TestCase.assertNotSame(link, copy);
+			if (link.point0 != null) {
+				TestCase.assertNotSame(link.point0, copy.point0);
+			} else { 
+				TestCase.assertNull(copy.point0);
+			}
+			if (link.point3 != null) {
+				TestCase.assertNotSame(link.point3, copy.point3);
+		 	} else {
+				TestCase.assertNull(copy.point3);
+			}
+			TestCase.assertNotSame(link.center, copy.center);
+			TestCase.assertNotSame(link.normals, copy.normals);
+			TestCase.assertNotSame(link.vertices, copy.vertices);
+			TestCase.assertEquals(link.length, copy.length);
+			TestCase.assertEquals(link.radius, copy.radius);
+			TestCase.assertNull(copy.userData);
+			
+			TestCase.assertEquals(link.center.x, copy.center.x);
+			TestCase.assertEquals(link.center.y, copy.center.y);
+			if (link.point0 != null) {
+				TestCase.assertEquals(link.point0.x, copy.point0.x);
+				TestCase.assertEquals(link.point0.y, copy.point0.y);
+			}
+			if (link.point3 != null) {
+				TestCase.assertEquals(link.point3.x, copy.point3.x);
+				TestCase.assertEquals(link.point3.y, copy.point3.y);
+			}
+			
+			TestCase.assertEquals(link.normals.length, copy.normals.length);
+			for (int i = 0; i < link.normals.length; i++) {
+				TestCase.assertEquals(link.normals[i].x, copy.normals[i].x);
+				TestCase.assertEquals(link.normals[i].y, copy.normals[i].y);
+			}
+			
+			TestCase.assertEquals(link.vertices.length, copy.vertices.length);
+			for (int i = 0; i < link.vertices.length; i++) {
+				TestCase.assertEquals(link.vertices[i].x, copy.vertices[i].x);
+				TestCase.assertEquals(link.vertices[i].y, copy.vertices[i].y);
+			}
 		}
 	}
 }
