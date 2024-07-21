@@ -27,12 +27,18 @@ dyn4j comes with a lot of features and extensibility, but getting started is eas
 Add dyn4j to your classpath by adding a Maven dependency from 
 [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.dyn4j%22%20AND%20a%3A%22dyn4j%22) or 
 [GitHub Packages](https://github.com/dyn4j/dyn4j/packages)
+
+- **Using maven**
 ```xml
 <dependency>
     <groupId>org.dyn4j</groupId>
     <artifactId>dyn4j</artifactId>
     <version>5.0.2</version>
 </dependency>
+```
+- **Using Gradle**
+```groovy
+implementation 'org.dyn4j:dyn4j:5.0.2'
 ```
 
 If you are not using Maven you can download the jar from either of the links above.  
