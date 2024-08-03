@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,7 +30,7 @@ import org.dyn4j.collision.CollisionPair;
 /**
  * An implementation of the {@link CollisionPair} interface used by the {@link BroadphaseDetector}s.
  * @author William Bittle
- * @version 4.1.0
+ * @version 6.0.0
  * @since 1.0.0
  * @param <T> the object type
  */
@@ -101,8 +101,9 @@ final class BroadphasePair<T> implements CollisionPair<T> {
 		return this.second;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.Copyable#copy()
+	/**
+	 * Returns a shallow copy of this object.
+	 * @return {@link BroadphasePair}
 	 */
 	@Override
 	public BroadphasePair<T> copy() {

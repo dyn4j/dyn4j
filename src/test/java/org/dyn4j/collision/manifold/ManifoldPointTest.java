@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link ManifoldPoint} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 6.0.0
  * @since 4.0.0
  */
 public class ManifoldPointTest {
@@ -78,6 +78,7 @@ public class ManifoldPointTest {
 		TestCase.assertEquals(ManifoldPointId.DISTANCE, mp2.id);
 		TestCase.assertNotNull(mp2.point);
 		TestCase.assertNotSame(mp.point, mp2.point);
+		TestCase.assertSame(mp.id, mp2.id);
 		TestCase.assertEquals(pt.x, mp2.point.x);
 		TestCase.assertEquals(pt.y, mp2.point.y);
 		TestCase.assertEquals(1.0, mp2.depth);
@@ -87,10 +88,24 @@ public class ManifoldPointTest {
 		
 		TestCase.assertEquals(ManifoldPointId.DISTANCE, mp3.id);
 		TestCase.assertNotNull(mp3.point);
+		TestCase.assertSame(mp.id, mp3.id);
 		TestCase.assertNotSame(mp.point, mp3.point);
 		TestCase.assertEquals(pt.x, mp3.point.x);
 		TestCase.assertEquals(pt.y, mp3.point.y);
 		TestCase.assertEquals(1.0, mp3.depth);
+		
+		IndexedManifoldPointId mpid = new IndexedManifoldPointId(1, 2, 3, true);
+		ManifoldPoint mp4 = new ManifoldPoint(mpid, new Vector2(3, 4), 2);
+		
+		ManifoldPoint mp5 = mp4.copy();
+		
+		TestCase.assertNotSame(mp4, mp5);
+		TestCase.assertNotSame(mp4.id, mp5.id);
+		TestCase.assertEquals(mp4.depth, mp5.depth);
+		TestCase.assertNotNull(mp5.point);
+		TestCase.assertNotSame(mp4.point, mp5.point);
+		TestCase.assertEquals(mp4.point.x, mp5.point.x);
+		TestCase.assertEquals(mp4.point.y, mp5.point.y);
 	}
 	
 	/**

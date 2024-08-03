@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link IndexedManifoldPointId} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 6.0.0
  * @since 4.0.0
  */
 public class IndexedManifoldPointIdTest {
@@ -126,5 +126,19 @@ public class IndexedManifoldPointIdTest {
 	public void tostring() {
 		IndexedManifoldPointId id = new IndexedManifoldPointId(0, 1, 0);
 		TestCase.assertNotNull(id.toString());
+	}
+	
+	/**
+	 * Tests the copy method.
+	 */
+	@Test
+	public void copy() {
+		IndexedManifoldPointId id = new IndexedManifoldPointId(0, 1, 0);
+		IndexedManifoldPointId copy = id.copy();
+		
+		TestCase.assertEquals(id.incidentEdgeIndex, copy.incidentEdgeIndex);
+		TestCase.assertEquals(id.incidentVertexIndex, copy.incidentVertexIndex);
+		TestCase.assertEquals(id.referenceEdgeIndex, copy.referenceEdgeIndex);
+		TestCase.assertEquals(id.flipped, copy.flipped);
 	}
 }

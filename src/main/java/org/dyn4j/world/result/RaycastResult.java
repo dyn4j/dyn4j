@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import org.dyn4j.collision.narrowphase.Raycast;
 /**
  * Represents a reusable {@link DetectResult} for raycast detection.
  * @author William Bittle
- * @version 4.0.0
+ * @version 6.0.0
  * @since 4.0.0
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
@@ -91,8 +91,12 @@ public class RaycastResult<T extends CollisionBody<E>, E extends Fixture> extend
 		return (int)Math.signum(this.raycast.getDistance() - o.raycast.getDistance());
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.world.result.DetectResult#copy()
+	/**
+	 * Returns a copy of this object.
+	 * <p>
+	 * NOTE: The {@link CollisionBody} and {@link Fixture} are not copied, 
+	 * but the {@link Raycast} is.
+	 * @return {@link RaycastResult}
 	 */
 	public RaycastResult<T, E> copy() {
 		return new RaycastResult<T, E>(this.body, this.fixture, this.raycast);

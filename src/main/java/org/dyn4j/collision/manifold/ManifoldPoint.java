@@ -65,7 +65,7 @@ public class ManifoldPoint implements Shiftable, Copyable<ManifoldPoint> {
 	 * @param depth the penetration depth
 	 */
 	protected ManifoldPoint(ManifoldPointId id, Vector2 point, double depth) {
-		this.id = id;
+		this.id = id.copy();
 		this.point = point.copy();
 		this.depth = depth;
 	}
@@ -132,7 +132,7 @@ public class ManifoldPoint implements Shiftable, Copyable<ManifoldPoint> {
 	 * @since 4.0.0
 	 */
 	public void copy(ManifoldPoint manifoldPoint) {
-		this.id = manifoldPoint.id;
+		this.id = manifoldPoint.id.copy();
 		this.depth = manifoldPoint.depth;
 		this.point.x = manifoldPoint.point.x;
 		this.point.y = manifoldPoint.point.y;

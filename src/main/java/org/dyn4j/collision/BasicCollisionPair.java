@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,7 +27,7 @@ package org.dyn4j.collision;
 /**
  * Represents a basic, immutable implementation of the {@link CollisionPair} interface.
  * @author William Bittle
- * @version 4.1.0
+ * @version 6.0.0
  * @since 4.0.0
  * @param <T> the object type
  */
@@ -64,8 +64,9 @@ public final class BasicCollisionPair<T> extends AbstractCollisionPair<T> implem
 		return AbstractCollisionPair.getHashCode(this.first, this.second);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.dyn4j.Copyable#copy()
+	/**
+	 * Returns a shallow copy of this object.
+	 * @return {@link BasicCollisionPair}
 	 */
 	@Override
 	public BasicCollisionPair<T> copy() {

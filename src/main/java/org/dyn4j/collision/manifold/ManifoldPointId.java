@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,6 +24,7 @@
  */
 package org.dyn4j.collision.manifold;
 
+import org.dyn4j.Copyable;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Feature;
 import org.dyn4j.geometry.PointFeature;
@@ -39,16 +40,26 @@ import org.dyn4j.geometry.Shape;
  * that a distance check should be done rather than an id comparison to determine whether
  * to use a cached value or not. 
  * @author William Bittle
- * @version 3.2.0
+ * @version 6.0.0
  * @since 1.0.0
  * @see IndexedManifoldPointId
  */
-public interface ManifoldPointId {
+public interface ManifoldPointId extends Copyable<ManifoldPointId> {
 	/**
 	 * The default {@link ManifoldPointId}.  Flags that the points should be
 	 * tested by performing a distance check.
 	 */
 	public static final ManifoldPointId DISTANCE = new ManifoldPointId() {
+		/**
+		 * {@inheritDoc}
+		 * @since 6.0.0
+		 * @return {@link ManifoldPointId}
+		 */
+		@Override
+		public ManifoldPointId copy() {
+			return this;
+		}
+		
 		/* (non-Javadoc)
 		 * @see java.lang.Object#toString()
 		 */

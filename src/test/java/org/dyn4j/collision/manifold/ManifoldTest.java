@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -35,7 +35,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link Manifold} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 6.0.0
  * @since 4.0.0
  */
 public class ManifoldTest {
@@ -104,6 +104,7 @@ public class ManifoldTest {
 		TestCase.assertEquals(1.0, m2.normal.x);
 		TestCase.assertEquals(1.0, m2.normal.y);
 		TestCase.assertEquals(1, m2.points.size());
+		TestCase.assertSame(m2.points.get(0).id, m.points.get(0).id);
 		TestCase.assertEquals(1.0, m2.points.get(0).point.x);
 		TestCase.assertEquals(1.0, m2.points.get(0).point.y);
 		TestCase.assertEquals(1.0, m2.points.get(0).depth);
@@ -122,6 +123,7 @@ public class ManifoldTest {
 		TestCase.assertEquals(1.0, m3.normal.x);
 		TestCase.assertEquals(1.0, m3.normal.y);
 		TestCase.assertEquals(1, m3.points.size());
+		TestCase.assertSame(m3.points.get(0).id, m.points.get(0).id);
 		TestCase.assertEquals(1.0, m3.points.get(0).point.x);
 		TestCase.assertEquals(1.0, m3.points.get(0).point.y);
 		TestCase.assertEquals(1.0, m3.points.get(0).depth);

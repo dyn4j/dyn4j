@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import org.dyn4j.collision.Fixture;
 /**
  * An implementation of the {@link CollisionItem} interface used by the {@link BroadphaseDetector}s.
  * @author William Bittle
- * @version 4.0.0
+ * @version 6.0.0
  * @since 3.2.0
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
@@ -96,8 +96,9 @@ final class BroadphaseItem<T extends CollisionBody<E>, E extends Fixture> extend
 		return this.fixture;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.Copyable#copy()
+	/**
+	 * Returns a shallow copy of this object.
+	 * @return {@link BroadphaseItem}
 	 */
 	@Override
 	public BroadphaseItem<T, E> copy() {

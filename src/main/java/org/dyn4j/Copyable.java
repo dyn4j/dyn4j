@@ -25,7 +25,7 @@
 package org.dyn4j;
 
 /**
- * Simple interface to support deep copying of objects.
+ * Simple interface to support copying of objects.
  * @author William Bittle
  * @version 6.0.0
  * @since 4.0.0
@@ -33,7 +33,10 @@ package org.dyn4j;
  */
 public interface Copyable<T extends Copyable<? extends T>> {
 	/**
-	 * Returns a deep copy of this object.
+	 * Returns a copy of this object.
+	 * <p>
+	 * The returned object is a deep copy of this object unless
+	 * specified otherwise.
 	 * @return T
 	 */
 	public T copy();
