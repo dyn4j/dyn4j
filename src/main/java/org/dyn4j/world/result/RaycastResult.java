@@ -57,6 +57,16 @@ public class RaycastResult<T extends CollisionBody<E>, E extends Fixture> extend
 		super(body, fixture);
 		this.raycast = raycast.copy();
 	}
+	
+	/**
+	 * Copy constructor.
+	 * @param result the result to copy
+	 * @since 6.0.0
+	 */
+	protected RaycastResult(RaycastResult<T, E> result) {
+		super(result);
+		this.raycast = result.raycast.copy();
+	}
 
 	/**
 	 * Returns the raycast information.
@@ -71,16 +81,28 @@ public class RaycastResult<T extends CollisionBody<E>, E extends Fixture> extend
 	 * @param raycast the raycast information
 	 */
 	public void setRaycast(Raycast raycast) {
-		this.raycast.copy(raycast);
+		this.raycast.set(raycast);
 	}
 	
 	/**
 	 * Copies (deep) the given result to this result.
 	 * @param result the result to copy
+	 * @deprecated Deprecated in 6.0.0. Use {@link #set(DetectResult)} instead.
 	 */
+	@Deprecated
 	public void copy(RaycastResult<T, E> result) {
-		super.copy(result);
-		this.raycast.copy(result.raycast);
+		super.set(result);
+		this.raycast.set(result.raycast);
+	}
+	
+	/**
+	 * Sets this result to the given result.
+	 * @param result the result to use
+	 * @since 6.0.0
+	 */
+	public void set(RaycastResult<T, E> result) {
+		super.set(result);
+		this.raycast.set(result.raycast);
 	}
 
 	/* (non-Javadoc)
@@ -99,6 +121,6 @@ public class RaycastResult<T extends CollisionBody<E>, E extends Fixture> extend
 	 * @return {@link RaycastResult}
 	 */
 	public RaycastResult<T, E> copy() {
-		return new RaycastResult<T, E>(this.body, this.fixture, this.raycast);
+		return new RaycastResult<T, E>(this);
 	}
 }

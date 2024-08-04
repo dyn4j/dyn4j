@@ -58,6 +58,16 @@ public class ConvexCastResult<T extends CollisionBody<E>, E extends Fixture> ext
 		this.timeOfImpact = timeOfImpact.copy();
 	}
 	
+	/**
+	 * Copy constructor.
+	 * @param result the result to copy
+	 * @since 6.0.0
+	 */
+	protected ConvexCastResult(ConvexCastResult<T, E> result) {
+		super(result);
+		this.timeOfImpact = result.timeOfImpact.copy();
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
@@ -79,16 +89,28 @@ public class ConvexCastResult<T extends CollisionBody<E>, E extends Fixture> ext
 	 * @param timeOfImpact the time of impact data
 	 */
 	public void setTimeOfImpact(TimeOfImpact timeOfImpact) {
-		this.timeOfImpact.copy(timeOfImpact);
+		this.timeOfImpact.set(timeOfImpact);
 	}
 	
 	/**
 	 * Copies (deep) the given result to this result.
 	 * @param result the result to copy
+	 * @deprecated Deprecated in 6.0.0.  Use {@link #set(ConvexCastResult)} instead.
 	 */
+	@Deprecated
 	public void copy(ConvexCastResult<T, E> result) {
-		super.copy(result);
-		this.timeOfImpact.copy(result.timeOfImpact);
+		super.set(result);
+		this.timeOfImpact.set(result.timeOfImpact);
+	}
+	
+	/**
+	 * Sets this result to the given result.
+	 * @param result the result to use
+	 * @since 6.0.0
+	 */
+	public void set(ConvexCastResult<T, E> result) {
+		super.set(result);
+		this.timeOfImpact.set(result.timeOfImpact);
 	}
 
 	/**
@@ -100,6 +122,6 @@ public class ConvexCastResult<T extends CollisionBody<E>, E extends Fixture> ext
 	 */
 	@Override
 	public ConvexCastResult<T, E> copy() {
-		return new ConvexCastResult<T, E>(this.body, this.fixture, this.timeOfImpact);
+		return new ConvexCastResult<T, E>(this);
 	}
 }

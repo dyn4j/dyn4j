@@ -123,6 +123,16 @@ public class Interval implements Copyable<Interval> {
 		
 		this.max = max;
 	}
+	
+	/**
+	 * Sets this interval to the given interval.
+	 * @param interval the interval to use
+	 * @since 6.0.0
+	 */
+	public void set(Interval interval) {
+		this.max = interval.max;
+		this.min = interval.min;
+	}
 
 	/**
 	 * Returns true if the given value is within this {@link Interval}

@@ -54,6 +54,16 @@ final class BroadphaseItem<T extends CollisionBody<E>, E extends Fixture> extend
 		this.fixture = fixture;
 	}
 	
+	/**
+	 * Copy constructor.
+	 * @param item the item to copy
+	 * @since 6.0.0
+	 */
+	protected BroadphaseItem(BroadphaseItem<T, E> item) {
+		this.body = item.body;
+		this.fixture = item.fixture;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -102,6 +112,6 @@ final class BroadphaseItem<T extends CollisionBody<E>, E extends Fixture> extend
 	 */
 	@Override
 	public BroadphaseItem<T, E> copy() {
-		return new BroadphaseItem<T, E>(this.body, this.fixture);
+		return new BroadphaseItem<T, E>(this);
 	}
 }

@@ -116,7 +116,7 @@ public class ManifoldTest {
 		TestCase.assertNotSame(m.points.get(0).point, m2.points.get(0).point);
 		
 		Manifold m3 = new Manifold();
-		m3.copy(m);
+		m3.set(m);
 		
 		TestCase.assertNotNull(m3.normal);
 		TestCase.assertNotNull(m3.points);

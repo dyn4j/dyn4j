@@ -57,6 +57,16 @@ public class ConvexDetectResult<T extends CollisionBody<E>, E extends Fixture> e
 		super(body, fixture);
 		this.penetration = penetration.copy();
 	}
+	
+	/**
+	 * Copy constructor.
+	 * @param result the result to copy
+	 * @since 6.0.0
+	 */
+	protected ConvexDetectResult(ConvexDetectResult<T, E> result) {
+		super(result);
+		this.penetration = result.penetration.copy();
+	}
 
 	/**
 	 * Returns the penetration data.
@@ -71,16 +81,28 @@ public class ConvexDetectResult<T extends CollisionBody<E>, E extends Fixture> e
 	 * @param penetration the penetration data
 	 */
 	public void setPenetration(Penetration penetration) {
-		this.penetration.copy(penetration);
+		this.penetration.set(penetration);
 	}
 	
 	/**
 	 * Copies (deep) the given result data to this result.
 	 * @param result the result to copy
+	 * @deprecated Deprecated in 6.0.0. Use {@link #set(ConvexDetectResult)} instead.
 	 */
+	@Deprecated
 	public void copy(ConvexDetectResult<T, E> result) {
-		super.copy(result);
-		this.penetration.copy(result.penetration);
+		super.set(result);
+		this.penetration.set(result.penetration);
+	}
+	
+	/**
+	 * Sets this result to the given result.
+	 * @param result the result to use
+	 * @since 6.0.0
+	 */
+	public void set(ConvexDetectResult<T, E> result) {
+		super.set(result);
+		this.penetration.set(result.penetration);
 	}
 
 	/**
@@ -91,6 +113,6 @@ public class ConvexDetectResult<T extends CollisionBody<E>, E extends Fixture> e
 	 * @return {@link ConvexDetectResult}
 	 */
 	public ConvexDetectResult<T, E> copy() {
-		return new ConvexDetectResult<T, E>(this.body, this.fixture, this.penetration);
+		return new ConvexDetectResult<T, E>(this);
 	}
 }

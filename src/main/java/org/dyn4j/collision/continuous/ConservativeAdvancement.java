@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -42,7 +42,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * This method is described in "Continuous Collision Detection and Physics" by Erwin Coumans (Draft).
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 1.2.0
  */
 public class ConservativeAdvancement implements TimeOfImpactDetector {
@@ -204,7 +204,7 @@ public class ConservativeAdvancement implements TimeOfImpactDetector {
 		
 		// fill up the separation object
 		toi.time = l;
-		toi.separation.copy(separation);
+		toi.separation.set(separation);
 		
 		return true;
 	}

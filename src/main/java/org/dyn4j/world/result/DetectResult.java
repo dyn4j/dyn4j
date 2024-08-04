@@ -46,9 +46,7 @@ public class DetectResult<T extends CollisionBody<E>, E extends Fixture> impleme
 	/**
 	 * Default constructor.
 	 */
-	public DetectResult() {
-		
-	}
+	public DetectResult() {}
 	
 	/**
 	 * Full constructor.
@@ -58,6 +56,16 @@ public class DetectResult<T extends CollisionBody<E>, E extends Fixture> impleme
 	protected DetectResult(T body, E fixture) {
 		this.body = body;
 		this.fixture = fixture;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param result the result to copy
+	 * @since 6.0.0
+	 */
+	protected DetectResult(DetectResult<T, E> result) {
+		this.body = result.body;
+		this.fixture = result.fixture;
 	}
 	
 	/**
@@ -95,8 +103,20 @@ public class DetectResult<T extends CollisionBody<E>, E extends Fixture> impleme
 	/**
 	 * Copies (deep) the given result to this result.
 	 * @param result the result to copy
+	 * @deprecated Deprecated in 6.0.0.  Use {@link #set(DetectResult)} instead.
 	 */
+	@Deprecated
 	public void copy(DetectResult<T, E> result) {
+		this.body = result.body;
+		this.fixture = result.fixture;
+	}
+	
+	/**
+	 * Sets this result to the given result.
+	 * @param result the result to use
+	 * @since 6.0.0
+	 */
+	public void set(DetectResult<T, E> result) {
 		this.body = result.body;
 		this.fixture = result.fixture;
 	}
@@ -106,6 +126,6 @@ public class DetectResult<T extends CollisionBody<E>, E extends Fixture> impleme
 	 * @return {@link DetectResult}
 	 */
 	public DetectResult<T, E> copy() {
-		return new DetectResult<T, E>(this.body, this.fixture);
+		return new DetectResult<T, E>(this);
 	}
 }

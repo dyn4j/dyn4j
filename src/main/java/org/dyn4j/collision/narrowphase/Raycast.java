@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -38,7 +38,7 @@ import org.dyn4j.geometry.Vector2;
  * The point is the point on the {@link Convex} {@link Shape} where the ray
  * intersects. The normal is the normal of the edge the {@link Ray} intersects.
  * @author William Bittle
- * @version 4.0.0
+ * @version 6.0.0
  * @since 2.0.0
  */
 public class Raycast implements Shiftable, Copyable<Raycast> {
@@ -69,6 +69,17 @@ public class Raycast implements Shiftable, Copyable<Raycast> {
 		this.point = point.copy();
 		this.normal = normal.copy();
 		this.distance = distance;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param raycast the raycast to copy
+	 * @since 6.0.0
+	 */
+	protected Raycast(Raycast raycast) {
+		this.point = raycast.point.copy();
+		this.normal = raycast.normal.copy();
+		this.distance = raycast.distance;
 	}
 	
 	/* (non-Javadoc)
@@ -150,8 +161,18 @@ public class Raycast implements Shiftable, Copyable<Raycast> {
 	 * Copies (deep) the given {@link Raycast} information to this {@link Raycast}.
 	 * @param raycast the raycast to copy
 	 * @since 4.0.0
+	 * @deprecated Deprecated in 6.0.0.  Use {@link #set(Raycast)} instead.
 	 */
 	public void copy(Raycast raycast) {
+		this.set(raycast);
+	}
+	
+	/**
+	 * Sets this {@link Raycast} to the given {@link Raycast}.
+	 * @param raycast the raycast to use
+	 * @since 6.0.0
+	 */
+	public void set(Raycast raycast) {
 		this.distance = raycast.distance;
 		this.normal.x = raycast.normal.x;
 		this.normal.y = raycast.normal.y;
@@ -173,6 +194,6 @@ public class Raycast implements Shiftable, Copyable<Raycast> {
 	 */
 	@Override
 	public Raycast copy() {
-		return new Raycast(this.point, this.normal, this.distance);
+		return new Raycast(this);
 	}
 }

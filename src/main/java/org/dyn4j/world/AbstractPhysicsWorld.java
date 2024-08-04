@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -91,7 +91,7 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * more than one world. Likewise, the {@link Joint#setOwner(Object)} method is used to handle
  * joints being added to the world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
@@ -807,7 +807,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		if (settings == null) {
 			return;
 		}
-		this.settings.copy(settings);
+		this.settings.set(settings);
 	}
 
 	/* (non-Javadoc)
@@ -1590,7 +1590,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// test against all fixture pairs taking the fixture
 			// with the smallest time of impact
 			for (int k = 0; k < fc2; k++) {
-				BodyFixture f2 = body2.getFixture(k);
+				BodyFixture fixture2 = body2.getFixture(k);
 				
 				// if the second body is static, we can accelerate a bit
 				// more by checking the swept AABB of the first body
@@ -1603,7 +1603,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 					AABB b1SweptAABB = this.ccdBroadphase.getAABB(body1);
 					
 					// use body2-fixture2 STATIC AABB
-					reusableItem.set(body2, f2);
+					reusableItem.set(body2, fixture2);
 					AABB b2StaticAABB = this.broadphaseDetector.getAABB(reusableItem);
 					
 					// if they don't overlap, then they can't possibly have a TOI
@@ -1613,16 +1613,16 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 				}
 				
 				// skip sensor fixtures
-				if (f2.isSensor()) continue;
+				if (fixture2.isSensor()) continue;
 				
 				for (int j = 0; j < fc1; j++) {
 					BodyFixture f1 = body1.getFixture(j);
 
 					// skip sensor fixtures
-					if (f2.isSensor()) continue;
+					if (fixture2.isSensor()) continue;
 
 					Filter filter1 = f1.getFilter();
-					Filter filter2 = f2.getFilter();
+					Filter filter2 = fixture2.getFilter();
 					
 					// make sure the fixture filters allow the collision
 					if (!filter1.isAllowed(filter2)) {
@@ -1632,7 +1632,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 					// check listeners
 					boolean allow = true;
 					for (TimeOfImpactListener<T> tl : listeners) {
-						if (!tl.collision(body1, f1, body2, f2)) {
+						if (!tl.collision(body1, f1, body2, fixture2)) {
 							// if any toi listener doesnt allow it, then don't allow it
 							// we need to allow all listeners to be notified before we continue
 							allow = false;
@@ -1641,7 +1641,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 					if (!allow) continue;
 					
 					Convex c1 = f1.getShape();
-					Convex c2 = f2.getShape();
+					Convex c2 = fixture2.getShape();
 					
 					// get the time of impact for the fixture pair
 					if (this.timeOfImpactDetector.getTimeOfImpact(c1, tx1, v1, av1, c2, tx2, v2, av2, t1, t2, toi)) {
@@ -1660,7 +1660,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 							// if it is then ask the listeners if we should use this collision
 							allow = true;
 							for (TimeOfImpactListener<T> tl : listeners) {
-								if (!tl.collision(body1, f1, body2, f2, toi)) {
+								if (!tl.collision(body1, f1, body2, fixture2, toi)) {
 									// if any toi listener doesnt allow it, then don't allow it
 									// we need to allow all listeners to be notified before we continue
 									allow = false;

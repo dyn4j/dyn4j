@@ -48,6 +48,16 @@ public final class BasicCollisionPair<T> extends AbstractCollisionPair<T> implem
 		this.second = second;
 	}
 	
+	/**
+	 * Copy constructor.
+	 * @param pair the pair to copy
+	 * @since 6.0.0
+	 */
+	protected BasicCollisionPair(BasicCollisionPair<T> pair) {
+		this.first = pair.first;
+		this.second = pair.second;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -70,7 +80,7 @@ public final class BasicCollisionPair<T> extends AbstractCollisionPair<T> implem
 	 */
 	@Override
 	public BasicCollisionPair<T> copy() {
-		return new BasicCollisionPair<T>(this.first, this.second);
+		return new BasicCollisionPair<T>(this);
 	}
 
 	/* (non-Javadoc)

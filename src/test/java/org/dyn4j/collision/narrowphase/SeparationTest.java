@@ -192,7 +192,7 @@ public class SeparationTest {
 		TestCase.assertEquals(3.0, sep1.getPoint2().y);
 		TestCase.assertNotSame(p2, sep1.getPoint2());
 		
-		sep2.copy(sep1);
+		sep2.set(sep1);
 		TestCase.assertEquals(5.0, sep2.getDistance());
 		TestCase.assertEquals(1.0, sep2.getNormal().x);
 		TestCase.assertEquals(1.0, sep2.getNormal().y);

@@ -257,8 +257,19 @@ public class Settings implements Copyable<Settings> {
 	 * Copies all the settings from the given settings to this settings.
 	 * @param settings the settings to copy
 	 * @since 4.0.0
+	 * @deprecated Deprecated in 6.0.0. Use {@link #set(Settings)} instead.
 	 */
+	@Deprecated
 	public void copy(Settings settings) {
+		this.set(settings);
+	}
+	
+	/**
+	 * Sets all this settings to the settings given.
+	 * @param settings the settings to use
+	 * @since 6.0.0
+	 */
+	public void set(Settings settings) {
 		this.angularTolerance = settings.angularTolerance;
 		this.angularToleranceSquared = settings.angularToleranceSquared;
 		this.atRestDetectionEnabled = settings.atRestDetectionEnabled;

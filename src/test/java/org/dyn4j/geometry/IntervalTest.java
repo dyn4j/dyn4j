@@ -426,4 +426,18 @@ public class IntervalTest {
 		TestCase.assertEquals(i.max, copy.max);
 		TestCase.assertEquals(i.min, copy.min);
 	}
+
+	/**
+	 * Tests the set method.
+	 */
+	@Test
+	public void set() {
+		Interval i = new Interval(-1, 0);
+		Interval o = new Interval(0, 0);
+		o.set(i);
+		
+		TestCase.assertNotSame(i, o);
+		TestCase.assertEquals(i.max, o.max);
+		TestCase.assertEquals(i.min, o.min);
+	}
 }

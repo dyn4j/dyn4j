@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -50,7 +50,7 @@ import org.dyn4j.exception.ValueOutOfRangeException;
  * is the default and only model the Java specification describes.
  * 
  * @author Manolis Tsamis
- * @version 5.0.0
+ * @version 6.0.0
  * @since 3.4.0
  */
 class AdaptiveDecimal implements Copyable<AdaptiveDecimal> {
@@ -122,8 +122,23 @@ class AdaptiveDecimal implements Copyable<AdaptiveDecimal> {
 	 * be enough to hold all the components.
 	 * 
 	 * @param other The {@link AdaptiveDecimal} to copy from
+	 * @deprecated Deprecated in 6.0.0.  Use {@link #set(AdaptiveDecimal)} instead.
 	 */
+	@Deprecated
 	public void copyFrom(AdaptiveDecimal other) {
+		System.arraycopy(other.components, 0, this.components, 0, other.size());
+		this.size = other.size;
+	}
+	
+	/**
+	 * Sets the components of this {@link AdaptiveDecimal} to the given {@link AdaptiveDecimal}.
+	 * The capacity of the this {@link AdaptiveDecimal} is not modified and it should
+	 * be enough to hold all the components.
+	 * 
+	 * @param other the {@link AdaptiveDecimal} to use
+	 * @since 6.0.0
+	 */
+	public void set(AdaptiveDecimal other) {
 		System.arraycopy(other.components, 0, this.components, 0, other.size());
 		this.size = other.size;
 	}

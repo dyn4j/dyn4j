@@ -198,10 +198,10 @@ public class DetectResultTest {
 		cdr2 = new ConvexDetectResult<Body, BodyFixture>();
 		rr2 = new RaycastResult<Body, BodyFixture>();
 		
-		dr2.copy(dr);
-		ccr2.copy(ccr);
-		cdr2.copy(cdr);
-		rr2.copy(rr);
+		dr2.set(dr);
+		ccr2.set(ccr);
+		cdr2.set(cdr);
+		rr2.set(rr);
 		
 		TestCase.assertEquals(dr2.getBody(), body);
 		TestCase.assertEquals(dr2.getFixture(), bf);

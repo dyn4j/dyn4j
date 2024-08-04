@@ -113,7 +113,7 @@ public class PenetrationTest {
 		Penetration pen1 = new Penetration(n, 2.0);
 		Penetration pen2 = new Penetration();
 		
-		pen2.copy(pen1);
+		pen2.set(pen1);
 		TestCase.assertEquals(2.0, pen2.getDepth());
 		TestCase.assertNotSame(n, pen2.getNormal());
 		TestCase.assertNotSame(pen1.getNormal(), pen2.getNormal());

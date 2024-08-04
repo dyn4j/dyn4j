@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -36,7 +36,7 @@ import org.dyn4j.geometry.Vector2;
  * The penetration normal should always be a normalized vector that points from the first
  * {@link Convex} {@link Shape} to the second.
  * @author William Bittle
- * @version 5.0.2
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class Penetration implements Shiftable, Copyable<Penetration> {
@@ -61,6 +61,16 @@ public class Penetration implements Shiftable, Copyable<Penetration> {
 	protected Penetration(Vector2 normal, double depth) {
 		this.normal = normal.copy();
 		this.depth = depth;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param penetration the penetration to copy
+	 * @since 6.0.0
+	 */
+	protected Penetration(Penetration penetration) {
+		this.normal = penetration.normal.copy();
+		this.depth = penetration.depth;
 	}
 	
 	/* (non-Javadoc)
@@ -123,8 +133,19 @@ public class Penetration implements Shiftable, Copyable<Penetration> {
 	 * Copies (deep) the given {@link Penetration} information to this {@link Penetration}.
 	 * @param penetration the penetration to copy
 	 * @since 4.0.0
+	 * @deprecated Deprecated in 6.0.0. Use {@link #set(Penetration)} instead.
 	 */
+	@Deprecated
 	public void copy(Penetration penetration) {
+		this.set(penetration);
+	}
+	
+	/**
+	 * Sets this {@link Penetration} to the given {@link Penetration}.
+	 * @param penetration the penetration to use
+	 * @since 6.0.0
+	 */
+	public void set(Penetration penetration) {
 		this.depth = penetration.depth;
 		this.normal.x = penetration.normal.x;
 		this.normal.y = penetration.normal.y;
@@ -143,6 +164,6 @@ public class Penetration implements Shiftable, Copyable<Penetration> {
 	 */
 	@Override
 	public Penetration copy() {
-		return new Penetration(this.normal, this.depth);
+		return new Penetration(this);
 	}
 }

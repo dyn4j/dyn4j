@@ -49,6 +49,16 @@ public final class BasicCollisionItem<T extends CollisionBody<E>, E extends Fixt
 		this.fixture = fixture;
 	}
 	
+	/**
+	 * Copy constructor.
+	 * @param item the item to copy
+	 * @since 6.0.0
+	 */
+	protected BasicCollisionItem(BasicCollisionItem<T, E> item) {
+		this.body = item.body;
+		this.fixture = item.fixture;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -71,7 +81,7 @@ public final class BasicCollisionItem<T extends CollisionBody<E>, E extends Fixt
 	 */
 	@Override
 	public BasicCollisionItem<T, E> copy() {
-		return new BasicCollisionItem<T, E>(this.body, this.fixture);
+		return new BasicCollisionItem<T, E>(this);
 	}
 
 	/* (non-Javadoc)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -31,7 +31,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link Containment} class.
  * @author William Bittle
- * @version 4.2.1
+ * @version 6.0.0
  * @since 4.2.1
  */
 public class ContainmentTest {
@@ -116,13 +116,24 @@ public class ContainmentTest {
 		TestCase.assertTrue(con.isAContainedInB());
 		TestCase.assertTrue(con.isBContainedInA());
 		
-		Containment con2 = new Containment();
-		con2.copy(con);
-		
-		TestCase.assertTrue(con2.isAContainedInB());
-		TestCase.assertTrue(con2.isBContainedInA());
-		
 		Containment con3 = con.copy();
+		
+		TestCase.assertTrue(con3.isAContainedInB());
+		TestCase.assertTrue(con3.isBContainedInA());
+	}
+
+	/**
+	 * Tests the set methods.
+	 */
+	@Test
+	public void set() {
+		Containment con = new Containment(true, true);
+		
+		TestCase.assertTrue(con.isAContainedInB());
+		TestCase.assertTrue(con.isBContainedInA());
+		
+		Containment con3 = new Containment();
+		con3.set(con);
 		
 		TestCase.assertTrue(con3.isAContainedInB());
 		TestCase.assertTrue(con3.isBContainedInA());

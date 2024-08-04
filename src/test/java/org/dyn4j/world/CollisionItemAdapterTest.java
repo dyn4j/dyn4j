@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -35,7 +35,7 @@ import junit.framework.TestCase;
 /**
  * Test case for the {@link CollisionItemAdapter} class.
  * @author William Bittle
- * @version 4.0.0
+ * @version 6.0.0
  * @since 4.0.0
  */
 public class CollisionItemAdapterTest {
@@ -64,12 +64,12 @@ public class CollisionItemAdapterTest {
 		TestCase.assertNull(this.item.getFixture());
 		
 		this.item.set(b1, b1f1);
-		TestCase.assertEquals(b1, this.item.getBody());
-		TestCase.assertEquals(b1f1, this.item.getFixture());
+		TestCase.assertSame(b1, this.item.getBody());
+		TestCase.assertSame(b1f1, this.item.getFixture());
 		
 		this.item.set(b2, b2f1);
-		TestCase.assertEquals(b2, this.item.getBody());
-		TestCase.assertEquals(b2f1, this.item.getFixture());
+		TestCase.assertSame(b2, this.item.getBody());
+		TestCase.assertSame(b2f1, this.item.getFixture());
 	}
 	
 	/**
@@ -112,15 +112,46 @@ public class CollisionItemAdapterTest {
 		
 		this.item.set(b1, b1f1);
 		CollisionItemAdapter<Body, BodyFixture> c2 = this.item.copy();
-		TestCase.assertEquals(b1, c2.getBody());
-		TestCase.assertEquals(b1f1, c2.getFixture());
+		TestCase.assertSame(b1, c2.getBody());
+		TestCase.assertSame(b1f1, c2.getFixture());
 		
 		// make sure it's a deep copy
 		c1.set(null, null);
 		TestCase.assertNull(c1.getBody());
 		TestCase.assertNull(c1.getFixture());
-		TestCase.assertEquals(b1, c2.getBody());
-		TestCase.assertEquals(b1f1, c2.getFixture());
+		TestCase.assertSame(b1, c2.getBody());
+		TestCase.assertSame(b1f1, c2.getFixture());
 	}
 	
+	/**
+	 * Tests the constructors.
+	 */
+	@Test
+	public void create() {
+		Body b1 = new Body();
+		BodyFixture b1f1 = b1.addFixture(Geometry.createCircle(0.5));
+		
+		CollisionItemAdapter<Body, BodyFixture> ci = new CollisionItemAdapter<>();
+		TestCase.assertNull(ci.getBody());
+		TestCase.assertNull(ci.getFixture());
+		
+		ci = new CollisionItemAdapter<>(b1, b1f1);
+		TestCase.assertSame(b1, ci.getBody());
+		TestCase.assertSame(b1f1, ci.getFixture());
+	}
+	
+	/**
+	 * Tests the set method.
+	 */
+	@Test
+	public void set() {
+		Body b1 = new Body();
+		BodyFixture b1f1 = b1.addFixture(Geometry.createCircle(0.5));
+		
+		CollisionItemAdapter<Body, BodyFixture> ci = new CollisionItemAdapter<>(b1, b1f1);
+		
+		this.item.set(ci);
+		TestCase.assertSame(this.item.getBody(), ci.getBody());
+		TestCase.assertSame(this.item.getFixture(), ci.getFixture());
+	}
 }

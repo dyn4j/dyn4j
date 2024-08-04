@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import org.dyn4j.collision.narrowphase.Separation;
  * The {@link #getTime()} is in the range of [0, 1] and represents the time within the current
  * timestep that the collision occurred.
  * @author William Bittle
- * @version 4.0.0
+ * @version 6.0.0
  * @since 1.2.0
  */
 public class TimeOfImpact implements Copyable<TimeOfImpact> {
@@ -104,17 +104,28 @@ public class TimeOfImpact implements Copyable<TimeOfImpact> {
 	 * @param separation the separation
 	 */
 	public void setSeparation(Separation separation) {
-		this.separation.copy(separation);
+		this.separation.set(separation);
 	}
 	
 	/**
 	 * Copies (deep) the given {@link TimeOfImpact} to this {@link TimeOfImpact}.
 	 * @param toi the time of impact data to copy
 	 * @since 4.0.0
+	 * @deprecated Deprecated in 6.0.0. Use {@link #set(TimeOfImpact)} instead.
 	 */
+	@Deprecated
 	public void copy(TimeOfImpact toi) {
+		this.set(toi);
+	}
+	
+	/**
+	 * Sets this {@link TimeOfImpact} to the given {@link TimeOfImpact}.
+	 * @param toi the time of impact to use
+	 * @since 6.0.0
+	 */
+	public void set(TimeOfImpact toi) {
 		this.time = toi.time;
-		this.separation.copy(toi.separation);
+		this.separation.set(toi.separation);
 	}
 	
 	/* (non-Javadoc)

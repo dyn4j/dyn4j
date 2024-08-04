@@ -63,6 +63,16 @@ public class Containment implements Copyable<Containment> {
 		this.bContainedInA = bContainedInA;
 	}
 	
+	/**
+	 * Copy constructor.
+	 * @param containment the containment to copy
+	 * @since 6.0.0
+	 */
+	protected Containment(Containment containment) {
+		this.aContainedInB = containment.aContainedInB;
+		this.bContainedInA = containment.bContainedInA;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -86,8 +96,19 @@ public class Containment implements Copyable<Containment> {
 	/**
 	 * Copies (deep) the given {@link Containment} information to this {@link Containment}.
 	 * @param containment the containment to copy
+	 * @deprecated Use {@link #set(Containment)} instead
 	 */
+	@Deprecated
 	public void copy(Containment containment) {
+		this.set(containment);
+	}
+	
+	/**
+	 * Sets this containment to the given containment.
+	 * @param containment the containment to use
+	 * @since 6.0.0
+	 */
+	public void set(Containment containment) {
 		this.aContainedInB = containment.aContainedInB;
 		this.bContainedInA = containment.bContainedInA;
 	}
@@ -97,7 +118,7 @@ public class Containment implements Copyable<Containment> {
 	 */
 	@Override
 	public Containment copy() {
-		return new Containment(this.aContainedInB, this.bContainedInA);
+		return new Containment(this);
 	}
 
 	/**

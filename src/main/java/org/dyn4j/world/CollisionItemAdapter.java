@@ -43,6 +43,32 @@ final class CollisionItemAdapter<T extends CollisionBody<E>, E extends Fixture> 
 	
 	/** The fixture */
 	private E fixture;
+	
+	/**
+	 * Default constructor.
+	 */
+	public CollisionItemAdapter() {}
+	
+	/**
+	 * Full constructor.
+	 * @param body the body
+	 * @param fixture the fixture
+	 * @since 6.0.0
+	 */
+	public CollisionItemAdapter(T body, E fixture) {
+		this.body = body;
+		this.fixture = fixture;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param item the item to copy
+	 * @since 6.0.0
+	 */
+	protected CollisionItemAdapter(CollisionItemAdapter<T, E> item) {
+		this.body = item.body;
+		this.fixture = item.fixture;
+	}
 
 	/**
 	 * Sets the body/fixture of this item.
@@ -52,6 +78,16 @@ final class CollisionItemAdapter<T extends CollisionBody<E>, E extends Fixture> 
 	public void set(T body, E fixture) {
 		this.body = body;
 		this.fixture = fixture;
+	}
+	
+	/**
+	 * Sets the body/fixture of this item to the given item's body/fixture.
+	 * @param item the item to use
+	 * @since 6.0.0
+	 */
+	public void set(CollisionItemAdapter<T, E> item) {
+		this.body = item.body;
+		this.fixture = item.fixture;
 	}
 	
 	/* (non-Javadoc)
@@ -92,9 +128,6 @@ final class CollisionItemAdapter<T extends CollisionBody<E>, E extends Fixture> 
 	 */
 	@Override
 	public CollisionItemAdapter<T, E> copy() {
-		CollisionItemAdapter<T, E> item = new CollisionItemAdapter<T, E>();
-		item.body = this.body;
-		item.fixture = this.fixture;
-		return item;
+		return new CollisionItemAdapter<T, E>(this);
 	}
 }

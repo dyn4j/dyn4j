@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -44,7 +44,7 @@ import org.dyn4j.Epsilon;
  * The receiver of a Rotation object can be sure it always represents a valid rotation.
  * 
  * @author Manolis Tsamis
- * @version 5.0.0
+ * @version 6.0.0
  * @since 3.4.0
  */
 public class Rotation implements Copyable<Rotation> {
@@ -234,7 +234,7 @@ public class Rotation implements Copyable<Rotation> {
 	 * @see org.dyn4j.Copyable#copy()
 	 */
 	public Rotation copy() {
-		return new Rotation(this.cost, this.sint);
+		return new Rotation(this);
 	}
 	
 	/* (non-Javadoc)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,7 +34,7 @@ import org.dyn4j.geometry.Vector2;
  * The depth represents the distance along the {@link Manifold} normal to this
  * contact point. This can vary for every {@link ManifoldPoint} in a {@link Manifold}.
  * @author William Bittle
- * @version 4.0.0
+ * @version 6.0.0
  * @since 1.0.0
  * @see Manifold
  */
@@ -68,6 +68,17 @@ public class ManifoldPoint implements Shiftable, Copyable<ManifoldPoint> {
 		this.id = id.copy();
 		this.point = point.copy();
 		this.depth = depth;
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param point the manifold point to copy
+	 * @since 6.0.0
+	 */
+	protected ManifoldPoint(ManifoldPoint point) {
+		this.id = point.id.copy();
+		this.point = point.point.copy();
+		this.depth = point.depth;
 	}
 	
 	/* (non-Javadoc)
@@ -130,8 +141,21 @@ public class ManifoldPoint implements Shiftable, Copyable<ManifoldPoint> {
 	 * Copies (deep) the given {@link ManifoldPoint} to this {@link ManifoldPoint}.
 	 * @param manifoldPoint the manifold point to copy
 	 * @since 4.0.0
+	 * @deprecated Deprecated in 6.0.0. Use {@link #set(ManifoldPoint)} instead.
 	 */
+	@Deprecated
 	public void copy(ManifoldPoint manifoldPoint) {
+		this.set(manifoldPoint);
+	}
+	
+	/**
+	 * Sets this {@link ManifoldPoint} data to the given {@link ManifoldPoint}.
+	 * <p>
+	 * NOTE: Object data is deep copied.
+	 * @param manifoldPoint the manifold point to use
+	 * @since 6.0.0
+	 */
+	public void set(ManifoldPoint manifoldPoint) {
 		this.id = manifoldPoint.id.copy();
 		this.depth = manifoldPoint.depth;
 		this.point.x = manifoldPoint.point.x;
@@ -152,6 +176,6 @@ public class ManifoldPoint implements Shiftable, Copyable<ManifoldPoint> {
 	 */
 	@Override
 	public ManifoldPoint copy() {
-		return new ManifoldPoint(this.id, this.point, this.depth);
+		return new ManifoldPoint(this);
 	}
 }

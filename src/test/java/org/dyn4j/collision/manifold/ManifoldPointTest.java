@@ -58,7 +58,7 @@ public class ManifoldPointTest {
 		TestCase.assertEquals(1.0, mp2.depth);
 		
 		// create with null id
-		ManifoldPoint mp3 = new ManifoldPoint(null);
+		ManifoldPoint mp3 = new ManifoldPoint((ManifoldPointId)null);
 		
 		TestCase.assertNotNull(mp3.point);
 		TestCase.assertEquals(0.0, mp3.depth);
@@ -84,7 +84,7 @@ public class ManifoldPointTest {
 		TestCase.assertEquals(1.0, mp2.depth);
 		
 		ManifoldPoint mp3 = new ManifoldPoint(ManifoldPointId.DISTANCE);
-		mp3.copy(mp);
+		mp3.set(mp);
 		
 		TestCase.assertEquals(ManifoldPointId.DISTANCE, mp3.id);
 		TestCase.assertNotNull(mp3.point);

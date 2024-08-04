@@ -130,7 +130,7 @@ public class AdaptiveDecimalTest {
 		TestCase.assertEquals(15.0, ed.get(1));
 		
 		AdaptiveDecimal copy2 = new AdaptiveDecimal(5);
-		copy2.copyFrom(ed);
+		copy2.set(ed);
 		
 		TestCase.assertEquals(0.1, copy2.get(0));
 		TestCase.assertEquals(15.0, copy2.get(1));

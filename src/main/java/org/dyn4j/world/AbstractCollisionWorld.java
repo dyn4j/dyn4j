@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -110,7 +110,7 @@ import org.dyn4j.world.result.RaycastResult;
  * methods to handle certain scenarios like fixture removal on a body or bodies added to
  * more than one world. Callers should <b>NOT</b> use the methods.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 4.0.0
  * @param <T> the {@link CollisionBody} type
  * @param <E> the {@link Fixture} type
@@ -1441,7 +1441,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public DetectResult<T, E> next() {
 			if (this.hasNext) {
-				this.currentResult.copy(this.nextResult);
+				this.currentResult.set(this.nextResult);
 				this.hasNext = this.findNext();
 				return this.currentResult;
 			}
@@ -1517,7 +1517,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public DetectResult<T, E> next() {
 			if (this.hasNext) {
-				this.currentResult.copy(this.nextResult);
+				this.currentResult.set(this.nextResult);
 				this.hasNext = this.findNext();
 				return this.currentResult;
 			}
@@ -1595,7 +1595,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public ConvexDetectResult<T, E> next() {
 			if (this.hasNext) {
-				this.currentResult.copy(this.nextResult);
+				this.currentResult.set(this.nextResult);
 				this.hasNext = this.findNext();
 				return this.currentResult;
 			}
@@ -1679,7 +1679,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public ConvexDetectResult<T, E> next() {
 			if (this.hasNext) {
-				this.currentResult.copy(this.nextResult);
+				this.currentResult.set(this.nextResult);
 				this.hasNext = this.findNext();
 				return this.currentResult;
 			}
@@ -1764,7 +1764,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public RaycastResult<T, E> next() {
 			if (this.hasNext) {
-				this.currentResult.copy(this.nextResult);
+				this.currentResult.set(this.nextResult);
 				this.hasNext = this.findNext();
 				return this.currentResult;
 			}
@@ -1853,7 +1853,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public RaycastResult<T, E> next() {
 			if (this.hasNext) {
-				this.currentResult.copy(this.nextResult);
+				this.currentResult.set(this.nextResult);
 				this.hasNext = this.findNext();
 				return this.currentResult;
 			}
@@ -1954,7 +1954,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public ConvexCastResult<T, E> next() {
 			if (this.hasNext) {
-				this.currentResult.copy(this.nextResult);
+				this.currentResult.set(this.nextResult);
 				this.hasNext = this.findNext();
 				return this.currentResult;
 			}

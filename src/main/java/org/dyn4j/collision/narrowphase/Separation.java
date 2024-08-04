@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -35,7 +35,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * The separation normal should always be normalized.
  * @author William Bittle
- * @version 4.0.0
+ * @version 6.0.0
  * @since 1.0.0
  */
 public class Separation implements Shiftable, Copyable<Separation> {
@@ -73,6 +73,18 @@ public class Separation implements Shiftable, Copyable<Separation> {
 		this.distance = distance;
 		this.point1 = point1.copy();
 		this.point2 = point2.copy();
+	}
+	
+	/**
+	 * Copy constructor.
+	 * @param separation the separation to copy
+	 * @since 6.0.0
+	 */
+	protected Separation(Separation separation) {
+		this.normal = separation.normal.copy();
+		this.distance = separation.distance;
+		this.point1 = separation.point1.copy();
+		this.point2 = separation.point2.copy();
 	}
 	
 	/* (non-Javadoc)
@@ -172,8 +184,19 @@ public class Separation implements Shiftable, Copyable<Separation> {
 	 * Copies (deep) the given {@link Separation} information to this {@link Separation}.
 	 * @param separation the separation to copy
 	 * @since 4.0.0
+	 * @deprecated Deprecated in 6.0.0.  Use {@link #set(Separation)} instead.
 	 */
+	@Deprecated
 	public void copy(Separation separation) {
+		this.set(separation);
+	}
+	
+	/**
+	 * Sets this separation to the given separation.
+	 * @param separation the separation to use
+	 * @since 6.0.0
+	 */
+	public void set(Separation separation) {
 		this.distance = separation.distance;
 		this.normal.x = separation.normal.x;
 		this.normal.y = separation.normal.y;
@@ -199,6 +222,6 @@ public class Separation implements Shiftable, Copyable<Separation> {
 	 */
 	@Override
 	public Separation copy() {
-		return new Separation(this.normal, this.distance, this.point1, this.point2);
+		return new Separation(this);
 	}
 }

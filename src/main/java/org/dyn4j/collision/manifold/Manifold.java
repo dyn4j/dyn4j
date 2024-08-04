@@ -73,6 +73,19 @@ public class Manifold implements Shiftable, Copyable<Manifold> {
 		}
 	}
 	
+	/**
+	 * Copy constructor.
+	 * @param manifold the manifold to copy
+	 * @since 6.0.0
+	 */
+	protected Manifold(Manifold manifold) {
+		this.points = new ArrayList<>(manifold.points.size());
+		this.normal = manifold.normal.copy();
+		for (ManifoldPoint mp : manifold.points) {
+			this.points.add(mp.copy());
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -141,8 +154,21 @@ public class Manifold implements Shiftable, Copyable<Manifold> {
 	 * Copies (deep) the given {@link Manifold} to this {@link Manifold}.
 	 * @param manifold the manifold to copy
 	 * @since 4.0.0
+	 * @deprecated Deprecated in 6.0.0. Use {@link #set(Manifold)} instead.
 	 */
+	@Deprecated
 	public void copy(Manifold manifold) {
+		this.set(manifold);
+	}
+	
+	/**
+	 * Sets this {@link Manifold} data to the given {@link Manifold}.
+	 * <p>
+	 * NOTE: Object data is deep copied.
+	 * @param manifold the manifold to use
+	 * @since 6.0.0
+	 */
+	public void set(Manifold manifold) {
 		this.normal.x = manifold.normal.x;
 		this.normal.y = manifold.normal.y;
 		this.points.clear();
@@ -167,6 +193,6 @@ public class Manifold implements Shiftable, Copyable<Manifold> {
 	 */
 	@Override
 	public Manifold copy() {
-		return new Manifold(this.normal, this.points);
+		return new Manifold(this);
 	}
 }

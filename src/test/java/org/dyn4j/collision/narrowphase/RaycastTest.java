@@ -153,7 +153,7 @@ public class RaycastTest {
 		TestCase.assertEquals(2.0, raycast1.getPoint().y);
 		TestCase.assertNotSame(p, raycast1.getPoint());
 		
-		raycast2.copy(raycast1);
+		raycast2.set(raycast1);
 		TestCase.assertEquals(2.0, raycast2.getDistance());
 		TestCase.assertEquals(1.0, raycast2.getNormal().x);
 		TestCase.assertEquals(1.0, raycast2.getNormal().y);
