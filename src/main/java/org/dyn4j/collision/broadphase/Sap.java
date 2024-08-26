@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.dyn4j.AVLTree;
 import org.dyn4j.BinarySearchTree;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.CollisionPair;
@@ -49,7 +50,7 @@ import org.dyn4j.geometry.Vector2;
  * <p>
  * This algorithm is O(n) for all {@link #detect(AABB)} and {@link #raycast(Ray, double)} methods.
  * @author William Bittle
- * @version 4.1.0
+ * @version 6.0.0
  * @since 1.0.0
  * @param <T> the object type
  */
@@ -92,7 +93,7 @@ public final class Sap<T> extends AbstractBroadphaseDetector<T> implements Broad
 	public Sap(BroadphaseFilter<T> broadphaseFilter, AABBProducer<T> aabbProducer, AABBExpansionMethod<T> aabbExpansionMethod, int initialCapacity) {
 		super(broadphaseFilter, aabbProducer, aabbExpansionMethod);
 		
-		this.tree = new BinarySearchTree<AABBBroadphaseProxy<T>>(true);
+		this.tree = new AVLTree<AABBBroadphaseProxy<T>>();
 		// 0.75 = 3/4, we can garuantee that the hashmap will not need to be rehashed
 		// if we take capacity / load factor
 		// the default load factor is 0.75 according to the javadocs, but lets assign it to be sure

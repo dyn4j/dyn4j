@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * Class used to test the {@link AABBBroadphaseProxy} class.
  * @author William Bittle
- * @version 4.1.0
+ * @version 6.0.0
  * @since 4.1.0
  */
 public class AABBBroadphaseProxyTest {
@@ -51,11 +51,11 @@ public class AABBBroadphaseProxyTest {
 	 */
 	@Test
 	public void compareTo() {
-		AABBBroadphaseProxy<TestCollisionBody> proxy1 = new AABBBroadphaseProxy<TestCollisionBody>(null);
-		AABBBroadphaseProxy<TestCollisionBody> proxy2 = new AABBBroadphaseProxy<TestCollisionBody>(null);
-		AABBBroadphaseProxy<TestCollisionBody> proxy3 = new AABBBroadphaseProxy<TestCollisionBody>(null);
-		AABBBroadphaseProxy<TestCollisionBody> proxy4 = new AABBBroadphaseProxy<TestCollisionBody>(null);
-		AABBBroadphaseProxy<TestCollisionBody> proxy5 = new AABBBroadphaseProxy<TestCollisionBody>(null);
+		AABBBroadphaseProxy<TestCollisionBody> proxy1 = new AABBBroadphaseProxy<TestCollisionBody>(new TestCollisionBody());
+		AABBBroadphaseProxy<TestCollisionBody> proxy2 = new AABBBroadphaseProxy<TestCollisionBody>(new TestCollisionBody());
+		AABBBroadphaseProxy<TestCollisionBody> proxy3 = new AABBBroadphaseProxy<TestCollisionBody>(new TestCollisionBody());
+		AABBBroadphaseProxy<TestCollisionBody> proxy4 = new AABBBroadphaseProxy<TestCollisionBody>(new TestCollisionBody());
+		AABBBroadphaseProxy<TestCollisionBody> proxy5 = new AABBBroadphaseProxy<TestCollisionBody>(new TestCollisionBody());
 		
 		proxy1.aabb.set(new AABB(0, 0, 10, 10));
 		proxy2.aabb.set(new AABB(1, 1, 2, 2));
@@ -67,7 +67,7 @@ public class AABBBroadphaseProxyTest {
 		TestCase.assertEquals(-1, proxy1.compareTo(proxy2));
 		
 		// equal minx/miny
-		TestCase.assertEquals(0, proxy1.compareTo(proxy3));
+		TestCase.assertFalse(0 == proxy1.compareTo(proxy3));
 		
 		// smaller minx
 		TestCase.assertEquals(1, proxy1.compareTo(proxy4));

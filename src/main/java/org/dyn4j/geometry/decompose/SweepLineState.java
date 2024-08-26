@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -26,6 +26,7 @@ package org.dyn4j.geometry.decompose;
 
 import java.util.PriorityQueue;
 
+import org.dyn4j.AVLTree;
 import org.dyn4j.BinarySearchTree;
 import org.dyn4j.Reference;
 import org.dyn4j.geometry.Vector2;
@@ -36,7 +37,7 @@ import org.dyn4j.geometry.Vector2;
  * The SweepLine algorithm maintains a DCEL to hold the triangulation, a binary tree for edge
  * searching and the current sweepline intercept value.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 3.2.0
  */
 final class SweepLineState {
@@ -54,7 +55,7 @@ final class SweepLineState {
 	 */
 	public SweepLineState() {
 		this.referenceY = new Reference<Double>(0.0);
-		this.tree = new BinarySearchTree<SweepLineEdge>(true);
+		this.tree = new AVLTree<SweepLineEdge>();
 	}
 	
 	/**

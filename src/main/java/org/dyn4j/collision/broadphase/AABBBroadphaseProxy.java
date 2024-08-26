@@ -64,7 +64,30 @@ final class AABBBroadphaseProxy<T> implements Comparable<AABBBroadphaseProxy<T>>
 		} else {
 			// if the x values are the same then compare on the y values
 			diff = this.aabb.getMinY() - o.aabb.getMinY();
-			return (int)Math.signum(diff);
+			if (diff != 0) {
+				return (int)Math.signum(diff);
+			} else {
+				// try the max x
+				diff = this.aabb.getMaxX() - o.aabb.getMaxX();
+				if (diff != 0) {
+					return (int)Math.signum(diff);
+				} else {
+					// now the max y
+					diff = this.aabb.getMaxY() - o.aabb.getMaxY();
+					if (diff != 0) {
+						return (int)Math.signum(diff);
+					} else {
+						// at this point we've discovered that the AABBs are identical
+						// but we still need something that makes them different because
+						// the BinarySearchTree they'll be put in cannot have duplicate
+						// values
+						
+						// since we don't know the type of T, then hashcode is the only
+						// thing we have to go on
+						return this.item.hashCode() - o.item.hashCode();
+					}
+				}
+			}
 		}
 	}
 
