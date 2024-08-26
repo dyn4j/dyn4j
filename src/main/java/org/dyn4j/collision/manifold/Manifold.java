@@ -79,7 +79,7 @@ public class Manifold implements Shiftable, Copyable<Manifold> {
 	 * @since 6.0.0
 	 */
 	protected Manifold(Manifold manifold) {
-		this.points = new ArrayList<>(manifold.points.size());
+		this.points = new ArrayList<ManifoldPoint>(manifold.points.size());
 		this.normal = manifold.normal.copy();
 		for (ManifoldPoint mp : manifold.points) {
 			this.points.add(mp.copy());
