@@ -60,7 +60,7 @@ public class AVLTree<E extends Comparable<E>> implements BinarySearchTree<E>, It
 	int size;
 
 	/**
-	 * Creates a new binary search tree with automatic balancing off.
+	 * Default constructor.
 	 */
 	public AVLTree() {
 		this.root = null;
@@ -656,7 +656,6 @@ public class AVLTree<E extends Comparable<E>> implements BinarySearchTree<E>, It
 		}
 		
 		this.remove(node);
-		
 		
 		return node;
 	}
