@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -34,9 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.CollisionPair;
-import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Vector2;
@@ -47,7 +45,7 @@ import org.dyn4j.geometry.Vector2;
  * This class uses a self-balancing binary tree to store the AABBs.  The AABBs are sorted using the perimeter.
  * The perimeter hueristic is better than area for 2D because axis aligned segments would have zero area.
  * @author William Bittle
- * @version 4.1.0
+ * @version 6.0.0
  * @since 3.0.0
  * @param <T> the object type
  */
@@ -133,11 +131,9 @@ public final class DynamicAABBTree<T> extends AbstractBroadphaseDetector<T> {
 	/**
 	 * Internal add method.
 	 * <p>
-	 * This method assumes the given arguments are all non-null and that the
-	 * {@link CollisionBody} {@link Fixture} is not currently in this broad-phase.
-	 * @param key the key for the body-fixture pair
-	 * @param body the body
-	 * @param fixture the fixture
+	 * This method assumes the given object is non-null and has not
+	 * been added to the tree already.
+	 * @param obj the object to add
 	 */
 	private void addNode(T obj) {
 		// compute the aabb
@@ -201,10 +197,8 @@ public final class DynamicAABBTree<T> extends AbstractBroadphaseDetector<T> {
 	 * Internal update method.
 	 * <p>
 	 * This method assumes the given arguments are all non-null.
-	 * @param key the key for the body-fixture pair
+	 * @param obj the object to update
 	 * @param node the current node in the tree
-	 * @param body the body
-	 * @param fixture the fixture
 	 */
 	private void updateNode(T obj, DynamicAABBTreeLeaf<T> node) {
 		// compute the AABB

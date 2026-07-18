@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -320,7 +320,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	@Override
 	public void step(int steps, double elapsedTime) {
-		// make sure the number of steps is greather than zero
+		// make sure the number of steps is greater than zero
 		if (steps <= 0) return;
 		// make sure the update time is greater than zero
 		if (elapsedTime <= 0.0) return;

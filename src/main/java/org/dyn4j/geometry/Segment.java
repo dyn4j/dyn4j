@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -54,8 +54,9 @@ public class Segment extends AbstractShape implements Convex, Wound, Shape, Tran
 	 * Creates a new segment using the given points.  The center will be the 
 	 * average of the points.
 	 * @param valid always true or this constructor would not be called
-	 * @param point1 the first point
-	 * @param point2 the second point
+	 * @param vertices the segment points
+	 * @param segment the vector from point1 to point2
+	 * @param length the length of the segment
 	 */
 	private Segment(boolean valid, Vector2[] vertices, Vector2 segment, double length) {
 		super(Geometry.getAverageCenter(vertices), length * 0.5);

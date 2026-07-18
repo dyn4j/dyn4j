@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -38,7 +38,7 @@ import org.dyn4j.geometry.AABB;
  * for the purpose described above.  If you want a more general purpose implementation
  * look at the DynamicAABBTree implementation in the broadphase package.
  * @author William Bittle
- * @version 4.2.0
+ * @version 6.0.0
  * @since 4.2.0
  */
 final class SegmentTree {
@@ -264,7 +264,7 @@ final class SegmentTree {
 	/**
 	 * Balances the subtree using node as the root.
 	 * @param node the root node of the subtree to balance
-	 * @return {@link DynamicAABBTreeNode} the new root of the subtree
+	 * @return {@link SegmentTreeNode} the new root of the subtree
 	 */
 	private SegmentTreeNode balance(SegmentTreeNode node) {
 		SegmentTreeNode a = node;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -52,7 +52,7 @@ import org.dyn4j.geometry.Vector2;
  * NOTE: This algorithm's result is highly dependent on the given cluster tolerance and the
  * input polygon.  There's no guarantee that the result will have 3 or more vertices.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 4.2.0
  * @see <a href="http://geomalgorithms.com/a16-_decimate-1.html">Vertex Cluster Reduction</a>
  */
@@ -199,7 +199,6 @@ public class VertexClusterReduction extends AbstractSimplifier implements Simpli
 	/**
 	 * Removes the given vertex from the queue and segment tree.
 	 * @param v the vertex to remove
-	 * @param list the list to remove the vertex from
 	 * @param tree the segment tree to remove the vertex from
 	 */
 	private final void removeVertex(SimplePolygonVertex v, SegmentTree tree) {

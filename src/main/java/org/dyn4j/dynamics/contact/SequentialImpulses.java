@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -40,7 +40,7 @@ import org.dyn4j.geometry.Vector2;
 /**
  * Represents an impulse based rigid {@link PhysicsBody} physics collision resolver.
  * @author William Bittle
- * @version 5.0.2
+ * @version 6.0.0
  * @since 3.2.0
  * @param <T> the {@link PhysicsBody} type
  */
@@ -72,7 +72,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * Helper method to update the bodies of a {@link ContactConstraint}
 	 * 
 	 * @param contactConstraint The {@link ContactConstraint} of the bodies
-	 * @param contact The corresponding {@link contact}
+	 * @param contact The corresponding {@link SolvableContact}
 	 * @param J
 	 * @since 3.4.0
 	 */

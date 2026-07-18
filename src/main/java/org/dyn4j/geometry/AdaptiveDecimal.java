@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -187,7 +187,7 @@ class AdaptiveDecimal implements Copyable<AdaptiveDecimal> {
 		return this;
 	}
 	
-	/** The mask to get the mantissa of a double as per the standard; Taken from {@link DoubleConsts#SIGN_BIT_MASK} */
+	/** The mask to get the mantissa of a double as per the standard; Taken from DoubleConsts.SIGN_BIT_MASK */
     private static final long SIGNIF_BIT_MASK = 0x000FFFFFFFFFFFFFL;
     
     /** The implicit bit in the mantissa of a double */
