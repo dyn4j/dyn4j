@@ -1,3 +1,56 @@
+## v6.0.0 - July 17th, 2026
+
+[Milestone](https://github.com/dyn4j/dyn4j/milestone/18?closed=1) |
+[Tag](https://github.com/dyn4j/dyn4j/tree/6.0.0) |
+[Maven Release](https://search.maven.org/artifact/org.dyn4j/dyn4j/6.0.0/bundle) |
+[GitHub Release](https://github.com/dyn4j/dyn4j/packages/93466?version=6.0.0)
+
+This update focuses on allowing the copy of most dyn4j objects.  There are few breaking changes in this release so please read
+the notes below carefully.
+
+**NOTE**: This release implements the `Copyable` interface on more classes, `Body` and `Joint` in particular.  In general, 
+the goal of the `copy()` method is to return an identical, deep copy, of the object.  However, there are objects where that 
+doesn't make sense.  When shallow or special copy behavior was needed, the javadoc was updated to highlight the difference.  
+
+**NOTE**: The `Copyable` interface requires that classes implement a `copy` method.  The contract for this method is 
+to return an object of the same type as the class `copy` was called on.  For example, the `Fixture` class will return a 
+`Fixture` instance.  The `BodyFixture` class will return an instance of `BodyFixture`.  This cannot be enforced by type
+parameters in a deep inheritance model like dyn4j.  What this means is that _using_ the `copy` method on any dyn4j object is 
+perfectly safe, but if you extend a dyn4j object, you must remember to _override_ the `copy` method to return an instance of 
+your type.  For example, if you create a class called `GameObject` that extends the `Body` class, you must override the 
+`copy` method to return a `GameObject`.  A `CopyException` will be thrown when copying `Body`s or `Joint`s if the 
+`copy` method is not overridden in a subclass.
+
+**NOTE**: The `Link` shape has been redesigned.  In prior versions the `Link` shape contained references to the next and 
+previous `Link`s in the chain. That structure was not compatible with the semantics of copying because you can't create a `Link` 
+copy without having the next and previous `Link`s copied already. The `Link` class was changed to store the previous and next 
+_vertices_ instead.  This makes the `Link` shape fully encapsulated which allows it to be treated independent of the other 
+`Link`s in the chain and most importantly, supports copying.  However, this means that the Link can no longer be locally 
+transformed (translated or rotated) - these methods now return `UnsupportedOperationException`s.  You can still
+perform translation/rotation manually by recreating any part of the `Link` chain.
+
+**NOTE**: Prior to 6.0.0, any joint with angular limits had a special way of setting limits when the angles were not within
+the range [-&pi;, &pi;] using the `setLimitsReferenceAngle` method. The angular limits have been improved to support
+any value.  The values provided will be normalized to the range [-&pi;, &pi;], then adjusted internally to support new ways
+to define the limits.  Review the class documentation for more details.
+
+**NOTE**: Prior to 6.0.0, some of the joints had their frame of reference in body1 space and others in body2 space.  This made
+configuring the joints inconsistent.  A breaking change in this version is to fix every joint's frame of reference in body1 
+space.  This affects the `AngleJoint` limits, `RevoluteJoint` limits, `DistanceJoint` limits, and `WeldJoint` 
+limits.
+
+**NOTE**: A number of bugs were addressed in the `BinarySearchTree` class along with a new set of unit tests for all the
+basic functionality.  At the same time, the `BinarySearchTree` class has been renamed to `AVLTree` to better reflect 
+the type of Binary Search Tree it represents.  To allow for other implementations, a new interface was created called 
+`BinarySearchTree` which the `AVLTree` implements.
+
+**Changes**
+- [#293](https://github.com/dyn4j/dyn4j/issues/293) Provide clone methods for a variety of objects
+- [#305](https://github.com/dyn4j/dyn4j/issues/305) Updated all joint angular limits to allow any values
+
+**Bug Fixes**
+- [#298](https://github.com/dyn4j/dyn4j/issues/298) Balanced tree does not work properly for left-right and right-left cases
+
 ## v5.0.2 - March 16th, 2024
 
 [Milestone](https://github.com/dyn4j/dyn4j/milestone/17?closed=1) |

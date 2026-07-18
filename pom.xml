@@ -3,7 +3,7 @@
 
   <groupId>org.dyn4j</groupId>
   <artifactId>dyn4j</artifactId>
-  <version>5.0.2</version>
+  <version>6.0.0</version>
 
   <name>dyn4j</name>
   <url>http://www.dyn4j.org</url>
@@ -126,6 +126,11 @@
             <execution>
               <id>default-compile</id>
               <configuration>
+            	<compilerArgs>
+              	  <compilerArg>-Xlint</compilerArg>
+              	  <compilerArg>-Xdoclint</compilerArg>
+              	  <compilerArg>-Werror</compilerArg>
+              	</compilerArgs>
                 <release>9</release>
               </configuration>
             </execution>
@@ -141,6 +146,11 @@
                 <goal>compile</goal>
               </goals>
               <configuration>
+              	<compilerArgs>
+              	  <compilerArg>-Xlint</compilerArg>
+              	  <compilerArg>-Xdoclint</compilerArg>
+              	  <compilerArg>-Werror</compilerArg>
+              	</compilerArgs>
                 <excludes>
                   <exclude>module-info.java</exclude>
                 </excludes>
