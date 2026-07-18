@@ -31,7 +31,7 @@
     <dyn4j.maven-bundle-plugin.version>5.1.8</dyn4j.maven-bundle-plugin.version>
     <dyn4j.maven-javadoc-plugin.version>3.4.1</dyn4j.maven-javadoc-plugin.version>
     <dyn4j.nexus-staging-maven-plugin.version>1.6.13</dyn4j.nexus-staging-maven-plugin.version>
-    <dyn4j.maven-gpg-plugin.version>3.0.1</dyn4j.maven-gpg-plugin.version>
+    <dyn4j.maven-gpg-plugin.version>3.2.8</dyn4j.maven-gpg-plugin.version>
     <dyn4j.maven-enforcer-plugin.version>3.1.0</dyn4j.maven-enforcer-plugin.version>
   </properties>
 
@@ -367,10 +367,9 @@
                 <id>sign-artifacts</id>
                 <phase>verify</phase>
                 <configuration>
-                	<gpgArguments>
-                		<arg>--pinentry-mode</arg>
-                		<arg>loopback</arg>
-                	</gpgArguments>
+                	<keyEnvName>GPG_KEYNAME</keyEnvName>
+                	<passphraseEnvName>GPG_PASSPHRASE</passphraseEnvName>
+                	<signer>bc</signer>
               	</configuration>
                 <goals>
                   <goal>sign</goal>
