@@ -294,23 +294,6 @@
             </execution>
           </executions>
         </plugin>
-
-        <!--
-          Nexus staging plugin.
-          https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin
-          This allows for deployment to Maven Central via the command line.
-        -->
-        <plugin>
-          <groupId>org.sonatype.plugins</groupId>
-          <artifactId>nexus-staging-maven-plugin</artifactId>
-          <version>${dyn4j.nexus-staging-maven-plugin.version}</version>
-          <extensions>true</extensions>
-          <configuration>
-            <serverId>ossrh</serverId>
-            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-            <autoReleaseAfterClose>true</autoReleaseAfterClose>
-          </configuration>
-        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -373,34 +356,8 @@
     <profile>
       <id>dyn4j-release-central</id>
       
-	  <distributionManagement>
-		<repository>
-		  <id>sonatype-nexus-staging</id>
-		  <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-		<snapshotRepository>
-		  <id>ossrh</id>
-		  <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-		</snapshotRepository>
-	  </distributionManagement>
-	  
       <build>
         <plugins>
-        
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-deploy-plugin</artifactId>
-            <version>${dyn4j.maven-deploy-plugin.version}</version>
-            <configuration>
-              <skip>true</skip>
-            </configuration>
-          </plugin>
-        
-          <!--
-          Maven GPG plugin.
-          https://maven.apache.org/plugins/maven-gpg-plugin/
-          -->
-
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
@@ -422,25 +379,16 @@
             </executions>
           </plugin>
         
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <extensions>true</extensions>
-            <executions>
-              <execution>
-                <id>deploy-packages</id>
-                <phase>deploy</phase>
-                <goals>
-                  <goal>deploy</goal>
-                </goals>
-                <configuration>
-                	<serverId>ossrh</serverId>
-                	<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                	<autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
+        <plugin>
+          <groupId>org.sonatype.central</groupId>
+          <artifactId>central-publishing-maven-plugin</artifactId>
+          <version>0.9.0</version>
+          <extensions>true</extensions>
+          <configuration>
+            <publishingServerId>central</publishingServerId>
+            <autoPublish>true</autoPublish>
+          </configuration>
+        </plugin>
         </plugins>
       </build>
     </profile>
