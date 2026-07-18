@@ -39,7 +39,7 @@ jobs:
       # release to Maven Central
       # NOTE: must use a settings.xml file since the CLI doesn't accept username/password arguments
       # NOTE: the profile dyn4j-release-github uses the maven deploy plugin
-      - name: Build and Release to GitHub Packages
+      - name: Build and Release to Maven Central
         env:
           GPG_KEYNAME: ${{ secrets.gpg_private_key }}
           GPG_PASSPHRASE: ${{ secrets.gpg_passphrase }}
