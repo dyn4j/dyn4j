@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -481,15 +481,6 @@ public class WeldJointTest extends BaseJointTest {
 	}
 	
 	/**
-	 * Tests the failed setting of the maximum angle.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setUpperLimitInvalid() {
-		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-		wj.setUpperLimit(Math.toRadians(-10));
-	}
-	
-	/**
 	 * Tests the successful setting of the minimum angle.
 	 */
 	@Test
@@ -498,15 +489,6 @@ public class WeldJointTest extends BaseJointTest {
 		wj.setLowerLimit(Math.toRadians(-10));
 		
 		TestCase.assertEquals(Math.toRadians(-10), wj.getLowerLimit(), 1e-6);
-	}
-	
-	/**
-	 * Tests the failed setting of the maximum angle.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setLowerLimitInvalid() {
-		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-		wj.setLowerLimit(Math.toRadians(10));
 	}
 	
 	/**
@@ -519,15 +501,6 @@ public class WeldJointTest extends BaseJointTest {
 		
 		TestCase.assertEquals(Math.toRadians(-30), wj.getLowerLimit(), 1e-6);
 		TestCase.assertEquals(Math.toRadians(20), wj.getUpperLimit(), 1e-6);
-	}
-	
-	/**
-	 * Tests the failed setting of the minimum and maximum angle.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setUpperAndLowerLimitsInvalid() {
-		WeldJoint<Body> wj = new WeldJoint<Body>(b1, b2, new Vector2());
-		wj.setLimits(Math.toRadians(30), Math.toRadians(20));
 	}
 	
 	/**

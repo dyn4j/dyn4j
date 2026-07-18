@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -44,7 +44,7 @@ public class AngleJointTest extends BaseJointTest {
 	public void create() {
 		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
 		
-		TestCase.assertEquals(0.0, aj.getJointAngle());
+		TestCase.assertEquals(0.0, aj.getAngularTranslation());
 		TestCase.assertEquals(1.0, aj.getRatio());
 		
 		TestCase.assertEquals(0.0, aj.getLimitsReferenceAngle());
@@ -76,15 +76,6 @@ public class AngleJointTest extends BaseJointTest {
 	}
 	
 	/**
-	 * Tests the failed setting of the maximum angle.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setUpperLimitInvalid() {
-		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
-		aj.setUpperLimit(Math.toRadians(-10));
-	}
-	
-	/**
 	 * Tests the successful setting of the minimum angle.
 	 */
 	@Test
@@ -93,15 +84,6 @@ public class AngleJointTest extends BaseJointTest {
 		aj.setLowerLimit(Math.toRadians(-10));
 		
 		TestCase.assertEquals(Math.toRadians(-10), aj.getLowerLimit(), 1e-6);
-	}
-	
-	/**
-	 * Tests the failed setting of the maximum angle.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setLowerLimitInvalid() {
-		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
-		aj.setLowerLimit(Math.toRadians(10));
 	}
 	
 	/**
@@ -114,15 +96,6 @@ public class AngleJointTest extends BaseJointTest {
 		
 		TestCase.assertEquals(Math.toRadians(-30), aj.getLowerLimit(), 1e-6);
 		TestCase.assertEquals(Math.toRadians(20), aj.getUpperLimit(), 1e-6);
-	}
-	
-	/**
-	 * Tests the failed setting of the minimum and maximum angle.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setUpperAndLowerLimitsInvalid() {
-		AngleJoint<Body> aj = new AngleJoint<Body>(b1, b2);
-		aj.setLimits(Math.toRadians(30), Math.toRadians(20));
 	}
 	
 	/**
@@ -674,11 +647,11 @@ public class AngleJointTest extends BaseJointTest {
 		TestCase.assertEquals(aj.fixedRotation, ajc.fixedRotation);
 		TestCase.assertEquals(aj.impulse, ajc.impulse);
 		TestCase.assertEquals(aj.limitsEnabled, ajc.limitsEnabled);
-		TestCase.assertEquals(aj.lowerImpulse, ajc.lowerImpulse);
+		TestCase.assertEquals(aj.lowerLimitImpulse, ajc.lowerLimitImpulse);
 		TestCase.assertEquals(aj.lowerLimit, ajc.lowerLimit);
 		TestCase.assertEquals(aj.ratio, ajc.ratio);
 		TestCase.assertEquals(aj.referenceAngle, ajc.referenceAngle);
-		TestCase.assertEquals(aj.upperImpulse, ajc.upperImpulse);
+		TestCase.assertEquals(aj.upperLimitImpulse, ajc.upperLimitImpulse);
 		TestCase.assertEquals(aj.upperLimit, ajc.upperLimit);
 		
 		// test overriding the bodies

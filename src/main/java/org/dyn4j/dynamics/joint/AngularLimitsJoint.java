@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -27,7 +27,7 @@ package org.dyn4j.dynamics.joint;
 /**
  * Represents a joint with a single set of angular limits.
  * @author William Bittle
- * @version 5.0.0
+ * @version 6.0.0
  * @since 5.0.0
  */
 public interface AngularLimitsJoint {
@@ -52,11 +52,14 @@ public interface AngularLimitsJoint {
 	/**
 	 * Sets the upper angular limit.
 	 * <p>
-	 * Must be greater than or equal to the lower angular limit.
+	 * The limit is relative to the vector from the anchor to body 1. The limit 
+	 * can be any value, but behavior will change based on the values of both 
+	 * the lower and upper limits. See the class documentation for more 
+	 * details on the different ways the limits can be set.
 	 * <p>
-	 * See the class documentation for more details on the limit ranges.
-	 * @param upperLimit the upper angular limit in radians
-	 * @throws IllegalArgumentException if upperLimit is less than the current lower limit
+	 * The limits can be equal. A WeldJoint can provide more stability over 
+	 * equal limits if you want the bodies pinned to each other.
+	 * @param upperLimit the counter-clockwise angular limit in radians
 	 */
 	public void setUpperLimit(double upperLimit);
 	
@@ -65,46 +68,63 @@ public interface AngularLimitsJoint {
 	 * @return double
 	 */
 	public double getLowerLimit();
-	
+
 	/**
 	 * Sets the lower angular limit.
 	 * <p>
-	 * Must be less than or equal to the upper angular limit.
+	 * The limit is relative to the vector from the anchor to body 1. The limit 
+	 * can be any value, but behavior will change based on the values of both 
+	 * the lower and upper limits. See the class documentation for more 
+	 * details on the different ways the limits can be set.
 	 * <p>
-	 * See the class documentation for more details on the limit ranges.
+	 * The limits can be equal. A WeldJoint can provide more stability over 
+	 * equal limits if you want the bodies pinned to each other.
 	 * @param lowerLimit the lower angular limit in radians
-	 * @throws IllegalArgumentException if lowerLimit is greater than the current upper limit
 	 */
 	public void setLowerLimit(double lowerLimit);
 	
 	/**
 	 * Sets the upper and lower angular limits.
 	 * <p>
-	 * The lower limit must be less than or equal to the upper limit.
+	 * The limit is relative to the vector from the anchor to body 1. The limit 
+	 * can be any value, but behavior will change based on the values of both 
+	 * the lower and upper limits. See the class documentation for more 
+	 * details on the different ways the limits can be set.
 	 * <p>
-	 * See the class documentation for more details on the limit ranges.
+	 * The limits can be equal. A WeldJoint can provide more stability over 
+	 * equal limits if you want the bodies pinned to each other.
 	 * @param lowerLimit the lower limit in radians
 	 * @param upperLimit the upper limit in radians
-	 * @throws IllegalArgumentException if the lowerLimit is greater than upperLimit
 	 */
 	public void setLimits(double lowerLimit, double upperLimit);
 	
 	/**
 	 * Sets both the lower and upper limits and enables them.
 	 * <p>
-	 * See the class documentation for more details on the limit ranges.
+	 * The limit is relative to the vector from the anchor to body 1. The limit 
+	 * can be any value, but behavior will change based on the values of both 
+	 * the lower and upper limits. See the class documentation for more 
+	 * details on the different ways the limits can be set.
+	 * <p>
+	 * The limits can be equal. A WeldJoint can provide more stability over 
+	 * equal limits if you want the bodies pinned to each other.
 	 * @param lowerLimit the lower limit in radians
 	 * @param upperLimit the upper limit in radians
-	 * @throws IllegalArgumentException if lowerLimit is greater than upperLimit
 	 * @since 4.2.0
 	 */
 	public void setLimitsEnabled(double lowerLimit, double upperLimit);
 
 	/**
-	 * Sets both the lower and upper limits to the given limit and enables them.
+	 * Sets both the lower and upper limits to the given value and enables them.
 	 * <p>
-	 * See the class documentation for more details on the limit ranges.
-	 * @param limit the desired limit
+	 * The limit is relative to the vector from the anchor to body 1. The limit 
+	 * can be any value, but behavior will change based on the values of both 
+	 * the lower and upper limits. See the class documentation for more 
+	 * details on the different ways the limits can be set.
+	 * <p>
+	 * The limits can be equal. A WeldJoint can provide more stability over 
+	 * equal limits if you want the bodies pinned to each other.
+	 * @param limit the lower limit in radians
 	 * @since 4.2.0
 	 */
 	public void setLimitsEnabled(double limit);
@@ -112,8 +132,14 @@ public interface AngularLimitsJoint {
 	/**
 	 * Sets both the lower and upper limits to the given limit.
 	 * <p>
-	 * See the class documentation for more details on the limit ranges.
-	 * @param limit the desired limit
+	 * The limit is relative to the vector from the anchor to body 1. The limit 
+	 * can be any value, but behavior will change based on the values of both 
+	 * the lower and upper limits. See the class documentation for more 
+	 * details on the different ways the limits can be set.
+	 * <p>
+	 * The limits can be equal. A WeldJoint can provide more stability over 
+	 * equal limits if you want the bodies pinned to each other.
+	 * @param limit the lower limit in radians
 	 * @since 4.2.0
 	 */
 	public void setLimits(double limit);
@@ -137,7 +163,7 @@ public interface AngularLimitsJoint {
 	 * from a current state or when adjusting the limits.
 	 * <p>
 	 * See the class documentation for more details.
-	 * @param angle the reference angle in radians
+	 * @param angle the reference angle; in radians
 	 * @see #getLimitsReferenceAngle()
 	 * @since 3.0.1
 	 */

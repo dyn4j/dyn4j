@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,10 +32,10 @@ import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.exception.ArgumentNullException;
 import org.dyn4j.exception.ValueOutOfRangeException;
-import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Matrix33;
+import org.dyn4j.geometry.Rotation;
 import org.dyn4j.geometry.Shiftable;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
@@ -70,23 +70,60 @@ import org.dyn4j.geometry.Vector3;
  * default the limits are disabled.  If you want the lower and upper limit
  * to be the same, disable the spring/limits for a more stable simulation.
  * <p>
- * If the lower and upper limits are set explicitly, the values must follow 
- * these restrictions:
- * <ul>
- * <li>lower limit &le; upper limit</li>
- * <li>lower limit &gt; -180</li>
- * <li>upper limit &lt; 180</li>
- * </ul> 
- * To create a joint with limits outside of this range use the 
- * {@link #setLimitsReferenceAngle(double)} method.  This method sets the 
- * baseline angle for the joint, which represents 0 radians in the context of
- * the limits.  For example:
+ * Both the lower and upper limits can be set to any value (in radians). Angle 
+ * zero is the vector from the anchor point to body 1. There are a few ways 
+ * to set the limits. The easiest way is to make sure the lower limit is less 
+ * than or equal to the upper limit. For example:
  * <pre>
- * // we would like the joint limits to be [30, 260]
- * // this is the same as the limits [-60, 170] if the reference angle is 90
- * joint.setLimits(Math.toRadians(-60), Math.toRadians(170));
- * joint.setReferenceAngle(Math.toRadians(90));
+ * [ -20,   20]
+ * [-130,    0]
+ * [   0,   40]
+ * [  50,  160]
  * </pre>
+ * If you don't like where the zero-angle is, you can use the 
+ * {@link #setLimitsReferenceAngle(double)} method to set the zero-angle 
+ * offset. For example:
+ * <pre>
+ * [ -20,   20] with reference angle =  50 yields [  30,  70] 
+ * [-130,    0] with reference angle = -50 yields [-180, -50]
+ * [   0,   40] with reference angle =  50 yields [  50,  90]
+ * [  50,  160] with reference angle = -50 yields [   0, 110]
+ * </pre>
+ * Another way is to reverse the lower and upper limits. This has the effect
+ * of setting the reference angle = &pi; and switching the lower and upper
+ * limits. The signs of the lower and upper limits must be different and the 
+ * lower limit must be larger than the upper limit. For example:
+ * <pre>
+ * [  20,  -20] translates to [-160,  160] 
+ * [ 130,    0] translates to [ 180,  -50]
+ * [   0,  -40] translates to [ 140, -180]
+ * [  50, -160] translates to [  20, -130]
+ * </pre>
+ * Another way is to have the lower and upper limits cross over each other.
+ * This means the blocked zone is where the two sweeps intersect. The lower 
+ * and upper limits must be the same sign and the lower limit must be larger 
+ * than the upper limit. For example:
+ * <pre>
+ * [  -20, -160] where the blocked zone is from [-160, -20]
+ * [  130,   50] where the blocked zone is from [  50, 130]
+ * [  -20,  -40] where the blocked zone is from [ -40, -20]
+ * [   50,   10] where the blocked zone is from [  10,  50]
+ * </pre>
+ * Finally, you can also provide the lower and upper limits larger than and 
+ * smaller than &pi;. They will be normalized into the [-&pi;, &pi;] range 
+ * and then matched to one of the patterns above.
+ * <pre>
+ * [  20,  225] translates to [  20, -135] and matches the reversed pattern 
+ * [ 225,  340] translates to [-135,  -20] and matches the crossed pattern
+ * [-225,   30] translates to [ 135,   30] and matches the crossed pattern
+ * [-225, -160] translates to [ 135, -160] and matches the reversed pattern
+ * </pre>
+ * When the limits are close together, where the larger arc represents the 
+ * free zone, the bodies can over step the limits and jump to the other side. 
+ * This is due to the solver running at a fixed rate and allowing rotation 
+ * beyond the limit and correcting it on the next solve. To avoid this 
+ * situation, make sure the limits are at least 15 degrees apart.
+ * <p>
  * @author William Bittle
  * @version 6.0.0
  * @since 1.0.0
@@ -106,14 +143,23 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	/** Whether the {@link Joint} limits are enabled or not */
 	protected boolean limitsEnabled;
 	
-	/** The upper limit of the {@link Joint} */
-	protected double upperLimit;
-	
-	/** The lower limit of the {@link Joint} */
+	/** The lower limit of the {@link Joint} in radians */
 	protected double lowerLimit;
+	
+	/** The upper limit of the {@link Joint} in radians */
+	protected double upperLimit;
 
-	/** The initial angle between the two {@link PhysicsBody}s */
+	/** The initial rotation between the two {@link PhysicsBody}s in radians */
 	protected double referenceAngle;
+	
+	/** The limit adjusted rotation offset */
+	protected double limitOffset;
+	
+	/** The adjusted lower limit */
+	protected double adjustedLowerLimit;
+	
+	/** The adjusted upper limit */
+	protected double adjustedUpperLimit;
 	
 	// spring damper
 	
@@ -202,8 +248,14 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 		// set the anchor point
 		this.localAnchor1 = body1.getLocalPoint(anchor);
 		this.localAnchor2 = body2.getLocalPoint(anchor);
-		// set the reference angle
-		this.referenceAngle = body1.getTransform().getRotationAngle() - body2.getTransform().getRotationAngle();
+		
+		// get the initial reference angle for the joint limits
+		this.referenceAngle = body2.getTransform().getRotationAngle() - body1.getTransform().getRotationAngle();
+		
+		// default limits
+		this.lowerLimit = this.upperLimit = Rotation.getNormalizedAngle(this.referenceAngle);
+		this.limitsEnabled = false;
+		this.calculateLimitOffsetAndAdjustedLimits();
 		
 		// initialize
 		this.K = new Matrix33();
@@ -219,11 +271,6 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 		this.springStiffness = 0.0;
 		this.springFrequency = 8.0;
 		this.springDampingRatio = 0.3;
-		
-		// limits
-		this.limitsEnabled = false;
-		this.lowerLimit = this.referenceAngle;
-		this.upperLimit = this.referenceAngle;
 		
 		this.angle = 0.0;
 		this.axialMass = 0.0;
@@ -265,6 +312,9 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 		this.lowerLimit = joint.lowerLimit;
 		this.upperLimit = joint.upperLimit;
 		this.referenceAngle = joint.referenceAngle;
+		this.limitOffset = joint.limitOffset;
+		this.adjustedLowerLimit = joint.adjustedLowerLimit;
+		this.adjustedUpperLimit = joint.adjustedUpperLimit;
 		
 		// spring
 		this.springMode = joint.springMode;
@@ -418,10 +468,10 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 			
 			// warm start
 			Vector2 impulse = new Vector2(this.impulse.x, this.impulse.y);
-			this.body1.getLinearVelocity().add(impulse.product(invM1));
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * (this.r1.cross(impulse) + axialImpulse));
-			this.body2.getLinearVelocity().subtract(impulse.product(invM2));
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (this.r2.cross(impulse) + axialImpulse));
+			this.body1.getLinearVelocity().subtract(impulse.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * (this.r1.cross(impulse) + axialImpulse));
+			this.body2.getLinearVelocity().add(impulse.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * (this.r2.cross(impulse) + axialImpulse));
 		} else {
 			this.impulse.zero();
 			this.springImpulse = 0.0;
@@ -448,7 +498,7 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 		// and the mass of the bodies (both of which could make stiffness zero)
 		if (this.springEnabled) {
 			// get the relative angular velocity
-			double rav = this.body1.getAngularVelocity() - this.body2.getAngularVelocity();
+			double rav = this.body2.getAngularVelocity() - this.body1.getAngularVelocity();
 			// solve for the spring/damper impulse
 			double springStepImpulse = -this.springMass * (rav + this.bias + this.gamma * this.springImpulse);
 			
@@ -462,16 +512,18 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 				this.springImpulse += springStepImpulse;
 			}
 			
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * springStepImpulse);
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * springStepImpulse);
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * springStepImpulse);
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * springStepImpulse);
 			
-			// solve the limit constraints
-			// (limits only apply when the angular spring is enabled)
+			// check if the limit constraint is enabled
 			if (this.limitsEnabled && this.axialMass > 0.0) {
+				double lowerLimit = this.adjustedLowerLimit;
+				double upperLimit = this.adjustedUpperLimit;
+
 				// lower limit
 				{
-					double C = this.angle - this.lowerLimit;
-					double Cdot = this.body1.getAngularVelocity() - this.body2.getAngularVelocity();
+					double C = this.angle - lowerLimit;
+					double Cdot = this.body2.getAngularVelocity() - this.body1.getAngularVelocity();
 					double stepImpulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * step.getInverseDeltaTime());
 					
 					// clamp
@@ -479,14 +531,14 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 					this.lowerLimitImpulse = Math.max(this.lowerLimitImpulse + stepImpulse, 0.0);
 					stepImpulse = this.lowerLimitImpulse - currentAccumulatedImpulse;
 					
-					this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * stepImpulse);
-					this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * stepImpulse);
+					this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * stepImpulse);
+					this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * stepImpulse);
 				}
 				
 				// upper limit
 				{
-					double C = this.upperLimit - this.angle;
-					double Cdot = this.body2.getAngularVelocity() - this.body1.getAngularVelocity();
+					double C = upperLimit - this.angle;
+					double Cdot = this.body1.getAngularVelocity() - this.body2.getAngularVelocity();
 					double stepImpulse = -this.axialMass * (Cdot + Math.max(C, 0.0) * step.getInverseDeltaTime());
 					
 					// clamp
@@ -494,29 +546,29 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 					this.upperLimitImpulse = Math.max(this.upperLimitImpulse + stepImpulse, 0.0);
 					stepImpulse = this.upperLimitImpulse - currentAccumulatedImpulse;
 					
-					this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * stepImpulse);
-					this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * stepImpulse);
+					this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * stepImpulse);
+					this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * stepImpulse);
 				}
 			}
 			
 			// solve the point-to-point constraint
 			Vector2 v1 = this.body1.getLinearVelocity().sum(this.r1.cross(this.body1.getAngularVelocity()));
 			Vector2 v2 = this.body2.getLinearVelocity().sum(this.r2.cross(this.body2.getAngularVelocity()));
-			Vector2 relv = v1.subtract(v2);
+			Vector2 relv = v2.subtract(v1);
 			
-			Vector2 stepImpulse = this.K.solve22(relv).negate();
+			Vector2 stepImpulse = this.K.solve22(relv.negate());
 			this.impulse.x += stepImpulse.x;
 			this.impulse.y += stepImpulse.y;
 			
-			this.body1.getLinearVelocity().add(stepImpulse.product(invM1));
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * this.r1.cross(stepImpulse));
-			this.body2.getLinearVelocity().subtract(stepImpulse.product(invM2));
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * this.r2.cross(stepImpulse));
+			this.body1.getLinearVelocity().subtract(stepImpulse.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * this.r1.cross(stepImpulse));
+			this.body2.getLinearVelocity().add(stepImpulse.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * this.r2.cross(stepImpulse));
 		} else {
 			Vector2 v1 = this.body1.getLinearVelocity().sum(this.r1.cross(this.body1.getAngularVelocity()));
 			Vector2 v2 = this.body2.getLinearVelocity().sum(this.r2.cross(this.body2.getAngularVelocity()));
-			Vector2 relv = v1.subtract(v2);
-			Vector3 C = new Vector3(relv.x, relv.y, this.body1.getAngularVelocity() - this.body2.getAngularVelocity());
+			Vector2 relv = v2.subtract(v1);
+			Vector3 C = new Vector3(relv.x, relv.y, this.body2.getAngularVelocity() - this.body1.getAngularVelocity());
 			
 			Vector3 stepImpulse = null;
 			if (this.K.m22 > 0.0) {
@@ -529,10 +581,10 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 			
 			// apply the impulse
 			Vector2 imp = new Vector2(stepImpulse.x, stepImpulse.y);
-			this.body1.getLinearVelocity().add(imp.product(invM1));
-			this.body1.setAngularVelocity(this.body1.getAngularVelocity() + invI1 * (this.r1.cross(imp) + stepImpulse.z));
-			this.body2.getLinearVelocity().subtract(imp.product(invM2));
-			this.body2.setAngularVelocity(this.body2.getAngularVelocity() - invI2 * (this.r2.cross(imp) + stepImpulse.z));
+			this.body1.getLinearVelocity().subtract(imp.product(invM1));
+			this.body1.setAngularVelocity(this.body1.getAngularVelocity() - invI1 * (this.r1.cross(imp) + stepImpulse.z));
+			this.body2.getLinearVelocity().add(imp.product(invM2));
+			this.body2.setAngularVelocity(this.body2.getAngularVelocity() + invI2 * (this.r2.cross(imp) + stepImpulse.z));
 		}
 	}
 	
@@ -561,7 +613,7 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 		
 		Vector2 p1 = this.body1.getWorldCenter().add(r1);
 		Vector2 p2 = this.body2.getWorldCenter().add(r2);
-		Vector2 relativePosition = p1.difference(p2);
+		Vector2 relativePosition = p2.difference(p1);
 		double  relativeRotation = this.getRelativeRotation();
 		Vector3 C = new Vector3(relativePosition.x, relativePosition.y, relativeRotation);
 		
@@ -589,28 +641,31 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 			
 			// solve limits
 			if (this.limitsEnabled && this.axialMass > 0.0) {
+				double lowerLimit = this.adjustedLowerLimit;
+				double upperLimit = this.adjustedUpperLimit;
 				double C3 = 0.0;
-				if (Math.abs(this.upperLimit - this.lowerLimit) < 2.0 * angularTolerance) {
-					C3 = Interval.clamp(relativeRotation - this.lowerLimit, -maxAngularCorrection, maxAngularCorrection);
-				} else if (relativeRotation <= this.lowerLimit) {
-					C3 = Interval.clamp(relativeRotation - this.lowerLimit + angularTolerance, -maxAngularCorrection, 0.0);
-				} else if (relativeRotation >= this.upperLimit) {
-					C3 = Interval.clamp(relativeRotation - this.upperLimit - angularTolerance, 0.0, maxAngularCorrection);
+				
+				if (Math.abs(upperLimit - lowerLimit) < 2.0 * angularTolerance) {
+					C3 = Interval.clamp(relativeRotation - lowerLimit, -maxAngularCorrection, maxAngularCorrection);
+				} else if (relativeRotation <= lowerLimit) {
+					C3 = Interval.clamp(relativeRotation - lowerLimit + angularTolerance, -maxAngularCorrection, 0.0);
+				} else if (relativeRotation >= upperLimit) {
+					C3 = Interval.clamp(relativeRotation - upperLimit - angularTolerance, 0.0, maxAngularCorrection);
 				}
 				
 				double impulse = -this.axialMass * C3;
-				this.body1.rotateAboutCenter(invI1 * impulse);
-				this.body2.rotateAboutCenter(-invI2 * impulse);
+				this.body1.rotateAboutCenter(-invI1 * impulse);
+				this.body2.rotateAboutCenter(invI2 * impulse);
 				angularError = Math.abs(C3);
 			}
 			
 			// then solve the linear constraint
-			Vector2 j = K.solve22(relativePosition).negate();
+			Vector2 j = K.solve22(relativePosition.negate());
 			
-			this.body1.translate(j.product(invM1));
-			this.body1.rotateAboutCenter(invI1 * r1.cross(j));
-			this.body2.translate(j.product(-invM2));
-			this.body2.rotateAboutCenter(-invI2 * r2.cross(j));
+			this.body1.translate(j.product(-invM1));
+			this.body1.rotateAboutCenter(-invI1 * r1.cross(j));
+			this.body2.translate(j.product(invM2));
+			this.body2.rotateAboutCenter(invI2 * r2.cross(j));
 		} else {
 			Vector3 impulse = null;
 			
@@ -623,13 +678,72 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	
 			// translate and rotate the objects
 			Vector2 imp = new Vector2(impulse.x, impulse.y);
-			this.body1.translate(imp.product(invM1));
-			this.body1.rotateAboutCenter(invI1 * (r1.cross(imp) + impulse.z));
-			this.body2.translate(imp.product(-invM2));
-			this.body2.rotateAboutCenter(-invI2 * (r2.cross(imp) + impulse.z));
+			this.body1.translate(imp.product(-invM1));
+			this.body1.rotateAboutCenter(-invI1 * (r1.cross(imp) + impulse.z));
+			this.body2.translate(imp.product(invM2));
+			this.body2.rotateAboutCenter(invI2 * (r2.cross(imp) + impulse.z));
 		}
 		
 		return linearError <= linearTolerance && angularError <= angularTolerance;
+	}
+
+	/**
+	 * Computes the limit offset and adjusted limits based on the limits 
+	 * provided by the user.
+	 */
+	private final void calculateLimitOffsetAndAdjustedLimits() {
+		// make sure the limits are in the range [-pi, pi]
+		double lowerLimit = Rotation.getNormalizedAngle(this.lowerLimit);
+		double upperLimit = Rotation.getNormalizedAngle(this.upperLimit);
+
+		// determine the type of limits we have
+		// - NORMAL
+		// - REVERSED
+		// - CROSSED
+		boolean sameSign = (lowerLimit > 0.0) == (upperLimit > 0.0);
+		boolean lowerGreaterThanUpper = lowerLimit > upperLimit;
+		
+		// pre-compute some offset values
+		double limitAverage = (lowerLimit + upperLimit) * 0.5;
+		double limitDifference = (lowerLimit - upperLimit);
+
+		// calculate adjustments for special cases
+		// this is something like [-20, 50] or [20, 50] or [-50, -20]
+		if (sameSign && lowerGreaterThanUpper) {
+			// the angles are CROSSED
+			// this is something like [50, 20] or [-20, -50]
+			if (lowerLimit > 0.0) {
+				limitDifference *= -1.0;
+			}
+			// the limit average gets the limits center at zero
+			// then we need to further offset by the difference in
+			// the angles so that the start angle is correct
+			this.limitOffset = limitAverage + limitDifference;
+			this.adjustedLowerLimit = lowerLimit - limitAverage - Math.PI;
+			this.adjustedUpperLimit = upperLimit - limitAverage + Math.PI;
+		} else if (lowerGreaterThanUpper) {
+			// the angles are REVERSED
+			// this is something like [20, -20]
+			this.limitOffset = Math.PI;
+			this.adjustedLowerLimit = upperLimit;
+			this.adjustedUpperLimit = lowerLimit;
+		} else {
+			// the angles are NORMAL
+			// just leave everything as-is
+			this.limitOffset = 0.0;
+			this.adjustedLowerLimit = lowerLimit;
+			this.adjustedUpperLimit = upperLimit;
+		}
+	}
+	
+	/**
+	 * Returns the relative angle between the two bodies given the reference angle.
+	 * @return double
+	 */
+	private final double getRelativeRotation() {
+		double a1 = this.body1.getTransform().getRotationAngle();
+		double a2 = this.body2.getTransform().getRotationAngle();
+		return Rotation.getNormalizedAngle(a2 - a1 - this.referenceAngle - this.limitOffset);
 	}
 
 	/**
@@ -660,14 +774,14 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	}
 	
 	/**
-	 * Returns the relative angle between the two bodies given the reference angle.
+	 * Returns the relative angle between the two {@link PhysicsBody}s in radians in the range [-&pi;, &pi;].
 	 * @return double
+	 * @since 6.0.0
 	 */
-	private double getRelativeRotation() {
-		double rr = this.body1.getTransform().getRotationAngle() - this.body2.getTransform().getRotationAngle() - this.referenceAngle;
-		if (rr < -Math.PI) rr += Geometry.TWO_PI;
-		if (rr > Math.PI) rr -= Geometry.TWO_PI;
-		return rr;
+	public double getAngularTranslation() {
+		double a1 = this.body1.getTransform().getRotationAngle();
+		double a2 = this.body2.getTransform().getRotationAngle();
+		return Rotation.getNormalizedAngle(a2 - a1 - this.referenceAngle);
 	}
 	
 	/**
@@ -919,10 +1033,11 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	public int getSpringMode() {
 		return this.springMode;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#isLimitsEnabled()
 	 */
+	@Override
 	public boolean isLimitsEnabled() {
 		return this.limitsEnabled;
 	}
@@ -930,6 +1045,7 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimitsEnabled(boolean)
 	 */
+	@Override
 	public void setLimitsEnabled(boolean flag) {
 		// check if its changing
 		if (this.limitsEnabled != flag) {
@@ -947,6 +1063,7 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#getUpperLimit()
 	 */
+	@Override
 	public double getUpperLimit() {
 		return this.upperLimit;
 	}
@@ -954,10 +1071,8 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setUpperLimit(double)
 	 */
+	@Override
 	public void setUpperLimit(double upperLimit) {
-		if (upperLimit < this.lowerLimit) 
-			throw new ValueOutOfRangeException("upperLimit", upperLimit, ValueOutOfRangeException.MUST_BE_GREATER_THAN_OR_EQUAL_TO, "lowerLimit", this.lowerLimit);
-		
 		if (this.upperLimit != upperLimit) {
 			// only wake the bodies if the motor is enabled and the limit has changed
 			if (this.limitsEnabled) {
@@ -967,6 +1082,7 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 			}
 			// set the new value
 			this.upperLimit = upperLimit;
+			this.calculateLimitOffsetAndAdjustedLimits();
 			// clear accumulated impulse
 			this.upperLimitImpulse = 0.0;
 		}
@@ -975,17 +1091,16 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#getLowerLimit()
 	 */
+	@Override
 	public double getLowerLimit() {
 		return this.lowerLimit;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLowerLimit(double)
 	 */
+	@Override
 	public void setLowerLimit(double lowerLimit) {
-		if (lowerLimit > this.upperLimit) 
-			throw new ValueOutOfRangeException("lowerLimit", lowerLimit, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "upperLimit", this.upperLimit);
-		
 		if (this.lowerLimit != lowerLimit) {
 			// only wake the bodies if the motor is enabled and the limit has changed
 			if (this.limitsEnabled) {
@@ -995,6 +1110,7 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 			}
 			// set the new value
 			this.lowerLimit = lowerLimit;
+			this.calculateLimitOffsetAndAdjustedLimits();
 			// clear accumulated impulse
 			this.lowerLimitImpulse = 0.0;
 		}
@@ -1003,10 +1119,8 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimits(double, double)
 	 */
+	@Override
 	public void setLimits(double lowerLimit, double upperLimit) {
-		if (lowerLimit > upperLimit)
-			throw new ValueOutOfRangeException("lowerLimit", lowerLimit, ValueOutOfRangeException.MUST_BE_LESS_THAN_OR_EQUAL_TO, "upperLimit", upperLimit);
-		
 		if (this.lowerLimit != lowerLimit || this.upperLimit != upperLimit) {
 			// only wake the bodies if the motor is enabled and one of the limits has changed
 			if (this.limitsEnabled) {
@@ -1017,6 +1131,7 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 			// set the values
 			this.lowerLimit = lowerLimit;
 			this.upperLimit = upperLimit;
+			this.calculateLimitOffsetAndAdjustedLimits();
 			// clear accumulated impulse
 			this.lowerLimitImpulse = 0.0;
 			this.upperLimitImpulse = 0.0;
@@ -1026,6 +1141,7 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimitsEnabled(double, double)
 	 */
+	@Override
 	public void setLimitsEnabled(double lowerLimit, double upperLimit) {
 		// enable the limits
 		this.setLimitsEnabled(true);
@@ -1036,6 +1152,7 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimitsEnabled(double)
 	 */
+	@Override
 	public void setLimitsEnabled(double limit) {
 		this.setLimitsEnabled(limit, limit);
 	}
@@ -1043,6 +1160,7 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.AngularLimitsJoint#setLimits(double)
 	 */
+	@Override
 	public void setLimits(double limit) {
 		if (this.lowerLimit != limit || this.upperLimit != limit) {
 			if (this.limitsEnabled) {
@@ -1051,8 +1169,10 @@ public class WeldJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T>
 				this.body2.setAtRest(false);
 			}
 			// set the limits
-			this.upperLimit = limit;
 			this.lowerLimit = limit;
+			this.upperLimit = limit;
+			this.calculateLimitOffsetAndAdjustedLimits();
+			
 			// clear accumulated impulse
 			this.lowerLimitImpulse = 0.0;
 			this.upperLimitImpulse = 0.0;

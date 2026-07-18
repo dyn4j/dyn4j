@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -38,7 +38,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link RevoluteJoint} class in simulation.
  * @author William Bittle
- * @version 4.2.0
+ * @version 6.0.0
  * @since 4.2.0
  */
 public class RevoluteJointSimulationTest {
@@ -115,7 +115,7 @@ public class RevoluteJointSimulationTest {
 	}
 	
 	/**
-	 * Tests the bodies not exceeding the limits
+	 * Tests the bodies not jumping to the limits when outside the bounds.
 	 */
 	@Test
 	public void limits() {
@@ -163,29 +163,29 @@ public class RevoluteJointSimulationTest {
 		TestCase.assertEquals(0.00290, b.getTransform().getRotationAngle(), 1e-5);
 		TestCase.assertEquals(0.17453, b.getAngularVelocity(), 1e-5);
 		TestCase.assertEquals(0.17453, rj.getAngularSpeed(), 1e-3);
-		TestCase.assertEquals(-0.00290, rj.getAngularTranslation(), 1e-3);
+		TestCase.assertEquals(0.00290, rj.getAngularTranslation(), 1e-3);
 		TestCase.assertEquals(0.0, rj.getReactionTorque(invdt), 1e-3);
 		
 		rj.setLimitsEnabled(Math.toRadians(10), Math.toRadians(30));
 		w.step(1);
 		
 		// the bodies should be placed at the lower limit
-		TestCase.assertEquals(-0.17453, b.getTransform().getRotationAngle(), 1e-5);
-		TestCase.assertEquals(0.00000, b.getAngularVelocity(), 1e-5);
-		TestCase.assertEquals(0.00000, rj.getAngularSpeed(), 1e-3);
+		TestCase.assertEquals(0.17453, b.getTransform().getRotationAngle(), 1e-5);
+		TestCase.assertEquals(0.17453, b.getAngularVelocity(), 1e-5);
+		TestCase.assertEquals(0.17453, rj.getAngularSpeed(), 1e-3);
 		TestCase.assertEquals(0.17453, rj.getAngularTranslation(), 1e-3);
-		TestCase.assertEquals(1.028, rj.getReactionTorque(invdt), 1e-3);
+		TestCase.assertEquals(0.0, rj.getReactionTorque(invdt), 1e-3);
 		
 		b.setAngularVelocity(-Math.toRadians(10));
 		rj.setLimitsEnabled(-Math.toRadians(30), Math.toRadians(5));
 		w.step(1);
 		
 		// the bodies should be placed at the upper limit
-		TestCase.assertEquals(-0.08726, b.getTransform().getRotationAngle(), 1e-5);
-		TestCase.assertEquals(0.00000, b.getAngularVelocity(), 1e-5);
-		TestCase.assertEquals(0.00000, rj.getAngularSpeed(), 1e-3);
-		TestCase.assertEquals(0.08726, rj.getAngularTranslation(), 1e-3);
-		TestCase.assertEquals(-1.028, rj.getReactionTorque(invdt), 1e-3);
+		TestCase.assertEquals( 0.08726, b.getTransform().getRotationAngle(), 1e-5);
+		TestCase.assertEquals(-0.17453, b.getAngularVelocity(), 1e-5);
+		TestCase.assertEquals(-0.17453, rj.getAngularSpeed(), 1e-3);
+		TestCase.assertEquals( 0.08726, rj.getAngularTranslation(), 1e-3);
+		TestCase.assertEquals( 0.0, rj.getReactionTorque(invdt), 1e-3);
 	}
 
 	/**
@@ -235,17 +235,17 @@ public class RevoluteJointSimulationTest {
 		w.step(1);
 		
 		// since the bodies are already 2.0 units apparent, nothing should happen
-		TestCase.assertEquals(-0.00581, b.getTransform().getRotationAngle(), 1e-5);
-		TestCase.assertEquals(-0.34906, b.getAngularVelocity(), 1e-5);
+		TestCase.assertEquals(0.00581, b.getTransform().getRotationAngle(), 1e-5);
+		TestCase.assertEquals(0.34906, b.getAngularVelocity(), 1e-5);
 		TestCase.assertEquals(Math.toRadians(20) / 60.0, rj.getAngularTranslation(), 1e-5);
-		TestCase.assertEquals(-Math.toRadians(20), rj.getAngularSpeed(), 1e-5);
+		TestCase.assertEquals(Math.toRadians(20), rj.getAngularSpeed(), 1e-5);
 		TestCase.assertEquals(2.05616, rj.getReactionTorque(invdt), 1e-3);
 		
 		rj.setLimitsEnabled(-Math.toRadians(5), Math.toRadians(5));
 		w.step(30);
 		
 		// the bodies should be placed at the upper limit
-		TestCase.assertEquals(-0.08726, b.getTransform().getRotationAngle(), 1e-5);
+		TestCase.assertEquals(0.08726, b.getTransform().getRotationAngle(), 1e-5);
 		TestCase.assertEquals(0.00000, b.getAngularVelocity(), 1e-5);
 		TestCase.assertEquals(0.00000, rj.getAngularSpeed(), 1e-3);
 		TestCase.assertEquals(0.08726, rj.getAngularTranslation(), 1e-3);
@@ -255,16 +255,16 @@ public class RevoluteJointSimulationTest {
 		w.step(1);
 		
 		// the bodies should be placed at the upper limit
-		TestCase.assertEquals(-0.08144, b.getTransform().getRotationAngle(), 1e-5);
-		TestCase.assertEquals(0.34906, b.getAngularVelocity(), 1e-5);
-		TestCase.assertEquals(0.34906, rj.getAngularSpeed(), 1e-3);
+		TestCase.assertEquals(0.08144, b.getTransform().getRotationAngle(), 1e-5);
+		TestCase.assertEquals(-0.34906, b.getAngularVelocity(), 1e-5);
+		TestCase.assertEquals(-0.34906, rj.getAngularSpeed(), 1e-3);
 		TestCase.assertEquals(0.08144, rj.getAngularTranslation(), 1e-3);
 		TestCase.assertEquals(-2.05616, rj.getReactionTorque(invdt), 1e-3);
 		
 		w.step(60);
 		
 		// the bodies should be placed at the lower limit
-		TestCase.assertEquals(0.08726, b.getTransform().getRotationAngle(), 1e-5);
+		TestCase.assertEquals(-0.08726, b.getTransform().getRotationAngle(), 1e-5);
 		TestCase.assertEquals(0.00000, b.getAngularVelocity(), 1e-5);
 		TestCase.assertEquals(0.00000, rj.getAngularSpeed(), 1e-3);
 		TestCase.assertEquals(-0.08726, rj.getAngularTranslation(), 1e-3);

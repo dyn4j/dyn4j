@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -232,7 +232,7 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	 * @param anchor the anchor point in world coordinates
 	 * @param axis the axis of allowed motion
 	 * @throws NullPointerException if body1, body2, anchor, or axis is null
-	 * @throws IllegalArgumentException if body1 == body2
+	 * @throws IllegalArgumentException if body1 == body2 or axis is close to the zero vector
 	 */
 	public WheelJoint(T frame, T wheel, Vector2 anchor, Vector2 axis) {
 		super(frame, wheel);
@@ -320,12 +320,12 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	/**
 	 * Copy constructor.
 	 * @param joint the joint to copy
-	 * @param body1 the first body
-	 * @param body2 the second body
+	 * @param frame the frame body
+	 * @param wheel the wheel body
 	 * @since 6.0.0
 	 */
-	protected WheelJoint(WheelJoint<T> joint, T body1, T body2) {
-		super(joint, body1, body2);
+	protected WheelJoint(WheelJoint<T> joint, T frame, T wheel) {
+		super(joint, frame, wheel);
 		
 		this.localAnchor1 = joint.localAnchor1.copy();
 		this.localAnchor2 = joint.localAnchor2.copy();
@@ -396,8 +396,8 @@ public class WheelJoint<T extends PhysicsBody> extends AbstractPairedBodyJoint<T
 	 * @since 6.0.0
 	 */
 	@Override
-	public WheelJoint<T> copy(T body1, T body2) {
-		return new WheelJoint<T>(this, body1, body2);
+	public WheelJoint<T> copy(T frame, T wheel) {
+		return new WheelJoint<T>(this, frame, wheel);
 	}
 	
 	/* (non-Javadoc)

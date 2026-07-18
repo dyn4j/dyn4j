@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2021 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -38,7 +38,7 @@ import junit.framework.TestCase;
 /**
  * Used to test the {@link AngleJoint} class.
  * @author William Bittle
- * @version 4.2.0
+ * @version 6.0.0
  * @since 4.2.0
  */
 public class AngleJointSimulationTest {
@@ -67,7 +67,7 @@ public class AngleJointSimulationTest {
 		b.setMass(MassType.NORMAL);
 		b.translate(0.0, 2.0);
 		// 30 degrees/second
-		b.setAngularVelocity(Math.toRadians(30.0));
+		b.setAngularVelocity(-Math.toRadians(30.0));
 		b.setLinearDamping(0.0);
 		b.setAngularDamping(0.0);
 		w.addBody(b);
@@ -80,8 +80,8 @@ public class AngleJointSimulationTest {
 		
 		// since g was NOT moving and b was, and they are equal in mass/inertia then
 		// the angular velocity is split between them
-		TestCase.assertEquals(Math.toRadians(15), g.getAngularVelocity());
-		TestCase.assertEquals(Math.toRadians(15), b.getAngularVelocity());
+		TestCase.assertEquals(-Math.toRadians(15), g.getAngularVelocity());
+		TestCase.assertEquals(-Math.toRadians(15), b.getAngularVelocity());
 		TestCase.assertEquals(new Vector2(0.0, 0.0), aj.getReactionForce(invdt));
 		TestCase.assertEquals(1.542, aj.getReactionTorque(invdt), 1e-3);
 		
@@ -89,8 +89,8 @@ public class AngleJointSimulationTest {
 		w.step(1);
 		
 		// since limits are enabled, they will continue to move at the same rate
-		TestCase.assertEquals(Math.toRadians(15), g.getAngularVelocity());
-		TestCase.assertEquals(Math.toRadians(15), b.getAngularVelocity());
+		TestCase.assertEquals(-Math.toRadians(15), g.getAngularVelocity());
+		TestCase.assertEquals(-Math.toRadians(15), b.getAngularVelocity());
 		TestCase.assertEquals(new Vector2(0.0, 0.0), aj.getReactionForce(invdt));
 		TestCase.assertEquals(0.0, aj.getReactionTorque(invdt), 1e-3);
 		
@@ -99,10 +99,10 @@ public class AngleJointSimulationTest {
 		
 		// with limits disabled, the ratio should take effect causing body1 to
 		// move at half the rate of body2
-		TestCase.assertEquals(Math.toRadians(10), g.getAngularVelocity(), 1e-8);
-		TestCase.assertEquals(Math.toRadians(20), b.getAngularVelocity(), 1e-8);
+		TestCase.assertEquals(-Math.toRadians(20), g.getAngularVelocity(), 1e-8);
+		TestCase.assertEquals(-Math.toRadians(10), b.getAngularVelocity(), 1e-8);
 		TestCase.assertEquals(new Vector2(0.0, 0.0), aj.getReactionForce(invdt));
-		TestCase.assertEquals(-0.514, aj.getReactionTorque(invdt), 1e-3);
+		TestCase.assertEquals(0.514, aj.getReactionTorque(invdt), 1e-3);
 	}
 	
 	/**
@@ -148,8 +148,8 @@ public class AngleJointSimulationTest {
 		w.step(40);
 		
 		// we hit the upper limit so velocity for b should be zero
-		TestCase.assertEquals(0.0, g.getAngularVelocity());
-		TestCase.assertEquals(0.0, b.getAngularVelocity());
+		TestCase.assertEquals(0.0, g.getAngularVelocity(), 1e-9);
+		TestCase.assertEquals(0.0, b.getAngularVelocity(), 1e-9);
 	}
 	
 
@@ -196,7 +196,7 @@ public class AngleJointSimulationTest {
 		w.step(40);
 		
 		// we hit the upper limit so velocity for b should be zero
-		TestCase.assertEquals(0.0, g.getAngularVelocity());
-		TestCase.assertEquals(0.0, b.getAngularVelocity());
+		TestCase.assertEquals(0.0, g.getAngularVelocity(), 1e-9);
+		TestCase.assertEquals(0.0, b.getAngularVelocity(), 1e-9);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,7 +24,7 @@
  */
 package org.dyn4j.dynamics.joint;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.dyn4j.DataContainer;
@@ -62,7 +62,8 @@ public abstract class AbstractPairedBodyJoint<T extends PhysicsBody> extends Abs
 	 * @throws IllegalArgumentException if body1 and body2 are the same object reference
 	 */
 	public AbstractPairedBodyJoint(T body1, T body2) {
-		super(Arrays.asList(body1, body2));
+//		super(Arrays.asList(body1, body2));
+		super(createBodyList(body1, body2));
 		
 		// verify the bodies are not the same instance
 		if (body1 == body2) 
@@ -99,18 +100,18 @@ public abstract class AbstractPairedBodyJoint<T extends PhysicsBody> extends Abs
 	 */
 	private static final <T extends PhysicsBody> List<T> buildBodyList(AbstractPairedBodyJoint<T> joint, T body1, T body2) {
 		if (body1 != null && body2 != null) {
-			return Arrays.asList(body1, body2);
+			return createBodyList(body1, body2);
 		} else if (body1 != null && body2 == null) {
 			// copy joint body2
 			T copy = Unsafe.copy(joint.body2);
-			return Arrays.asList(body1, copy);
+			return createBodyList(body1, copy);
 		} else if (body1 == null && body2 != null) {
 			// copy joint body1
 			T copy = Unsafe.copy(joint.body1);
-			return Arrays.asList(copy, body2);
+			return createBodyList(copy, body2);
 		} else {
 			// copy both bodies
-			return Arrays.asList(
+			return createBodyList(
 				Unsafe.copy(joint.body1),
 				Unsafe.copy(joint.body2));
 		}
@@ -149,6 +150,24 @@ public abstract class AbstractPairedBodyJoint<T extends PhysicsBody> extends Abs
 	 * @since 6.0.0
 	 */
 	public abstract AbstractPairedBodyJoint<T> copy(T body1, T body2);
+	
+	/**
+	 * Creates a list to store the two bodies in a type-safe way (for java 6).
+	 * <p>
+	 * This replaces List.of(...) which is only available in java 9 and doesn't
+	 * have the compiler warnings of Arrays.asList(...) in java 6.
+	 * @param <T> the type parameter
+	 * @param body1 the first body
+	 * @param body2 the second body
+	 * @return List&lt;T&gt;
+	 * @since 6.0.0
+	 */
+	private static final <T> List<T> createBodyList(T body1, T body2) {
+		List<T> list = new ArrayList<T>();
+		list.add(body1);
+		list.add(body2);
+		return list;
+	}
 	
 	/**
 	 * Returns the reduced mass of this pair of bodies.

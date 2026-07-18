@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2022 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -32,7 +32,7 @@ import junit.framework.TestCase;
  * Test case for the {@link Rotation} class.
  * @author Manolis Tsamis
  * @author William Bittle
- * @version 4.2.2
+ * @version 6.0.0
  * @since 3.4.0
  */
 public class RotationTest {
@@ -511,4 +511,131 @@ public class RotationTest {
 		TestCase.assertEquals(Math.toRadians(-15), r4.getRotationBetween(v1).toRadians(), 1.0e-6);
 	}
 	
+	/**
+	 * Tests the getNormalizedAngle method.
+	 */
+	@Test
+	public void getNormalizedAngle() {
+        double[][] data = {
+            // values already in [-pi, pi] range
+            {0.0, 0.0},
+            {Math.PI / 2, Math.PI / 2},
+            {Math.PI, -Math.PI},
+            
+            // positive values just past the [-pi, pi] range
+            {1.5 * Math.PI, -0.5 * Math.PI}, 
+            {2.0 * Math.PI, 0.0},                 
+            {2.5 * Math.PI, Math.PI / 2},  
+            
+            // positive values just past the [-pi, pi] range
+            {-0.5 * Math.PI, -0.5 * Math.PI}, 
+            {-Math.PI, -Math.PI},  
+            {-1.5 * Math.PI, Math.PI / 2},  
+            {-2.0 * Math.PI, 0.0},
+
+            // extreme values
+            {100 * 2.0 * Math.PI + 1.0, 1.0},
+            {-100 * 2.0 * Math.PI - 1.0, -1.0}
+        };
+
+        for (double[] testCase : data) {
+            double input = testCase[0];
+            double expected = testCase[1];
+            
+            TestCase.assertEquals(expected, Rotation.getNormalizedAngle(input), 1e-9);
+        }
+	}
+	
+	/**
+	 * Tests the getShortestDistance method.
+	 */
+    @Test
+    public void getShortestDistance() {
+        double[][] testCases = {
+            // zero distance
+            {0.0, 0.0, 0.0},
+            {Math.PI, Math.PI, 0.0},
+            {-Math.PI, -Math.PI, 0.0},
+
+            // counter-clockwise distance
+            {0.0, Math.PI / 2, Math.PI / 2},          
+            {-Math.PI / 2, 0.0, Math.PI / 2},         
+            {-3 * Math.PI / 4, -Math.PI / 4, Math.PI / 2}, 
+
+            // clockwise distance
+            {Math.PI / 2, 0.0, -Math.PI / 2},         
+            {0.0, -Math.PI / 2, -Math.PI / 2},        
+            {-Math.PI / 4, -3 * Math.PI / 4, -Math.PI / 2},
+
+            // testing the Math.PI / -Math.PI wrap-around boundary
+            {3 * Math.PI / 4, -3 * Math.PI / 4, Math.PI / 2}, 
+            {-3 * Math.PI / 4, 3 * Math.PI / 4, -Math.PI / 2},
+
+            // exact half-circle boundary wraps
+            {0.0, Math.PI, -Math.PI},                 
+            {Math.PI, 0.0, -Math.PI},                 
+            {-Math.PI, 0.0, -Math.PI}
+        };
+
+        for (double[] testCase : testCases) {
+            double angle1 = testCase[0];
+            double angle2 = testCase[1];
+            double expected = testCase[2];
+            
+            TestCase.assertEquals(expected, Rotation.getShortestDistance(angle1, angle2), 1e-9);
+        }
+    }
+	
+	/**
+	 * Tests the isAngleBetween method.
+	 */
+	@Test
+	public void isAngleBetween() {
+		double[][] data = new double[][] {
+			    {-30.0, 30.0, 10.0},
+			    {0.0, 30.0, 10.0},
+			    {20.0, 30.0, 10.0},
+			    {10.0, 30.0, 10.0},
+			    {-50.0, -20.0, 10.0},
+			    {-50.0, -20.0, -30.0},
+			    {50.0, -30.0, 80.0},
+			    {50.0, -30.0, 10.0},
+			    {50.0, -50.0, 100.0},
+			    {50.0, -50.0, 180.0},
+			    {50.0, -50.0, -170.0},
+			    {100.0, -100.0, 160.0},
+			    {100.0, -100.0, -180.0},
+			    {0.0, 0.0, 10.0},
+			    {5.0, -5.0, 10.0},
+			    {-60.0, 60.0, -10.0}
+			};
+
+			boolean[] expectedOutcome = {
+			    true,
+			    true,
+			    false,
+			    true,
+			    false,
+			    true,
+			    true,
+			    false,
+			    true,
+			    true,
+			    true,
+			    true,
+			    true,
+			    false,
+			    true,
+			    true
+			};
+		
+		for (int i = 0; i < data.length; i++) {
+			double a1 = Math.toRadians(data[i][0]);
+			double a2 = Math.toRadians(data[i][1]);
+			double a = Math.toRadians(data[i][2]);
+			boolean outcome = expectedOutcome[i];
+			
+			TestCase.assertEquals(Math.toDegrees(a1) + " <= " + Math.toDegrees(a) + " <= " + Math.toDegrees(a2), outcome, Rotation.isAngleBetween(a, a1, a2));
+		}
+	}
 }

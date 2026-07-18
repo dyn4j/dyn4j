@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -24,7 +24,8 @@
  */
 package org.dyn4j.dynamics.joint;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Ownable;
@@ -52,7 +53,7 @@ public abstract class AbstractSingleBodyJoint<T extends PhysicsBody> extends Abs
 	 * @throws NullPointerException if body is null
 	 */
 	public AbstractSingleBodyJoint(T body) {
-		super(Arrays.asList(body));
+		super(createBodyList(body));
 		this.body = body;
 	}
 	
@@ -64,7 +65,7 @@ public abstract class AbstractSingleBodyJoint<T extends PhysicsBody> extends Abs
 	 * @since 6.0.0
 	 */
 	protected AbstractSingleBodyJoint(AbstractSingleBodyJoint<T> joint, T body) {
-		super(joint, body != null ? Arrays.asList(body) : Arrays.asList(Unsafe.copy(joint.body)));
+		super(joint, body != null ? createBodyList(body) : createBodyList(Unsafe.copy(joint.body)));
 		this.body = this.bodies.get(0);
 	}
 	
@@ -95,6 +96,22 @@ public abstract class AbstractSingleBodyJoint<T extends PhysicsBody> extends Abs
 	 * @since 6.0.0
 	 */
 	public abstract AbstractSingleBodyJoint<T> copy(T body);
+	
+	/**
+	 * Creates a list to store the two bodies in a type-safe way (for java 6).
+	 * <p>
+	 * This replaces List.of(...) which is only available in java 9 and doesn't
+	 * have the compiler warnings of Arrays.asList(...) in java 6.
+	 * @param <T> the type parameter
+	 * @param body the body
+	 * @return List&lt;T&gt;
+	 * @since 6.0.0
+	 */
+	private static final <T> List<T> createBodyList(T body) {
+		List<T> list = new ArrayList<T>();
+		list.add(body);
+		return list;
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.joint.UniaryJoint#getBody()

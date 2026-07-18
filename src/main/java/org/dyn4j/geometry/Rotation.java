@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -50,6 +50,9 @@ import org.dyn4j.Epsilon;
 public class Rotation implements Copyable<Rotation> {
 	/** 1/sqrt(2) */
 	private static final double SQRT_2_INV = 1.0 / Math.sqrt(2);
+	
+	/** 1/2pi */
+	private static final double INV_TWO_PI = 1.0 / (2.0 * Math.PI);
 	
 	/** The cosine of the angle described by this Rotation */
 	protected double cost;
@@ -386,8 +389,8 @@ public class Rotation implements Copyable<Rotation> {
 		
 		// Apart from being quite faster this is also more precise
 		// (see the documentation of Math.acos and Math.atan2)
-		
-		double acos = Math.acos(this.cost);
+		double cost = Interval.clamp(this.cost, -1.0, 1.0);
+		double acos = Math.acos(cost);
 		double angle = (this.sint >= 0)? acos: -acos;
 		return angle;
 	}
@@ -777,4 +780,83 @@ public class Rotation implements Copyable<Rotation> {
 		return this.getRotationBetween(Rotation.of(vector));
 	}
 	
+	/**
+	 * Returns the given angle in the range [-&pi;, &pi;].
+	 * @param angle an angle; in radians
+	 * @return double
+	 * @since 6.0.0
+	 */
+	public static double getNormalizedAngle(double angle) {
+		// not too bad, but supports all angle values
+		double rotations = Math.floor((angle + Math.PI) * INV_TWO_PI);
+	    return angle - (rotations * Geometry.TWO_PI);
+	    
+	    // simple and only addition/subtraction, but could be inefficient
+	    // if angle are very large
+//	    while (angle < -Math.PI) angle += Geometry.TWO_PI;
+//	    while (angle > Math.PI) angle -= Geometry.TWO_PI;
+	    
+	    // super efficient, but only handles angles in the [-3pi, 3pi] range
+//		if (angle < -Math.PI) angle += Geometry.TWO_PI;
+//		if (angle > Math.PI) angle -= Geometry.TWO_PI;
+//		return angle;
+	}
+	
+	/**
+	 * Returns the shortest distance between two angles in radians in the range [-&pi;, &pi;].
+	 * @param angle1 the first angle; in radians in the range [-&pi;, &pi;]
+	 * @param angle2 the second angle; in radians in the range [-&pi;, &pi;]
+	 * @return double
+	 * @since 6.0.0
+	 */
+	public static double getShortestDistance(double angle1, double angle2) {
+		return Rotation.getNormalizedAngle(angle2 - angle1);
+	}
+	
+	/**
+	 * Returns true if the given angle is in between clockwiseAngle and counterClockwiseAngle.
+	 * <p>
+	 * Technically every angle is between any other two angles, it's just a matter of which
+	 * sweep the angle is in. If we assume a counter-clockwise rotation is positive and a 
+	 * clockwise rotation is negative, the area between them sweeping from 0 is the "between"
+	 * zone.  In the reverse, the opposite area is the "between" zone.
+	 * <p>
+	 * To help with understanding, below is a list of examples where CW represents the 
+	 * clockwiseAngle, CCW represents the counterClockwiseAngle, and A represents the test
+	 * angle. The Between? column shows the expected result of this method and the Valid
+	 * Range column is showing the "between" area between the CW and CCW angles.
+	 * <pre>
+	 * +------+------+------+----------+-------------+
+	 * |   CW |  CCW |    A | Between? | Valid Range |
+	 * +------+------+------+----------+-------------+
+	 * |  -30 |   30 |   10 |   Yes    |          60 |
+	 * |    0 |   30 |   10 |   Yes    |          30 |
+	 * |   20 |   30 |   10 |   No     |          10 |
+	 * |   10 |   30 |   10 |   Yes    |          20 |
+	 * |  -50 |  -20 |   10 |   No     |          30 |
+	 * |  -50 |  -20 |  -30 |   Yes    |          30 |
+	 * |   50 |  -30 |   80 |   Yes    |         280 |
+	 * |   50 |  -30 |   10 |   No     |         280 |
+	 * |   50 |  -50 |  100 |   Yes    |         260 |
+	 * |   50 |  -50 |  180 |   Yes    |         260 |
+	 * |   50 |  -50 | -170 |   Yes    |         260 |
+	 * |  100 | -100 |  160 |   Yes    |         160 |
+	 * |  100 | -100 | -180 |   Yes    |         160 |
+	 * |    0 |    0 |   10 |   No     |           0 |
+	 * |    5 |   -5 |   10 |   Yes    |         350 |
+	 * |  -60 |   60 |  -10 |   Yes    |         120 |
+	 * +------+------+------+----------+-------------+
+	 * </pre>
+	 * @param angle the angle to test; in radians in the range [-&pi;, &pi;]
+	 * @param clockwiseAngle the clockwise angle; in radians in the range [-&pi;, &pi;]
+	 * @param counterClockwiseAngle the counter-clockwise angle; in radians in the range [-&pi;, &pi;]
+	 * @return boolean
+	 * @since 6.0.0
+	 */
+	public static boolean isAngleBetween(double angle, double clockwiseAngle, double counterClockwiseAngle) {
+		if (clockwiseAngle <= counterClockwiseAngle) {
+			return angle >= clockwiseAngle && angle <= counterClockwiseAngle;
+		}
+		return angle >= clockwiseAngle || angle <= counterClockwiseAngle;
+	}
 }

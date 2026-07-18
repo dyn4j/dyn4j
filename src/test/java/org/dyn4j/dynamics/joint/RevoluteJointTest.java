@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024 William Bittle  http://www.dyn4j.org/
+ * Copyright (c) 2010-2026 William Bittle  http://www.dyn4j.org/
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted 
@@ -348,15 +348,6 @@ public class RevoluteJointTest extends BaseJointTest {
 	}
 	
 	/**
-	 * Tests the failed setting of the maximum angle.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setUpperLimitInvalid() {
-		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
-		rj.setUpperLimit(Math.toRadians(-10));
-	}
-	
-	/**
 	 * Tests the successful setting of the minimum angle.
 	 */
 	@Test
@@ -365,15 +356,6 @@ public class RevoluteJointTest extends BaseJointTest {
 		rj.setLowerLimit(Math.toRadians(-10));
 		
 		TestCase.assertEquals(Math.toRadians(-10), rj.getLowerLimit(), 1e-6);
-	}
-	
-	/**
-	 * Tests the failed setting of the maximum angle.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setLowerLimitInvalid() {
-		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
-		rj.setLowerLimit(Math.toRadians(10));
 	}
 	
 	/**
@@ -386,15 +368,6 @@ public class RevoluteJointTest extends BaseJointTest {
 		
 		TestCase.assertEquals(Math.toRadians(-30), rj.getLowerLimit(), 1e-6);
 		TestCase.assertEquals(Math.toRadians(20), rj.getUpperLimit(), 1e-6);
-	}
-	
-	/**
-	 * Tests the failed setting of the minimum and maximum angle.
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void setUpperAndLowerLimitsInvalid() {
-		RevoluteJoint<Body> rj = new RevoluteJoint<Body>(b1, b2, new Vector2());
-		rj.setLimits(Math.toRadians(30), Math.toRadians(20));
 	}
 	
 	/**
@@ -627,8 +600,8 @@ public class RevoluteJointTest extends BaseJointTest {
 		TestCase.assertEquals(Math.PI, rj.getUpperLimit());
 		
 		// test the scenario where only the lower limit value changes
-		rj.setLowerLimit(-2*Math.PI);
-		TestCase.assertEquals(-2*Math.PI, rj.getLowerLimit());
+		rj.setLowerLimit(-0.5*Math.PI);
+		TestCase.assertEquals(-0.5*Math.PI, rj.getLowerLimit());
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
@@ -640,8 +613,8 @@ public class RevoluteJointTest extends BaseJointTest {
 		TestCase.assertEquals(Math.PI, rj.getUpperLimit());
 		
 		// test the scenario where only the upper limit value changes
-		rj.setUpperLimit(2*Math.PI);
-		TestCase.assertEquals(2*Math.PI, rj.getUpperLimit());
+		rj.setUpperLimit(0.5*Math.PI);
+		TestCase.assertEquals(0.5*Math.PI, rj.getUpperLimit());
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
@@ -870,8 +843,8 @@ public class RevoluteJointTest extends BaseJointTest {
 		TestCase.assertEquals(Math.PI, rj.getUpperLimit());
 		
 		// test the scenario where only the lower limit value changes
-		rj.setLowerLimit(-2*Math.PI);
-		TestCase.assertEquals(-2*Math.PI, rj.getLowerLimit());
+		rj.setLowerLimit(-0.5*Math.PI);
+		TestCase.assertEquals(-0.5*Math.PI, rj.getLowerLimit());
 		b1.setAtRest(true);
 		b2.setAtRest(true);
 		
