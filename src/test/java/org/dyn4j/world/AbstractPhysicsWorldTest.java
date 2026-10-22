@@ -25,6 +25,7 @@
 package org.dyn4j.world;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.List;
 
 import org.dyn4j.collision.AxisAlignedBounds;
@@ -450,6 +451,12 @@ public class AbstractPhysicsWorldTest {
 	/**
 	 * Tests the getJointIterator method.
 	 */
+	@Test(expected = NoSuchElementException.class)
+	public void emptyJointIterator() {
+		TestWorld w = new TestWorld();
+		w.getJointIterator().next();
+	}
+
 	@Test
 	public void getJointIteratorFailure() {
 		TestWorld w = new TestWorld();
@@ -475,7 +482,7 @@ public class AbstractPhysicsWorldTest {
 			it.next();
 			it.next();
 			TestCase.fail();
-		} catch (IndexOutOfBoundsException ex) {
+		} catch (NoSuchElementException ex) {
 		} catch (Exception ex) {
 			TestCase.fail();
 		}

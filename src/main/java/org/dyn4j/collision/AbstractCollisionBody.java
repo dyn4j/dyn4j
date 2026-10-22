@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.List;
 
 import org.dyn4j.DataContainer;
@@ -672,7 +673,7 @@ public abstract class AbstractCollisionBody<T extends Fixture> implements Collis
 		@Override
 		public T next() {
 			if (this.index + 1 >= AbstractCollisionBody.this.fixtures.size()) {
-				throw new IndexOutOfBoundsException();
+				throw new NoSuchElementException();
 			}
 			try {
 				this.index++;

@@ -498,6 +498,12 @@ public class AbstractCollisionWorldTest {
 	/**
 	 * Tests the getBodyIterator method.
 	 */
+	@Test(expected = NoSuchElementException.class)
+	public void emptyBodyIterator() {
+		TestWorld w = new TestWorld();
+		w.getBodyIterator().next();
+	}
+
 	@Test
 	public void getBodyIteratorFailure() {
 		TestWorld w = new TestWorld();
@@ -517,7 +523,7 @@ public class AbstractCollisionWorldTest {
 			it.next();
 			it.next();
 			TestCase.fail();
-		} catch (IndexOutOfBoundsException ex) {
+		} catch (NoSuchElementException ex) {
 		} catch (Exception ex) {
 			TestCase.fail();
 		}

@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -1839,7 +1840,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		@Override
 		public Joint<T> next() {
 			if (this.index + 1 >= AbstractPhysicsWorld.this.joints.size()) {
-				throw new IndexOutOfBoundsException();
+				throw new NoSuchElementException();
 			}
 			try {
 				this.index++;
