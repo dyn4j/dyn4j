@@ -27,6 +27,7 @@ package org.dyn4j.geometry;
 import junit.framework.TestCase;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import org.junit.Test;
 
@@ -113,9 +114,9 @@ public class WoundTest {
 	}
 
 	/**
-	 * You should NOT be able to remove points of a wound shape.
+	 * The iterator should report exhaustion with NoSuchElementException.
 	 */
-	@Test(expected = IndexOutOfBoundsException.class)
+	@Test(expected = NoSuchElementException.class)
 	public void woundIteratorFail() {
 		Wound w = Geometry.createPolygon(
 				new Vector2(0.0, 0.0),

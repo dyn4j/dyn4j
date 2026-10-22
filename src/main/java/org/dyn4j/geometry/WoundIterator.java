@@ -26,6 +26,7 @@ package org.dyn4j.geometry;
 
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Represents an iterator of {@link Vector2}s for the vertices and normals
@@ -64,7 +65,7 @@ final class WoundIterator implements Iterator<Vector2> {
 	@Override
 	public Vector2 next() {
 		if (this.index >= this.vectors.length) {
-			throw new IndexOutOfBoundsException();
+			throw new NoSuchElementException();
 		}
 		try {
 			Vector2 v = this.vectors[this.index++];

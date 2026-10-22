@@ -1376,7 +1376,7 @@ public abstract class AbstractCollisionWorld<T extends CollisionBody<E>, E exten
 		@Override
 		public T next() {
 			if (this.index + 1 >= AbstractCollisionWorld.this.bodies.size()) {
-				throw new IndexOutOfBoundsException();
+				throw new NoSuchElementException();
 			}
 			try {
 				this.index++;

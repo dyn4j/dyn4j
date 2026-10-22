@@ -25,6 +25,7 @@
 package org.dyn4j.collision;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.List;
 
 import org.dyn4j.geometry.AABB;
@@ -358,6 +359,12 @@ public class AbstractCollisionBodyTest {
 	/**
 	 * Tests the getFixtureTterator method failure cases.
 	 */
+	@Test(expected = NoSuchElementException.class)
+	public void emptyFixtureIterator() {
+		TestBody b = new TestBody();
+		b.getFixtureIterator().next();
+	}
+
 	@Test
 	public void getFixtureIteratorFailures() {
 		TestBody b = new TestBody();
@@ -376,7 +383,7 @@ public class AbstractCollisionBodyTest {
 			it.next();
 			it.next();
 			TestCase.fail();
-		} catch (IndexOutOfBoundsException ex) {
+		} catch (NoSuchElementException ex) {
 		} catch (Exception ex) {
 			TestCase.fail();
 		}
